@@ -19,6 +19,7 @@ from literate_ai.adapters.dependencies.observation import (
 )
 from literate_ai.adapters.native_sdk_custody import capture_native_sdk
 from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
+from literate_ai.bootstrap.windows_images import pe_architecture
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.identity import ContentIdentity
 from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
@@ -42,22 +43,13 @@ def require_native_sdk_target(operating_system: str, architecture: str) -> None:
 
 
 def _pe_architecture(path: Path) -> str:
-    # Machine is the first COFF field after the PE signature; values are defined by
-    # https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#machine-types
-    dos = _stable_file_bytes(path, limit=64)
-    if len(dos) != 64 or dos[:2] != b"MZ":
-        raise ValueError("SDK runtime image has no complete PE DOS header")
-    offset = int.from_bytes(dos[60:64], "little")
-    if offset < 64:
-        raise ValueError("SDK runtime image has an invalid PE header offset")
-    header = _stable_file_bytes(path, offset=offset, limit=24)
-    if len(header) != 24 or header[:4] != b"PE\0\0":
-        raise ValueError("SDK runtime image has no complete PE COFF header")
-    machine = int.from_bytes(header[4:6], "little")
-    try:
-        return {0x8664: "x86_64", 0xAA64: "arm64"}[machine]
-    except KeyError as exc:
-        raise ValueError("SDK runtime PE machine type is unsupported") from exc
+    architecture = pe_architecture(
+        lambda offset, limit: _stable_file_bytes(path, offset=offset, limit=limit),
+        context="SDK runtime image",
+    )
+    if architecture not in _ARCHITECTURES:
+        raise ValueError("SDK runtime PE machine type is unsupported")
+    return architecture
 
 
 def _architectures(properties: list[dict[str, str]], operating_system: str) -> set[str]:

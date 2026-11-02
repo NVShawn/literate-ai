@@ -29243,6 +29243,17 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
+- **Current integration:** Combine the preserved authored ARM64 realization and
+  packaged template with bounded actual PE-image/runtime observations. Preserve
+  x86-64 bytes and explicit unavailable-capability closure. Portable version-only
+  probes must be adapted to the new image requirement; they never establish
+  native worker readiness. Script launchers and missing runtime companions remain
+  unverified unless their actual execution chain can be proven. Native ARM64,
+  installed-package and integrated qualification remain open.
+  NPM is explicitly unavailable until its actual script/runtime chain has a
+  reviewed binding; Node-only language selection remains available. The existing
+  model cannot infer that chain from a version string or ARM64 Node alone.
+
 - **GitHub issue:** [#43](https://github.com/jordanhubbard/literate-ai/issues/43)
 - **Release target:** 1.4.0
 - **Historical target:** 1.3.0 (2026-10-18 reconciliation); current 1.4 integration includes all original open issues by directing-user authorization.
@@ -32438,7 +32449,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   validates the wrapped project. This is source-CLI development evidence; exact
   installed and integration-CI qualification remain open.
 
-### [ ] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
+### [x] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#201](https://github.com/jordanhubbard/literate-ai/issues/201)
@@ -32453,7 +32464,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Disable performance-span publication for unapplied onboard plans through the existing null context policy.
 - **Evidence:**
   - [x] Reproduce target mutation before the fix; prove target snapshots and repeated plan identities stable, exact expect-plan applies, genuine source drift still refuses, and ordinary apply telemetry remains available.
-  - [ ] Run affected CLI/adoption tests and declared review/static gates; require exact integration CI before issue 201 closes.
+  - [x] Run affected CLI/adoption tests and declared review/static gates; require exact integration CI before issue 201 closes.
 
 - **Development evidence:** The regression fails before repair because `_build`
   and its telemetry records appear after planning. Fifteen onboarding, retained
@@ -32465,6 +32476,17 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   Actual source drift still refuses, and pre-existing build content remains in
   the reviewed quarantine. Exact integration and installed qualification remain
   required before issue closure.
+
+- **Closure evidence:** Thirteen installed, in-process public CLI controls pass
+  with real Make/Node/subprocess execution and no failures/errors/skips (879.028
+  seconds). Independent review verifies sixteen production files byte-identical
+  across installed `9517459008`, main `1abbf13ad` and qualified `bc6ce1bd2`, plus
+  five unchanged test/shared fixtures. All twenty-seven qualification jobs passed
+  for that relevant source in run `41450986972`, attempt 2. The two rollback
+  refusal/OSError variants are explicit fault injections; the original noisy
+  failure is genuine. See `verification/adoption-installed-cli-resolution.json`
+  for exact source/log bindings and issue resolution links. This is functional
+  adoption evidence, not whole-candidate or native PACKAGE qualification.
 
 ### [x] ADOPT-GIT-CUSTODY-001 — Preserve tracked ignored files and relative aliases through conversion moves
 
@@ -32550,7 +32572,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 - **Reviewed integration closure:** The required adoption/custody regression and integrated installed qualification pass at `bc6ce1bd`, with unchanged repair/tests at observed main `1abbf13`. Independent review verifies exact Phase 1.2 fault recovery and preservation controls; prerequisite ADOPT-GIT-CUSTODY-001 is satisfied by the recorded Windows custody rerun, not removed. [Functional evidence](../../verification/lift-shift-recovery-resolution.json); [issue outcome](https://github.com/jordanhubbard/literate-ai/issues/209#issuecomment-6581866830). This does not claim a dedicated unmodified installed failure reproduction or Windows Phase 1.2 CLI execution.
 
-### [ ] ADOPT-JS-DEPS-001 — Document explicit JavaScript dependencies for retained adoption sandboxes
+### [x] ADOPT-JS-DEPS-001 — Document explicit JavaScript dependencies for retained adoption sandboxes
 
 - **Priority:** P1
 - **Release target:** 1.4.0
@@ -32564,11 +32586,22 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Add the JavaScript/polyglot dependency example to the adoption guide and cross-link it from workspace-link guidance.
 - **Evidence:**
   - [x] Execute real Node module import through an acknowledged public adoption: missing binding fails and rolls back; explicit external sibling binding passes baseline/parity and preserves source. Check portable evidence contains no host locators. Both native Node public-CLI cases pass; seven related operator/output/failure controls also pass.
-  - [ ] Run affected CLI/adoption controls and documentation/static gates; require exact integration and installed qualification before issue closure.
+  - [x] Run affected CLI/adoption controls and documentation/static gates; require exact integration and installed qualification before issue closure.
 
 - **Local validation:** Nine focused CLI/adoption/output controls, strict lint, formatting, layout, public export and 181 Mermaid renders pass. Authority verification passes; the lifecycle receipt is stale. Exact integration and installed qualification remain open.
 
-### [ ] ADOPT-FAILURE-DIAGNOSTICS-001 — Preserve bounded adoption failure diagnostics and recovery outcome
+- **Closure evidence:** Thirteen installed, in-process public CLI controls pass
+  with real Make/Node/subprocess execution and no failures/errors/skips (879.028
+  seconds). Independent review verifies sixteen production files byte-identical
+  across installed `9517459008`, main `1abbf13ad` and qualified `bc6ce1bd2`, plus
+  five unchanged test/shared fixtures. All twenty-seven qualification jobs passed
+  for that relevant source in run `41450986972`, attempt 2. The two rollback
+  refusal/OSError variants are explicit fault injections; the original noisy
+  failure is genuine. See `verification/adoption-installed-cli-resolution.json`
+  for exact source/log bindings and issue resolution links. This is functional
+  adoption evidence, not whole-candidate or native PACKAGE qualification.
+
+### [x] ADOPT-FAILURE-DIAGNOSTICS-001 — Preserve bounded adoption failure diagnostics and recovery outcome
 
 - **Priority:** P1
 - **Release target:** 1.4.0
@@ -32583,9 +32616,20 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Retain a finite private failure summary and bounded per-phase excerpts/digests outside rollback scope, and identify the report in the diagnostic; refuse new retention when the owned store reaches its cap. The cooperative private store caps reports at 512 KiB, 128 reports and 16 MiB total, without evicting existing evidence.
 - **Evidence:**
   - [x] Use real baseline failures with warning-heavy stderr, stdout test failures and rollback failures; prove selected markers, outcome, finite output, redaction and private report survival. Six controls pass, including concurrent quota enforcement, unsafe/overlapping store refusal and both typed and OS rollback failures.
-  - [ ] Run CLI/adoption regressions and review/static checks; require exact integrated qualification before issue closure.
+  - [x] Run CLI/adoption regressions and review/static checks; require exact integrated qualification before issue closure.
 
 - **Diagnostic implementation checkpoint:** The outer onboarding handler now preserves the finite `CliFailure` budget selected by initialization. The real missing-Node-dependency case retains `ERR_MODULE_NOT_FOUND` and passes. Recovery outcome and the private report locator now precede excerpts for baseline/parity and lift-shift failures. Retention is best-effort, bounded, redacted, and cannot override the original failure; 52 combined regression controls, strict lint, formatting, layout, public export and 181 Mermaid renders pass. Authority passes while the lifecycle receipt remains stale. Exact integration and installed/native qualification remain pending.
+
+- **Closure evidence:** Thirteen installed, in-process public CLI controls pass
+  with real Make/Node/subprocess execution and no failures/errors/skips (879.028
+  seconds). Independent review verifies sixteen production files byte-identical
+  across installed `9517459008`, main `1abbf13ad` and qualified `bc6ce1bd2`, plus
+  five unchanged test/shared fixtures. All twenty-seven qualification jobs passed
+  for that relevant source in run `41450986972`, attempt 2. The two rollback
+  refusal/OSError variants are explicit fault injections; the original noisy
+  failure is genuine. See `verification/adoption-installed-cli-resolution.json`
+  for exact source/log bindings and issue resolution links. This is functional
+  adoption evidence, not whole-candidate or native PACKAGE qualification.
 
 ### [ ] ACCEPTED-CACHE-DISCOVERY-001 — Resolve accepted-source membership from declared targets and requested authority
 

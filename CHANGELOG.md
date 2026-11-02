@@ -9,6 +9,11 @@
 - Worker failure diagnostics now include bounded nested cause locations while
   omitting exception messages, local values and host paths.
 
+- Windows ARM64: add a distinct host-install realization and bounded executable/
+  runtime-image observations. Preserve existing tools, refuse unverified image
+  chains and report unsupported capabilities explicitly; native qualification
+  remains required.
+
 - Adoption: include Node manifests and JavaScript sources in mixed-language plans,
   including Rust/pnpm workspaces, while preserving primary Cargo/CMake selection.
 

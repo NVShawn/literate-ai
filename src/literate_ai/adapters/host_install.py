@@ -38,6 +38,7 @@ from literate_ai.bootstrap.host_install_requirements import (
     supported_targets,
     version_satisfies,
 )
+from literate_ai.bootstrap.windows_images import observe_pe_architecture
 
 INSTALL_DEPENDENCIES_ENVIRONMENT = "LITAI_INSTALL_DEPENDENCIES"
 INSTALL_ACCELERATOR_ENVIRONMENT = "LITAI_INSTALL_ACCELERATOR"
@@ -61,6 +62,13 @@ class HostInstallError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
+class HostImageArchitecture:
+    role: str
+    path: Path | None
+    architecture: str | None
+
+
+@dataclass(frozen=True, slots=True)
 class HostCapabilityObservation:
     """Observed provenance and runtime status for one composed capability."""
 
@@ -71,13 +79,25 @@ class HostCapabilityObservation:
     probe_satisfied: bool
     observed_version: str | None
     executable: Path | None
+    arm64_images: tuple[HostImageArchitecture, ...] | None = None
+
+    @property
+    def architecture_ready(self) -> bool:
+        return self.arm64_images is None or (
+            bool(self.arm64_images)
+            and all(image.architecture == "arm64" for image in self.arm64_images)
+        )
 
     @property
     def ready(self) -> bool:
-        return self.probe_satisfied and self.manager_installed is not False
+        return (
+            self.probe_satisfied
+            and self.manager_installed is not False
+            and self.architecture_ready
+        )
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        result: dict[str, object] = {
             "capability": self.requirement.capability,
             "source_kind": self.source_kind,
             "package": self.manager_package,
@@ -88,6 +108,20 @@ class HostCapabilityObservation:
             "executable": str(self.executable) if self.executable else None,
             "reason": self.requirement.reason,
         }
+        if self.arm64_images is not None:
+            result["image_architecture"] = {
+                "required": "arm64",
+                "verified": self.architecture_ready,
+                "images": [
+                    {
+                        "role": image.role,
+                        "path": str(image.path) if image.path is not None else None,
+                        "architecture": image.architecture,
+                    }
+                    for image in self.arm64_images
+                ],
+            }
+        return result
 
 
 # Compatibility name for the pre-0.9 internal adapter surface.
@@ -332,12 +366,21 @@ def observe_host_install_dependencies(
             locator=locate,
         )
     )
+    observations = (*native, *managed, agent)
+    if (
+        sbom.target.operating_system == "windows"
+        and sbom.target.architecture == "arm64"
+    ):
+        observations = tuple(
+            _observe_windows_arm64_images(item, sbom, observed_environment)
+            for item in observations
+        )
     base_path = sbom_path.parents[4] / "os-base" / "toolchain.cdx.json"
     return HostInstallReport(
         base_path,
         sbom_path,
         sbom,
-        (*native, *managed, agent),
+        observations,
         coding_agent,
         managed_paths,
     )
@@ -375,6 +418,25 @@ def ensure_host_install_dependencies(
     )
     if report.ready:
         return report
+    incompatible = [
+        item
+        for item in report.missing
+        if not item.architecture_ready
+        and (
+            item.executable is not None
+            or any(
+                _unverified_existing_image(image) for image in item.arm64_images or ()
+            )
+        )
+    ]
+    if incompatible:
+        raise HostInstallError(
+            "host-install.native-image-unverified",
+            "Existing Windows ARM64 tool images or runtime companions are not "
+            "proven native: "
+            + ", ".join(item.requirement.capability for item in incompatible)
+            + ". Inspect the image_architecture observations; no tools were replaced.",
+        )
     consent = _installation_consent(
         configured,
         manager=sbom.package_manager.identifier,
@@ -659,6 +721,87 @@ def _observe_capability(
     return HostCapabilityObservation(
         requirement, source_kind, None, None, satisfied, version, executable
     )
+
+
+def _python_runtime_image() -> Path | None:
+    """Locate the DLL loaded by this interpreter; do not guess its filename."""
+    handle = getattr(sys, "dllhandle", None)
+    if os.name != "nt" or not isinstance(handle, int):
+        return None
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    locate = kernel.GetModuleFileNameW
+    locate.argtypes = (wintypes.HMODULE, wintypes.LPWSTR, wintypes.DWORD)
+    locate.restype = wintypes.DWORD
+    buffer = ctypes.create_unicode_buffer(32768)
+    count = locate(wintypes.HMODULE(handle), buffer, len(buffer))
+    return Path(buffer.value) if 0 < count < len(buffer) else None
+
+
+def _unverified_existing_image(image: HostImageArchitecture) -> bool:
+    if image.architecture == "arm64" or image.path is None:
+        return False
+    try:
+        image.path.stat(follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+    except OSError:
+        # Unreadable is not permission to replace an independently owned tool.
+        return True
+    return True
+
+
+def _observe_windows_arm64_images(
+    observation: HostCapabilityObservation,
+    sbom: HostInstallSbom,
+    environment: Mapping[str, str],
+) -> HostCapabilityObservation:
+    """Observe actual images; a version string is not native-architecture proof."""
+    requirement = observation.requirement
+    if requirement.probe_kind == "file-group":
+        paths = [
+            (
+                "runtime-image",
+                Path(_expand_environment_candidate(candidate, environment)),
+            )
+            for candidate in requirement.probe_candidates
+        ]
+    else:
+        paths = [("executable", observation.executable)]
+    if requirement.probe_kind in {"current-python", "python-module"}:
+        paths.append(("python-runtime", _python_runtime_image()))
+    for artifact in sbom.artifacts:
+        if requirement.capability not in artifact.capabilities:
+            continue
+        relative = PurePosixPath(artifact.executable_path)
+        executable = observation.executable
+        if executable is None:
+            continue
+        suffix = executable.parts[-len(relative.parts) :]
+        if tuple(part.casefold() for part in suffix) != tuple(
+            part.casefold() for part in relative.parts
+        ):
+            if artifact.required_runtime_paths:
+                paths.append(("artifact-runtime-layout", None))
+            continue
+        root = executable.parents[len(relative.parts) - 1]
+        paths.extend(
+            ("artifact-runtime-image", root.joinpath(*PurePosixPath(name).parts))
+            for name in artifact.required_runtime_paths
+            if PurePosixPath(name).suffix.casefold() != ".json"
+        )
+    images = []
+    for role, path in paths:
+        architecture = None
+        if path is not None:
+            try:
+                architecture = observe_pe_architecture(path)
+            except (OSError, ValueError):
+                pass
+        images.append(HostImageArchitecture(role, path, architecture))
+    return replace(observation, arm64_images=tuple(images))
 
 
 def _probe_capability(
