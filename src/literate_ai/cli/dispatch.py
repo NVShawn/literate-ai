@@ -3243,10 +3243,14 @@ def _perf_build_root(args: argparse.Namespace) -> Path | None:
     try:
         from literate_ai.cache_directories import (
             CacheDirectoryError,
-            resolve_cache_directories,
+            select_cache_directories,
         )
 
-        return resolve_cache_directories(project_root).obj_dir
+        return select_cache_directories(
+            project_root,
+            build_dir=getattr(args, "build_dir", None),
+            obj_dir=getattr(args, "obj_dir", None),
+        ).obj_dir
     except CacheDirectoryError:
         return project_root / "_build"
 
@@ -3417,7 +3421,10 @@ def main(
             else:
                 output.write(help_text)
             return 0
-        recorder = PerformanceRecorder(build_root=_perf_build_root(args))
+        recorder = PerformanceRecorder(
+            build_root=_perf_build_root(args),
+            project_root=getattr(args, "project", None) or Path.cwd(),
+        )
         perf_target = next(
             (
                 getattr(args, name)

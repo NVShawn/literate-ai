@@ -3153,7 +3153,9 @@ def _run_release_gate_on_workers(
             )
             with context as evidence_node:
                 evidence_node.skip(str(item["reason"]))
-    recorder = PerformanceRecorder(build_root=_release_perf_build_root(root))
+    recorder = PerformanceRecorder(
+        build_root=_release_perf_build_root(root), project_root=root
+    )
 
     def dispatch(worker: ExecutionWorker) -> dict[str, object]:
         with recorder.span(

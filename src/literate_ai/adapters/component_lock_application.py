@@ -13,6 +13,7 @@ from literate_ai.contracts import (
 from literate_ai.projects import LoadedProject, PinnedInputClosureError
 
 from .component_lock_planning import (
+    ComponentCatalogSnapshot,
     ComponentLockPlanningError,
     FilesystemComponentLockPlanner,
 )
@@ -75,6 +76,8 @@ def current_project_component_locks(
     """
 
     locks: list[ComponentLock] = []
+    reader = FilesystemLockedGenerationAuthorityReader()
+    catalog = None
     try:
         for component in project_component_roots(project):
             lock_path = component / "component.lock.json"
@@ -87,7 +90,8 @@ def current_project_component_locks(
                     "component_lock.project_lock_set_unavailable",
                     "project Component lock set could not be inspected",
                 ) from exc
-            locks.append(current_component_lock(component))
+            lock, catalog = _read_current_component_lock(component, reader, catalog)
+            locks.append(lock)
     except ProjectComponentLockSetError:
         raise
     except (
@@ -121,10 +125,19 @@ def current_component_lock_identity(component_root: Path) -> ContentIdentity:
 def current_component_lock(component_root: Path) -> ComponentLock:
     """Read one exact current lock and its complete pinned input closure."""
 
-    reader = FilesystemLockedGenerationAuthorityReader()
+    return _read_current_component_lock(
+        component_root, FilesystemLockedGenerationAuthorityReader(), None
+    )[0]
+
+
+def _read_current_component_lock(
+    component_root: Path,
+    reader: FilesystemLockedGenerationAuthorityReader,
+    prior_catalog: ComponentCatalogSnapshot | None,
+) -> tuple[ComponentLock, ComponentCatalogSnapshot]:
     try:
         component = Path(component_root).resolve(strict=True)
-        catalog = reader.load_catalog(component)
+        catalog = reader.load_catalog(component, prior_catalog=prior_catalog)
         lock_store = ComponentLockStore(component)
         lock = lock_store.read_from_catalog(authorings=catalog.authorings)
         closure = catalog.locked_input_closure(
@@ -135,7 +148,7 @@ def current_component_lock(component_root: Path) -> ComponentLock:
         catalog.require_unchanged()
         lock_store.require_current(lock)
         closure.require_unchanged()
-        return lock
+        return lock, catalog
     except ProjectComponentLockSetError:
         raise
     except (

@@ -822,8 +822,11 @@ project-relative. Explicit values travel through the lifecycle driver's allowlis
 environment and enter the outer rebuild request binding. They choose storage location,
 not derivation validity.
 
-Every `litai` command records a JSON-Lines performance span under
-`OBJ_DIR/.litai/perf/<run-id>.jsonl`: schema, run id, stage, target kind/id, coding CLI,
+Every timed `litai` command records a JSON-Lines performance span under the
+operator state root, at `performance/<object-root-key>/<run-id>.jsonl`. The key
+is the SHA-256 of the normalized absolute selected `OBJ_DIR`; explicit
+`--obj-dir` wins over the environment. Spans include schema, run id, stage,
+target kind/id, coding CLI,
 model, ISO 8601 start/end, duration in milliseconds, pass/fail, and a typed error code
 when it failed. A `litai release check --target local` fan-out additionally records one
 span per dispatched worker (`release.check.worker`, target kind `worker`), so a full
@@ -842,14 +845,18 @@ litai perf chart --output _build/perf.svg --group-by stage
 `litai perf chart` renders a dependency-free SVG bar chart (no new third-party graphing
 library); each bar shows the group's total duration and span count.
 
-`OBJ_DIR` is disposable and gets wiped by `make clean`/`really-clean`, so telemetry
-recorded there does not survive a clean. To keep it, copy `OBJ_DIR/.litai/perf`
-somewhere durable before cleaning, then point `litai perf show`/`litai perf chart` at
-the copy directly with `--dir`:
+New spans survive `make clean`/`really-clean` and never initialize or write into
+project or object-cache roots. `LITAI_STATE_DIR` selects the operator-state
+namespace; different values isolate diagnostics. An unsafe or unavailable state
+sink cannot fail the observed command. A state sink inside the selected object
+root or an explicitly supplied project root is refused to preserve that boundary.
+
+Reports combine new spans with any existing `OBJ_DIR/.litai/perf` logs.
+`litai --json perf show` lists both locations in `log_directories`. To archive
+logs, copy the desired literal directory from that list, then report on it with:
 
 ```bash
-cp -R "$OBJ_DIR/.litai/perf" ~/litai-perf-archive/2026-08-17-run
-litai perf show --dir ~/litai-perf-archive/2026-08-17-run --group-by target_id
+litai perf show --dir ~/litai-perf-archive/run --group-by target_id
 ```
 
 `--dir` names the exact directory holding the `*.jsonl` span files (the archived

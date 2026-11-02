@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Tests: keep SSH workspace descriptors portable while using native temporary
+  storage for retained receiver scope checks on Windows.
+
+- Source scanning: identical finding-bearing content at multiple paths no longer
+  crashes reports; distinct source content, rules and occurrences retain their
+  findings and blocking severity.
+
+- Diagnostics: store new timing spans in operator state, keyed by the selected
+  object root, so first-command telemetry cannot poison custom caches. Reports
+  retain existing cache-local logs and honor explicit object-root selection.
+
+- Retained PACKAGE receivers: reuse parsed Component/Flavor catalogs and project
+  definitions within one request, with isolated returned definitions, fresh file
+  reads, project-context checks and complete catalog/selected-input validation.
+
 - Tests: isolate original-adoption CLI diagnostics while preserving complete
   project snapshots and recorded refusal telemetry.
 

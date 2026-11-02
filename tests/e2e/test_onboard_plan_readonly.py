@@ -10,6 +10,7 @@ from contextlib import chdir
 from pathlib import Path
 from unittest import mock
 
+from literate_ai.perf import read_performance_spans
 from tests.support.fixtures_test_project_cli import invoke
 
 
@@ -65,7 +66,7 @@ class OnboardReadOnlyPlanTests(unittest.TestCase):
             )
             self.assertEqual(retained.read_bytes(), before["app.py"][1])
             # Applying remains mutagenic and retains ordinary timing diagnostics.
-            self.assertTrue(list((self.root / "_build/.litai/perf").glob("*.jsonl")))
+            self.assertTrue(read_performance_spans(self.root / "_build"))
 
     def test_explicit_object_root_does_not_make_read_only_plan_write(self):
         with chdir(self.root):

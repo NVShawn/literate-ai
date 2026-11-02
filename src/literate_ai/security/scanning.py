@@ -156,6 +156,7 @@ class RuleBasedSourceScanner:
 
     def scan(self, modules: tuple[SourceModule, ...]) -> SecurityScanReport:
         findings: list[SecurityFinding] = []
+        observed: set[tuple[str, str, int]] = set()
         for module in sorted(modules, key=lambda item: item.path):
             text = module.content.decode("utf-8", errors="replace")
             suffix = PurePosixPath(module.path).suffix.lower()
@@ -165,6 +166,12 @@ class RuleBasedSourceScanner:
                 for match_index, _match in enumerate(
                     re.finditer(rule.pattern, text, re.MULTILINE)
                 ):
+                    # Findings identify content, rule and occurrence, not paths.
+                    # Keep the first applicable path in deterministic path order.
+                    occurrence = (module.source_digest, rule.rule_id, match_index)
+                    if occurrence in observed:
+                        continue
+                    observed.add(occurrence)
                     identity = _digest(
                         {
                             "scanner": self.scanner_identity,

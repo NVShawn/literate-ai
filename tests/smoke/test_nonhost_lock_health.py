@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from literate_ai.adapters.component_lock_application import current_component_lock
 from literate_ai.adapters.project_lock_health import observe_project_locks
+from literate_ai.perf import read_performance_spans
 from tests.smoke import test_installed_lock_health_smoke as fixtures
 from tests.smoke.test_project_verify import invoke, tree_snapshot
 
@@ -39,7 +40,7 @@ class NonhostLockHealthTests(unittest.TestCase):
             current_component_lock(self.component).identity, current.identity
         )
         self.assertEqual(tree_snapshot(self.root), before)
-        self.assertTrue(tuple((diagnostics / ".litai" / "perf").glob("*.jsonl")))
+        self.assertTrue(read_performance_spans(diagnostics))
 
     def test_changed_project_flavor_policy_remains_stale(self):
         self.lock()

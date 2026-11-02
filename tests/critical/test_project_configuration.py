@@ -17,6 +17,7 @@ from literate_ai.projects import (
     PROJECT_FILENAME,
     ProjectConfigurationStore,
     ProjectError,
+    read_only_project_configuration_parses,
     serialize_project_configuration,
 )
 
@@ -45,6 +46,73 @@ def _definition() -> ProjectDefinition:
 
 
 class ProjectConfigurationStoreTests(unittest.TestCase):
+    def test_scoped_parsing_isolates_callers_and_rechecks_current_bytes_and_limits(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as directory:
+            store = ProjectConfigurationStore(Path(directory))
+            original = store.create(_definition())
+            expected = dict(original.definition.component_flavor_selectors)
+            with read_only_project_configuration_parses():
+                for key in ("first-caller", "later-caller"):
+                    observed = store.read()
+                    self.assertEqual(
+                        observed.definition.component_flavor_selectors, expected
+                    )
+                    observed.definition.component_flavor_selectors[key] = ("+changed",)
+                self.assertEqual(
+                    store.read().definition.component_flavor_selectors, expected
+                )
+                with self.assertRaises(ProjectError):
+                    ProjectConfigurationStore(
+                        store.root, maximum_bytes=len(original.content) - 1
+                    ).read()
+                for index in range(20):
+                    changed = replace(
+                        original.definition, project_id=f"changed-{index}"
+                    )
+                    store.path.write_bytes(serialize_project_configuration(changed))
+                    self.assertEqual(store.read().definition, changed)
+                store.path.write_bytes(b"{")
+                with self.assertRaisesRegex(ProjectError, "manifest is invalid"):
+                    store.read()
+                store.path.write_bytes(original.content)
+                self.assertEqual(store.read().definition, original.definition)
+
+    def test_scoped_discovery_observes_nearer_projects_and_rejects_redirected_reads(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as directory:
+            outer = Path(directory).resolve()
+            ProjectConfigurationStore(outer).create(_definition())
+            child = outer / "child"
+            child.mkdir()
+            with read_only_project_configuration_parses():
+                self.assertEqual(ProjectConfigurationStore.discover(child).root, outer)
+                store = ProjectConfigurationStore(child)
+                # Identical bytes may share parsing, never the discovered root.
+                nested = store.create(_definition())
+                self.assertEqual(ProjectConfigurationStore.discover(child).root, child)
+                backup = child / "original.json"
+                store.path.rename(backup)
+                try:
+                    store.path.symlink_to(backup.name)
+                except OSError:
+                    backup.rename(store.path)
+                    if os.name == "nt":
+                        return
+                    raise
+                try:
+                    with self.assertRaises(ProjectError):
+                        store.read()
+                    self.assertEqual(
+                        ProjectConfigurationStore.discover(child).root, outer
+                    )
+                finally:
+                    store.path.unlink()
+                    backup.rename(store.path)
+                self.assertEqual(store.read().definition, nested.definition)
+
     @unittest.skipIf(os.name == "nt", "POSIX replacement uses an open inode")
     def test_read_rejects_path_replacement_after_descriptor_open(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

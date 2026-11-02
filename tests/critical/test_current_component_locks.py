@@ -18,6 +18,11 @@ from literate_ai.adapters.component_lock_application import (
     current_project_component_lock_identities,
     current_project_component_locks,
 )
+from literate_ai.adapters.locked_generation_authority import (
+    FilesystemLockedGenerationAuthorityReader,
+    LockedGenerationAuthorityReaderError,
+    read_only_component_catalog_observations,
+)
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
@@ -41,7 +46,7 @@ from literate_ai.contracts.retained_project_tests import (
     RetainedProjectExpectedCase,
     RetainedProjectTestPolicy,
 )
-from literate_ai.projects import LoadedProject
+from literate_ai.projects import LoadedProject, ProjectError
 from tests.support.fixtures_retained_project_sbom import retained_project_sbom_fixture
 from tests.support.fixtures_test_cli_component_locks import _run
 from tests.support.fixtures_test_component_lock_planning import _fixture
@@ -91,6 +96,97 @@ class CurrentComponentLockTests(unittest.TestCase):
         self.assertEqual(
             current_project_component_lock_identities(self.project), (lock.identity,)
         )
+
+    def test_shared_catalog_keeps_each_lock_and_rejects_later_source_drift(self):
+        catalog_root = self.root / "catalog"
+        catalog_root.mkdir()
+        original = catalog_root / "greeting"
+        self.component.rename(original)
+        self.component = original
+        target = catalog_root / "second"
+        shutil.copytree(original, target)
+        authoring = target / "component.md"
+        authoring.write_text(
+            authoring.read_text().replace("version: 1.0.0", "version: 1.0.1", 1)
+        )
+        project = replace(
+            self.project,
+            definition=replace(self.project.definition, component_roots=("catalog",)),
+        )
+        (self.root / "literate.project.json").write_text(
+            json.dumps(project.definition.to_dict())
+        )
+        for component in (original, target):
+            status, record, error = _run(
+                [
+                    "lock",
+                    str(component),
+                    "--target",
+                    "host",
+                    "--flavor",
+                    "+python",
+                    "--flavor",
+                    "+macos",
+                    "--json",
+                ]
+            )
+            self.assertEqual(status, 0, (record, error))
+        expected = tuple(
+            sorted(
+                (
+                    current_component_lock(self.component),
+                    current_component_lock(target),
+                ),
+                key=lambda item: item.identity.uri,
+            )
+        )
+        with read_only_component_catalog_observations():
+            self.assertEqual(current_project_component_locks(project), expected)
+            specification = target / "specs/spec.md"
+            specification.write_text(specification.read_text() + "\nChanged source.\n")
+            with self.assertRaises(ProjectComponentLockSetError):
+                current_project_component_locks(project)
+
+    def test_reused_catalog_rechecks_bytes_membership_and_nearest_project(self):
+        with read_only_component_catalog_observations():
+            reader = FilesystemLockedGenerationAuthorityReader()
+            catalog = reader.load_catalog(self.component)
+            observed = reader.load_catalog(self.component)
+            self.assertEqual(
+                observed.catalog_audit_identity, catalog.catalog_audit_identity
+            )
+            flavor = self.root / "flavors/lang-python/flavor.md"
+            original = flavor.read_bytes()
+            try:
+                flavor.write_bytes(original + b"\nChanged flavor authority.\n")
+                with self.assertRaises(LockedGenerationAuthorityReaderError):
+                    reader.load_catalog(self.component)
+            finally:
+                flavor.write_bytes(original)
+            added = self.component / "added/component.md"
+            added.parent.mkdir()
+            try:
+                added.write_bytes((self.component / "component.md").read_bytes())
+                with self.assertRaises(LockedGenerationAuthorityReaderError):
+                    reader.load_catalog(self.component)
+            finally:
+                added.unlink()
+                added.parent.rmdir()
+            if os.name != "nt":
+                retired = flavor.with_name("flavor-original.md")
+                flavor.rename(retired)
+                try:
+                    flavor.symlink_to(retired.name)
+                    with self.assertRaises(LockedGenerationAuthorityReaderError):
+                        reader.load_catalog(self.component)
+                finally:
+                    flavor.unlink(missing_ok=True)
+                    retired.rename(flavor)
+            # A new nearest project must be discovered, rather than inheriting the
+            # old valid parent catalog across a now-invalid authority boundary.
+            (self.component / "literate.project.json").write_text("{}\n")
+            with self.assertRaises(ProjectError):
+                reader.load_catalog(self.component)
 
     def test_stale_loaded_project_cannot_supply_graph_metadata(self):
         stale = replace(
