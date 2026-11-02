@@ -51,10 +51,15 @@ _PYTHON_PROBE_SCRIPT = (
     "},sort_keys=True,separators=(',',':')))"
 )
 _PYTHON_COMPILE_SCRIPT = (
-    "import py_compile,sys;"
-    "py_compile.compile(sys.argv[1],cfile=sys.argv[2],dfile=sys.argv[3],"
-    "doraise=True,invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH)"
+    "import json,pathlib,py_compile,sys\n"
+    "source,target=map(pathlib.Path,sys.argv[1:3])\n"
+    "for relative in json.loads(sys.stdin.buffer.read().decode('utf-8')):\n"
+    " py_compile.compile(source/relative,"
+    "cfile=target/pathlib.Path(relative).with_suffix('.pyc'),dfile=relative,"
+    "doraise=True,invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH)\n"
 )
+_PYTHON_COMPILE_BATCH_FILES = 64
+_PYTHON_COMPILE_BATCH_BYTES = 64 * 1024
 
 
 class BuildError(RuntimeError):
@@ -740,15 +745,25 @@ class GuardedPythonBuilder:
         compiled: list[str] = []
         try:
             resolved_source = source_root.resolve(strict=True)
-            for source in sorted(resolved_source.rglob("*.py")):
-                if source.is_symlink():
+            batch, batch_bytes = [], 2
+
+            def compile_batch():
+                nonlocal batch_bytes
+                if not batch:
+                    return
+                content = json.dumps(
+                    [relative for relative, _target in batch],
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+                if len(content) != batch_bytes:
                     raise BuildError(
-                        "builder.source_symlink",
-                        f"Source symlink rejected: {source}",
+                        "builder.python_compile_input_invalid",
+                        "Python compiler batch differs from its bounded selection",
                     )
-                relative = source.relative_to(resolved_source)
-                target = staging / relative.with_suffix(".pyc")
-                target.parent.mkdir(parents=True, exist_ok=True)
+                # One bounded compiler invocation consumes the whole batch.
+                # Keep the same full launcher/runtime checks around every real
+                # subprocess, and the existing full source checks around build.
                 self.toolchain.require_unchanged(environment)
                 try:
                     completed = _run_bounded_process(
@@ -758,9 +773,8 @@ class GuardedPythonBuilder:
                             "-S",
                             "-c",
                             _PYTHON_COMPILE_SCRIPT,
-                            str(source),
-                            str(target),
-                            relative.as_posix(),
+                            str(resolved_source),
+                            str(staging),
                         ],
                         cwd=resolved_source,
                         environment=environment,
@@ -768,10 +782,14 @@ class GuardedPythonBuilder:
                         stdout_limit_bytes=self.stdout_limit_bytes,
                         stderr_limit_bytes=self.stderr_limit_bytes,
                         error_prefix="builder.python_compile",
+                        input_bytes=content,
+                        input_limit_bytes=_PYTHON_COMPILE_BATCH_BYTES,
                     )
                 finally:
                     self.toolchain.require_unchanged(environment)
-                if completed.returncode != 0 or not target.is_file():
+                if completed.returncode != 0 or any(
+                    not target.is_file() for _relative, target in batch
+                ):
                     detail = (completed.stdout + completed.stderr)[-4000:].decode(
                         "utf-8", errors="replace"
                     )
@@ -779,7 +797,39 @@ class GuardedPythonBuilder:
                         "builder.python_compile_failed",
                         "Python bytecode compilation failed: " + detail,
                     )
-                compiled.append(target.relative_to(staging).as_posix())
+                compiled.extend(
+                    target.relative_to(staging).as_posix()
+                    for _relative, target in batch
+                )
+                batch.clear()
+                batch_bytes = 2
+
+            for source in sorted(resolved_source.rglob("*.py")):
+                if source.is_symlink():
+                    raise BuildError(
+                        "builder.source_symlink",
+                        f"Source symlink rejected: {source}",
+                    )
+                relative = source.relative_to(resolved_source)
+                target = staging / relative.with_suffix(".pyc")
+                relative_text = relative.as_posix()
+                encoded_bytes = len(
+                    json.dumps(relative_text, ensure_ascii=False).encode("utf-8")
+                )
+                if encoded_bytes + 2 > _PYTHON_COMPILE_BATCH_BYTES:
+                    raise BuildError(
+                        "builder.python_compile_input_exceeded",
+                        "Python source path exceeds the compiler input bound",
+                    )
+                if batch and (
+                    len(batch) == _PYTHON_COMPILE_BATCH_FILES
+                    or batch_bytes + encoded_bytes + 1 > _PYTHON_COMPILE_BATCH_BYTES
+                ):
+                    compile_batch()
+                target.parent.mkdir(parents=True, exist_ok=True)
+                batch_bytes += encoded_bytes + bool(batch)
+                batch.append((relative_text, target))
+            compile_batch()
             _require_source_tree_unchanged(source_root, actual_source_digest)
             manifest = {
                 "builder_id": self.builder_id,

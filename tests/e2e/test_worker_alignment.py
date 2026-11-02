@@ -458,6 +458,8 @@ class FreeBSDAlignmentTests(unittest.TestCase):
                         "cmd git /usr/local/bin/git",
                         "cmd git-lfs /usr/local/bin/git-lfs",
                         "cmd gmake /usr/local/bin/gmake",
+                        "cmd pkg-static /usr/local/sbin/pkg-static",
+                        "cmd bsdtar /usr/bin/bsdtar",
                         "cmd readelf /usr/bin/readelf",
                         "cmd ldconfig /sbin/ldconfig",
                         "cmd cc /usr/bin/cc",

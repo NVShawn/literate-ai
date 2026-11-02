@@ -40,6 +40,12 @@ class WorktreeRepositoryFixture:
                 "user.email=fixture@example.invalid",
                 "-c",
                 "commit.gpgsign=false",
+                # The seed is copied after commit returns. Detached maintenance
+                # can remove a lock while copytree is enumerating its objects.
+                "-c",
+                "maintenance.auto=false",
+                "-c",
+                "gc.auto=0",
                 *arguments,
             ),
             cwd=root,

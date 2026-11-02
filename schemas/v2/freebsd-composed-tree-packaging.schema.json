@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:freebsd-composed-tree-packaging-contracts",
+  "description": "Mechanical native coordinates, non-circular resource policy and complete selected-set projection. Evidence/graph/current live owners and actual native tool reopening remain required; decoding grants no producer, runtime, PACKAGE, LINK, install or release authority.",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:freebsd-composed-tree-packaging-contracts#/$defs/parameters"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:freebsd-composed-tree-packaging-contracts#/$defs/projection"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:freebsd-composed-tree-packaging-contracts#/$defs/policy"
+    }
+  ],
+  "$defs": {
+    "parameters": {
+      "$id": "literate-ai/freebsd-retained-unit-parameters@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "package",
+        "origin",
+        "prefix",
+        "architecture",
+        "evidence"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/freebsd-retained-unit-parameters@1"
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}$"
+        },
+        "origin": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}/[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}$"
+        },
+        "prefix": {
+          "type": "string",
+          "pattern": "^/.+$"
+        },
+        "architecture": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9:._-]{1,96}$"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/packageInput"
+              },
+              {
+                "properties": {
+                  "kind": {
+                    "const": "resource"
+                  },
+                  "executable": {
+                    "const": false
+                  },
+                  "role": {
+                    "enum": [
+                      "component-authoring",
+                      "component-lock",
+                      "retained-project-profile",
+                      "retained-source-manifest",
+                      "cyclonedx-source-sbom",
+                      "cyclonedx-resolved-sbom",
+                      "retained-receipt",
+                      "license",
+                      "component-specification"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "policy": {
+      "$id": "literate-ai/freebsd-composed-tree-policy@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "max_closure_steps",
+        "max_closure_memory_bytes",
+        "max_provider_metadata_bytes",
+        "max_provider_memory_bytes",
+        "max_verified_record_cache_bytes",
+        "native_manifest_byte_limit",
+        "native_unit_member_limit",
+        "xz_decoder_memory_bytes"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/freebsd-composed-tree-policy@1"
+        },
+        "max_closure_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16000000
+        },
+        "max_closure_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "max_provider_metadata_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_provider_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "max_verified_record_cache_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "native_manifest_byte_limit": {
+          "const": 16777216
+        },
+        "native_unit_member_limit": {
+          "const": 100000
+        },
+        "xz_decoder_memory_bytes": {
+          "const": 134217728
+        }
+      }
+    },
+    "projection": {
+      "$id": "literate-ai/freebsd-composed-tree-pkg-projection@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority_mode",
+        "release_authorized",
+        "set_plan",
+        "graph_identity",
+        "pkg_tool_identity",
+        "tar_tool_identity",
+        "provider_policy"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/freebsd-composed-tree-pkg-projection@1"
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "release_authorized": {
+          "const": false
+        },
+        "set_plan": {
+          "$ref": "urn:literate-ai:schema:v2:retained-unit-package-set-plan-contracts#/$defs/plan"
+        },
+        "graph_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "pkg_tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tar_tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "provider_policy": {
+          "$ref": "urn:literate-ai:schema:v2:freebsd-composed-tree-packaging-contracts#/$defs/policy"
+        }
+      }
+    }
+  }
+}

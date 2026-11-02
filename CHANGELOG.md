@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retained packaging foundation: add bounded canonical tree shards and explicit
+  unit ownership with typed dependencies. Preserve composed link topology and
+  shared structural directories without copying another unit's payload. Public
+  per-unit packaging and native worker qualification remain in progress.
+
 - Whole-project continuation: distribute exact accepted-source selectors to their
   current Component roots, reject foreign selections before execution, and retain
   aggregate publication IDs while preserving cache history.

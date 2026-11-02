@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-unit-package-set-plan-contracts",
+  "$ref": "urn:literate-ai:schema:v2:retained-unit-package-set-plan-contracts#/$defs/plan",
+  "$defs": {
+    "plan": {
+      "$id": "literate-ai/retained-unit-package-set-plan@1",
+      "description": "Opt-in bounded selected-set plan, before unit plans/results. Requires live retained admission and provider/LINK scope for production; no installation, promotion or release authority.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority_mode",
+        "release_authorized",
+        "retained_plan_identity",
+        "receipt_identity",
+        "target_identity",
+        "graph_index",
+        "tree_index",
+        "packager_identity",
+        "tool_identity",
+        "max_concurrent_units",
+        "max_staging_bytes",
+        "max_transport_bytes",
+        "max_archive_bytes",
+        "max_total_archive_bytes",
+        "provider_policy_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-set-plan@1"
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "release_authorized": {
+          "const": false
+        },
+        "retained_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "receipt_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "graph_index": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/json"
+                },
+                "size": {
+                  "minimum": 1,
+                  "maximum": 2097152
+                }
+              }
+            }
+          ]
+        },
+        "tree_index": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/json"
+                },
+                "size": {
+                  "minimum": 1,
+                  "maximum": 2097152
+                }
+              }
+            }
+          ]
+        },
+        "packager_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "max_concurrent_units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "max_staging_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_transport_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_total_archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "provider_policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

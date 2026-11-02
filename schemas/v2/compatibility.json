@@ -240,7 +240,21 @@
     "urn:literate-ai:schema:v2:generated-test-suite",
     "literate-ai/generated-test-coverage-request@1",
     "literate-ai/public-callable-signature@1",
-    "literate-ai/generated-test-coverage-authority@1"
+    "literate-ai/generated-test-coverage-authority@1",
+    "literate-ai/native-tree-index@1",
+    "literate-ai/native-tree-shard@1",
+    "literate-ai/retained-unit-package-definition@1",
+    "literate-ai/retained-unit-package-graph-index@1",
+    "literate-ai/retained-unit-package-graph-shard@1",
+    "literate-ai/retained-unit-package-plan@1",
+    "literate-ai/retained-unit-package-result@1",
+    "literate-ai/retained-unit-package-set-plan@1",
+    "literate-ai/freebsd-composed-tree-pkg-projection@1",
+    "literate-ai/freebsd-composed-tree-policy@1",
+    "literate-ai/freebsd-retained-unit-parameters@1",
+    "literate-ai/retained-unit-package-request@1",
+    "literate-ai/retained-unit-package-result-shard@1",
+    "literate-ai/retained-unit-package-set-result@1"
   ],
   "read_paths": [
     {

@@ -21,6 +21,15 @@ from literate_ai.cli import main
 from tests.support.symlinks import skip_unless_symlinks_followable
 
 
+def _rewrite_control_file(path, content):
+    # Git for Windows hides .git pointer files. Opening an existing hidden file
+    # with truncation can fail; r+b preserves its native attributes and inode,
+    # which is also required by the in-place custody-drift control below.
+    with path.open("r+b") as stream:
+        stream.write(content)
+        stream.truncate()
+
+
 class WorktreeDiscoveryTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -45,6 +54,10 @@ class WorktreeDiscoveryTests(unittest.TestCase):
                 "user.email=fixture@example.invalid",
                 "-c",
                 "commit.gpgsign=false",
+                "-c",
+                "maintenance.auto=false",
+                "-c",
+                "gc.auto=0",
                 *arguments,
             ),
             cwd=root,
@@ -156,14 +169,14 @@ class WorktreeDiscoveryTests(unittest.TestCase):
         linked = self.linked(self.parent / "registered")
         foreign = self.parent / "foreign"
         self.initialize(foreign)
-        (linked / ".git").write_text(f"gitdir: {foreign / '.git'}\n")
+        _rewrite_control_file(linked / ".git", f"gitdir: {foreign / '.git'}\n".encode())
         entry = self.entries(discovery.discover_project_worktrees(self.root))[linked]
         self.assertEqual(entry.classification, "contradictory-registration")
 
     def test_same_common_directory_pointer_swap_is_contradictory(self):
         first = self.linked(self.parent / "first")
         second = self.linked(self.parent / "second")
-        (first / ".git").write_bytes((second / ".git").read_bytes())
+        _rewrite_control_file(first / ".git", (second / ".git").read_bytes())
         entries = self.entries(discovery.discover_project_worktrees(self.root))
         self.assertEqual(entries[first].classification, "contradictory-registration")
         self.assertEqual(entries[second].classification, "legacy-peer-worktree")
@@ -224,7 +237,7 @@ class WorktreeDiscoveryTests(unittest.TestCase):
 
         def changing(observed):
             marker = linked / ".git"
-            marker.write_bytes(marker.read_bytes() + b"\n")
+            _rewrite_control_file(marker, marker.read_bytes() + b"\n")
             return revalidate(observed)
 
         with mock.patch.object(discovery._Observation, "revalidate", changing):
@@ -240,7 +253,7 @@ class WorktreeDiscoveryTests(unittest.TestCase):
 
         def changing(observed):
             marker = administration / "commondir"
-            marker.write_bytes(marker.read_bytes() + b"\n")
+            _rewrite_control_file(marker, marker.read_bytes() + b"\n")
             return revalidate(observed)
 
         with mock.patch.object(discovery._Observation, "revalidate", changing):

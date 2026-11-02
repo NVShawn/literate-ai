@@ -19,13 +19,22 @@ from literate_ai.adapters.retained_project_inputs import (
     _stamp,
     _stream,
 )
-from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.blobs import BlobRef
+from literate_ai.contracts.identity import ContentIdentity, canonical_json_bytes
 from literate_ai.contracts.native_sdk_tree_products import (
     NativeSdkTreeBuildLayout,
     NativeSdkTreeSnapshot,
 )
 from literate_ai.contracts.native_sdk_trees import NativeSdkAlias, NativeSdkTree
 from literate_ai.contracts.native_sdks import NativeSdkFile
+from literate_ai.contracts.native_tree_shards import (
+    MAX_DESCRIPTOR_BYTES,
+    MAX_DESCRIPTOR_TOTAL_BYTES,
+    MAX_INDEX_BYTES,
+    MAX_TREE_MEMBERS,
+    ComposedNativeTree,
+    validate_native_tree_policy,
+)
 from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.storage.cas import FileSystemCAS
 
@@ -93,6 +102,115 @@ def capture_native_sdk_tree(
     limits: RetainedProjectLimits,
     case_sensitive: bool = False,
 ) -> NativeSdkTree:
+    return _capture_native_tree(
+        root,
+        store=store,
+        limits=limits,
+        case_sensitive=case_sensitive,
+        maximum_entries=16384,
+        tree_factory=NativeSdkTree,
+    )
+
+
+def capture_composed_native_tree(
+    root: Path,
+    *,
+    store: FileSystemCAS,
+    limits: RetainedProjectLimits,
+    case_sensitive: bool = False,
+    max_descriptor_bytes=MAX_DESCRIPTOR_BYTES,
+    max_descriptor_total_bytes=MAX_DESCRIPTOR_TOTAL_BYTES,
+    max_index_bytes=MAX_INDEX_BYTES,
+    max_metadata_memory_bytes=1024 * 1024 * 1024,
+) -> ComposedNativeTree:
+    """Capture larger composed geometry through the same no-follow custody owner."""
+    from literate_ai.adapters.native_tree_shards import prepare_native_tree
+
+    validate_native_tree_policy(
+        limits,
+        case_sensitive,
+        max_descriptor_bytes,
+        max_descriptor_total_bytes,
+        max_index_bytes,
+        max_metadata_memory_bytes,
+    )
+    baseline = 16 * (max_descriptor_bytes + max_index_bytes)
+    if baseline >= max_metadata_memory_bytes:
+        raise ValueError("tree.shards.metadata-memory-policy-exceeded")
+
+    def inventory_policy():
+        count = descriptor_bound = 0
+
+        def observe(name, metadata):
+            nonlocal count, descriptor_bound
+            count += 1
+            # Conservative wire-space allowance before metadata retention or
+            # payload streaming. Exact descriptor geometry is checked separately
+            # after inode grouping, still before any payload is copied.
+            row_bound = len(canonical_json_bytes(name)) + 1
+            if stat.S_ISREG(metadata.st_mode):
+                row_bound += len(
+                    canonical_json_bytes(
+                        NativeSdkFile(
+                            name,
+                            BlobRef("0" * 64, metadata.st_size),
+                            bool(metadata.st_mode & 0o111),
+                        ).to_dict()
+                    )
+                )
+            elif stat.S_ISLNK(metadata.st_mode):
+                if metadata.st_size > 4096:
+                    raise ValueError("SDK capture symbolic target exceeds byte bound")
+                row_bound += 128 + 6 * metadata.st_size
+            descriptor_bound += row_bound
+            if descriptor_bound > max_descriptor_total_bytes:
+                raise ValueError("tree.shards.capture-descriptor-policy-exceeded")
+            if (
+                baseline + 16 * descriptor_bound + 2048 * count
+                > max_metadata_memory_bytes
+            ):
+                raise ValueError("tree.shards.metadata-memory-policy-exceeded")
+
+        return observe
+
+    def compose(directories, files, aliases, case_sensitive):
+        return prepare_native_tree(
+            directories,
+            files,
+            aliases,
+            limits=limits,
+            case_sensitive=case_sensitive,
+            max_descriptor_bytes=max_descriptor_bytes,
+            max_descriptor_total_bytes=max_descriptor_total_bytes,
+            max_index_bytes=max_index_bytes,
+            max_metadata_memory_bytes=max_metadata_memory_bytes,
+        )
+
+    return _capture_native_tree(
+        root,
+        store=store,
+        limits=limits,
+        case_sensitive=case_sensitive,
+        maximum_entries=min(
+            MAX_TREE_MEMBERS, (max_metadata_memory_bytes - baseline) // 2048
+        ),
+        tree_factory=compose,
+        inventory_policy=inventory_policy,
+        preflight_geometry=True,
+    )
+
+
+def _capture_native_tree(
+    root,
+    *,
+    store,
+    limits,
+    case_sensitive,
+    maximum_entries,
+    tree_factory,
+    inventory_policy=None,
+    preflight_geometry=False,
+):
     """Capture physical bytes and link topology through existing input custody.
 
     Bounds charge canonical file bytes and symbolic target bytes. Hard links
@@ -123,7 +241,7 @@ def capture_native_sdk_tree(
                     descriptor if descriptor is not None else root
                 ) as entries:
                     for entry in entries:
-                        if len(result) >= min(limits.max_entries, 16384):
+                        if len(result) >= min(limits.max_entries, maximum_entries):
                             raise ValueError("SDK capture exceeds entry bound")
                         result.append(entry.name)
             finally:
@@ -137,9 +255,10 @@ def capture_native_sdk_tree(
             return _inventory(
                 root,
                 roots,
-                min(limits.max_entries, 16384),
+                min(limits.max_entries, maximum_entries),
                 allow_internal_symlinks=True,
                 access=access,
+                observe=inventory_policy() if inventory_policy is not None else None,
             )
 
         def metadata(name):
@@ -166,6 +285,33 @@ def capture_native_sdk_tree(
         files = []
         if total > limits.max_total_bytes:
             raise ValueError("SDK capture exceeds total byte bound")
+        if preflight_geometry:
+            # Stat-derived placeholders have identical encoded size to the
+            # eventual SHA-256 refs. They remain local planning values, are never
+            # retained, and cannot become a producer/admission claim.
+            planned_files, planned_aliases = [], list(aliases)
+            for group in groups.values():
+                owner = min(group)
+                value = before[owner]
+                planned_files.append(
+                    NativeSdkFile(
+                        owner,
+                        BlobRef("0" * 64, value.st_size),
+                        bool(value.st_mode & 0o111),
+                    )
+                )
+                planned_aliases.extend(
+                    NativeSdkAlias(name, owner, "hardlink")
+                    for name in group
+                    if name != owner
+                )
+            tree_factory(
+                directories,
+                tuple(sorted(planned_files, key=lambda item: item.path)),
+                tuple(sorted(planned_aliases, key=lambda item: item.path)),
+                case_sensitive,
+            )
+            del planned_files, planned_aliases
         with tempfile.TemporaryDirectory(
             prefix=".sdk-capture-", dir=store.root
         ) as temp:
@@ -204,7 +350,7 @@ def capture_native_sdk_tree(
                 )
         if total > limits.max_total_bytes:
             raise ValueError("SDK capture exceeds total byte bound")
-        tree = NativeSdkTree(
+        tree = tree_factory(
             directories,
             tuple(sorted(files, key=lambda item: item.path)),
             tuple(sorted(aliases, key=lambda item: item.path)),
@@ -255,6 +401,69 @@ def materialize_native_sdk_tree(
     """Return a fresh verified relocation, preserving all alias relationships."""
     if not isinstance(tree, NativeSdkTree) or tree.identity != expected_identity:
         raise ValueError("SDK tree differs from its requested exact identity")
+    return _materialize_native_tree(
+        tree,
+        store=store,
+        limits=limits,
+        parent=parent,
+        capture=capture_native_sdk_tree,
+        equal=lambda actual: actual == tree,
+    )
+
+
+def materialize_composed_native_tree(
+    tree: ComposedNativeTree,
+    *,
+    expected_identity: ContentIdentity,
+    store: FileSystemCAS,
+    limits: RetainedProjectLimits,
+    parent: Path,
+) -> Path:
+    """Materialize complete geometry; this never admits an isolated unit subset."""
+    if not isinstance(tree, ComposedNativeTree) or tree.identity != expected_identity:
+        raise ValueError("Composed native tree differs from its requested identity")
+    if not isinstance(limits, RetainedProjectLimits):
+        raise TypeError("Composed relocation requires typed limits")
+    if any(
+        len(v.target.encode("utf-8")) > limits.max_file_bytes
+        for v in tree.aliases
+        if v.kind == "symlink"
+    ):
+        raise ValueError("Composed relocation exceeds alias byte bound")
+    policy = tree.index
+
+    def capture(root, **kwargs):
+        return capture_composed_native_tree(
+            root,
+            **kwargs,
+            max_descriptor_bytes=policy.max_descriptor_bytes,
+            max_descriptor_total_bytes=policy.max_descriptor_total_bytes,
+            max_index_bytes=policy.max_index_bytes,
+            max_metadata_memory_bytes=policy.max_metadata_memory_bytes,
+        )
+
+    def equal(actual):
+        # Descriptor boundaries are not physical topology. The original exact
+        # index stays bound by expected_identity; independently recaptured bytes,
+        # modes, aliases and directory geometry must match its complete projection.
+        return (
+            actual.directories == tree.directories
+            and actual.files == tree.files
+            and actual.aliases == tree.aliases
+            and actual.case_sensitive == tree.case_sensitive
+        )
+
+    return _materialize_native_tree(
+        tree,
+        store=store,
+        limits=limits,
+        parent=parent,
+        capture=capture,
+        equal=equal,
+    )
+
+
+def _materialize_native_tree(tree, *, store, limits, parent, capture, equal):
     if not isinstance(limits, RetainedProjectLimits):
         raise TypeError("SDK relocation requires typed limits")
     if (
@@ -291,13 +500,13 @@ def materialize_native_sdk_tree(
         for alias in tree.aliases:
             if alias.kind == "symlink":
                 os.symlink(alias.target, staging / alias.path)
-        actual = capture_native_sdk_tree(
+        actual = capture(
             staging,
             store=store,
             limits=limits,
             case_sensitive=tree.case_sensitive,
         )
-        if actual != tree:
+        if not equal(actual):
             raise ValueError("SDK relocated tree differs from its exact inventory")
         return staging
     except BaseException:

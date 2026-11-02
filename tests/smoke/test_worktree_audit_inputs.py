@@ -89,7 +89,10 @@ class WorktreeAuditInputTests(WorktreeRepositoryFixture, unittest.TestCase):
         _, document = self.capture()
         alias = next(entry for entry in document["source"] if entry["path"] == "alias")
         self.assertEqual(alias["kind"], "symlink")
-        self.assertEqual(base64.b64decode(alias["target_base64"]), os.fsencode(outside))
+        self.assertEqual(
+            base64.b64decode(alias["target_base64"]),
+            os.fsencode(os.readlink(self.root / "alias")),
+        )
         self.assertNotIn("content_identity", alias)
 
     @unittest.skipUnless(hasattr(os, "mkfifo"), "native POSIX special files")

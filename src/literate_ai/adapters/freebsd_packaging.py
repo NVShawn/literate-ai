@@ -608,27 +608,62 @@ def _manifest_files(document):
 
 
 def _require_single_xz_frame(content, maximum_expanded_bytes):
+    _expand_single_xz_stream(
+        io.BytesIO(content), None, len(content), maximum_expanded_bytes
+    )
+
+
+def _expand_single_xz_stream(
+    source, output, maximum_compressed_bytes, maximum_expanded_bytes
+):
+    """Validate one bounded frame, optionally retaining bounded expanded bytes.
+
+    Caller-owned streams remain mechanical custody, not producer authority.
+    Existing byte-backed validation uses this same frame/parser policy.
+    """
+    if any(
+        type(value) is not int or value < 0
+        for value in (maximum_compressed_bytes, maximum_expanded_bytes)
+    ):
+        raise PackagingError("FreeBSD XZ streams require finite byte bounds")
     lzma = _xz_codec()
     decoder = lzma.LZMADecompressor(format=lzma.FORMAT_XZ, memlimit=128 * 1024**2)
     offset = total = 0
     try:
         while not decoder.eof:
             if decoder.needs_input:
-                block = content[offset : offset + 65536]
+                block = source.read(min(65536, maximum_compressed_bytes - offset + 1))
                 if not block:
                     raise PackagingError("FreeBSD XZ frame is truncated")
                 offset += len(block)
+                if offset > maximum_compressed_bytes:
+                    raise PackagingError(
+                        "FreeBSD XZ frame exceeds compressed byte bound"
+                    )
             else:
                 block = b""
-            total += len(decoder.decompress(block, max_length=1024 * 1024))
+            expanded = decoder.decompress(
+                block, max_length=min(1024 * 1024, maximum_expanded_bytes - total + 1)
+            )
+            total += len(expanded)
             if total > maximum_expanded_bytes:
                 raise PackagingError("FreeBSD XZ frame exceeds accepted size bound")
-        if decoder.unused_data or offset != len(content):
+            if output is not None:
+                remaining = memoryview(expanded)
+                while remaining:
+                    written = output.write(remaining)
+                    if type(written) is not int or not 0 < written <= len(remaining):
+                        raise PackagingError(
+                            "FreeBSD XZ output stopped accepting bytes"
+                        )
+                    remaining = remaining[written:]
+        if decoder.unused_data or source.read(1):
             raise PackagingError("FreeBSD package has trailing compressed data")
     except lzma.LZMAError as exc:
         raise PackagingError(
             "FreeBSD XZ compression is invalid or over budget"
         ) from exc
+    return total
 
 
 def _require_tar_metadata(member, *, numeric_owner, timestamp):

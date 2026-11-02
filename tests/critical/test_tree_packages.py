@@ -14,16 +14,39 @@ from pathlib import Path, PurePosixPath
 from unittest import mock
 
 from literate_ai.adapters import tree_packaging
+from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
+from literate_ai.adapters.native_tar_archives import (
+    NativeTarToolBinding,
+    rewrite_native_tar,
+)
+from literate_ai.adapters.native_tree_shards import (
+    prepare_native_tree,
+    retain_native_tree,
+)
+from literate_ai.adapters.retained_unit_graphs import (
+    prepare_retained_unit_graph,
+    read_retained_unit_graph,
+    retain_retained_unit_graph,
+)
 from literate_ai.application.packaging import PackagingError
 from literate_ai.contracts import canonical_identity
+from literate_ai.contracts.blobs import BlobRef
+from literate_ai.contracts.composed_tree_packages import ComposedTreePackageProjection
 from literate_ai.contracts.executable_components.packages import (
     PackageKind,
     PackagePlan,
 )
+from literate_ai.contracts.identity import ComponentCoordinate
 from literate_ai.contracts.native_sdk_trees import NativeSdkAlias
 from literate_ai.contracts.package_tree_inputs import PackageTreeInput
 from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.retained_unit_packages import (
+    RetainedUnitDependency,
+    RetainedUnitOwnership,
+    RetainedUnitPackageDefinition,
+)
+from literate_ai.contracts.retained_unit_partition import RetainedUnitPartition
 from literate_ai.contracts.tree_packages import TreePackagePlan, TreePackageResult
 from literate_ai.storage.cas import FileSystemCAS
 from tests.support import fixtures_test_package_adapters as fixtures
@@ -31,6 +54,244 @@ from tests.support import fixtures_test_package_adapters as fixtures
 
 @unittest.skipIf(os.name == "nt", "Tree TAR custody requires POSIX")
 class TreePackageTests(unittest.TestCase):
+    def test_native_libarchive_preserves_external_links_and_bounds_file_output(self):
+        command = shutil.which("bsdtar")
+        if command is None:
+            self.skipTest(
+                "Native libarchive bsdtar unavailable; no rewrite qualification"
+            )
+        tool = NativeTarToolBinding.discover(command)
+        source = self.work / "explicit-links.tar"
+        with tarfile.open(source, "w", format=tarfile.PAX_FORMAT) as archive:
+            directory = tarfile.TarInfo("bin")
+            directory.type, directory.mode = tarfile.DIRTYPE, 0o755
+            archive.addfile(directory)
+            hardlink = tarfile.TarInfo("bin/compiler")
+            hardlink.type, hardlink.linkname, hardlink.mode = (
+                tarfile.LNKTYPE,
+                "bin/cc",
+                0o755,
+            )
+            archive.addfile(hardlink)
+            symlink = tarfile.TarInfo("public")
+            symlink.type, symlink.linkname, symlink.mode = tarfile.SYMTYPE, "bin", 0o777
+            archive.addfile(symlink)
+        reference = self.store.put_file(source, media_type="application/x-tar")
+        output = self.work / "native-links.txz"
+        with output.open("x+b") as sink:
+            rewrite_native_tar(
+                tool,
+                source,
+                reference,
+                sink,
+                maximum_input_bytes=65536,
+                maximum_output_bytes=65536,
+            )
+        with tarfile.open(output, "r:xz") as archive:
+            entries = {entry.name: entry for entry in archive}
+        self.assertEqual(set(entries), {"bin", "bin/compiler", "public"})
+        self.assertEqual(
+            (
+                entries["bin/compiler"].type,
+                entries["bin/compiler"].linkname,
+                entries["bin/compiler"].size,
+            ),
+            (tarfile.LNKTYPE, "bin/cc", 0),
+        )
+        self.assertEqual(
+            (entries["public"].type, entries["public"].linkname),
+            (tarfile.SYMTYPE, "bin"),
+        )
+        preserved = output.read_bytes()
+        # Public construction emits exactly one XZ frame, without libarchive's
+        # stdout record padding that a permissive tarfile reader would ignore.
+        import lzma
+
+        decoder = lzma.LZMADecompressor(format=lzma.FORMAT_XZ, memlimit=128 * 1024**2)
+        decoder.decompress(preserved, max_length=65536)
+        self.assertTrue(decoder.eof)
+        self.assertEqual(decoder.unused_data, b"")
+        refused = self.work / "over-budget.txz"
+        with refused.open("x+b") as sink:
+            with self.assertRaisesRegex(BuildError, "stdout or stderr byte budget"):
+                rewrite_native_tar(
+                    tool,
+                    source,
+                    reference,
+                    sink,
+                    maximum_input_bytes=65536,
+                    maximum_output_bytes=16,
+                )
+        self.assertLessEqual(refused.stat().st_size, 16)
+        self.assertEqual(output.read_bytes(), preserved)
+        with (self.work / "text-output").open("x") as sink:
+            with self.assertRaisesRegex(PackagingError, "binary file"):
+                rewrite_native_tar(
+                    tool,
+                    source,
+                    reference,
+                    sink,
+                    maximum_input_bytes=65536,
+                    maximum_output_bytes=65536,
+                )
+
+        class FailedArchiveSink(io.BufferedRandom):
+            def write(self, content):
+                raise TypeError("injected external file-write failure")
+
+        with FailedArchiveSink(
+            (self.work / "write-failure").open("x+b", buffering=0)
+        ) as sink:
+            with self.assertRaisesRegex(BuildError, "output could not be read"):
+                rewrite_native_tar(
+                    tool,
+                    source,
+                    reference,
+                    sink,
+                    maximum_input_bytes=65536,
+                    maximum_output_bytes=65536,
+                )
+
+        class ShortArchiveSink(io.BufferedRandom):
+            def write(self, content):
+                return super().write(content[:7])
+
+        short = self.work / "short-writes.txz"
+        with ShortArchiveSink(short.open("x+b", buffering=0)) as sink:
+            rewrite_native_tar(
+                tool,
+                source,
+                reference,
+                sink,
+                maximum_input_bytes=65536,
+                maximum_output_bytes=65536,
+            )
+        self.assertEqual(short.read_bytes(), preserved)
+        self.assertEqual(output.read_bytes(), preserved)
+
+    def test_composed_cross_unit_links_never_copy_dependency_payload(self):
+        old = self.plan.trees[0].tree
+        tree = prepare_native_tree(
+            old.directories, old.files, old.aliases, limits=self.limits
+        )
+        parameters = BlobRef(
+            canonical_identity({}).digest, 2, media_type="application/json"
+        )
+
+        def definition(name):
+            provenance = {
+                field: canonical_identity(field)
+                for field in RetainedUnitPackageDefinition.IDENTITY_FIELDS
+            }
+            provenance["payload_identity"] = tree.identity
+            return RetainedUnitPackageDefinition(
+                name,
+                ComponentCoordinate("test", name),
+                **provenance,
+                provider_parameters=parameters,
+                abi="FreeBSD:14:amd64",
+                version="1.0",
+            )
+
+        physical, aliases = definition("physical"), definition("aliases")
+        partition = RetainedUnitPartition(
+            tree,
+            tuple(sorted((physical, aliases), key=lambda value: value.identity.uri)),
+            (
+                RetainedUnitOwnership("bin/cc", "file", physical.identity),
+                RetainedUnitOwnership("bin/compiler", "hardlink", aliases.identity),
+                RetainedUnitOwnership("empty", "empty-directory", physical.identity),
+                RetainedUnitOwnership("public", "symlink", aliases.identity),
+            ),
+            (
+                RetainedUnitDependency(
+                    aliases.identity,
+                    physical.identity,
+                    "tree-link",
+                    physical.target_identity,
+                ),
+            ),
+            self.limits,
+            10,
+            20,
+            65536,
+        )
+        tree_reference = retain_native_tree(tree, self.store)
+        graph = prepare_retained_unit_graph(
+            partition,
+            tree_reference,
+            max_descriptor_bytes=2400,
+            max_descriptor_total_bytes=65536,
+            max_index_bytes=4096,
+            max_metadata_memory_bytes=1024 * 1024,
+        )
+        reference = retain_retained_unit_graph(graph, self.store)
+
+        def reopen_graph(reference=reference, expected=graph.identity):
+            return read_retained_unit_graph(
+                reference,
+                self.store,
+                expected_identity=expected,
+                tree=tree,
+                per_unit_limits=self.limits,
+                max_units=partition.max_units,
+                max_dependencies=partition.max_dependencies,
+                max_metadata_bytes=partition.max_metadata_bytes,
+                max_descriptor_bytes=2400,
+                max_descriptor_total_bytes=65536,
+                max_index_bytes=4096,
+                max_metadata_memory_bytes=1024 * 1024,
+            )
+
+        projection = ComposedTreePackageProjection(
+            reopen_graph().partition, 1000, 1024 * 1024
+        )
+        stage = tree_packaging.materialize_composed_tree_package_set(
+            projection,
+            expected_tree_identity=tree.identity,
+            store=self.store,
+            parent=self.work,
+        )
+        self.assertEqual((stage / "public/compiler").read_bytes(), b"compiler")
+        self.assertEqual(
+            (stage / "bin/cc").stat().st_ino, (stage / "bin/compiler").stat().st_ino
+        )
+        self.assertTrue((stage / "empty").is_dir())
+        subset = {
+            value.path: value for value in projection.members_for(aliases.identity)
+        }
+        self.assertEqual(set(subset), {"bin", "bin/compiler", "public"})
+        self.assertEqual(subset["bin/compiler"].target, "bin/cc")
+        self.assertIsNone(subset["bin/compiler"].blob)
+        self.assertEqual(subset["public"].target, "bin")
+        with self.assertRaisesRegex(ValueError, "tree-link-dependency"):
+            ComposedTreePackageProjection(
+                replace(partition, dependencies=()), 1000, 1024 * 1024
+            )
+        with self.assertRaisesRegex(ValueError, "exact-output-partition"):
+            replace(partition, ownership=partition.ownership[:-1])
+        # Understated graph counts must refuse before the missing next group's
+        # descriptor is read. Prior usable staging remains physically intact.
+        understated = replace(graph.index, ownership_count=1)
+        altered = self.store.put_manifest(
+            understated.to_dict(), media_type="application/json"
+        )
+        self.store.path_for(graph.index.dependencies[0]).unlink()
+        with self.assertRaisesRegex(
+            ValueError, "actual-graph-count-exceeds-declaration"
+        ):
+            reopen_graph(altered, understated.identity)
+        self.assertEqual(
+            (stage / "bin/cc").stat().st_ino, (stage / "bin/compiler").stat().st_ino
+        )
+        # A separately copied target has equal bytes but has lost admitted inode
+        # topology. The whole-set verifier must still reject that staging tree.
+        (stage / "bin/compiler").unlink()
+        (stage / "bin/compiler").write_bytes(b"compiler")
+        (stage / "bin/compiler").chmod(0o755)
+        with self.assertRaisesRegex(PackagingError, "topology"):
+            tree_packaging.verify_composed_tree_package_stage(projection, stage)
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix="tree-tar-test-")
         self.addCleanup(temporary.cleanup)

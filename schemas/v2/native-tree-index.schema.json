@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "literate-ai/native-tree-index@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "shards",
+    "member_count",
+    "payload_bytes",
+    "limits",
+    "case_sensitive",
+    "max_descriptor_bytes",
+    "max_descriptor_total_bytes",
+    "max_index_bytes",
+    "max_metadata_memory_bytes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "literate-ai/native-tree-index@1"
+    },
+    "shards": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "allOf": [
+          {
+            "$ref": "urn:literate-ai:schema:v1:blob-ref"
+          },
+          {
+            "properties": {
+              "media_type": {
+                "const": "application/json"
+              },
+              "size": {
+                "minimum": 1,
+                "maximum": 8388608
+              }
+            }
+          }
+        ]
+      }
+    },
+    "member_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1048576
+    },
+    "payload_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_entries",
+        "max_file_bytes",
+        "max_total_bytes"
+      ],
+      "properties": {
+        "max_entries": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_file_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_total_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "case_sensitive": {
+      "type": "boolean"
+    },
+    "max_descriptor_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8388608
+    },
+    "max_descriptor_total_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 536870912
+    },
+    "max_index_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2097152
+    },
+    "max_metadata_memory_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 17179869184
+    }
+  },
+  "description": "Content-addressed bounded tree descriptors. References never grant producer, LINK or PACKAGE authority. Exact totals, canonical ordering, complete closure and the metadata allocation estimate require the checked decoder."
+}

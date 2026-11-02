@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-unit-package-result-shard-contracts",
+  "$ref": "urn:literate-ai:schema:v2:retained-unit-package-result-shard-contracts#/$defs/shard",
+  "$defs": {
+    "shard": {
+      "$id": "literate-ai/retained-unit-package-result-shard@1",
+      "description": "Bounded result assertions. Reopening this descriptor does not verify native archive bytes or create a live PACKAGE producer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "results"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-result-shard@1"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:retained-unit-package-result-contracts#/$defs/result"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "literate-ai/retained-unit-package-graph-shard@1",
+  "description": "Bounded typed unit metadata. Raw bytes must be bounded before decoding; a shard grants no graph, live owner or PACKAGE authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "kind",
+    "records"
+  ],
+  "properties": {
+    "schema": {
+      "const": "literate-ai/retained-unit-package-graph-shard@1"
+    },
+    "kind": {
+      "enum": [
+        "definitions",
+        "ownership",
+        "dependencies"
+      ]
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16384
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "kind": {
+          "const": "definitions"
+        },
+        "records": {
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:retained-unit-package-definition-contracts#/$defs/definition"
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "kind": {
+          "const": "ownership"
+        },
+        "records": {
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "kind",
+              "unit_identity"
+            ],
+            "properties": {
+              "path": {
+                "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+              },
+              "kind": {
+                "enum": [
+                  "file",
+                  "symlink",
+                  "hardlink",
+                  "empty-directory"
+                ]
+              },
+              "unit_identity": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "kind": {
+          "const": "dependencies"
+        },
+        "records": {
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source_unit_identity",
+              "target_unit_identity",
+              "kind",
+              "target_identity",
+              "required_abi",
+              "required_version"
+            ],
+            "properties": {
+              "source_unit_identity": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "target_unit_identity": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "kind": {
+                "enum": [
+                  "build-input",
+                  "runtime",
+                  "tree-link"
+                ]
+              },
+              "target_identity": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "required_abi": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "pattern": "^[^\\r\\n\\u0000]+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "required_version": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "pattern": "^[^\\r\\n\\u0000]+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "build-input",
+                        "runtime"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "required_abi": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "pattern": "^[^\\r\\n\\u0000]+$"
+                    },
+                    "required_version": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "pattern": "^[^\\r\\n\\u0000]+$"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

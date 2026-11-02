@@ -101,6 +101,11 @@ class GuardedPythonBuilderTests(unittest.TestCase):
                 "separators=(',', ':')))\n",
                 encoding="utf-8",
             )
+            modules = source / "modules"
+            modules.mkdir()
+            for index in range(130):
+                (modules / f"module_{index:03}.py").write_text(f"value = {index}\n")
+            (modules / "λ-%25.py").write_text("value = 42\n")
             toolchain = discover_python_toolchain()
             request, authorization = self.request_and_authorization(
                 source, toolchain_digest=toolchain.identity
@@ -114,7 +119,17 @@ class GuardedPythonBuilderTests(unittest.TestCase):
                 artifact_store=root / "artifacts",
                 now=NOW + timedelta(minutes=1),
             )
-            self.assertEqual(artifact.compiled_files, ("hello.pyc",))
+            self.assertEqual(
+                artifact.compiled_files,
+                tuple(
+                    path.relative_to(source).with_suffix(".pyc").as_posix()
+                    for path in sorted(source.rglob("*.py"))
+                ),
+            )
+            for relative in artifact.compiled_files:
+                self.assertEqual(
+                    (artifact.artifact_path / relative).read_bytes()[4:8], b"\x03\0\0\0"
+                )
             bytecode = artifact.artifact_path / "hello.pyc"
             self.assertTrue(bytecode.is_file())
             self.assertEqual(artifact.toolchain_identity, toolchain.identity)
@@ -131,6 +146,22 @@ class GuardedPythonBuilderTests(unittest.TestCase):
             )
             self.assertEqual(completed.returncode, 0, completed.stderr.decode())
             self.assertEqual(completed.stdout.splitlines(), [b'{"value":42}'])
+            before = canonical_tree_digest(artifact.artifact_path)
+            (modules / "module_129.py").write_text("def broken(:\n")
+            bad_request, bad_authorization = self.request_and_authorization(
+                source, toolchain_digest=toolchain.identity
+            )
+            with self.assertRaisesRegex(BuildError, "compilation failed"):
+                GuardedPythonBuilder(
+                    AuthorizationRevocationSet(), toolchain=toolchain
+                ).build(
+                    bad_request,
+                    bad_authorization,
+                    source_root=source,
+                    artifact_store=root / "artifacts",
+                    now=NOW + timedelta(minutes=1),
+                )
+            self.assertEqual(canonical_tree_digest(artifact.artifact_path), before)
 
     def test_revoked_authorization_prevents_compiler_call(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

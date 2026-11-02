@@ -158,6 +158,7 @@ class NativeSdkTree:
         files: set[str],
         aliases: dict[str, NativeSdkAlias],
         budget: _ResolutionBudget,
+        observe=None,
     ) -> str:
         pending = deque(path.split("/"))
         resolved: list[str] = []
@@ -176,6 +177,8 @@ class NativeSdkTree:
                 resolved.pop()
                 continue
             candidate = "/".join((*resolved, part))
+            if observe is not None:
+                observe(candidate)
             if candidate in aliases:
                 expansions += 1
                 if expansions > _MAX_EXPANSIONS:
@@ -187,6 +190,8 @@ class NativeSdkTree:
                             "SDK hard-link target must be a physical regular file"
                         )
                     resolved = alias.target.split("/")
+                    if observe is not None:
+                        observe(alias.target)
                 else:
                     pending.extendleft(reversed(alias.target.split("/")))
             elif candidate in directories or candidate in files:

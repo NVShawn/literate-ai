@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import os
+import platform
 import shutil
 import subprocess
 import unittest
@@ -11,6 +12,8 @@ import zipfile
 from dataclasses import replace
 from unittest.mock import PropertyMock, patch
 
+from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
+from literate_ai.adapters.native_tar_archives import NativeTarToolBinding
 from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_PATH
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -18,6 +21,10 @@ from literate_ai.adapters.retained_project_inputs import (
 )
 from literate_ai.adapters.retained_project_package import RetainedProjectZipPackage
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
+from literate_ai.adapters.retained_project_unit_packages import (
+    RetainedProjectUnitPackages,
+)
+from literate_ai.adapters.retained_unit_results import read_retained_unit_results
 from literate_ai.application.packaging import PackagingError
 from literate_ai.contracts import (
     BlobRef,
@@ -40,6 +47,7 @@ from literate_ai.contracts.executable_components.packages import (
     PackageResult,
 )
 from literate_ai.contracts.flavors import FlavorAxis, FlavorCardinality, FlavorSlot
+from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.contracts.retained_project_acceptance import (
     RetainedProjectAcceptancePolicy,
 )
@@ -50,16 +58,23 @@ from literate_ai.contracts.retained_project_package import (
 from literate_ai.contracts.retained_project_sbom import (
     project_retained_project_managed_graph,
 )
+from literate_ai.contracts.retained_unit_requests import RetainedUnitPackageRequest
 from literate_ai.storage.cas import FileSystemCAS
 from tests.critical import test_retained_project_completion as completed
 from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_component_lock_contracts as locked
 
 
-def package_lock(specification, provider="zip"):
+def package_lock(specification, provider="zip", extra_specifications=()):
     authoring = locked.component_authoring("retained-package")
+    specification_roots = tuple(
+        sorted(
+            ("specs/retained-package.md", *(item.uri for item in extra_specifications))
+        )
+    )
     authoring = replace(
         authoring,
+        specification_roots=specification_roots,
         flavor_slots=(
             *authoring.flavor_slots,
             FlavorSlot(
@@ -80,11 +95,14 @@ def package_lock(specification, provider="zip"):
     revision = locked.locked_revision(
         "retained-package", selected_flavor="rust", authoring=authoring
     )
+    specifications = tuple(
+        sorted((reference, *extra_specifications), key=lambda value: value.uri)
+    )
     revision = replace(
         revision,
-        specifications=(reference,),
+        specifications=specifications,
         specification_set_identity=ordered_specification_set_identity(
-            authoring.specification_provider, (reference,)
+            authoring.specification_provider, specifications
         ),
         selected_flavor_revisions=tuple(
             sorted(
@@ -135,6 +153,150 @@ def package_lock(specification, provider="zip"):
     os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
 )
 class RetainedProjectPackageTests(unittest.TestCase):
+    @unittest.skipUnless(platform.system() == "FreeBSD", "requires native FreeBSD")
+    def test_live_native_unit_construction_reopens_without_installing(self):
+        self.package_provider = "pkg"
+        request = RetainedUnitPackageRequest(
+            "application",
+            (),
+            True,
+            "specs/LICENSE",
+            "retained-application",
+            "1.0.0",
+            "misc/retained-application",
+            "/usr/local",
+            (),
+        )
+        self.finish(unit_request=request, documentation_path="literal%25-λ.txt")
+        arguments = self.unit_plan_arguments()
+        arguments.update(
+            pkg_tool=FreeBsdPkgToolBinding.discover(),
+            tar_tool=NativeTarToolBinding.discover(),
+        )
+        owner = RetainedProjectUnitPackages(self.admission, **arguments)
+        root = self.fixture.fixture.base
+        first = owner.construct(object_root=root)
+        reference = owner.construct_set(object_root=root)
+        index, repeated = read_retained_unit_results(
+            owner.projection, reference, self.store, **owner.tree_policy
+        )
+        self.assertEqual(repeated, first)
+        self.assertEqual(owner.verify_set(reference, object_root=root), index)
+        self.assertEqual(len(first), 1)
+        self.store.verify(first[0].archive)
+        self.assertGreater(first[0].archive.size, 0)
+        path = self.fixture.fixture.source / "specs/LICENSE"
+        original = path.read_bytes()
+        path.write_bytes(original + b"changed license\n")
+        try:
+            with self.assertRaises(ValueError):
+                owner.verify_set(reference, object_root=root)
+            self.store.verify(first[0].archive)
+        finally:
+            path.write_bytes(original)
+        owner.require_current()
+
+    def test_unit_plan_requires_live_admission_and_locked_output_license_intent(self):
+        self.package_provider = "pkg"
+        request = RetainedUnitPackageRequest(
+            "application",
+            (),
+            True,
+            "specs/LICENSE",
+            "retained-application",
+            "1.0.0",
+            "misc/retained-application",
+            "/usr/local",
+            (),
+        )
+        self.finish(unit_request=request)
+        arguments = self.unit_plan_arguments()
+        before = set(self.store.iter_refs())
+        owner = RetainedProjectUnitPackages(self.admission, **arguments)
+        owner.require_current()
+        projection = owner.projection
+        self.assertEqual(set(self.store.iter_refs()), before)
+        self.assertEqual(projection.graph.index.unit_count, 1)
+        definition = projection.graph.partition.definitions[0]
+        self.assertEqual(definition.receipt_identity, self.admission.receipt.identity)
+        self.assertEqual(definition.component_lock_identity, self.lock.identity)
+        params = projection.parameters[0]
+        license_input = next(
+            value for value in params.evidence if value.role == "license"
+        )
+        self.assertEqual(
+            self.store.get_bytes(license_input.blob),
+            (self.fixture.fixture.source / "specs/LICENSE").read_bytes(),
+        )
+        self.assertFalse(projection.set_plan.to_dict()["release_authorized"])
+        with self.assertRaisesRegex(TypeError, "live-admission-required"):
+            RetainedProjectUnitPackages(self.admission.receipt.to_dict(), **arguments)
+        path = self.fixture.fixture.source / "specs/application.package-unit.json"
+        original = path.read_bytes()
+        path.write_bytes(original + b"\n")
+        with self.assertRaises(ValueError):
+            owner.require_current()
+        self.assertEqual(set(self.store.iter_refs()), before)
+        path.write_bytes(original)
+        owner.require_current()
+
+    def unit_plan_arguments(self):
+        root = self.fixture.fixture.base
+        # These are unexecuted observations for a read-only plan, never a native
+        # production fixture. Missing tool paths prove planning launches neither.
+        return dict(
+            pkg_tool=FreeBsdPkgToolBinding(
+                root / "unexecuted-pkg",
+                "0" * 64,
+                "2.8.4",
+                "FreeBSD:16:amd64",
+                "freebsd:16:x86:64",
+            ),
+            tar_tool=NativeTarToolBinding(
+                root / "unexecuted-tar", "1" * 64, "bsdtar 3.5.3 - libarchive 3.7.4"
+            ),
+            limits=RetainedProjectLimits(500, 64 * 1024**2, 128 * 1024**2),
+            per_unit_limits=RetainedProjectLimits(500, 64 * 1024**2, 128 * 1024**2),
+            max_units=10,
+            max_dependencies=100,
+            max_metadata_bytes=1024**2,
+            max_staging_bytes=256 * 1024**2,
+            max_transport_bytes=256 * 1024**2,
+            max_archive_bytes=64 * 1024**2,
+            max_total_archive_bytes=128 * 1024**2,
+            max_descriptor_bytes=4096,
+            max_descriptor_total_bytes=65536,
+            max_index_bytes=4096,
+            max_metadata_memory_bytes=1024**2,
+            max_closure_steps=1000,
+            max_closure_memory_bytes=1024**2,
+        )
+
+    def test_unit_plan_rejects_unlocked_copy_of_locked_json(self):
+        self.package_provider = "pkg"
+        request = RetainedUnitPackageRequest(
+            "application",
+            (),
+            True,
+            "specs/LICENSE",
+            "retained-application",
+            "1.0.0",
+            "misc/retained-application",
+            "/usr/local",
+            (),
+        )
+        self.finish(
+            unit_request=request,
+            unit_request_path="specs/locked.json",
+            copy_unit_request=True,
+        )
+        before = set(self.store.iter_refs())
+        with self.assertRaisesRegex(
+            ValueError, "locked-package-unit-specifications-required"
+        ):
+            RetainedProjectUnitPackages(self.admission, **self.unit_plan_arguments())
+        self.assertEqual(set(self.store.iter_refs()), before)
+
     @classmethod
     def setUpClass(cls):
         commands.RetainedProjectExecutionTests.setUpClass()
@@ -146,14 +308,42 @@ class RetainedProjectPackageTests(unittest.TestCase):
         self.addCleanup(self.fixture.doCleanups)
 
     def finish(
-        self, *, include_specification=True, collision=False, empty_directory=False
+        self,
+        *,
+        include_specification=True,
+        collision=False,
+        empty_directory=False,
+        unit_request=None,
+        unit_request_path="specs/application.package-unit.json",
+        copy_unit_request=False,
+        documentation_path="docs.txt",
     ):
         f = self.fixture.fixture
         specification = b"# Retained package\nPreserve original bytes and behavior.\n"
         (f.source / "specs").mkdir()
         (f.source / "specs/retained-package.md").write_bytes(specification)
+        extra = ()
+        if unit_request is not None:
+            content = canonical_json_bytes(unit_request.to_dict())
+            (f.source / unit_request_path).write_bytes(content)
+            if copy_unit_request:
+                (f.source / "specs/copied.package-unit.json").write_bytes(content)
+            (f.source / "specs/LICENSE").write_bytes(
+                b"Fixture copyright. SPDX-License-Identifier: BSD-2-Clause\n"
+            )
+            extra = (
+                ContentReference(
+                    "specification",
+                    unit_request_path,
+                    ContentIdentity.parse_uri(
+                        "sha256:" + hashlib.sha256(content).hexdigest()
+                    ),
+                ),
+            )
         self.lock = package_lock(
-            specification, provider=getattr(self, "package_provider", "zip")
+            specification,
+            provider=getattr(self, "package_provider", "zip"),
+            extra_specifications=extra,
         )
         self.fixture.locks = (self.lock,)
         roles = {
@@ -182,6 +372,21 @@ class RetainedProjectPackageTests(unittest.TestCase):
                 "sha256:" + hashlib.sha256(content).hexdigest()
             ),
         )
+        if documentation_path != "docs.txt":
+            actions = list(profile.actions)
+            actions[2] = replace(
+                actions[2],
+                outputs=(documentation_path,),
+                argv=("docs", "{output_root}/" + documentation_path),
+            )
+            actions[3] = replace(
+                actions[3], argv=("check", "{output_root}/" + documentation_path)
+            )
+            profile = replace(
+                profile,
+                actions=tuple(actions),
+                package_inventory=("app.bin", documentation_path),
+            )
         if collision:
             actions = list(profile.actions)
             actions[2] = replace(

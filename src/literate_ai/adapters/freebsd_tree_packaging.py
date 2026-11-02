@@ -56,6 +56,69 @@ class _NativeTarReader(_BoundedTarReader):
         return self.source.read(size)
 
 
+class _VerifiedComposedArchiveFiles:
+    """Operation-local verified byte records; never a live PACKAGE capability.
+
+    Only the complete-set verifier supplies this context to the shared archive
+    checker, after an earlier unit's physical bytes and metadata have passed.
+    There is no wire decoder or standalone-producer conversion for this value.
+    Its memory policy covers retained record copies; the per-unit native parser's
+    fixed manifest/member limits and XZ decoder cap apply separately.
+    """
+
+    def __init__(self, graph_identity, set_plan_identity, maximum_cache_bytes):
+        if (
+            not isinstance(graph_identity, ContentIdentity)
+            or not isinstance(set_plan_identity, ContentIdentity)
+            or type(maximum_cache_bytes) is not int
+            or not 1 <= maximum_cache_bytes <= 16 * 1024**3
+        ):
+            raise TypeError(
+                "Composed archive verification requires exact bounded context"
+            )
+        self.graph_identity, self.set_plan_identity = graph_identity, set_plan_identity
+        self.maximum_cache_bytes = maximum_cache_bytes
+        self._records, self._units = {}, set()
+        self._memory = 0
+
+    def require_context(self, projection):
+        if (
+            getattr(projection, "graph_identity", None),
+            getattr(projection, "set_plan_identity", None),
+        ) != (self.graph_identity, self.set_plan_identity):
+            raise PackagingError(
+                "Composed archive physical records bind another graph/set"
+            )
+
+    def physical_record(self, path):
+        if path not in self._records:
+            raise PackagingError(
+                "Composed hardlink dependency has no verified physical owner"
+            )
+        return dict(self._records[path])
+
+    def register_verified(self, unit_identity, expected, records):
+        if unit_identity in self._units:
+            raise PackagingError("Composed archive unit was verified more than once")
+        for path, item in expected.items():
+            if item.kind != "file":
+                continue
+            if path in self._records:
+                raise PackagingError("Composed archive has conflicting physical owners")
+            record = records[path]
+            self._memory += (
+                1024
+                + 4 * len(path.encode("utf-8"))
+                + 16 * len(canonical_json_bytes(record))
+            )
+            if self._memory > self.maximum_cache_bytes:
+                raise PackagingError(
+                    "Composed archive verified-record cache budget exceeded"
+                )
+            self._records[path] = dict(record)
+        self._units.add(unit_identity)
+
+
 def _dependencies(plan, content):
     # Environment/device obligations stay bound by the complete original plan.
     # are not pkg coordinates and cannot be satisfied by inventing package names.
@@ -548,9 +611,18 @@ class FreeBsdTreePackageAdapter:
             expanded.seek(0)
             self._verify_tar(plan, expected, expanded)
 
-    def _verify_tar(self, plan, expected, expanded):
+    def _verify_tar(
+        self, plan, expected, expanded, *, composed=None, collect_records=False
+    ):
+        if composed is not None:
+            if not isinstance(composed, _VerifiedComposedArchiveFiles):
+                raise PackagingError(
+                    "External hardlinks require verified composed context"
+                )
+            composed.require_context(self.projection)
         manifests, seen, records = {}, set(), {}
         required, provided = set(), set()
+        declared_required, declared_provided = set(), set()
         try:
             with tarfile.open(
                 fileobj=_NativeTarReader(expanded), mode="r:", tarinfo=_BoundedTarInfo
@@ -607,6 +679,28 @@ class FreeBsdTreePackageAdapter:
                         )
                         if path == "/+MANIFEST":
                             records = native._manifest_files(manifests[path])
+                        if len(manifests) == 2:
+                            # Manifest bytes are already bounded. Constrain the
+                            # cumulative ELF inventory to those declarations
+                            # before visiting payloads, so distinct imports from
+                            # many files cannot grow an unbounded observed set.
+                            for key, destination in (
+                                ("shlibs_required", declared_required),
+                                ("shlibs_provided", declared_provided),
+                            ):
+                                first = manifests["/+MANIFEST"].get(key, [])
+                                second = manifests["/+COMPACT_MANIFEST"].get(key, [])
+                                if (
+                                    not isinstance(first, list)
+                                    or any(not isinstance(name, str) for name in first)
+                                    or first != sorted(set(first))
+                                    or second != first
+                                ):
+                                    raise PackagingError(
+                                        "Native tree pkg shared-library "
+                                        "declarations differ"
+                                    )
+                                destination.update(first)
                         continue
                     if path not in expected or set(manifests) != {
                         "/+MANIFEST",
@@ -661,13 +755,15 @@ class FreeBsdTreePackageAdapter:
                         hasher.update(item.target.encode("utf-8"))
                     elif item.kind == "hardlink":
                         physical = expected.get(target)
-                        if physical is None or physical.kind != "file":
+                        if physical is None and composed is not None:
+                            physical_record = composed.physical_record(target)
+                        elif physical is None or physical.kind != "file":
                             raise PackagingError(
                                 "Native tree pkg hardlink has no physical owner"
                             )
-                        self._require_hardlink_checksum(
-                            records[path], records.get(target)
-                        )
+                        else:
+                            physical_record = records.get(target)
+                        self._require_hardlink_checksum(records[path], physical_record)
                     else:
                         stream = archive.extractfile(member)
                         accepted = hashlib.sha256()
@@ -690,6 +786,15 @@ class FreeBsdTreePackageAdapter:
                         needs, supplies = inspect_freebsd_package_elf(
                             stream, count, self.projection.abi
                         )
+                        if any(
+                            name not in declared_required
+                            and name not in declared_provided
+                            for name in needs
+                        ) or any(name not in declared_provided for name in supplies):
+                            raise PackagingError(
+                                "Native tree pkg has undeclared "
+                                "shared-library inventory"
+                            )
                         required.update(needs)
                         provided.update(supplies)
                     if (
@@ -765,6 +870,8 @@ class FreeBsdTreePackageAdapter:
             for record in directories.values()
         ):
             raise PackagingError("Native tree pkg directory metadata differs")
+        if collect_records:
+            return records
 
     @staticmethod
     def _require_hardlink_checksum(alias_record, physical_record):
