@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retained PACKAGE supervision: check the attempt and private registration during
+  frequent parent polls; retain full intent validation before native launch and
+  final admission, plus the child's live authority checks. Prelaunch refusals
+  release only proven never-started reservations, separately from native cleanup.
+
 - Tests: keep SSH workspace descriptors portable while using native temporary
   storage for retained receiver scope checks on Windows.
 
