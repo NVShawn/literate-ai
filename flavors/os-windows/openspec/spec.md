@@ -1,5 +1,43 @@
 # Windows host Flavor
 
+### Requirement: Exact Windows ARM64 host realization
+
+Windows ARM64 host installation SHALL select its own authored realization and
+SHALL NOT substitute the x86-64 realization. Acquisition SHALL explicitly request
+ARM64 packages and bind managed artifacts to their reviewed ARM64 bytes. Existing
+ready capabilities SHALL remain unchanged. Unsupported providers or required
+capabilities SHALL refuse rather than select another architecture or provider.
+
+#### Scenario: An ARM64 worker already has its required tools
+
+- **WHEN** the exact Windows ARM64 realization observes every selected capability and its required package provenance
+- **THEN** readiness succeeds without installation or provider replacement
+- **AND** current bounded PE-machine observations cover the selected executable, loaded Python DLL and declared managed-agent companions
+- **AND** native worker execution and complete loader/ABI qualification remain separate evidence
+
+#### Scenario: A required ARM64 tool or installer is unavailable
+
+- **WHEN** a selected capability is absent or its ARM64 installer is unavailable
+- **THEN** preflight or the authorized acquisition reports the missing requirement
+- **AND** readiness does not succeed through the x86-64 catalog or an emulated replacement
+
+#### Scenario: The selected coding provider has no reviewed ARM64 artifact
+
+- **WHEN** the operator explicitly selects an unrealized provider
+- **THEN** preflight refuses before probing or acquiring a different provider
+
+#### Scenario: An existing tool has an unverified native execution chain
+
+- **WHEN** a selected image or runtime companion is foreign, missing or unverified, or only a script launcher is available without a reviewed runtime binding
+- **THEN** readiness refuses and preserves the existing tool before acquisition
+- **AND** version output alone never establishes native readiness
+
+#### Scenario: NPM is selected on ARM64
+
+- **WHEN** a selected Flavor requires NPM
+- **THEN** capability closure refuses its explicitly unavailable realization before acquisition
+- **AND** selecting the Node-only JavaScript language Flavor remains supported
+
 ### Requirement: Portable Windows host execution
 
 The generated application SHALL use the selected language's portable APIs for

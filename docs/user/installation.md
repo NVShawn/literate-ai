@@ -109,6 +109,31 @@ merely because installation succeeded. Native worker alignment and offline wheel
 bootstrap have separate declared requirements and do not by themselves qualify
 agent authentication, native sandboxing, or an application lifecycle.
 
+The development Windows ARM64 tuple is separate from Windows x86-64. WinGet
+acquisition explicitly requests `arm64`; a missing installer never retries as
+x86-64. The catalog includes Python, Git with Git LFS and its compatibility shell,
+the ARM64 Visual C++ runtime, Node.js, Rust and CMake. Its reviewed coding-agent
+alternative is the pinned ARM64 Codex package. Explicit selections of other
+providers refuse rather than replacing the operator's choice.
+
+Existing tools must satisfy the same version and package-provenance requirements.
+MSVC's native ARM64 toolset can be observed when already ready; its WinGet entry
+currently supplies only an x64 bootstrapper, so an absent compiler cannot be
+acquired through an architecture fallback. GNU Make, Bazel, Elixir, Erlang and NPM have
+no reviewed binding in this tuple; selecting a Flavor that requires them fails
+the capability-closure check. Readiness reports installed provenance and capability
+probes. Native executable machine types and actual ARM64 worker execution require
+separate qualification; the vendor archive inspection does not establish it.
+
+ARM64 readiness checks bounded PE-machine observations for the selected executable,
+the loaded Python DLL and declared managed-agent companions. Existing foreign or
+unverified tools are preserved and reported before acquisition. A script launcher
+alone cannot prove the native runtime chain it invokes. NPM remains unavailable
+in this tuple because its `npm.cmd` → Node → `npm-cli.js` chain has no reviewed
+binding; `package-npm` selection refuses while the Node-only language Flavor remains
+available. Native worker execution and complete loader/ABI qualification remain
+separate from these file-machine observations.
+
 
 For a managed coding agent, the tuple SBOM identifies the complete official package,
 its digest, executable directory, and required runtime companions. Installation keeps

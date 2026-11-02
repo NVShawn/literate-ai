@@ -1,0 +1,100 @@
+{
+  "schema": "literate-ai/windows-arm64-vendor-inspection-development@1",
+  "host_execution": false,
+  "native_worker_qualified": false,
+  "archive": {
+    "url": "https://github.com/openai/codex/releases/download/rust-v0.153.0/codex-package-aarch64-pc-windows-msvc.tar.gz",
+    "sha256": "c65f36a29f7ddfba6848fc9ddbaa7cb257f0c315d6e5d7fa54d9045df41d3573",
+    "bytes": 126129521,
+    "executables": {
+      "bin/codex-code-mode-host.exe": {
+        "machine": "0xaa64",
+        "size": 67623728
+      },
+      "bin/codex.exe": {
+        "machine": "0xaa64",
+        "size": 250250544
+      },
+      "codex-path/rg.exe": {
+        "machine": "0xaa64",
+        "size": 3859456
+      },
+      "codex-resources/codex-command-runner.exe": {
+        "machine": "0xaa64",
+        "size": 7331120
+      },
+      "codex-resources/codex-windows-sandbox-setup.exe": {
+        "machine": "0xaa64",
+        "size": 13674800
+      }
+    }
+  },
+  "package_manifest_observations": {
+    "python": {
+      "version": "3.13.15",
+      "architectures": [
+        "x86",
+        "x86",
+        "x64",
+        "x64",
+        "arm64",
+        "arm64"
+      ],
+      "path": "manifests/p/Python/Python/3/13/3.13.15/Python.Python.3.13.installer.yaml",
+      "url": "https://github.com/microsoft/winget-pkgs/blob/master/manifests/p/Python/Python/3/13/3.13.15/Python.Python.3.13.installer.yaml"
+    },
+    "git": {
+      "version": "2.55.0.5",
+      "architectures": [
+        "x64",
+        "x64",
+        "arm64",
+        "arm64"
+      ],
+      "path": "manifests/g/Git/Git/2.55.0.5/Git.Git.installer.yaml",
+      "url": "https://github.com/microsoft/winget-pkgs/blob/master/manifests/g/Git/Git/2.55.0.5/Git.Git.installer.yaml"
+    },
+    "rustup": {
+      "version": "1.29.1",
+      "architectures": [
+        "x86",
+        "x64",
+        "arm64"
+      ],
+      "path": "manifests/r/Rustlang/Rustup/1.29.1/Rustlang.Rustup.installer.yaml",
+      "url": "https://github.com/microsoft/winget-pkgs/blob/master/manifests/r/Rustlang/Rustup/1.29.1/Rustlang.Rustup.installer.yaml"
+    },
+    "cmake": {
+      "version": "4.4.4",
+      "architectures": [
+        "x86",
+        "x64",
+        "arm64",
+        "x86",
+        "x64",
+        "arm64"
+      ],
+      "path": "manifests/k/Kitware/CMake/4.4.4/Kitware.CMake.installer.yaml",
+      "url": "https://github.com/microsoft/winget-pkgs/blob/master/manifests/k/Kitware/CMake/4.4.4/Kitware.CMake.installer.yaml"
+    },
+    "buildtools": {
+      "version": "17.14.42",
+      "architectures": [
+        "x64"
+      ],
+      "path": "manifests/m/Microsoft/VisualStudio/2022/BuildTools/17.14.42/Microsoft.VisualStudio.2022.BuildTools.installer.yaml",
+      "url": "https://github.com/microsoft/winget-pkgs/blob/master/manifests/m/Microsoft/VisualStudio/2022/BuildTools/17.14.42/Microsoft.VisualStudio.2022.BuildTools.installer.yaml"
+    },
+    "vcredist": {
+      "version": "14.51.36247.0",
+      "architectures": [
+        "arm64",
+        "arm64",
+        "arm64"
+      ],
+      "path": "manifests/m/Microsoft/VCRedist/2015+/arm64/14.51.36247.0/Microsoft.VCRedist.2015+.arm64.installer.yaml",
+      "url": "https://github.com/microsoft/winget-pkgs/blob/master/manifests/m/Microsoft/VCRedist/2015%2B/arm64/14.51.36247.0/Microsoft.VCRedist.2015%2B.arm64.installer.yaml"
+    }
+  },
+  "scope": "Static archive digest and PE-machine inspection plus vendor manifest availability. This is not native worker, installed lifecycle or application qualification."
+}

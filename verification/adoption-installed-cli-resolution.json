@@ -1,0 +1,58 @@
+{
+  "issues": [
+    201,
+    202,
+    204
+  ],
+  "qualified_source": "bc6ce1bd23bfaae67abc66c592660a29a75049a9",
+  "main_source": "1abbf13ad95b93b18f50b1e444a795c88e771d57",
+  "equivalent_files": {
+    "src/literate_ai/cli/dispatch.py": "97cedd3e7a5ac7ddbf05d4566f4d9b92de380fcd8b7bf3fe9dc4a6a6849eb5c7",
+    "src/literate_ai/cli/operator.py": "5c88726032c8aa36cbcb2d69c53e86ef95d449c8c5e7df09b51887d1179f84d2",
+    "src/literate_ai/cli/project.py": "ed3b55475851f6dcc5c826e913d8fc081964918938d3955139b64bb7322dffbb",
+    "src/literate_ai/cli/errors.py": "f7afabe7906724f9c266feb0fe4702026353874494a1efdb478881778974c5d3",
+    "src/literate_ai/application/operator_adoption.py": "c832ad25c8251aa93b96812c8284f6ae33d8693bf01048c6e69c9a661430361f",
+    "src/literate_ai/contracts/operator_adoption.py": "0720ef3aec7fcb2bdaf28e3f39e68402bc49d91556ad4f58708502b573735c1d",
+    "src/literate_ai/perf.py": "85728d4bfa5652ba29174aaf1d8cd0e9da8d06c3ed4e3077d5ae0dd8878cf67b",
+    "src/literate_ai/diagnostics.py": "9f7ba59cd3b6210f0f2fa1f46c2e3255a19bef1c928874951bf64eb675692f1b",
+    "src/literate_ai/adapters/project_initialization.py": "08d152c09026aa1d2e8d3b34d577c7c27821a44eaf2134192fcaf9712ae083c7",
+    "src/literate_ai/adapters/harness_inventory.py": "70b19b1b33b2beb5f2fe440ab220af5c0fd521eef344645fc6e2fcf5650e8829",
+    "src/literate_ai/adapters/harness_tree.py": "620412d3821b30acc1b8d53a622a8daab655673b0af2d76d3f95738889e4b927",
+    "src/literate_ai/adapters/harness_workspace.py": "24cbf218b56fe10d3346731aeea1a3aefb7b58ca3c28cdc5432d6cb35cf3ec2b",
+    "src/literate_ai/adapters/conversion_failure_evidence.py": "8ca4dd7baee985f5ac313e6517149a1849a77ad3a69407a941d04219c260c6ff",
+    "src/literate_ai/adapters/conversion_authority.py": "aefb37011fc884a243f5ec6c60a9f66ee938d9008f551e8d66d3376bdae20225",
+    "src/literate_ai/adapters/lifecycle_lock.py": "0075643b160fce0563e42b566ecb63043ba3d7bd4b0ed2988dad0922345706ce",
+    "src/literate_ai/adapters/exclusive_directory.py": "42571c9785fae1693a94648fb4767e04cef6ae2e48153bef23c3dc37bc5a035a",
+    "tests/e2e/test_onboard_plan_readonly.py": "abbdbc38f361d28b159f508f0c57d19ea4435c5a39c4ab8fc51fac7c68ce09f0",
+    "tests/e2e/test_adoption_node_dependencies.py": "2c09f9766159f376641759898c47fd8cacdb726b4d0a62d2a78b67947f51d5ff",
+    "tests/e2e/test_adoption_failure_evidence.py": "e22e78c422e95894c564a5721612c076cc73a72914806bee14b1d72fc3339578",
+    "tests/support/fixtures_test_project_cli.py": "c5e749a7ab54ff3b0203f07662680d17be76e8be6c8941e9ad8d0266df4edb7c",
+    "tests/support/root_parent_adapter.py": "f94aceb7e4efd2b2e38f36e96f2862a66cf591efc991058a5132d4d4402f8277"
+  },
+  "qualification_run": 41450986972,
+  "qualification_attempt": 2,
+  "independent_scope_reviewer": "review_worktree_discovery",
+  "fault_injections": "Two #202 rollback refusal/OS-error variants; original noisy failure uses real subprocess. No initialization/acceptance shortcuts.",
+  "scope": "Installed in-process public CLI with real subprocesses, nativeMake/Node and explicit named fault injections; not fullrelease or nativeFreeBSDPACKAGEqualification",
+  "log_sha256": "8100699ee1af93034c92e746c052dfb3faf0583121e4ac90c26a850276eddaae",
+  "proof_sha256": "3f7fa7bcd321f90a814da67fdbef152f5a74d69db73125222fef0467e9055ada",
+  "test_source_identity": "sha256:8bdef00c0b9f5d658b34220c758fea5297e7d407b0291dc4fc7b96f622785fa9",
+  "schema": "literate-ai/adoption-installed-cli-resolution@1",
+  "installed_source": "9517459008b18f895c3c1440a088589f53f40122",
+  "installed_distribution": "sha256:1a2c17f425bc004fe9cda0404135aeb85d114f34c9924d1ee888dbfd6ddbfec0",
+  "tests": {
+    "run": 13,
+    "passed": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 879.0282980829943
+  },
+  "issue_comments": {
+    "201": "https://github.com/jordanhubbard/literate-ai/issues/201#issuecomment-6583326013",
+    "202": "https://github.com/jordanhubbard/literate-ai/issues/202#issuecomment-6583327259",
+    "204": "https://github.com/jordanhubbard/literate-ai/issues/204#issuecomment-6583328368"
+  },
+  "release_qualified": false,
+  "native_FreeBSD_PACKAGE_qualified": false
+}
