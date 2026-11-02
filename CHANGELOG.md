@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Retained unit verification: add distinct `verify-plan` and `verify` operations
+  for existing archives under fresh lifecycle admission. Bind the original result
+  and selected custody, stream bounded incoming artifacts, refuse a different
+  projection, and rehash the selected source before final admission. Native SSH
+  and scale qualification remain required for release.
+
 - Retained PACKAGE capability refresh: bind canonical measurement to the exact
   private action and perform fresh full intent validation once per refresh.
   Registration and native ownership checks bracket measurement; custom callbacks

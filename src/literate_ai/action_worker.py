@@ -503,6 +503,7 @@ def main(
                 blob_source=None if source is None else source.fetch,
                 **(
                     {
+                        "package_source": source,
                         "capability_identity": capability,
                         "measure_capability": measure_package,
                     }

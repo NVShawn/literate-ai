@@ -15,6 +15,9 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
+from literate_ai.adapters.action_filesystem_blob_source import (
+    FileSystemActionBlobSource,
+)
 from literate_ai.adapters.exclusive_directory import directory_node
 from literate_ai.adapters.freebsd_composed_tree_packaging import (
     FreeBsdComposedPackageSetProjection,
@@ -40,7 +43,14 @@ class RetainedUnitReturnCustody:
                 budget, (RetainedUnitPackagePolicy, RetainedUnitPackageSetPlan)
             )
             or not isinstance(store, FileSystemCAS)
-            or not isinstance(source, (HttpActionBlobSource, CommandActionBlobSource))
+            or not isinstance(
+                source,
+                (
+                    HttpActionBlobSource,
+                    CommandActionBlobSource,
+                    FileSystemActionBlobSource,
+                ),
+            )
             or not isinstance(deadline, ActionDispatchDeadline)
             or source.deadline != deadline
             or not callable(guard)
@@ -151,7 +161,10 @@ def receive_retained_unit_package_set(
     if (
         not isinstance(projection, FreeBsdComposedPackageSetProjection)
         or not isinstance(store, FileSystemCAS)
-        or not isinstance(source, (HttpActionBlobSource, CommandActionBlobSource))
+        or not isinstance(
+            source,
+            (HttpActionBlobSource, CommandActionBlobSource, FileSystemActionBlobSource),
+        )
         or not isinstance(deadline, ActionDispatchDeadline)
         or source.deadline != deadline
         or not callable(admission_guard)

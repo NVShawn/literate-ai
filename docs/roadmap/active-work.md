@@ -32751,6 +32751,14 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Priority:** P0
 - **Release target:** 1.4.0
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
+- **Public verification source, 2026-11-02:** `verify-plan` and `verify` now select
+  an original index with distinct operation authorization. Fresh lifecycle
+  admission precedes native `verify_set`; a different projection refuses rather
+  than constructing replacement archives. Bounded incoming custody and version 2
+  private receiver configuration preserve legacy construction; final source
+  rehash prevents valid destination cache entries from hiding source corruption.
+  Native SSH verification, negative controls and complete scale qualification
+  remain unchecked; this development checkpoint does not unblock issue #235.
 - **2026-11-01 qualification correction:** The fresh 1,969-test full gate stopped
   after 1,655.151 seconds with 75 skips and one error: an existing public SDK test
   patched `project_component_roots` in the runtime module after that read-only

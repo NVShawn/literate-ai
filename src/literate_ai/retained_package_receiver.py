@@ -8,6 +8,7 @@ Native attempt ownership is acquired before launching the execution child.
 import argparse
 import copy
 import os
+import re
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,6 +23,7 @@ from literate_ai.adapters.action_dispatch_wire import (
 from literate_ai.adapters.action_retained_unit_package_worker import (
     ConfiguredRetainedUnitPackageWorker,
     retained_unit_package_input,
+    retained_unit_verification_input,
 )
 from literate_ai.adapters.freebsd_owned_attempt import (
     FreeBsdOwnedAttemptError,
@@ -34,6 +36,9 @@ from literate_ai.adapters.locked_generation_authority import (
 from literate_ai.adapters.retained_receiver_attempt import (
     reserve_retained_receiver_attempt,
 )
+from literate_ai.adapters.retained_unit_verification import (
+    RetainedUnitVerificationSelection,
+)
 from literate_ai.cli.retained_project import _document
 from literate_ai.cli.retained_unit_execution import (
     execute_retained_unit_package_from_args,
@@ -44,6 +49,7 @@ from literate_ai.contracts.paths import canonical_relative_posix_path
 from literate_ai.projects import read_only_project_configuration_parses
 
 CONFIG_SCHEMA = "literate-ai/retained-unit-package-receiver@1"
+VERIFICATION_CONFIG_SCHEMA = "literate-ai/retained-unit-package-receiver@2"
 _FIELDS = {
     "schema",
     "project",
@@ -74,10 +80,11 @@ class _Registration:
     def __init__(self, path):
         self.path = _direct_path(str(path))
         raw, value = _document(self.path, maximum_bytes=65536)
-        if (
-            type(value) is not dict
-            or set(value) != _FIELDS
-            or value["schema"] != CONFIG_SCHEMA
+        if type(value) is not dict or not (
+            set(value) == _FIELDS
+            and value["schema"] == CONFIG_SCHEMA
+            or set(value) == _FIELDS | {"verification"}
+            and value["schema"] == VERIFICATION_CONFIG_SCHEMA
         ):
             raise ValueError("retained.receiver.private-registration-invalid")
         self.identity = record_identity(raw)
@@ -117,6 +124,44 @@ class _Registration:
         ):
             raise ValueError("retained.receiver.bounded-private-environment-required")
         self.environment = dict(environment)
+        self.verification_selection = None
+        self.source_arguments = []
+        self.source_token_env = None
+        if value["schema"] == VERIFICATION_CONFIG_SCHEMA:
+            verification = value["verification"]
+            if type(verification) is not dict or set(verification) != {
+                "selection",
+                "source",
+            }:
+                raise ValueError("retained.receiver.private-verification-invalid")
+            self.verification_selection = RetainedUnitVerificationSelection.from_dict(
+                verification["selection"]
+            )
+            source = verification["source"]
+            if source is not None:
+                if (
+                    type(source) is not dict
+                    or set(source) != {"endpoint", "bearer_token_env", "allow_http"}
+                    or not isinstance(source["endpoint"], str)
+                    or not 1 <= len(source["endpoint"]) <= 4096
+                    or type(source["allow_http"]) is not bool
+                ):
+                    raise ValueError("retained.receiver.private-source-invalid")
+                self.source_arguments = ["--source-cas-url", source["endpoint"]]
+                name = source["bearer_token_env"]
+                if name is not None:
+                    if (
+                        not isinstance(name, str)
+                        or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,255}", name) is None
+                        or not self.environment.get(name)
+                    ):
+                        raise ValueError(
+                            "retained.receiver.private-source-credential-required"
+                        )
+                    self.source_token_env = name
+                    self.source_arguments += ["--source-token-env", name]
+                if source["allow_http"]:
+                    self.source_arguments.append("--allow-http")
         self.cas = self.build / "retained-project-cas"
         require_safe_directory(self.cas)
         self.args = SimpleNamespace(
@@ -131,7 +176,9 @@ class _Registration:
             tools=value["tools"],
             build_dir=str(self.build),
             obj_dir=str(self.obj),
-            retained_unit_command="execution-plan",
+            retained_unit_command="execution-plan"
+            if self.verification_selection is None
+            else "verify-plan",
             specification=".",
             force_regeneration=False,
             authorize_retained_project=None,
@@ -145,7 +192,12 @@ class _Registration:
 
 
 def _configured_worker(config, *, owned_child=None):
-    preview, status = execute_retained_unit_package_from_args(config.args)
+    def preview_current():
+        return execute_retained_unit_package_from_args(
+            config.args, verification_selection=config.verification_selection
+        )
+
+    preview, status = preview_current()
     if status != 0 or preview["authorization_identity"] != config.authorization.uri:
         raise ValueError("retained.receiver.exact-private-authorization-required")
     _project, _binding, _policy, _observations, _pkg, _tar, authority = (
@@ -163,10 +215,16 @@ def _configured_worker(config, *, owned_child=None):
         config.require_unchanged()
         if owned_child is not None:
             owned_child.require_current()
+            if (
+                config.source_token_env is not None
+                and os.environ.get(config.source_token_env)
+                != config.environment[config.source_token_env]
+            ):
+                raise ValueError("retained.receiver.source-credential-changed")
 
     def current():
         registered_current()
-        fresh, code = execute_retained_unit_package_from_args(config.args)
+        fresh, code = preview_current()
         if code != 0 or fresh != preview:
             raise ValueError("retained.receiver.authorized-intent-changed")
 
@@ -175,12 +233,16 @@ def _configured_worker(config, *, owned_child=None):
             raise ValueError("retained.receiver.native-owned-child-required")
         current()
         args = copy.copy(config.args)
-        args.retained_unit_command = "execute"
+        args.retained_unit_command = (
+            "execute" if config.verification_selection is None else "verify"
+        )
         args.authorize_retained_project = planning.plan.identity.uri
         args.authorize_unit_packages = config.authorization.uri
         args.allow_host_execution = True
         result, code = execute_retained_unit_package_from_args(
-            args, receiver_context=context
+            args,
+            receiver_context=context,
+            verification_selection=config.verification_selection,
         )
         if code != 0 or Path(result["custody_root"]) != config.cas:
             raise ValueError("retained.receiver.private-custody-differs")
@@ -194,21 +256,37 @@ def _configured_worker(config, *, owned_child=None):
         planning.plan.identity,
         config.identity,
         config.authorization,
-        retained_unit_package_input(preview["request"]),
+        (
+            retained_unit_package_input(preview["request"])
+            if config.verification_selection is None
+            else retained_unit_verification_input(preview["request"])
+        ),
         run,
         current,
         poll_guard=registered_current,
+        verification_selection=config.verification_selection,
     )
 
 
 def _receive(config, mode, *, owned_child=None):
     from literate_ai.action_worker import main as receive
 
+    if config.source_token_env is not None:
+        os.environ[config.source_token_env] = config.environment[
+            config.source_token_env
+        ]
     worker = _configured_worker(config, owned_child=owned_child)
     # The private worker identity overrides ambient SSH environment assertions.
     os.environ["LITAI_ACTION_WORKER_IDENTITY"] = worker.worker.identity.uri
     return receive(
-        ["--cas", str(config.cas), "--workspace", str(config.obj), *mode],
+        [
+            "--cas",
+            str(config.cas),
+            "--workspace",
+            str(config.obj),
+            *config.source_arguments,
+            *mode,
+        ],
         package_worker=worker,
     )
 

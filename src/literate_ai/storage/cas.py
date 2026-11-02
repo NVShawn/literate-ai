@@ -166,6 +166,19 @@ class FileSystemCAS:
         assert content is not None
         return content
 
+    def stream_to(self, reference: BlobRef, output: BinaryIO) -> int:
+        """Stream a same-handle verified blob into caller-owned provisional bytes.
+
+        The caller must discard its sink on refusal. This does not publish a
+        destination, grant admission or collect the complete blob in memory.
+        """
+        if not isinstance(reference, BlobRef) or not callable(
+            getattr(output, "write", None)
+        ):
+            raise TypeError("verified streaming requires an exact blob and binary sink")
+        self._read_verified(reference, collect=False, sink=output)
+        return reference.size
+
     def copy_to(self, reference: BlobRef, destination: str | Path) -> None:
         """Copy one verified blob to a new file with bounded, same-handle reads."""
         target = Path(destination).absolute()
@@ -264,7 +277,14 @@ class FileSystemCAS:
                         )
                     digest.update(chunk)
                     if sink is not None:
-                        sink.write(chunk)
+                        remaining = memoryview(chunk)
+                        while remaining:
+                            written = sink.write(remaining)
+                            if type(written) is not int or not 0 < written <= len(
+                                remaining
+                            ):
+                                raise StorageError("blob sink did not accept its bytes")
+                            remaining = remaining[written:]
                     if chunks is not None:
                         chunks.append(chunk)
         finally:

@@ -196,8 +196,7 @@ def retain_retained_unit_results(projection, results, store, **policy):
     return store.put_manifest(index.to_dict(), media_type="application/json")
 
 
-def read_retained_unit_results(
-    projection,
+def read_retained_unit_result_index(
     reference,
     store,
     *,
@@ -206,7 +205,7 @@ def read_retained_unit_results(
     max_index_bytes=MAX_INDEX_BYTES,
     max_metadata_memory_bytes=1024**3,
 ):
-    """Rehash indexed assertions under caller limits; inspect archive bytes later."""
+    """Read only the bounded root assertion, without retrieving any shard."""
     _policy(
         max_descriptor_bytes,
         max_descriptor_total_bytes,
@@ -215,7 +214,11 @@ def read_retained_unit_results(
     )
     if not isinstance(store, FileSystemCAS):
         raise TypeError("retained.unit.filesystem-store-required")
-    context = _context(projection)
+    if (
+        not isinstance(reference, BlobRef)
+        or 16 * reference.size > max_metadata_memory_bytes
+    ):
+        raise ValueError("retained.unit.result-index-memory-policy-exceeded")
     index = RetainedUnitPackageSetResult.from_dict(
         _document(store, reference, max_index_bytes)
     )
@@ -233,6 +236,29 @@ def read_retained_unit_results(
         )
     ):
         raise ValueError("retained.unit.result-reader-policy-exceeded")
+    return index
+
+
+def read_retained_unit_results(
+    projection,
+    reference,
+    store,
+    *,
+    max_descriptor_bytes=MAX_DESCRIPTOR_BYTES,
+    max_descriptor_total_bytes=MAX_DESCRIPTOR_TOTAL_BYTES,
+    max_index_bytes=MAX_INDEX_BYTES,
+    max_metadata_memory_bytes=1024**3,
+):
+    """Rehash indexed assertions under caller limits; inspect archive bytes later."""
+    context = _context(projection)
+    index = read_retained_unit_result_index(
+        reference,
+        store,
+        max_descriptor_bytes=max_descriptor_bytes,
+        max_descriptor_total_bytes=max_descriptor_total_bytes,
+        max_index_bytes=max_index_bytes,
+        max_metadata_memory_bytes=max_metadata_memory_bytes,
+    )
     _require_set(projection, index)
     results, seen, archive_bytes = [], set(), 0
     for ref in index.shards:

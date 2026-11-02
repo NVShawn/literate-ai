@@ -29,13 +29,14 @@ from literate_ai.adapters.action_package_worker import ConfiguredPackageWorker
 from literate_ai.adapters.action_retained_unit_package_worker import (
     retained_unit_package_action,
     retained_unit_package_input,
+    retained_unit_verification_input,
 )
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
     LifecycleActionKind,
     LifecycleActionWorker,
 )
-from literate_ai.contracts import canonical_identity, canonical_json_bytes
+from literate_ai.contracts import BlobRef, canonical_identity, canonical_json_bytes
 from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
     ExecutionWorkerKind,
@@ -141,6 +142,8 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 "import ConfiguredRetainedUnitPackageWorker\n"
                 "from literate_ai.adapters.retained_package_capability "
                 "import RegisteredRetainedPackageCapabilityProbe\n"
+                "from literate_ai.adapters.retained_unit_verification "
+                "import RetainedUnitVerificationSelection\n"
                 "from literate_ai.contracts import ContentIdentity\n"
                 "from literate_ai.contracts.execution_dispatch import ExecutionWorker\n"
                 "v=json.loads(Path(sys.argv[1]).read_text())\n"
@@ -176,7 +179,10 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 "worker=Worker("
                 "ExecutionWorker.from_dict(v['worker']),i,i,i,i,"
                 "v['input'].encode(),"
-                "run,full_current,poll_guard=registered_current)\n"
+                "run,full_current,poll_guard=registered_current,"
+                "verification_selection=(RetainedUnitVerificationSelection.from_dict("
+                "v['verification_selection']) if v.get('verification_selection') "
+                "else None))\n"
                 "raise SystemExit(main(['--cas',v['cas'],'--workspace',v['workspace'],"
                 "*sys.argv[2:]],package_worker=worker))\n"
             )
@@ -276,3 +282,93 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                     self.assertEqual(touched.read_text(), "entered")
                     self.assertEqual(tuple(cas.iter_refs()), before)
                     self.assertEqual(tuple(workspace.iterdir()), ())
+            # A real verification receiver must refuse both an execution-family
+            # grant and a different original index before entering its action.
+            selection = {
+                "verification_mode": "fresh-exact-projection",
+                "result_index": BlobRef(
+                    "a" * 64, 100, media_type="application/json"
+                ).to_dict(),
+                "source_custody_identity": canonical_identity("private-source").uri,
+            }
+            verification = {
+                "authority_mode": "retained-project",
+                "operation": "verify",
+                **{
+                    name: identity.uri
+                    for name in (
+                        "retained_plan_identity",
+                        "worker_selection_identity",
+                        "policy_identity",
+                        "native_tool_observations_identity",
+                    )
+                },
+                "requires_host_execution_authorization": True,
+                "release_authorized": False,
+                **selection,
+            }
+            verification_input = retained_unit_verification_input(verification)
+            private = json.loads(settings.read_text())
+            private.update(
+                input=verification_input.decode(),
+                verification_selection=selection,
+                custom_measurement=False,
+            )
+            settings.write_text(json.dumps(private))
+            authority.write_bytes(b"approved")
+            if touched.exists():
+                touched.unlink()
+            described = subprocess.run(
+                [*command, "--describe"],
+                input=challenge,
+                capture_output=True,
+                env=environment,
+                timeout=30,
+            )
+            self.assertEqual(described.returncode, 0, described.stderr)
+            measured = decode_capability_response(
+                described.stdout, challenge, receiver_code_identity()
+            )
+            self.assertNotEqual(
+                measured.capability_identity, observed.capability_identity
+            )
+            verification_route = replace(route, observation_identity=measured.identity)
+            changed_index = {
+                **verification,
+                "result_index": BlobRef(
+                    "b" * 64, 100, media_type="application/json"
+                ).to_dict(),
+            }
+            for substituted in (
+                retained_unit_package_input({**verification, "operation": "execute"}),
+                retained_unit_verification_input(changed_index),
+            ):
+                substituted_identity = record_identity(substituted)
+                request = LifecycleActionDispatchRequest(
+                    identity,
+                    retained_unit_package_action(
+                        identity, worker.worker_id, substituted_identity
+                    ),
+                    verification_route,
+                    0,
+                    (),
+                    deadline.identity,
+                    (substituted_identity,),
+                )
+                result = subprocess.run(
+                    command,
+                    input=encode_action_request(
+                        request,
+                        deadline,
+                        {substituted_identity: substituted},
+                        capability=measured.capability_identity,
+                    ),
+                    capture_output=True,
+                    env=environment,
+                    timeout=30,
+                )
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, b"")
+                self.assertFalse(touched.exists())
+                self.assertEqual(tuple(cas.iter_refs()), before)
+                self.assertEqual(tuple(workspace.iterdir()), ())

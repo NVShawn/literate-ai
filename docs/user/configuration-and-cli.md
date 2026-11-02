@@ -53,6 +53,8 @@ litai package retained-units plan
 litai package retained-units inspect
 litai package retained-units execution-plan
 litai package retained-units execute
+litai package retained-units verify-plan
+litai package retained-units verify
 litai orchestrate plan
 litai orchestrate run
 litai clean

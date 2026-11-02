@@ -605,6 +605,34 @@ the remote round trip and the large real-tree qualification remain open in
 [RETAINED-UNIT-PACKAGE-001](../roadmap/active-work.md#retained-unit-package-001-deliver-per-unit-retained-tree-packages-and-verified-freebsd-transport).
 Package execution does not install, publish or authorize a release.
 
+The public verification front door follows ADR 0052. Its
+read-only `verify-plan` binds the original result-index reference, selected
+custody, current lifecycle/worker selection, tools and package policy. `verify`
+requires that exact operation authorization and explicit host-execution
+acknowledgement because it obtains fresh lifecycle admission. It verifies the
+original selected archive bytes, without constructing replacement packages. A
+different fresh receipt or projection refuses verification and preserves the
+original evidence. Historical `inspect` remains an observation without admission.
+Local and remote artifact import share bounded streaming custody; endpoint and
+credential selection remain private operator configuration. Native verification
+and final currentness checks, rather than transfer success, determine admission.
+Use `--custody-root` and `--result` with the current manifest, profile, policy,
+tools and worker arguments for both commands. `verify` additionally requires
+`--authorize-retained-project`, `--authorize-unit-packages` and
+`--allow-host-execution`; an execution operation's authorization cannot authorize
+verification. A valid destination cache cannot hide missing or corrupt archives
+in the selected source custody.
+
+SSH verification uses the private receiver registration version 2. Its additional
+`verification` object contains `selection` (the plan's `verification_mode`, full
+`result_index` and `source_custody_identity`) and `source`. A null `source` selects
+the receiver's existing private CAS; otherwise it contains the private incoming
+CAS `endpoint`, optional `bearer_token_env`, and explicit `allow_http` boolean.
+Credentials come from the registered child environment. URLs, credentials and
+host paths never enter the versioned verification input. Version 1 registrations
+continue to select construction. Native SSH verification remains unqualified
+until the roadmap's installed public-path evidence is complete.
+
 ## Publication
 
 Publication is an explicit, resumable operation over exact immutable objects. A

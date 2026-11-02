@@ -20,6 +20,9 @@ from literate_ai.adapters import freebsd_tree_packaging as tree_pkg
 from literate_ai.adapters.action_blob_source import HttpActionBlobSource
 from literate_ai.adapters.action_command_blob_source import CommandActionBlobSource
 from literate_ai.adapters.action_dispatch_wire import ActionDispatchDeadline
+from literate_ai.adapters.action_filesystem_blob_source import (
+    FileSystemActionBlobSource,
+)
 from literate_ai.adapters.freebsd_composed_tree_packaging import (
     inspect_freebsd_composed_package_set,
     verify_freebsd_composed_package_set,
@@ -27,11 +30,15 @@ from literate_ai.adapters.freebsd_composed_tree_packaging import (
 from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
 from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
 from literate_ai.adapters.retained_unit_results import (
+    read_retained_unit_result_index,
     read_retained_unit_results,
     retain_retained_unit_results,
 )
 from literate_ai.adapters.retained_unit_transfer import (
     receive_retained_unit_package_set,
+)
+from literate_ai.adapters.retained_unit_verification import (
+    RetainedUnitVerificationSelection,
 )
 from literate_ai.adapters.tree_packaging import verify_tree_package_stage
 from literate_ai.application.packaging import PackagingError
@@ -52,10 +59,11 @@ from literate_ai.contracts.native_sdk_trees import NativeSdkAlias, NativeSdkTree
 from literate_ai.contracts.native_sdks import NativeSdkFile
 from literate_ai.contracts.package_tree_inputs import PackageTreeInput
 from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.retained_unit_policy import RetainedUnitPackagePolicy
 from literate_ai.contracts.retained_unit_results import RetainedUnitPackageResultShard
 from literate_ai.contracts.tree_packages import TreePackagePlan, TreePackageResult
 from literate_ai.return_cas import CONFIG_SCHEMA
-from literate_ai.storage.cas import FileSystemCAS
+from literate_ai.storage.cas import BlobIntegrityError, FileSystemCAS
 from tests.critical import test_tree_packages as tree_fixture
 from tests.support import fixtures_test_package_adapters as package_fixture
 from tests.support.action_deadline import ACTION_TEST_DEADLINE
@@ -258,6 +266,75 @@ class FreeBsdTreePackageTests(unittest.TestCase):
         returned = FileSystemCAS(self.work.parent / "returned-cas")
         transferred = (reference, *index.shards, *(value.archive for value in results))
         deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
+        # Root selection must not eagerly demand shards or archives. Complete
+        # portable custody subsequently retrieves and rehashes the original set.
+        index_only = FileSystemCAS(self.work.parent / "index-only")
+        self.assertEqual(
+            index_only.put_bytes(
+                self.store.get_bytes(reference), media_type=reference.media_type
+            ),
+            reference,
+        )
+        self.assertEqual(read_retained_unit_result_index(reference, index_only), index)
+        local_return = FileSystemCAS(self.work.parent / "local-return")
+        local_index, local_results, local_metrics = receive_retained_unit_package_set(
+            projection,
+            reference,
+            store=local_return,
+            source=FileSystemActionBlobSource(self.store, deadline),
+            object_root=self.work,
+            deadline=deadline,
+            admission_guard=lambda: None,
+            max_descriptor_bytes=4096,
+            max_descriptor_total_bytes=16384,
+            max_index_bytes=4096,
+            max_metadata_memory_bytes=1024**2,
+        )
+        self.assertEqual((local_index, local_results), (index, results))
+        self.assertEqual(
+            local_metrics["payload_bytes_received"],
+            sum(ref.size for ref in transferred),
+        )
+        self.assertFalse(local_metrics["admitted"])
+        self.assertFalse(local_metrics["native_verified"])
+        for ref in transferred:
+            self.assertEqual(local_return.get_bytes(ref), self.store.get_bytes(ref))
+        source = FileSystemActionBlobSource(self.store, deadline)
+        selection = RetainedUnitVerificationSelection(
+            reference, source.identity, source
+        )
+        set_plan = projection.set_plan
+        policy = RetainedUnitPackagePolicy(
+            RetainedProjectLimits(500, 65536, 16 * 1024**2),
+            RetainedProjectLimits(500, 65536, 16 * 1024**2),
+            10,
+            20,
+            65536,
+            set_plan.max_staging_bytes,
+            set_plan.max_transport_bytes,
+            set_plan.max_archive_bytes,
+            set_plan.max_total_archive_bytes,
+            max_descriptor_bytes=4096,
+            max_descriptor_total_bytes=16384,
+            max_index_bytes=4096,
+            max_metadata_memory_bytes=1024**2,
+        )
+        selection.require_original_source(
+            projection, policy, admission_guard=lambda: None
+        )
+        selected_archive = results[0].archive
+        original = self.store.get_bytes(selected_archive)
+        try:
+            self.store.path_for(selected_archive).write_bytes(b"x" * len(original))
+            # A valid destination cache cannot replace the selected custody.
+            # This proves byte custody, never native admission.
+            local_return.verify(selected_archive)
+            with self.assertRaises(BlobIntegrityError):
+                selection.require_original_source(
+                    projection, policy, admission_guard=lambda: None
+                )
+        finally:
+            self.store.path_for(selected_archive).write_bytes(original)
         configuration = self.work.parent / "command-return.json"
         worker = ExecutionWorker(
             "unit-return",
