@@ -150,17 +150,34 @@ def execute_retained_unit_package_from_args(
     if retained_unit_tool_observations(pkg_tool, tar_tool) != observations:
         raise ValueError("retained.unit.current-native-tools-differ")
 
-    def current_plan():
+    def current_authority_plan():
         if verifying:
             verification_selection.require_current(policy)
-        if receiver_context is not None:
-            receiver_context.require_plan(plan)
         _manifest, current_worker, current = authority()
         if _worker_selection_identity(current_worker) != _worker_selection_identity(
             selected
         ):
             raise ValueError("retained.unit.execution-worker-selection-changed")
         return current.plan
+
+    def current_plan():
+        if receiver_context is not None:
+            receiver_context.require_plan(plan)
+        return current_authority_plan()
+
+    if (
+        receiver_context is not None
+        and type(receiver_context) is RetainedReceiverContext
+    ):
+        from literate_ai.adapters.retained_project_platform import (
+            _compose_receiver_current_plan,
+        )
+
+        runtime_current_plan = _compose_receiver_current_plan(
+            receiver_context, plan, current_authority_plan
+        )
+    else:
+        runtime_current_plan = current_plan
 
     if current_plan() != plan:
         raise ValueError("retained.unit.execution-authority-changed")
@@ -279,7 +296,7 @@ def execute_retained_unit_package_from_args(
                 if receiver_context is None
                 else {"receiver_context": receiver_context}
             ),
-            current_plan=current_plan,
+            current_plan=runtime_current_plan,
             test_receipt_policy=project.definition.test_receipt_policy,
             cache_directories=directories,
             authorization=args.authorize_retained_project,

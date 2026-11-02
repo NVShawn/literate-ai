@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Retained receivers compose host observation and fresh planning checks without
+  repeating the complete receiver preview at each nested platform check.
+  Custom callbacks retain conservative validation and configured deadlines.
+- Original-byte retained package verification accepts explicit custody leases up
+  to three hours, while preserving its one-hour default and finite expiry checks.
+
 - Retained unit packages qualify locked declarations through their registered
   Component paths, preserving exact captured-source ownership for nested catalogs.
   Invalid declarations refuse during preflight before SDK execution.

@@ -48,6 +48,23 @@ def _identity(value: os.stat_result) -> tuple[int, ...]:
     )
 
 
+def _opening_identity(value: os.stat_result) -> tuple[int, ...]:
+    if os.name != "nt":
+        return _identity(value)
+    # Windows path and descriptor queries synthesize executable mode bits and
+    # report ctime differently. Compare their common file identity at opening;
+    # retain the complete identity within each view for the later drift checks.
+    return (
+        value.st_dev,
+        value.st_ino,
+        value.st_mode & ~0o111,
+        value.st_size,
+        value.st_mtime_ns,
+        getattr(value, "st_birthtime_ns", 0),
+        getattr(value, "st_file_attributes", 0),
+    )
+
+
 def observe_pe_architecture(path: Path) -> str:
     """Inspect one stable regular image through one descriptor, reading 88 bytes.
 
@@ -65,7 +82,8 @@ def observe_pe_architecture(path: Path) -> str:
         flags |= getattr(os, name, 0)
     descriptor = os.open(path, flags)
     try:
-        if _identity(before) != _identity(os.fstat(descriptor)):
+        opened = os.fstat(descriptor)
+        if _opening_identity(before) != _opening_identity(opened):
             raise ValueError("Windows image changed while opening")
 
         def read(offset: int, limit: int) -> bytes:
@@ -80,7 +98,7 @@ def observe_pe_architecture(path: Path) -> str:
             return b"".join(chunks)
 
         architecture = pe_architecture(read)
-        if _identity(before) != _identity(os.fstat(descriptor)) or _identity(
+        if _identity(opened) != _identity(os.fstat(descriptor)) or _identity(
             before
         ) != _identity(path.stat(follow_symlinks=False)):
             raise ValueError("Windows image changed while reading")

@@ -275,7 +275,10 @@ def add_retained_unit_package_parser(commands):
                 "--result", required=True, help="original set-result index identity"
             )
             parser.add_argument(
-                "--verification-timeout-seconds", type=int, default=3600
+                "--verification-timeout-seconds",
+                type=int,
+                default=3600,
+                help="original-byte custody lease, 1-10800 seconds (default: 3600)",
             )
         if operation in {"execute", "verify"}:
             parser.add_argument("--authorize-retained-project", required=True)

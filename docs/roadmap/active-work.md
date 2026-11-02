@@ -32809,6 +32809,30 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 - **Priority:** P0
 - **Release target:** 1.4.0
+- **Native qualification remains incomplete:** Installed candidate
+  `20e41d4632c6ead7790209f30cdc73e4dbb149f3` passed the retained negative,
+  positive and zero generated cases and reached native LINK input validation,
+  then the unchanged 3,600-second PACKAGE deadline expired. The native receiver,
+  temporary Git source service and tunnel all returned genuine cleanup evidence;
+  no PACKAGE/LINK admission or downstream unblock is claimed. The sampled run's
+  elapsed time is instrumented, not pristine performance qualification.
+- **Currentness cost investigation in progress:** A separate public native
+  `package retained-units execution-plan` profile preserved the exact original
+  authorization and passed native cleanup. It measured 10 seconds under cProfile,
+  22.5 million function calls and repeated project/catalog validation. Compare
+  with the receiver's existing read-only parsing scopes before selecting an
+  optimization. Retain fresh byte, namespace, registration, capability, revocation
+  and deadline checks; never replace them with cached acceptance. The directing
+  user subsequently authorized a three-hour PACKAGE timeout. The private action
+  policy is now 10,800 seconds; original-byte verification must accept the same
+  explicit lease, and new temporary service/transport leases must cover setup and
+  teardown. Preserve the previous one-hour failure as historical evidence.
+  The scoped comparison passed with genuine cleanup and preserved the original
+  authorization. The composed receiver/current-plan repair is source-reviewed;
+  its corrected 24-case native runtime/refusal group passes. Next: qualify the
+  completed candidate and repeat the full native PACKAGE/LINK/original-verification,
+  exact-identity, corruption and large-tree acceptance contract.
+
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a
   controller refusal after four retained actions exited successfully. Its exact
