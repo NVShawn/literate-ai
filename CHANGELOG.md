@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Retained SDK packages distinguish completed-command evidence from execution
+  grants. Commands still require unexpired authorization through teardown; later
+  retention checks live owners and fresh revocations without extending grants.
+
+- Worker failure diagnostics now include bounded nested cause locations while
+  omitting exception messages, local values and host paths.
+
 - Adoption: include Node manifests and JavaScript sources in mixed-language plans,
   including Rust/pnpm workspaces, while preserving primary Cargo/CMake selection.
 

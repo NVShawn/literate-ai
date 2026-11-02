@@ -406,6 +406,34 @@ def verify_historical_sdk_authority_checks(
     return previous
 
 
+def verify_historical_completed_sdk_check(
+    check, grant, request, ordered_inputs, *, after
+):
+    """Verify completed-command facts and separately timed revocation observations."""
+    _fields(check, "checked_at authorization_checked_at revocations")
+    observed_at = datetime.fromisoformat(check["checked_at"])
+    authorized_at = datetime.fromisoformat(check["authorization_checked_at"])
+    _require(
+        observed_at.tzinfo is not None
+        and authorized_at == after
+        and after <= observed_at
+    )
+    verify_historical_sdk_authority_checks(
+        [
+            {
+                "checked_at": authorized_at.isoformat(),
+                "revocations": check["revocations"],
+            }
+        ],
+        grant,
+        request,
+        ordered_inputs,
+        expected_count=1,
+        not_before=after,
+    )
+    return observed_at
+
+
 def sdk_process_fields(
     reader,
     *,

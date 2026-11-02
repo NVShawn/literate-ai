@@ -32771,6 +32771,24 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   actual validated guardian response before releasing native reservations.
   These records provide diagnostics only; historical records never authorize
   execution, clear uncertain ownership or replace PACKAGE/LINK admission.
+- **Nested failure recovery, 2026-11-02:** The next native attempt retained
+  its actual completed guardian response and confirmed empty cleanup, but the
+  diagnostic stopped at an exception wrapper. In progress: traverse bounded
+  explicit causes and unsuppressed contexts while retaining only source symbols
+  and line numbers. Extend the real worker revocation refusal to prove that its
+  nested cause survives without exception messages or host paths. Native final
+  retention also appears to outlive a command grant; preserve that evidence and
+  investigate the authorization lifecycle without weakening expiry or revocation.
+- **Completed SDK authorization lifecycle, 2026-11-02:** Keep grant validity
+  mandatory through actual command teardown and the successful postcheck. Mint
+  a process-local completed scope only after successful evidence retention; it
+  cannot execute another command or be decoded. Later packaging checks current
+  producer/runtime/tool/context owners and fresh revocations, validating the
+  original grant at the captured postcheck time. Version final-check evidence
+  and its independent inspector together, preserving legacy checks. Required
+  controls cover expiry during execution, expiry after completion, later
+  revocation, owner drift and retained evidence tampering. Native PACKAGE/LINK
+  and complete scale qualification remain required.
 - **Public verification source, 2026-11-02:** `verify-plan` and `verify` now select
   an original index with distinct operation authorization. Fresh lifecycle
   admission precedes native `verify_set`; a different projection refuses rather

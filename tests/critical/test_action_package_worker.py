@@ -151,10 +151,14 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 "def registered_current():\n"
                 " if Path(sys.argv[1]).read_bytes()!=registered:"
                 "raise RuntimeError('registration changed')\n"
+                "def underlying_revocation():\n"
+                " raise ValueError('private underlying marker')\n"
                 "def full_current():\n"
                 " registered_current()\n"
-                " if Path(v['authority']).read_bytes()!=b'approved':"
-                "raise RuntimeError('authority changed')\n"
+                " if Path(v['authority']).read_bytes()!=b'approved':\n"
+                "  try:underlying_revocation()\n"
+                "  except ValueError as exc:"
+                "raise RuntimeError('authority changed') from exc\n"
                 "def run(context):\n"
                 " Path(v['touched']).write_text('entered')\n"
                 " context.require_current()\n"
@@ -285,6 +289,11 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                     )
                     self.assertEqual(diagnostic["exception_type"], "RuntimeError")
                     self.assertTrue(diagnostic["frames"])
+                    self.assertIn(
+                        "underlying_revocation",
+                        [frame["function"] for frame in diagnostic["frames"]],
+                    )
+                    self.assertNotIn(b"private underlying marker", result.stderr)
                     self.assertNotIn(str(root).encode(), result.stderr)
                     self.assertNotIn(b"authority changed", result.stderr)
                     self.assertEqual(touched.read_text(), "entered")

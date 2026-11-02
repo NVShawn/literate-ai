@@ -80,18 +80,33 @@ def _report_failure_locations(request, error):
         return "<unavailable>"
 
     frames = deque(maxlen=32)
-    trace = error.__traceback__
-    for _ in range(256):
-        if trace is None:
+    current = error
+    seen = set()
+    remaining_frames = 256
+    for _ in range(8):
+        if current is None or id(current) in seen:
             break
-        frames.append(
-            {
-                "module": symbol(trace.tb_frame.f_globals.get("__name__")),
-                "function": symbol(trace.tb_frame.f_code.co_name),
-                "line": trace.tb_lineno,
-            }
+        seen.add(id(current))
+        trace = current.__traceback__
+        while trace is not None and remaining_frames:
+            frames.append(
+                {
+                    "module": symbol(trace.tb_frame.f_globals.get("__name__")),
+                    "function": symbol(trace.tb_frame.f_code.co_name),
+                    "line": trace.tb_lineno,
+                }
+            )
+            remaining_frames -= 1
+            trace = trace.tb_next
+        if not remaining_frames:
+            break
+        current = (
+            current.__cause__
+            if current.__cause__ is not None
+            else None
+            if current.__suppress_context__
+            else current.__context__
         )
-        trace = trace.tb_next
     record = {
         "schema": "literate-ai/action-worker-failure-locations@1",
         "request_identity": request.identity.uri,

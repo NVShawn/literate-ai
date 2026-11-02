@@ -14,6 +14,7 @@ from unittest.mock import patch
 from literate_ai.adapters import retained_project_execution as execution
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.adapters.native_sdk_qualification import (
+    verify_historical_completed_sdk_check,
     verify_historical_sdk_authority_checks,
 )
 from literate_ai.adapters.qualification_capture import QualificationCaptureError
@@ -480,30 +481,35 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
         for check, (grant, request, inputs, after) in zip(
             final["checks"], last_scopes, strict=True
         ):
-            verify_historical_sdk_authority_checks(
-                [check],
-                grant,
-                request,
-                inputs,
-                expected_count=1,
-                not_before=after,
+            verify_historical_completed_sdk_check(
+                check, grant, request, inputs, after=after
             )
             changed = deepcopy(check)
             changed["checked_at"] = (after - timedelta(seconds=1)).isoformat()
             with self.assertRaises(QualificationCaptureError):
-                verify_historical_sdk_authority_checks(
-                    [changed],
-                    grant,
-                    request,
-                    inputs,
-                    expected_count=1,
-                    not_before=after,
+                verify_historical_completed_sdk_check(
+                    changed, grant, request, inputs, after=after
+                )
+            changed = deepcopy(check)
+            changed["authorization_checked_at"] = (
+                after - timedelta(seconds=1)
+            ).isoformat()
+            with self.assertRaises(QualificationCaptureError):
+                verify_historical_completed_sdk_check(
+                    changed, grant, request, inputs, after=after
                 )
 
         # Reopen the actual SDK-bearing accepted run using only retained bytes.
         # This preserves immutable facts; no decoded grant becomes a live owner.
         store = self.sdk_fixture.fixture.store
-        admission = admit_retained_project(workspace, store)
+        # Delay only retention's clock: all real commands and actual teardown have
+        # already succeeded. Retention must not mint a replacement execution grant.
+        future = max(grant.expires_at for grant in self.grants) + timedelta(seconds=1)
+        with patch.object(execution, "datetime") as clock:
+            clock.now.return_value = future
+            admission = admit_retained_project(workspace, store)
+            admission.require_current()
+        self.assertEqual(len(self.grants), 6)
         run = admission.run
         planning = RetainedProjectPlanningResult(
             run.source_bom.plan, run.source_bom.managed_graph
@@ -739,6 +745,34 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
         workspace = self.workspace()
         for _ in self.fixture.plan.profile.actions:
             workspace.execute_next()
-        self.revoke_latest()
-        with self.assertRaises(AuthorizationError):
+        future = max(grant.expires_at for grant in self.grants) + timedelta(seconds=1)
+        with patch.object(execution, "datetime") as clock:
+            clock.now.return_value = future
+            workspace.completed_run()
+            self.revoke_latest()
+            with self.assertRaises(AuthorizationError):
+                workspace.completed_run()
+
+    def test_expiry_during_actual_sdk_execution_refuses_its_postcheck(self):
+        """A completed-evidence scope cannot be minted for an expired execution."""
+        workspace = self.workspace()
+        original = execution.run_bounded_process
+        with patch.object(execution, "datetime") as clock:
+            clock.now.side_effect = lambda *_: datetime.now(UTC)
+
+            def execute_then_expire(*args, **kwargs):
+                result = original(*args, **kwargs)
+                clock.now.side_effect = None
+                clock.now.return_value = self.grants[-1].expires_at
+                return result
+
+            with patch.object(
+                execution, "run_bounded_process", side_effect=execute_then_expire
+            ):
+                with self.assertRaisesRegex(
+                    AuthorizationError, "authorization_expired"
+                ):
+                    workspace.execute_next()
+        self.assertEqual(workspace.observations, ())
+        with self.assertRaisesRegex(ValueError, "run-incomplete"):
             workspace.completed_run()

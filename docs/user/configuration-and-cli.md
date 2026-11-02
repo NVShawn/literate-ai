@@ -627,6 +627,15 @@ revocation and independent acceptance evidence. The preceding run-bound SDK poli
 keeps its exact identity and refusal semantics; a public invocation requires the
 selection policy to obtain fresh producers.
 
+SDK command grants must remain valid through the command's actual teardown and
+postcheck. Successful evidence retention creates an in-process completed scope,
+which cannot authorize another command or be reconstructed from records. Later
+PACKAGE checks still revalidate live producer, runtime, tool and context owners
+and current revocations, even if the completed command's grant has since expired.
+Version 2 final-check evidence records the current observation time separately
+from the exact successful command postcheck time; its independent inspector
+validates both. Version 1 evidence retains its original expiry semantics.
+
 
 | `validate CORPUS --id-prefix ID` | Non-mutating validation of derived IDs, parents, references, and effective context. |
 | `explain CORPUS --id-prefix ID [--node ID]` | Explain the full derived corpus graph or one node's effective context without mutation. |
