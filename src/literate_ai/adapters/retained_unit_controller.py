@@ -17,8 +17,10 @@ from literate_ai.adapters.action_command_dispatch import (
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
 from literate_ai.adapters.action_retained_unit_package_worker import (
     RESULT_SCHEMA,
+    VERIFICATION_RESULT_SCHEMA,
     retained_unit_package_action,
     retained_unit_package_input,
+    retained_unit_verification_input,
 )
 from literate_ai.adapters.exclusive_directory import directory_node
 from literate_ai.adapters.retained_project_unit_packages import (
@@ -102,11 +104,13 @@ class AdmittedRemoteRetainedUnitPackageSet:
         store,
         guard,
         *,
+        verification_selection=None,
         _seal=None,
     ):
         if _seal is not _ADMITTED_REMOTE_SET:
             raise TypeError("retained.unit.actual-controller-admission-required")
         self.request, self.inputs, self.run = request, inputs, run
+        self.verification_selection = verification_selection
         self.projection, self.index, self.results = projection, index, results
         self.references, self.metrics, self.store, self._guard = (
             references,
@@ -125,7 +129,7 @@ class AdmittedRemoteRetainedUnitPackageSet:
 
     def to_dict(self):
         self.require_current()
-        return {
+        result = {
             "schema": "literate-ai/retained-unit-remote-package-admission@1",
             "authority_mode": "retained-project",
             "verification_scope": "authenticated-worker-native-package",
@@ -146,6 +150,14 @@ class AdmittedRemoteRetainedUnitPackageSet:
             "native_verified": True,
             "release_authorized": False,
         }
+        if self.verification_selection is not None:
+            result.update(
+                schema="literate-ai/retained-unit-remote-verification-admission@1",
+                operation="verify",
+                verification_scope="authenticated-worker-native-original-archive-verification",
+                verified_result_index=self.verification_selection.result.to_dict(),
+            )
+        return result
 
 
 def execute_and_import_retained_unit_package(
@@ -167,6 +179,7 @@ def execute_and_import_retained_unit_package(
     source_guard,
     sdk_snapshots=lambda: (),
     cancelled=lambda: False,
+    verification_selection=None,
 ):
     """Dispatch through live worker admission and import only its exact result.
 
@@ -195,7 +208,28 @@ def execute_and_import_retained_unit_package(
     )
     worker = pool.catalog.worker(request.worker.worker_id)
     plan = planning.plan
-    intent = retained_unit_package_input(execution_request)
+    if verification_selection is not None:
+        from literate_ai.adapters.retained_unit_verification import (
+            RetainedUnitVerificationSelection,
+        )
+
+        if (
+            not isinstance(verification_selection, RetainedUnitVerificationSelection)
+            or verification_selection.source is None
+        ):
+            raise TypeError("retained.unit.explicit-verification-selection-required")
+        verification_selection.require_current(policy)
+        _require(
+            all(
+                execution_request.get(name) == value
+                for name, value in verification_selection.to_dict().items()
+            )
+        )
+    intent = (
+        retained_unit_package_input(execution_request)
+        if verification_selection is None
+        else retained_unit_verification_input(execution_request)
+    )
     input_identity = record_identity(intent)
     authorization = canonical_identity(execution_request)
     _require(
@@ -211,7 +245,8 @@ def execute_and_import_retained_unit_package(
         and request.input_record_identities == (input_identity,)
         and execution_request["retained_plan_identity"] == plan.identity.uri
         and execution_request["authority_mode"] == "retained-project"
-        and execution_request["operation"] == "execute"
+        and execution_request["operation"]
+        == ("execute" if verification_selection is None else "verify")
         and execution_request["policy_identity"] == policy.identity.uri
         and execution_request["requires_host_execution_authorization"] is True
         and execution_request["release_authorized"] is False
@@ -237,8 +272,24 @@ def execute_and_import_retained_unit_package(
         pool.revalidate(request.worker)
         current()
 
+    def verified_current():
+        final_current()
+        if verification_selection is not None:
+            verification_selection.require_original_source(
+                projection,
+                policy,
+                admission_guard=current,
+                cancelled=cancelled,
+            )
+            final_current()
+
     final_current()
     outcome, content = dispatcher.dispatch_attested_record(request)
+    if outcome.failure_code is not None:
+        raise ActionWireError(
+            outcome.failure_code,
+            "retained PACKAGE worker refused its current action",
+        )
     current()
     _require(
         outcome.request_identity == request.identity
@@ -259,7 +310,12 @@ def execute_and_import_retained_unit_package(
             "release_authorized",
         }
         and canonical_json_bytes(value) == content
-        and value["schema"] == RESULT_SCHEMA
+        and value["schema"]
+        == (
+            RESULT_SCHEMA
+            if verification_selection is None
+            else VERIFICATION_RESULT_SCHEMA
+        )
         and value["request_identity"] == request.identity.uri
         and value["admitted"] is False
         and value["release_authorized"] is False
@@ -276,7 +332,12 @@ def execute_and_import_retained_unit_package(
     execution = value["execution"]
     _require(
         type(execution) is dict
-        and set(execution) == _EXECUTION_FIELDS
+        and set(execution)
+        == (
+            _EXECUTION_FIELDS
+            if verification_selection is None
+            else _EXECUTION_FIELDS | {"operation", "verified_result_index"}
+        )
         and execution["authorization_identity"] == authorization.uri
         and execution["retained_plan_identity"] == plan.identity.uri
         and type(execution["archive_bytes"]) is int
@@ -284,6 +345,13 @@ def execute_and_import_retained_unit_package(
         and type(execution["unit_count"]) is int
         and 1 <= execution["unit_count"] <= policy.max_units
     )
+    if verification_selection is not None:
+        _require(
+            execution["operation"] == "verify"
+            and execution["verified_result_index"]
+            == verification_selection.result.to_dict()
+            and execution["result_index"] == verification_selection.result.to_dict()
+        )
     references = {
         name: BlobRef.from_dict(execution[name])
         for name in (
@@ -394,7 +462,8 @@ def execute_and_import_retained_unit_package(
         ),
         metrics,
         store,
-        final_current,
+        verified_current,
+        verification_selection=verification_selection,
         _seal=_ADMITTED_REMOTE_SET,
     )
     capability.require_current()

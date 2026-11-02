@@ -425,6 +425,8 @@ def detected_language_flavors(
         _LANGUAGE_FLAVOR_BY_MARKER["rust"] not in flavors
     ):
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["rust"])
+    if "javascript" in languages:
+        flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["javascript"])
     if flavors:
         return flavors
     if (path / "package.json").exists():

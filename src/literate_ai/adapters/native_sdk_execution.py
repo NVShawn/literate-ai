@@ -78,10 +78,30 @@ class NativeSdkCommandScope:
         default=None, repr=False, compare=False
     )
 
+    _completed_scope: _CompletedNativeSdkCommandScope | None = field(
+        default=None, init=False, repr=False, compare=False
+    )
+
+    def completed_scope(self):
+        """Return completed evidence custody, never a new execution grant."""
+        if self._completed_scope is None:
+            raise ValueError("SDK command has no successfully retained completion")
+        return self._completed_scope
+
     def require_current(self):
         """Recheck this live grant without granting or repeating its command."""
         if self._revalidate is None:
             raise ValueError("SDK command scope has no live authority verifier")
+        return self._revalidate()
+
+
+@dataclass(frozen=True, slots=True)
+class _CompletedNativeSdkCommandScope:
+    """Process-local completed evidence with live custody and revocation checks."""
+
+    _revalidate: Callable[[], object] = field(repr=False, compare=False)
+
+    def require_current(self):
         return self._revalidate()
 
 
@@ -243,7 +263,7 @@ class NativeSdkExecutionInputs:
         if not isinstance(grant, BuildAuthorization):
             raise TypeError("SDK execution requires a typed command authorization")
 
-        def require_authority() -> dict[str, object]:
+        def require_authority(*, completed_at=None) -> dict[str, object]:
             self.require_unchanged()
             tool.require_unchanged()
             if captured_runtime_context is not None:
@@ -265,11 +285,23 @@ class NativeSdkExecutionInputs:
                     "security.native_sdk_execution_privilege_mismatch"
                 )
             checked_at = clock()
+            if completed_at is not None and checked_at < completed_at:
+                raise ValueError("SDK completion observation precedes its postcheck")
+            # The provider reads revocations now, even for a completed command.
+            # Only the original execution's grant lifetime uses its actual postcheck.
             revocations = self.owner.require_execution_authorized(
-                self.revision, request, grant, now=checked_at
+                self.revision,
+                request,
+                grant,
+                now=checked_at if completed_at is None else completed_at,
             )
             return {
                 "checked_at": checked_at.isoformat(),
+                **(
+                    {"authorization_checked_at": completed_at.isoformat()}
+                    if completed_at is not None
+                    else {}
+                ),
                 "revocations": list(revocations),
             }
 
@@ -323,6 +355,14 @@ class NativeSdkExecutionInputs:
             }
         )
         object.__setattr__(scope, "evidence_identity", evidence)
+        completed_at = datetime.fromisoformat(after["checked_at"])
+        object.__setattr__(
+            scope,
+            "_completed_scope",
+            _CompletedNativeSdkCommandScope(
+                lambda: require_authority(completed_at=completed_at)
+            ),
+        )
 
 
 @contextmanager

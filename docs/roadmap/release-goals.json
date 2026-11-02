@@ -189,6 +189,9 @@
       },
       {
         "id": "DIAGNOSTIC-CACHE-CUSTODY-001"
+      },
+      {
+        "id": "HOST-WINARM-001"
       }
     ]
   }

@@ -41,6 +41,7 @@ class FreeBsdOwnedAttemptResult:
     stderr: bytes
     elapsed_milliseconds: int
     guardian_pid: int
+    recovery_frame: bytes = b""
 
 
 class OwnedFreeBsdChild:
@@ -416,6 +417,7 @@ def run_owned_freebsd_attempt(
             *output,
             response["elapsed_milliseconds"],
             guardian.pid,
+            bytes(streams["stdout"]),
         )
     except FreeBsdOwnedAttemptError:
         raise

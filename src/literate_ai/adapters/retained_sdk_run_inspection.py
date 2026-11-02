@@ -17,6 +17,7 @@ from literate_ai.adapters.native_sdk_dependencies import (
 )
 from literate_ai.adapters.native_sdk_qualification import (
     _dependencies,
+    verify_historical_completed_sdk_check,
     verify_historical_sdk_authority_checks,
 )
 from literate_ai.adapters.native_sdk_recipes import select_native_sdk_recipes
@@ -810,7 +811,11 @@ def verify_retained_sdk_run_assertions(
     final = reader.record(run.native_sdk_final_check_identity.uri)
     fields(final, "schema plan_identity inputs_identity checks")
     require(
-        final["schema"] == "literate-ai/retained-sdk-final-authority-check@1"
+        final["schema"]
+        in {
+            "literate-ai/retained-sdk-final-authority-check@1",
+            "literate-ai/retained-sdk-final-authority-check@2",
+        }
         and final["plan_identity"] == plan.identity.uri
         and final["inputs_identity"] == inputs_identity.uri
         and type(final["checks"]) is list
@@ -820,9 +825,14 @@ def verify_retained_sdk_run_assertions(
         final["checks"], final_scopes, strict=True
     ):
         step()
-        verify_historical_sdk_authority_checks(
-            [check], grant, request, ordered, expected_count=1, not_before=after
-        )
+        if final["schema"] == "literate-ai/retained-sdk-final-authority-check@2":
+            verify_historical_completed_sdk_check(
+                check, grant, request, ordered, after=after
+            )
+        else:
+            verify_historical_sdk_authority_checks(
+                [check], grant, request, ordered, expected_count=1, not_before=after
+            )
     for snapshot in current_sdk_snapshots:
         snapshot.require_unchanged()
     step()

@@ -316,7 +316,7 @@ class RetainedProjectNativeSdkInputs:
         if len(self._last_scopes) != len(self.executions):
             raise ValueError("retained.sdk.completed-command-authority-required")
         document = {
-            "schema": "literate-ai/retained-sdk-final-authority-check@1",
+            "schema": "literate-ai/retained-sdk-final-authority-check@2",
             "plan_identity": self.plan.identity.uri,
             "inputs_identity": self.identity.uri,
             "checks": [scope.require_current() for scope in self._last_scopes],
@@ -418,4 +418,4 @@ class RetainedProjectNativeSdkInputs:
             "evidence_identities",
             tuple(scope.evidence_identity for scope in scopes),
         )
-        self._last_scopes = scopes
+        self._last_scopes = tuple(scope.completed_scope() for scope in scopes)

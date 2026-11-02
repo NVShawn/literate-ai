@@ -51,15 +51,26 @@ def _worker_selection_identity(selected):
     )
 
 
-def execute_retained_unit_package_from_args(args, *, receiver_context=None):
+def execute_retained_unit_package_from_args(
+    args, *, receiver_context=None, verification_selection=None
+):
     project, binding, policy, observations, _pkg, _tar, authority = _project_context(
         args
     )
     manifest, selected, planning = authority()
     plan = planning.plan
+    verifying = args.retained_unit_command in {"verify-plan", "verify"}
+    if verifying:
+        from .retained_unit_verification import verification_selection_from_args
+
+        if verification_selection is None:
+            verification_selection = verification_selection_from_args(args, policy)
+        verification_selection.require_current(policy)
+    elif verification_selection is not None:
+        raise ValueError("retained.unit.verification-operation-required")
     request = {
         "authority_mode": "retained-project",
-        "operation": "execute",
+        "operation": "verify" if verifying else "execute",
         "retained_plan_identity": plan.identity.uri,
         "worker_selection_identity": _worker_selection_identity(selected).uri,
         "policy_identity": policy.identity.uri,
@@ -67,10 +78,14 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
         "requires_host_execution_authorization": True,
         "release_authorized": False,
     }
+    if verifying:
+        request.update(verification_selection.to_dict())
     authorization = canonical_identity(request)
-    if args.retained_unit_command == "execution-plan":
+    if args.retained_unit_command in {"execution-plan", "verify-plan"}:
         return {
-            "schema": EXECUTION_PLAN_SCHEMA,
+            "schema": "literate-ai/retained-unit-package-verification-plan@1"
+            if verifying
+            else EXECUTION_PLAN_SCHEMA,
             "request": request,
             "authorization_identity": authorization.uri,
             "executed": False,
@@ -99,6 +114,7 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
                 selected=selected,
                 planning=planning,
                 execution_request=request,
+                verification_selection=verification_selection,
             )
     else:
         from literate_ai.adapters.retained_receiver_context import (
@@ -124,6 +140,8 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
         raise ValueError("retained.unit.current-native-tools-differ")
 
     def current_plan():
+        if verifying:
+            verification_selection.require_current(policy)
         if receiver_context is not None:
             receiver_context.require_plan(plan)
         _manifest, current_worker, current = authority()
@@ -147,6 +165,7 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
         project.root, build_dir=args.build_dir, obj_dir=args.obj_dir
     )
     completed = []
+    verified_projections = []
 
     def consume(admission, workspace):
         if current_plan() != plan:
@@ -165,7 +184,21 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
             )
             / "retained-unit-packages"
         )
-        reference = owner.construct_set(object_root=work, link_handoff=handoff)
+        if verifying:
+            from .retained_unit_verification import receive_selected_unit_packages
+
+            reference = receive_selected_unit_packages(
+                verification_selection,
+                owner,
+                object_root=work,
+                receiver_context=receiver_context,
+            )
+            # The owner reopens these exact bytes under genuine fresh admission.
+            # A different projection is refused by the canonical result reader.
+            owner.verify_set(reference, object_root=work)
+            verified_projections.append(owner.projection)
+        else:
+            reference = owner.construct_set(object_root=work, link_handoff=handoff)
         index, _results = read_retained_unit_results(
             owner.projection, reference, admission.store, **owner.tree_policy
         )
@@ -177,7 +210,9 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
             raise ValueError("retained.unit.execution-request-retention-differs")
         completed.append(
             {
-                "schema": EXECUTION_SCHEMA,
+                "schema": "literate-ai/retained-unit-package-verification@1"
+                if verifying
+                else EXECUTION_SCHEMA,
                 "authority_mode": "retained-project",
                 "authorization_identity": authorization.uri,
                 "execution_request": request_reference.to_dict(),
@@ -196,6 +231,10 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
                 "release_authorized": False,
             }
         )
+        if verifying:
+            completed[-1].update(
+                operation="verify", verified_result_index=reference.to_dict()
+            )
         if receiver_context is not None:
             from literate_ai.adapters.retained_unit_run_evidence import (
                 retain_retained_unit_run_evidence,
@@ -245,6 +284,14 @@ def execute_retained_unit_package_from_args(args, *, receiver_context=None):
         polls = ()
     if len(completed) != 1 or current_plan() != plan:
         raise ValueError("retained.unit.complete-current-execution-required")
+    if verifying and verification_selection.source is not None:
+        if len(verified_projections) != 1:
+            raise ValueError("retained.unit.complete-original-verification-required")
+        verification_selection.require_original_source(
+            verified_projections[0],
+            policy,
+            admission_guard=verification_selection.source.require_current,
+        )
     admission.require_current()
     pkg_tool.require_unchanged()
     tar_tool.require_current()

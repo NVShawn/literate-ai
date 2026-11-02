@@ -1,0 +1,54 @@
+{
+  "schema": "literate-ai/issue-resolution-evidence@1",
+  "issue": 209,
+  "work_id": "ADOPT-LIFT-ROLLBACK-001",
+  "observed_main": "1abbf13ad95b93b18f50b1e444a795c88e771d57",
+  "qualified_commit": "bc6ce1bd23bfaae67abc66c592660a29a75049a9",
+  "ci_run": 41450986972,
+  "ci_jobs_passed": 27,
+  "independent_reviewer": "review_worktree_discovery",
+  "source_and_test_equivalence": {
+    "src/literate_ai/adapters/harness_inventory.py": "70b19b1b33b2beb5f2fe440ab220af5c0fd521eef344645fc6e2fcf5650e8829",
+    "src/literate_ai/adapters/project_initialization.py": "08d152c09026aa1d2e8d3b34d577c7c27821a44eaf2134192fcaf9712ae083c7",
+    "tests/e2e/test_conversion_tracked_ignored.py": "26d4d108e0e58ab8dad665ef027d29d828f06d1d20c117a38492e0cdc4922272"
+  },
+  "scope": "The landed repair restores original Git/filesystem custody after failed Phase 1.2 parity and preserves originals with explicit recovery guidance when recovery is incomplete. Fault-injected public-CLI controls execute real baseline/parity work before rejection and verify exact source, relative aliases and staged-index restoration; the four formerly failing unconditional Windows custody cases also pass in the qualified Windows shards.",
+  "latest_main_qualification_claimed": false,
+  "release_complete": false,
+  "ci_url": "https://github.com/jordanhubbard/literate-ai/actions/runs/41450986972",
+  "current_integration_qualification_claimed": false,
+  "dedicated_unmodified_installed_failure_reproduction": false,
+  "windows_phase12_cli_execution_claimed": false,
+  "native_windows_custody_controls": [
+    "test_incomplete_quarantine_refuses_before_any_scaffold_deletion",
+    "test_partial_directory_preserves_index_scope_and_baseline_copy",
+    "test_recovery_collision_preserves_both_original_and_new_entry",
+    "test_failed_git_rollback_keeps_original_and_index_in_quarantine",
+    "test_mixed_line_endings_survive_baseline_copy_and_rollback"
+  ],
+  "windows_shards": [
+    {
+      "passed": 811,
+      "skipped": 161
+    },
+    {
+      "passed": 603,
+      "skipped": 144
+    },
+    {
+      "passed": 774,
+      "skipped": 140
+    }
+  ],
+  "original_failed_windows_run": 41322306715,
+  "related_issues": [
+    200,
+    208,
+    209
+  ],
+  "public_cli_controls": {
+    "test_failed_public_adoption_restores_common_agent_alias_and_index": "Real failing baseline, exact CLAUDE.md to AGENTS.md alias layout, complete tree and staged-index restoration; no mocked parity/recovery failure",
+    "test_public_adoption_executes_test_importing_ignored_tracked_module": "Real baseline/parity imports force-added ignored module; relocated index membership and untracked sibling preserved",
+    "test_phase12_failure_restores_original_tree_and_staged_aliases": "Real baseline and parity work before injected Phase1.2 rejection; exact restoration checked"
+  }
+}

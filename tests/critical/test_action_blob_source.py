@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 
 from literate_ai.adapters.action_blob_source import HttpActionBlobSource
 from literate_ai.adapters.action_command_blob_source import CommandActionBlobSource
@@ -20,6 +21,9 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
     record_identity,
+)
+from literate_ai.adapters.action_filesystem_blob_source import (
+    FileSystemActionBlobSource,
 )
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.execution_dispatch import (
@@ -29,7 +33,7 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from literate_ai.return_cas import CONFIG_SCHEMA
-from literate_ai.storage.cas import FileSystemCAS
+from literate_ai.storage.cas import BlobIntegrityError, FileSystemCAS, StorageError
 from tests.support.action_deadline import ACTION_TEST_DEADLINE
 
 
@@ -97,6 +101,100 @@ class ActionBlobSourceTests(unittest.TestCase):
             record_identity(self.content).digest, len(self.content)
         )
         self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
+
+    def test_local_source_preserves_unsigned_native_volume_identity(self):
+        with tempfile.TemporaryDirectory() as raw:
+            store = FileSystemCAS(Path(raw) / "source")
+            reference = store.put_bytes(self.content)
+            # Observed native Windows st_dev is outside canonical signed64.
+            node = (16766534376316073186, 17, 16832)
+            with patch(
+                "literate_ai.adapters.action_filesystem_blob_source.directory_node",
+                return_value=node,
+            ) as observe:
+                source = FileSystemActionBlobSource(store, self.deadline)
+                output = io.BytesIO()
+                source.copy_to(
+                    reference,
+                    output,
+                    maximum_bytes=reference.size,
+                    admission_guard=lambda: None,
+                )
+                self.assertEqual(output.getvalue(), self.content)
+                observe.return_value = (node[0] + 1, *node[1:])
+                with self.assertRaises(ActionWireError) as refusal:
+                    source.require_current()
+                self.assertEqual(
+                    refusal.exception.code, "action_source.custody_changed"
+                )
+
+    def test_local_stream_preserves_custody_and_refuses_partial_delivery(self):
+        """Real CAS reads retain digest, cancellation and short-write boundaries."""
+        with tempfile.TemporaryDirectory() as raw:
+            store = FileSystemCAS(Path(raw) / "source")
+            content = b"original archive bytes\n" * 100000
+            reference = store.put_bytes(content)
+            source = FileSystemActionBlobSource(store, self.deadline)
+
+            class ShortSink(io.BytesIO):
+                def write(self, data):
+                    return super().write(data[: max(1, len(data) // 2)])
+
+            output = ShortSink()
+            count = source.copy_to(
+                reference,
+                output,
+                maximum_bytes=reference.size,
+                admission_guard=lambda: None,
+            )
+            self.assertEqual(count, len(content))
+            self.assertEqual(output.getvalue(), content)
+            with self.assertRaises(ActionWireError):
+                source.copy_to(
+                    reference,
+                    io.BytesIO(),
+                    maximum_bytes=reference.size - 1,
+                    admission_guard=lambda: None,
+                )
+
+            class CancelAfterWrite(io.BytesIO):
+                def write(self, data):
+                    count = super().write(data)
+                    self.cancelled = True
+                    return count
+
+            cancelled_output = CancelAfterWrite()
+            cancelled_output.cancelled = False
+            with self.assertRaises(ActionWireError) as refusal:
+                source.copy_to(
+                    reference,
+                    cancelled_output,
+                    maximum_bytes=reference.size,
+                    admission_guard=lambda: None,
+                    cancelled=lambda: cancelled_output.cancelled,
+                )
+            self.assertEqual(refusal.exception.code, "action_source.cancelled")
+            self.assertLess(len(cancelled_output.getvalue()), reference.size)
+
+            class StalledSink:
+                def write(self, data):
+                    return 0
+
+            with self.assertRaises(StorageError):
+                source.copy_to(
+                    reference,
+                    StalledSink(),
+                    maximum_bytes=reference.size,
+                    admission_guard=lambda: None,
+                )
+            store.path_for(reference).write_bytes(b"x" * reference.size)
+            with self.assertRaises(BlobIntegrityError):
+                source.copy_to(
+                    reference,
+                    io.BytesIO(),
+                    maximum_bytes=reference.size,
+                    admission_guard=lambda: None,
+                )
 
     @unittest.skipUnless(os.name == "posix", "requires bounded POSIX return reader")
     def test_real_command_streams_large_blob_and_refuses_changed_custody(self):

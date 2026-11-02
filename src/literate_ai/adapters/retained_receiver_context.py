@@ -7,8 +7,12 @@ worker and catalog remain bound throughout execution.
 
 import os
 
+from literate_ai.adapters.action_blob_source import HttpActionBlobSource
 from literate_ai.adapters.action_capabilities import ActionWorkerCapabilities
 from literate_ai.adapters.action_dispatch_wire import ActionDispatchDeadline
+from literate_ai.adapters.action_filesystem_blob_source import (
+    FileSystemActionBlobSource,
+)
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
     LifecycleActionKind,
@@ -35,6 +39,8 @@ class RetainedReceiverContext:
         measure_capability,
         cancelled,
         *,
+        package_source=None,
+        custody_guard=None,
         _seal=None,
     ):
         if _seal is not _LIVE_RECEIVER:
@@ -46,15 +52,28 @@ class RetainedReceiverContext:
         self._registration_guard = registration_guard
         self._measure_capability = measure_capability
         self._cancelled = cancelled
+        self.package_source = package_source
+        self._custody_guard = (
+            registration_guard if custody_guard is None else custody_guard
+        )
         self._pid = os.getpid()
         self._open = True
 
-    def require_current(self):
+    def _require_live_request(self):
         if not self._open or os.getpid() != self._pid:
             raise ValueError("retained.receiver.context-not-live")
         self.deadline.remaining()
         if self._cancelled():
             raise ValueError("retained.receiver.cancelled")
+
+    def require_custody_current(self):
+        """Poll private custody only; this never substitutes for full admission."""
+        self._require_live_request()
+        self._custody_guard()
+        self._require_live_request()
+
+    def require_current(self):
+        self._require_live_request()
         self._registration_guard()
         observed = self._measure_capability()
         if (
@@ -90,6 +109,8 @@ def _admit_retained_receiver_context(
     registration_guard,
     measure_capability,
     cancelled=lambda: False,
+    package_source=None,
+    custody_guard=None,
 ):
     """Private receiver composition after decoding and authenticating its request.
 
@@ -115,6 +136,15 @@ def _admit_retained_receiver_context(
             callable(value)
             for value in (registration_guard, measure_capability, cancelled)
         )
+        or custody_guard is not None
+        and not callable(custody_guard)
+        or package_source is not None
+        and (
+            not isinstance(
+                package_source, (HttpActionBlobSource, FileSystemActionBlobSource)
+            )
+            or package_source.deadline != deadline
+        )
     ):
         raise TypeError("retained.receiver.exact-private-request-binding-required")
     context = RetainedReceiverContext(
@@ -127,6 +157,8 @@ def _admit_retained_receiver_context(
         registration_guard,
         measure_capability,
         cancelled,
+        package_source=package_source,
+        custody_guard=custody_guard,
         _seal=_LIVE_RECEIVER,
     )
     context.require_current()

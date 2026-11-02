@@ -12,6 +12,7 @@ from literate_ai.adapters.action_execution_config import load_action_execution
 from literate_ai.adapters.action_retained_unit_package_worker import (
     retained_unit_package_action,
     retained_unit_package_input,
+    retained_unit_verification_input,
 )
 from literate_ai.adapters.component_lock_application import (
     current_project_component_locks,
@@ -51,6 +52,7 @@ def execute_remote_retained_unit_package(
     selected,
     planning,
     execution_request,
+    verification_selection=None,
 ):
     """Use current private worker configuration, never transport paths in intent."""
     from .retained_unit_execution import _worker_selection_identity
@@ -73,6 +75,8 @@ def execute_remote_retained_unit_package(
         )
 
     def source_current():
+        if verification_selection is not None:
+            verification_selection.require_current(policy)
         bound.require_unchanged()
         binding.require_unchanged()
         (
@@ -114,7 +118,11 @@ def execute_remote_retained_unit_package(
     ]
     if len(matches) != 1:
         raise ValueError("retained.unit.selected-command-worker-not-admitted")
-    input_record = retained_unit_package_input(execution_request)
+    input_record = (
+        retained_unit_package_input(execution_request)
+        if verification_selection is None
+        else retained_unit_verification_input(execution_request)
+    )
     input_identity = record_identity(input_record)
     request = LifecycleActionDispatchRequest(
         canonical_identity(
@@ -168,6 +176,7 @@ def execute_remote_retained_unit_package(
         input_records=inputs,
         record_result=retain,
         record_failure=retain,
+        record_attested_failure=retain,
         on_unknown_ownership=unknown,
         revalidate_worker=pool.revalidate,
         environment=bound.environment,
@@ -214,6 +223,7 @@ def execute_remote_retained_unit_package(
             test_receipt_policy=project.definition.test_receipt_policy,
             source_guard=source_current,
             sdk_snapshots=snapshots,
+            verification_selection=verification_selection,
         )
 
     admitted, polls = dispatch_with_worker_health_poll(

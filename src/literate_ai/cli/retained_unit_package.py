@@ -98,7 +98,12 @@ def _read_context(args):
 
 def retained_unit_package_from_args(args):
     try:
-        if args.retained_unit_command in {"execution-plan", "execute"}:
+        if args.retained_unit_command in {
+            "execution-plan",
+            "execute",
+            "verify-plan",
+            "verify",
+        }:
             from .retained_unit_execution import execute_retained_unit_package_from_args
 
             return execute_retained_unit_package_from_args(args)
@@ -200,7 +205,14 @@ def add_retained_unit_package_parser(commands):
     actions.add_parser(
         "observe-tools", help="probe installed native FreeBSD pkg and libarchive tools"
     )
-    for operation in ("plan", "inspect", "execution-plan", "execute"):
+    for operation in (
+        "plan",
+        "inspect",
+        "execution-plan",
+        "execute",
+        "verify-plan",
+        "verify",
+    ):
         parser = actions.add_parser(
             operation,
             help=(
@@ -209,6 +221,8 @@ def add_retained_unit_package_parser(commands):
                     "inspect": "inspect archive bytes; grants no admission",
                     "execution-plan": "review current lifecycle and package intent",
                     "execute": "run authorized lifecycle and native unit packaging",
+                    "verify-plan": "review original archive verification intent",
+                    "verify": "verify original archives under fresh admission",
                 }[operation]
             ),
         )
@@ -241,7 +255,15 @@ def add_retained_unit_package_parser(commands):
             parser.add_argument(
                 "--obj-dir", help="owned temporary inspection staging root"
             )
-        if operation == "execute":
+        if operation in {"verify-plan", "verify"}:
+            parser.add_argument("--custody-root", required=True)
+            parser.add_argument(
+                "--result", required=True, help="original set-result index identity"
+            )
+            parser.add_argument(
+                "--verification-timeout-seconds", type=int, default=3600
+            )
+        if operation in {"execute", "verify"}:
             parser.add_argument("--authorize-retained-project", required=True)
             parser.add_argument("--authorize-unit-packages", required=True)
             parser.add_argument("--allow-host-execution", action="store_true")
