@@ -411,7 +411,10 @@ def _main(argv=None):
                             attempt.release_after_native_empty()
                 raise
             else:
-                attempt.release_after_native_empty()
+                try:
+                    attempt.retain_completion(result)
+                finally:
+                    attempt.release_after_native_empty()
         if result.returncode != 0:
             raise ValueError("retained.receiver.execution-child-failed")
         # Only an actually empty native subtree permits forwarding a response.

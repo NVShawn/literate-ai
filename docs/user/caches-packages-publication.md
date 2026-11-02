@@ -604,6 +604,12 @@ historical native verification/readmission, installed public-path qualification,
 the remote round trip and the large real-tree qualification remain open in
 [RETAINED-UNIT-PACKAGE-001](../roadmap/active-work.md#retained-unit-package-001-deliver-per-unit-retained-tree-packages-and-verified-freebsd-transport).
 Package execution does not install, publish or authorize a release.
+Completed retained attempts leave recovery records beside the private registration
+with the validated guardian response, including bounded stdout/stderr, before
+reservation release. Worker failures retain their authenticated frame in controller custody
+and report bounded module/function locations without exception arguments or host
+paths. These records diagnose an attempt; they cannot authorize another execution
+or clear uncertain native ownership.
 
 The public verification front door follows ADR 0052. Its
 read-only `verify-plan` binds the original result-index reference, selected

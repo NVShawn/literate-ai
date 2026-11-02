@@ -279,6 +279,14 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                     self.assertIsNone(outcome.result_identity)
                     self.assertIsNone(record)
                     self.assertIsNone(attested)
+                    diagnostic = json.loads(result.stderr.splitlines()[-1])
+                    self.assertEqual(
+                        diagnostic["request_identity"], request.identity.uri
+                    )
+                    self.assertEqual(diagnostic["exception_type"], "RuntimeError")
+                    self.assertTrue(diagnostic["frames"])
+                    self.assertNotIn(str(root).encode(), result.stderr)
+                    self.assertNotIn(b"authority changed", result.stderr)
                     self.assertEqual(touched.read_text(), "entered")
                     self.assertEqual(tuple(cas.iter_refs()), before)
                     self.assertEqual(tuple(workspace.iterdir()), ())

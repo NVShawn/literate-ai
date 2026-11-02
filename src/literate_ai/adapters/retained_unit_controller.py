@@ -285,6 +285,11 @@ def execute_and_import_retained_unit_package(
 
     final_current()
     outcome, content = dispatcher.dispatch_attested_record(request)
+    if outcome.failure_code is not None:
+        raise ActionWireError(
+            outcome.failure_code,
+            "retained PACKAGE worker refused its current action",
+        )
     current()
     _require(
         outcome.request_identity == request.identity

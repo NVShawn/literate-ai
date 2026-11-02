@@ -16,6 +16,7 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionWireError,
     decode_attested_action_response,
     encode_action_request,
+    record_identity,
 )
 from literate_ai.adapters.action_transport import (
     action_receiver_command,
@@ -100,6 +101,7 @@ class CommandLifecycleActionDispatcher:
         environment: Mapping[str, str] | None = None,
         attested_boundary: Callable[[LifecycleActionWorker], ContentIdentity]
         | None = None,
+        record_attested_failure: Callable[[ContentIdentity, bytes], None] | None = None,
     ) -> None:
         if not isinstance(catalog, ExecutionWorkerCatalog) or not isinstance(
             deadline, ActionDispatchDeadline
@@ -129,6 +131,11 @@ class CommandLifecycleActionDispatcher:
         self.input_records = input_records
         self.record_result = record_result
         self.record_failure = record_failure
+        if record_attested_failure is not None and not callable(
+            record_attested_failure
+        ):
+            raise TypeError("attested failure retention requires a callback")
+        self.record_attested_failure = record_attested_failure
         self.on_unknown_ownership = on_unknown_ownership
         self.revalidate_worker = revalidate_worker
         # When set, boundaries skip the separate capability probe: the receiver
@@ -319,6 +326,8 @@ class CommandLifecycleActionDispatcher:
                 # Reached only after the boundary check above passed.
                 with self._lock:
                     self.admitted_failures[request.identity] = output
+                if attested is not None and self.record_attested_failure is not None:
+                    self.record_attested_failure(record_identity(output), output)
                 if self.on_unknown_ownership is not None:
                     self.on_unknown_ownership(request)
             with self._lock:

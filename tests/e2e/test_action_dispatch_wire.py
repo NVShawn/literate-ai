@@ -19,6 +19,7 @@ from literate_ai.adapters.action_command_dispatch import (
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
+    decode_attested_action_response,
     record_identity,
 )
 from literate_ai.application.action_dag_scheduler import (
@@ -35,6 +36,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.contracts.identity import canonical_identity
+from literate_ai.storage.cas import FileSystemCAS
 from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.process_state import stopped_process_state
 
@@ -108,13 +110,15 @@ result = canonical_json_bytes({
     "bound_token": os.environ.get("WORKER_TOKEN"),
 })
 response = encode_action_response(request, result_record=result)
+if mode in ("attest-failure", "misattest-failure", "failure"):
+    response = encode_action_response(request, failure_code="fixture.refused")
 if mode == "corrupt":
     value = json.loads(response)
     value["result_identity"] = record_identity(b"foreign").uri
     response = canonical_json_bytes(value)
-if mode == "attest":
+if mode in ("attest", "attest-failure"):
     response = attest_action_response(response, request, capability)
-if mode == "misattest":
+if mode in ("misattest", "misattest-failure"):
     response = attest_action_response(
         response, request, canonical_identity("changed runtime")
     )
@@ -133,7 +137,14 @@ class CommandActionDispatchTests(unittest.TestCase):
         self.admissions = []
 
     def dispatcher(
-        self, mode="ok", *, request_file=False, duration=60, attested_boundary=None
+        self,
+        mode="ok",
+        *,
+        request_file=False,
+        duration=60,
+        attested_boundary=None,
+        record_attested_failure=None,
+        on_unknown_ownership=None,
     ):
         command = (sys.executable, str(self.script), mode)
         if request_file:
@@ -162,6 +173,8 @@ class CommandActionDispatchTests(unittest.TestCase):
             ),
             revalidate_worker=self.admissions.append,
             attested_boundary=attested_boundary,
+            record_attested_failure=record_attested_failure,
+            on_unknown_ownership=on_unknown_ownership,
             environment={
                 **os.environ,
                 "PRIVATE_TEST_TOKEN": "synthetic-token",
@@ -254,6 +267,55 @@ class CommandActionDispatchTests(unittest.TestCase):
             dispatcher.dispatch_attested_record(request)
         self.assertEqual(failed.exception.code, "action_dispatch.attestation_required")
         self.assertFalse(hasattr(failed.exception, "unknown_ownership_request"))
+        self.assertEqual(self.results, {})
+
+        # An authentic refused action retains its exact frame beyond dispatcher
+        # lifetime; forged measurements and unattested errors cannot populate it.
+        failures = FileSystemCAS(self.root / "failure-cas")
+        references = []
+
+        def retain_failure(identity, content):
+            reference = failures.put_bytes(content, media_type="application/json")
+            self.assertEqual(reference.identity, identity.uri)
+            references.append(reference)
+
+        for mode in ("attest-failure", "misattest-failure", "failure"):
+            dispatcher, request = self.dispatcher(
+                mode, attested_boundary=boundary, record_attested_failure=retain_failure
+            )
+            if mode == "attest-failure":
+                outcome, content = dispatcher.dispatch_attested_record(request)
+                self.assertEqual(outcome.failure_code, "fixture.refused")
+                self.assertIsNone(content)
+                dispatcher.admitted_failures.clear()
+                reopened, record, measured = decode_attested_action_response(
+                    failures.get_bytes(references[0]), request
+                )
+                self.assertEqual(reopened, outcome)
+                self.assertIsNone(record)
+                self.assertEqual(measured, admitted)
+                self.assertIsNone(reopened.termination)
+            else:
+                with self.assertRaises(ActionWireError):
+                    dispatcher.dispatch_attested_record(request)
+            self.assertEqual(len(references), 1)
+            self.assertEqual(self.results, {})
+
+        unknown = []
+
+        def refuse_retention(_identity, _content):
+            raise OSError("fixture failure store unavailable")
+
+        dispatcher, request = self.dispatcher(
+            "attest-failure",
+            attested_boundary=boundary,
+            record_attested_failure=refuse_retention,
+            on_unknown_ownership=unknown.append,
+        )
+        with self.assertRaises(OSError) as failed:
+            dispatcher.dispatch_attested_record(request)
+        self.assertEqual(failed.exception.unknown_ownership_request, request)
+        self.assertEqual(unknown, [request])
         self.assertEqual(self.results, {})
 
     def test_corrupt_worker_result_never_enters_result_store(self):

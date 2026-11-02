@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import os
 import shutil
@@ -124,12 +126,41 @@ class FreeBsdAttemptOwnershipTests(unittest.TestCase):
                     expires_at=datetime.now(UTC) + timedelta(seconds=20),
                     admission_guard=lambda: None,
                 )
-                attempt.release_after_native_empty()
+                attempt.retain_completion(result)
+                # A second publication must preserve existing recovery bytes.
+                # The wrapper has already proved cleanup, so the actual parent
+                # still releases its own marker when journaling refuses.
+                with self.assertRaises(FileExistsError):
+                    try:
+                        attempt.retain_completion(result)
+                    finally:
+                        attempt.release_after_native_empty()
             self.assertFalse((root / "private-receiver.json.attempt").exists())
             cleanup_verified = True
             self.assertEqual(result.returncode, 17, result.stderr)
             self.assertEqual(result.stdout, b"owned-input\x00")
             self.assertEqual(result.stderr, b"owned")
+            completed = [
+                json.loads(path.read_bytes())
+                for path in root.glob("private-receiver.json.attempt.*.json")
+                if json.loads(path.read_bytes()).get("schema")
+                == "literate-ai/retained-receiver-completed-attempt@1"
+            ]
+            self.assertEqual(len(completed), 1)
+            journal = completed[0]
+            frame = (root / journal["guardian_response_file"]).read_bytes()
+            self.assertEqual(
+                hashlib.sha256(frame).hexdigest(), journal["guardian_response_sha256"]
+            )
+            report = json.loads(frame)
+            self.assertEqual(report["guardian_pid"], result.guardian_pid)
+            self.assertTrue(report["cleanup"]["empty"])
+            self.assertEqual(report["cleanup"]["children"], 0)
+            self.assertEqual(report["cleanup"]["descendants"], 0)
+            self.assertEqual(base64.b64decode(report["stdout"]), b"owned-input\x00")
+            self.assertEqual(base64.b64decode(report["stderr"]), b"owned")
+            self.assertEqual(journal["returncode"], 17)
+            self.assertFalse(journal["admitted"])
             # Cancellation remains sticky when the requesting child exits zero
             # before the guardian polls its pipe, and also kills a blocked job.
             for after in ("sys.exit(0)", "time.sleep(60)"):
@@ -164,7 +195,12 @@ class FreeBsdAttemptOwnershipTests(unittest.TestCase):
                     else:
                         self.fail("child cancellation returned a result")
                 self.assertFalse((root / "private-receiver.json.attempt").exists())
-            diagnostics = tuple(root.glob("private-receiver.json.attempt.*.json"))
+            diagnostics = tuple(
+                path
+                for path in root.glob("private-receiver.json.attempt.*.json")
+                if json.loads(path.read_bytes()).get("schema")
+                == "literate-ai/retained-receiver-cleanup-diagnostic@1"
+            )
             self.assertEqual(len(diagnostics), 3)
             self.assertTrue(
                 all(json.loads(p.read_bytes())["cleanup_verified"] for p in diagnostics)

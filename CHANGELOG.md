@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retained PACKAGE diagnostics: preserve authenticated worker failure frames and
+  completed native guardian responses before reservation release. Bounded failure
+  locations omit exception arguments and host paths; recovery records remain
+  diagnostics rather than execution or admission grants.
+
 - Retained unit verification: add distinct `verify-plan` and `verify` operations
   for existing archives under fresh lifecycle admission. Bind the original result
   and selected custody, stream bounded incoming artifacts, refuse a different

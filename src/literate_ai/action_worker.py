@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import argparse
 import errno
+import json
 import os
+import re
 import secrets
 import sys
+from collections import deque
 from pathlib import Path
 
 from literate_ai._filesystem import require_safe_directory
@@ -66,6 +69,39 @@ from literate_ai.contracts import canonical_json_bytes
 from literate_ai.contracts.identity import ContentIdentity
 from literate_ai.storage import FileSystemCAS
 from literate_ai.storage.cas import StorageError
+
+
+def _report_failure_locations(request, error):
+    """Bounded source locations only; omit exception arguments and host paths."""
+
+    def symbol(value):
+        if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_.<>]{1,160}", value):
+            return value
+        return "<unavailable>"
+
+    frames = deque(maxlen=32)
+    trace = error.__traceback__
+    for _ in range(256):
+        if trace is None:
+            break
+        frames.append(
+            {
+                "module": symbol(trace.tb_frame.f_globals.get("__name__")),
+                "function": symbol(trace.tb_frame.f_code.co_name),
+                "line": trace.tb_lineno,
+            }
+        )
+        trace = trace.tb_next
+    record = {
+        "schema": "literate-ai/action-worker-failure-locations@1",
+        "request_identity": request.identity.uri,
+        "exception_type": symbol(type(error).__name__),
+        "frames": list(frames),
+        "admitted": False,
+    }
+    encoded = json.dumps(record, separators=(",", ":"), ensure_ascii=True)
+    if len(encoded) <= 16384:
+        print(encoded, file=sys.stderr)
 
 
 def _describe(request, deadline, expected_worker, *, http_source, workers):
@@ -589,6 +625,7 @@ def main(
         response = encode_action_response(request, result_record=result)
     except WorkerDependencyGraphLimitError as exc:
         if not describing:
+            _report_failure_locations(request, exc)
             response = encode_action_response(
                 request, failure_code="action_dependencies.graph_limit"
             )
@@ -604,6 +641,7 @@ def main(
             sys.stdout.buffer.write(encode_observation_failure(exc.code))
             print("Action capability request refused", file=sys.stderr)
             return 2
+        _report_failure_locations(request, exc)
         response = encode_action_response(request, failure_code=exc.code)
     except (StorageError, OSError, ValueError, RuntimeError) as exc:
         if describing:
@@ -613,6 +651,7 @@ def main(
             print("Action capability custody unavailable", file=sys.stderr)
             return 2
         # Return a bounded code, never private host paths or blob contents.
+        _report_failure_locations(request, exc)
         response = encode_action_response(
             request, failure_code="action_source.custody_unavailable"
         )

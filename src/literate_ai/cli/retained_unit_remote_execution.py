@@ -176,6 +176,7 @@ def execute_remote_retained_unit_package(
         input_records=inputs,
         record_result=retain,
         record_failure=retain,
+        record_attested_failure=retain,
         on_unknown_ownership=unknown,
         revalidate_worker=pool.revalidate,
         environment=bound.environment,

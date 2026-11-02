@@ -32751,6 +32751,13 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Priority:** P0
 - **Release target:** 1.4.0
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
+- **Failure recovery, 2026-11-02:** The installed native attempt returned a
+  controller refusal after four retained actions exited successfully. Its exact
+  failure frame and standalone guardian response were not durably retained.
+  Preserve authenticated failure frames, bounded exception locations and the
+  actual validated guardian response before releasing native reservations.
+  These records provide diagnostics only; historical records never authorize
+  execution, clear uncertain ownership or replace PACKAGE/LINK admission.
 - **Public verification source, 2026-11-02:** `verify-plan` and `verify` now select
   an original index with distinct operation authorization. Fresh lifecycle
   admission precedes native `verify_set`; a different projection refuses rather
