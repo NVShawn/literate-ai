@@ -2,21 +2,42 @@
 
 import json
 import os
+import secrets
 import shutil
 import sys
 import unittest
 from argparse import Namespace
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from literate_ai.adapters.action_capabilities import (
+    CAPABILITY_REQUEST_SCHEMA,
+    decode_capability_request,
+    decode_capability_response,
+    encode_capability_response,
+    receiver_code_identity,
+)
+from literate_ai.adapters.action_dispatch_wire import ActionDispatchDeadline
+from literate_ai.adapters.action_package_worker import ConfiguredPackageWorker
+from literate_ai.adapters.packaging import DirectoryPackageAdapter
 from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
 from literate_ai.adapters.retained_project_runtime import execute_local_retained_project
+from literate_ai.adapters.retained_receiver_context import (
+    _admit_retained_receiver_context,
+)
 from literate_ai.adapters.worker_provisioning import configure
+from literate_ai.application.action_dag_scheduler import (
+    LifecycleActionDispatchRequest,
+    LifecycleActionKind,
+    LifecycleActionNode,
+    LifecycleActionWorker,
+)
 from literate_ai.cache_directories import CacheDirectories
 from literate_ai.cli.errors import CliFailure
 from literate_ai.cli.retained_project import retained_project_from_args
-from literate_ai.contracts import BlobRef, canonical_json_bytes
+from literate_ai.contracts import BlobRef, canonical_identity, canonical_json_bytes
 from literate_ai.contracts.execution_dispatch import (
     ExecutionRequirements,
     ExecutionWorker,
@@ -86,7 +107,18 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         )
 
     def test_real_complete_run_returns_live_admission_and_reopens_custody(self):
-        admission, workspace = self.run_project()
+        consumed = []
+
+        def consume(actual, live_workspace):
+            actual.require_current()
+            self.assertFalse(
+                (live_workspace.root / "command-diagnostics.json").exists()
+            )
+            self.assertTrue((live_workspace.outputs / "app.bin").is_file())
+            consumed.append((actual, live_workspace))
+
+        admission, workspace = self.run_project(consume_admission=consume)
+        self.assertEqual(consumed, [(admission, workspace)])
         admission.require_current()
         self.assertEqual(admission.receipt.passed, 1)
         self.assertFalse(admission.receipt.to_dict()["conversion_advanced"])
@@ -119,6 +151,116 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         )
         self.assertEqual(len(records[0]["observations"]), 2)
         self.assertFalse(records[0]["grants_admission"])
+
+    def test_failed_live_consumer_retains_completed_command_diagnostics(self):
+        runs = []
+
+        def refuse(admission, workspace):
+            admission.require_current()
+            runs.append(workspace.root)
+            raise ValueError("live package consumer refused")
+
+        with self.assertRaisesRegex(ValueError, "live package consumer refused"):
+            self.run_project(consume_admission=refuse)
+        self.assertEqual(len(runs), 1)
+        diagnostic = json.loads((runs[0] / "command-diagnostics.json").read_bytes())
+        self.assertFalse(diagnostic["admission"])
+        self.assertEqual(len(diagnostic["command_observations"]), 4)
+
+    def test_revoked_receiver_context_refuses_before_first_retained_command(self):
+        """An unchanged planner cannot override a revoked live receiver capability."""
+        f = self.fixture.fixture
+        worker = ExecutionWorker(
+            "receiver",
+            ExecutionWorkerKind.SSH,
+            endpoint="user@127.0.0.1",
+            workspace=str(f.base),
+        )
+        f.plan = replace(
+            f.plan, profile=replace(f.plan.profile, worker_identity=worker.identity)
+        )
+        f.current = f.plan
+        catalog = canonical_identity({"workers": [worker.to_dict()]})
+        registration = f.base / "private-receiver-registration.json"
+        expected = canonical_json_bytes(
+            {
+                "worker": worker.identity.uri,
+                "catalog": catalog.uri,
+                "retained_plan": f.plan.identity.uri,
+            }
+        )
+        registration.write_bytes(expected)
+
+        def registered():
+            if registration.read_bytes() != expected:
+                raise ValueError("receiver registration changed")
+
+        configured = ConfiguredPackageWorker(
+            canonical_identity("directory-package-revocation-fixture"),
+            DirectoryPackageAdapter,
+            registered,
+        )
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=120))
+
+        def measure():
+            registered()
+            raw = canonical_json_bytes(
+                {
+                    "schema": CAPABILITY_REQUEST_SCHEMA,
+                    "worker_identity": worker.identity.uri,
+                    "nonce": secrets.token_hex(16),
+                    "deadline": deadline.to_dict(),
+                }
+            )
+            request, _ = decode_capability_request(raw)
+            response = encode_capability_response(
+                request,
+                deadline,
+                worker.identity,
+                http_source=False,
+                package_profile=configured.identity,
+            )
+            return decode_capability_response(
+                response, raw, receiver_code_identity(deadline=deadline)
+            )
+
+        observed = measure()
+        action_worker = LifecycleActionWorker(
+            worker.worker_id, worker.identity, catalog, observed.identity
+        )
+        node = LifecycleActionNode(
+            "retained-package",
+            f.plan.project_identity,
+            LifecycleActionKind.PACKAGE,
+            canonical_identity("package-payload"),
+            (),
+            (worker.worker_id,),
+        )
+        request = LifecycleActionDispatchRequest(
+            canonical_identity("revocation-schedule"),
+            node,
+            action_worker,
+            0,
+            (),
+            deadline.identity,
+            (canonical_identity("retained-package-input"),),
+        )
+        context = _admit_retained_receiver_context(
+            request,
+            deadline,
+            worker=worker,
+            catalog_identity=catalog,
+            retained_plan_identity=f.plan.identity,
+            capability_identity=observed.capability_identity,
+            registration_guard=registered,
+            measure_capability=measure,
+        )
+        workspace = f.workspace(receiver_context=context)
+        context.close()
+        with self.assertRaisesRegex(ValueError, "context-not-live"):
+            workspace.execute_next()
+        self.assertEqual(workspace.observations, ())
+        self.assertFalse((workspace.outputs / "app.bin").exists())
 
     def test_secondary_policy_without_owner_refuses_before_platform_or_cache(self):
         f = self.fixture.fixture

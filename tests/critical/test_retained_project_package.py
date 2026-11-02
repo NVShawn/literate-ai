@@ -20,11 +20,24 @@ from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
 from literate_ai.adapters.retained_project_package import RetainedProjectZipPackage
+from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
 from literate_ai.adapters.retained_project_unit_packages import (
     RetainedProjectUnitPackages,
+    plan_retained_unit_packages,
+)
+from literate_ai.adapters.retained_unit_inspection import (
+    read_retained_unit_planning_inputs,
+)
+from literate_ai.adapters.retained_unit_link import link_retained_unit_packages
+from literate_ai.adapters.retained_unit_planning_evidence import (
+    retain_retained_unit_planning_evidence,
 )
 from literate_ai.adapters.retained_unit_results import read_retained_unit_results
+from literate_ai.adapters.retained_unit_run_evidence import (
+    retain_retained_unit_run_evidence,
+)
+from literate_ai.adapters.retained_unit_run_inspection import reopen_retained_unit_run
 from literate_ai.application.packaging import PackagingError
 from literate_ai.contracts import (
     BlobRef,
@@ -47,7 +60,10 @@ from literate_ai.contracts.executable_components.packages import (
     PackageResult,
 )
 from literate_ai.contracts.flavors import FlavorAxis, FlavorCardinality, FlavorSlot
-from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.retained_project import (
+    RetainedProjectLimits,
+    RetainedProjectTreePolicy,
+)
 from literate_ai.contracts.retained_project_acceptance import (
     RetainedProjectAcceptancePolicy,
 )
@@ -58,8 +74,9 @@ from literate_ai.contracts.retained_project_package import (
 from literate_ai.contracts.retained_project_sbom import (
     project_retained_project_managed_graph,
 )
+from literate_ai.contracts.retained_unit_policy import RetainedUnitPackagePolicy
 from literate_ai.contracts.retained_unit_requests import RetainedUnitPackageRequest
-from literate_ai.storage.cas import FileSystemCAS
+from literate_ai.storage.cas import BlobIntegrityError, FileSystemCAS
 from tests.critical import test_retained_project_completion as completed
 from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_component_lock_contracts as locked
@@ -153,6 +170,65 @@ def package_lock(specification, provider="zip", extra_specifications=()):
     os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
 )
 class RetainedProjectPackageTests(unittest.TestCase):
+    def test_actual_output_links_require_policy_and_bind_package_custody(self):
+        """Native output aliases must enter the verified lifecycle before packaging."""
+        for selected in (False, True):
+            with self.subTest(tree_policy=selected):
+                case = RetainedProjectPackageTests()
+                case.setUp()
+                self.addCleanup(case.doCleanups)
+                case.package_provider = "pkg"
+                request = RetainedUnitPackageRequest(
+                    "application",
+                    (),
+                    True,
+                    "specs/LICENSE",
+                    "retained-tree",
+                    "1.0.0",
+                    "misc/retained-tree",
+                    "/usr/local",
+                    (),
+                )
+                if not selected:
+                    with self.assertRaisesRegex(
+                        ValueError, "Retained input is redirected"
+                    ):
+                        case.finish(
+                            unit_request=request,
+                            tree_outputs=True,
+                            selected_tree_policy=False,
+                        )
+                    continue
+                workspace = case.finish(unit_request=request, tree_outputs=True)
+                manifest = case.admission.payload_manifest
+                self.assertEqual(manifest.tree_policy, RetainedProjectTreePolicy())
+                members = {member.path: member for member in manifest.members}
+                self.assertEqual(members["z-link"].symlink_target, "app.bin")
+                self.assertEqual(members["z-hardlink"].hardlink_target, "app.bin")
+                self.assertEqual(members["z-directory"].symlink_target, "empty")
+                self.assertIn("empty", manifest.directories)
+                owner = RetainedProjectUnitPackages(
+                    case.admission, **case.unit_plan_arguments()
+                )
+                handoff = link_retained_unit_packages(owner)
+                handoff.require_current(owner)
+                path = workspace.outputs / "z-hardlink"
+                content, mode = path.read_bytes(), path.stat().st_mode & 0o777
+                path.unlink()
+                path.write_bytes(content)
+                path.chmod(mode)
+                with self.assertRaisesRegex(ValueError, "[Hh]ard link topology"):
+                    workspace.completed_run()
+                # Package custody owns independently retained bytes and topology.
+                handoff.require_current(owner)
+                retained = case.store.path_for(
+                    BlobRef(members["app.bin"].sha256, members["app.bin"].size)
+                )
+                retained.chmod(0o644)
+                retained.write_bytes(b"changed sealed custody")
+                with self.assertRaises(BlobIntegrityError):
+                    handoff.require_current(owner)
+
     @unittest.skipUnless(platform.system() == "FreeBSD", "requires native FreeBSD")
     def test_live_native_unit_construction_reopens_without_installing(self):
         self.package_provider = "pkg"
@@ -196,6 +272,132 @@ class RetainedProjectPackageTests(unittest.TestCase):
             path.write_bytes(original)
         owner.require_current()
 
+    def test_return_evidence_reopens_real_run_and_rejects_rebound_acceptance(self):
+        """Rehashing return metadata cannot replace canonical completion checks."""
+        self.finish()
+        admission, store = self.admission, self.store
+        run = admission.run
+        planning = RetainedProjectPlanningResult(
+            run.source_bom.plan, run.source_bom.managed_graph
+        )
+        arguments = self.unit_plan_arguments()
+        policy = RetainedUnitPackagePolicy(
+            **{
+                key: value
+                for key, value in arguments.items()
+                if key not in {"pkg_tool", "tar_tool"}
+            }
+        )
+        receipt_ref = store.put_manifest(
+            admission.receipt.to_dict(), media_type="application/json"
+        )
+        planning_ref = retain_retained_unit_planning_evidence(admission)
+        evidence_ref = retain_retained_unit_run_evidence(
+            admission,
+            maximum_bytes=policy.max_provider_metadata_bytes,
+            maximum_memory_bytes=policy.max_provider_memory_bytes,
+        )
+
+        def inputs(receipt_reference, planning_reference):
+            return read_retained_unit_planning_inputs(
+                admission.source,
+                run.source_bom.manifest,
+                run.source_bom.plan,
+                run.source_bom.component_locks,
+                receipt_reference,
+                store,
+                planning_evidence_reference=planning_reference,
+            )
+
+        def reopen(selected, evidence):
+            return reopen_retained_unit_run(
+                selected,
+                planning,
+                evidence,
+                policy=policy,
+                test_receipt_policy=run.configured_test_policy,
+                admission_guard=admission.require_current,
+            )
+
+        selected = inputs(receipt_ref, planning_ref)
+        reopened = reopen(selected, evidence_ref)
+        self.assertEqual(reopened.to_dict(), run.to_dict())
+        self.assertEqual(reopened.identity, run.identity)
+        self.assertFalse(reopened.to_dict()["sdk_admitted"])
+        self.assertFalse(reopened.to_dict()["lifecycle_receipt"])
+        evidence = store.get_manifest(evidence_ref)
+        selected_refs = [
+            BlobRef.from_dict(evidence["tool_observation"]),
+            BlobRef.from_dict(evidence["export_observation"]),
+            *(BlobRef.from_dict(v) for v in evidence["sdk_dependencies"]),
+            *(
+                BlobRef.from_dict(v)
+                for v in evidence["command_output_manifests"]
+                if v is not None
+            ),
+            evidence_ref,
+        ]
+        unique = {ref.identity: ref.size for ref in selected_refs}
+        before = set(store.iter_refs())
+        with self.assertRaisesRegex(
+            ValueError, "run-evidence-metadata-policy-exceeded"
+        ):
+            retain_retained_unit_run_evidence(
+                admission,
+                maximum_bytes=sum(unique.values()) - 1,
+                maximum_memory_bytes=policy.max_provider_memory_bytes,
+            )
+        self.assertEqual(set(store.iter_refs()), before)
+        # Keep hashes, receipt roots and observation joins internally consistent
+        # while removing actual independent acceptance. A historical reader may
+        # reopen those assertions; canonical completion must refuse them.
+        for label, field, values, expected in (
+            (
+                "missing-acceptance",
+                "acceptance_observations",
+                [],
+                "complete-run-observations-required",
+            ),
+            (
+                "repeated-command",
+                "command_observations",
+                [run.observations[0].identity.uri] * len(run.observations),
+                "unique-run-observations-required",
+            ),
+        ):
+            with self.subTest(case=label):
+                incomplete = run.to_dict()
+                incomplete[field] = values
+                incomplete_ref = store.put_manifest(
+                    incomplete, media_type="application/json"
+                )
+                old_ref = admission.receipt.root("completed-run")
+                records = {
+                    r.identity: r for r in admission.receipt.records if r != old_ref
+                }
+                records[incomplete_ref.identity] = incomplete_ref
+                forged = replace(
+                    admission.receipt,
+                    roots=tuple(
+                        (name, incomplete_ref if name == "completed-run" else ref)
+                        for name, ref in admission.receipt.roots
+                    ),
+                    records=tuple(records[name] for name in sorted(records)),
+                )
+                forged_ref = store.put_manifest(
+                    forged.to_dict(), media_type="application/json"
+                )
+                references = []
+                for ref in (planning_ref, evidence_ref):
+                    document = store.get_manifest(ref)
+                    document["retained_receipt_identity"] = forged.identity.uri
+                    references.append(
+                        store.put_manifest(document, media_type="application/json")
+                    )
+                with self.assertRaisesRegex(ValueError, expected):
+                    reopen(inputs(forged_ref, references[0]), references[1])
+        admission.require_current()
+
     def test_unit_plan_requires_live_admission_and_locked_output_license_intent(self):
         self.package_provider = "pkg"
         request = RetainedUnitPackageRequest(
@@ -216,6 +418,71 @@ class RetainedProjectPackageTests(unittest.TestCase):
         owner.require_current()
         projection = owner.projection
         self.assertEqual(set(self.store.iter_refs()), before)
+        evidence = owner.retain_planning_evidence()
+        before = set(self.store.iter_refs())
+        receipt = self.admission.receipt
+        reference = BlobRef(
+            receipt.identity.digest,
+            len(canonical_json_bytes(receipt.to_dict())),
+            media_type="application/json",
+        )
+        inputs = read_retained_unit_planning_inputs(
+            self.admission.source,
+            self.admission.run.source_bom.manifest,
+            self.admission.run.source_bom.plan,
+            self.admission.run.source_bom.component_locks,
+            reference,
+            self.store,
+            planning_evidence_reference=evidence,
+        )
+        self.assertEqual(
+            plan_retained_unit_packages(inputs, **arguments).identity,
+            projection.identity,
+        )
+        with self.assertRaisesRegex(TypeError, "live-admission-required"):
+            RetainedProjectUnitPackages(inputs, **arguments)
+        self.assertEqual(set(self.store.iter_refs()), before)
+        # Rehashing a receipt cannot substitute unrelated BOM or verifier bytes
+        # behind the unchanged completed run's observation identities.
+        for name in (
+            "source-bom",
+            "resolved-bom",
+            "acceptance-policy-bytes",
+            "completed-run",
+        ):
+            original_ref = receipt.root(name)
+            replacement = self.store.put_bytes(
+                canonical_json_bytes([] if name == "completed-run" else {}),
+                media_type=original_ref.media_type,
+            )
+            records = {ref.identity: ref for ref in (*receipt.records, replacement)}
+            forged = replace(
+                receipt,
+                roots=tuple(
+                    (key, replacement if key == name else value)
+                    for key, value in receipt.roots
+                ),
+                records=tuple(records[key] for key in sorted(records)),
+            )
+            forged_ref = self.store.put_manifest(
+                forged.to_dict(), media_type="application/json"
+            )
+            joins = self.store.get_manifest(evidence)
+            joins["retained_receipt_identity"] = forged.identity.uri
+            forged_evidence = self.store.put_manifest(
+                joins, media_type="application/json"
+            )
+            with self.subTest(root=name), self.assertRaises(ValueError):
+                read_retained_unit_planning_inputs(
+                    self.admission.source,
+                    self.admission.run.source_bom.manifest,
+                    self.admission.run.source_bom.plan,
+                    self.admission.run.source_bom.component_locks,
+                    forged_ref,
+                    self.store,
+                    planning_evidence_reference=forged_evidence,
+                )
+        before = set(self.store.iter_refs())
         self.assertEqual(projection.graph.index.unit_count, 1)
         definition = projection.graph.partition.definitions[0]
         self.assertEqual(definition.receipt_identity, self.admission.receipt.identity)
@@ -229,6 +496,28 @@ class RetainedProjectPackageTests(unittest.TestCase):
             (self.fixture.fixture.source / "specs/LICENSE").read_bytes(),
         )
         self.assertFalse(projection.set_plan.to_dict()["release_authorized"])
+        # Only the original live owner can use the completed LINK handoff.
+        # A serialized proof remains an assertion even when its CAS bytes verify.
+        handoff = link_retained_unit_packages(owner)
+        handoff.require_current(owner)
+        proof = self.store.get_manifest(handoff.reference)
+        self.assertTrue(proof["link_complete"])
+        self.assertFalse(proof["release_authorized"])
+        with self.assertRaisesRegex(TypeError, "live-link-handoff-required"):
+            owner.construct(object_root=self.fixture.fixture.base, link_handoff=proof)
+        foreign = RetainedProjectUnitPackages(self.admission, **arguments)
+        with self.assertRaisesRegex(ValueError, "link-handoff-selection-differs"):
+            handoff.require_current(foreign)
+        proof_path = self.store.path_for(handoff.reference)
+        proof_bytes = proof_path.read_bytes()
+        proof_path.write_bytes(b"{}")
+        try:
+            with self.assertRaises(BlobIntegrityError):
+                handoff.require_current(owner)
+        finally:
+            proof_path.write_bytes(proof_bytes)
+        handoff.require_current(owner)
+        before = set(self.store.iter_refs())
         with self.assertRaisesRegex(TypeError, "live-admission-required"):
             RetainedProjectUnitPackages(self.admission.receipt.to_dict(), **arguments)
         path = self.fixture.fixture.source / "specs/application.package-unit.json"
@@ -236,9 +525,12 @@ class RetainedProjectPackageTests(unittest.TestCase):
         path.write_bytes(original + b"\n")
         with self.assertRaises(ValueError):
             owner.require_current()
+        with self.assertRaises(ValueError):
+            handoff.require_current(owner)
         self.assertEqual(set(self.store.iter_refs()), before)
         path.write_bytes(original)
         owner.require_current()
+        handoff.require_current(owner)
 
     def unit_plan_arguments(self):
         root = self.fixture.fixture.base
@@ -317,6 +609,8 @@ class RetainedProjectPackageTests(unittest.TestCase):
         unit_request_path="specs/application.package-unit.json",
         copy_unit_request=False,
         documentation_path="docs.txt",
+        tree_outputs=False,
+        selected_tree_policy=True,
     ):
         f = self.fixture.fixture
         specification = b"# Retained package\nPreserve original bytes and behavior.\n"
@@ -358,6 +652,11 @@ class RetainedProjectPackageTests(unittest.TestCase):
             roles,
             f.manifest.limits,
             executable_paths=(f.runner_path,),
+            tree_policy=(
+                RetainedProjectTreePolicy()
+                if tree_outputs and selected_tree_policy
+                else None
+            ),
         )
         path = f.source / ACCEPTANCE_POLICY_PATH
         policy = RetainedProjectAcceptancePolicy.from_dict(
@@ -368,10 +667,31 @@ class RetainedProjectPackageTests(unittest.TestCase):
         path.write_bytes(content)
         profile = replace(
             f.plan.profile,
+            toolchain_identity=f.manifest.role_identity({"sdk", "toolchain"}),
+            dependency_identity=f.manifest.role_identity({"dependency"}),
             acceptance_policy_identity=ContentIdentity.parse_uri(
                 "sha256:" + hashlib.sha256(content).hexdigest()
             ),
         )
+        if tree_outputs:
+            actions = list(profile.actions)
+            actions[0] = replace(
+                actions[0],
+                argv=("export-tree", "{output_root}/app.bin"),
+                outputs=("app.bin", "empty", "z-directory", "z-hardlink", "z-link"),
+            )
+            profile = replace(
+                profile,
+                actions=tuple(actions),
+                package_inventory=(
+                    "app.bin",
+                    "docs.txt",
+                    "empty",
+                    "z-directory",
+                    "z-hardlink",
+                    "z-link",
+                ),
+            )
         if documentation_path != "docs.txt":
             actions = list(profile.actions)
             actions[2] = replace(

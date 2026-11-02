@@ -13,13 +13,29 @@ from unittest.mock import patch
 
 from literate_ai.adapters import retained_project_execution as execution
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
+from literate_ai.adapters.native_sdk_qualification import (
+    verify_historical_sdk_authority_checks,
+)
+from literate_ai.adapters.qualification_capture import QualificationCaptureError
 from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_PATH
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
 from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
+from literate_ai.adapters.retained_project_receipt import admit_retained_project
+from literate_ai.adapters.retained_unit_inspection import (
+    read_retained_unit_planning_inputs,
+)
+from literate_ai.adapters.retained_unit_planning_evidence import (
+    retain_retained_unit_planning_evidence,
+)
+from literate_ai.adapters.retained_unit_run_evidence import (
+    retain_retained_unit_run_evidence,
+)
+from literate_ai.adapters.retained_unit_run_inspection import reopen_retained_unit_run
 from literate_ai.cache_directories import CacheDirectories
 from literate_ai.contracts import (
+    BlobRef,
     ContentIdentity,
     SourceIntelligenceMode,
     canonical_identity,
@@ -44,7 +60,14 @@ from literate_ai.contracts.retained_project_sdks import (
     RetainedProjectSdkSelectionPolicy,
     read_retained_sdk_policy_document,
 )
-from literate_ai.security import AuthorizationError, BuildAuthorization, SecurityProfile
+from literate_ai.contracts.retained_unit_policy import RetainedUnitPackagePolicy
+from literate_ai.security import (
+    AuthorizationError,
+    AuthorizationRevocationSet,
+    BuildAuthorization,
+    BuildRequest,
+    SecurityProfile,
+)
 from tests.critical import test_retained_project_completion as completion
 from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_native_sdk_source_build as producer_fixtures
@@ -412,6 +435,242 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
         final = self.documents[result.native_sdk_final_check_identity.uri]
         self.assertTrue(final["checks"])
         self.assertFalse(result.to_dict()["lifecycle_receipt"])
+        # Inspect only the genuine recorded grants; this does not restore their
+        # original live scopes or authorize a command on this controller.
+        observations = (*result.observations, *result.acceptance_observations)
+        last_scopes = []
+        for observation in observations:
+            scopes = []
+            for identity in observation.native_sdk_executions:
+                value = self.documents[identity.uri]
+                grant = BuildAuthorization.from_dict(value["authorization"])
+                request = BuildRequest.from_dict(value["request"])
+                inputs = tuple(
+                    ContentIdentity.from_dict(v["input_identity"])
+                    for v in value["dependencies"]
+                )
+                after = verify_historical_sdk_authority_checks(
+                    value["checks"], grant, request, inputs
+                )
+                # A self-consistent record digest cannot hide missing input
+                # coverage or a recorded revocation of this actual command grant.
+                missing = deepcopy(value["checks"])
+                missing[0]["revocations"] = []
+                with self.assertRaises(QualificationCaptureError):
+                    verify_historical_sdk_authority_checks(
+                        missing, grant, request, inputs
+                    )
+                revoked = deepcopy(value["checks"])
+                revoked[0]["revocations"][0]["state"] = (
+                    AuthorizationRevocationSet()
+                    .revoke(
+                        grant.authorization_id,
+                        actor="independent-verifier",
+                        reason="Refuse revoked recorded command scope",
+                    )
+                    .to_dict()
+                )
+                with self.assertRaises(AuthorizationError):
+                    verify_historical_sdk_authority_checks(
+                        revoked, grant, request, inputs
+                    )
+                scopes.append((grant, request, inputs, after))
+            last_scopes = scopes
+        self.assertEqual(len(final["checks"]), len(last_scopes))
+        for check, (grant, request, inputs, after) in zip(
+            final["checks"], last_scopes, strict=True
+        ):
+            verify_historical_sdk_authority_checks(
+                [check],
+                grant,
+                request,
+                inputs,
+                expected_count=1,
+                not_before=after,
+            )
+            changed = deepcopy(check)
+            changed["checked_at"] = (after - timedelta(seconds=1)).isoformat()
+            with self.assertRaises(QualificationCaptureError):
+                verify_historical_sdk_authority_checks(
+                    [changed],
+                    grant,
+                    request,
+                    inputs,
+                    expected_count=1,
+                    not_before=after,
+                )
+
+        # Reopen the actual SDK-bearing accepted run using only retained bytes.
+        # This preserves immutable facts; no decoded grant becomes a live owner.
+        store = self.sdk_fixture.fixture.store
+        admission = admit_retained_project(workspace, store)
+        run = admission.run
+        planning = RetainedProjectPlanningResult(
+            run.source_bom.plan, run.source_bom.managed_graph
+        )
+        policy = RetainedUnitPackagePolicy(
+            run.source_bom.manifest.limits,
+            run.source_bom.manifest.limits,
+            10,
+            100,
+            64 * 1024**2,
+            1024**3,
+            1024**3,
+            1024**3,
+            1024**3,
+            max_provider_memory_bytes=1024**3,
+        )
+        evidence_reference = retain_retained_unit_run_evidence(
+            admission,
+            maximum_bytes=policy.max_provider_metadata_bytes,
+            maximum_memory_bytes=policy.max_provider_memory_bytes,
+        )
+        inputs = read_retained_unit_planning_inputs(
+            admission.source,
+            run.source_bom.manifest,
+            run.source_bom.plan,
+            run.source_bom.component_locks,
+            store.put_manifest(
+                admission.receipt.to_dict(), media_type="application/json"
+            ),
+            store,
+            planning_evidence_reference=retain_retained_unit_planning_evidence(
+                admission
+            ),
+        )
+
+        def reopen(reference, selected=inputs):
+            admission.require_current()
+            result = reopen_retained_unit_run(
+                selected,
+                planning,
+                reference,
+                policy=policy,
+                test_receipt_policy=run.configured_test_policy,
+                admission_guard=lambda: None,
+                current_sdk_snapshots=(self.sdk_fixture.snapshot,),
+            )
+            admission.require_current()
+            return result
+
+        reopened = reopen(evidence_reference)
+        self.assertEqual(reopened.to_dict(), run.to_dict())
+        evidence = store.get_manifest(evidence_reference)
+        self.assertTrue(evidence["sdk_metadata_records"])
+        recipe_identity = self.built.selection.recipe.identity.uri
+        self.assertIn(
+            recipe_identity,
+            {BlobRef.from_dict(v).identity for v in evidence["sdk_metadata_records"]},
+        )
+        changed = deepcopy(evidence)
+        changed["sdk_metadata_records"] = [
+            v
+            for v in changed["sdk_metadata_records"]
+            if BlobRef.from_dict(v).identity != recipe_identity
+        ]
+        with self.assertRaisesRegex(ValueError, "run-record-missing"):
+            reopen(store.put_manifest(changed, media_type="application/json"))
+        changed = deepcopy(evidence)
+        changed["sdk_metadata_records"].append(
+            store.put_manifest({"unreachable": True}).to_dict()
+        )
+        with self.assertRaisesRegex(ValueError, "exact-sdk-metadata-closure"):
+            reopen(store.put_manifest(changed, media_type="application/json"))
+
+        # Rehash the complete assertion chain, including the grant's request
+        # digest. An immutable checksum alone must not authorize different argv.
+        first = run.observations[0]
+        execution_identity = first.native_sdk_executions[0]
+        references = {
+            BlobRef.from_dict(v).identity: BlobRef.from_dict(v)
+            for v in evidence["sdk_metadata_records"]
+        }
+        execution_document = store.get_manifest(references[execution_identity.uri])
+        altered_execution = deepcopy(execution_document)
+        altered_execution["retained_command_context"]["argv"].append(
+            "unreviewed-argument"
+        )
+        altered_execution["command_binding"]["argv_identity"] = canonical_identity(
+            altered_execution["retained_command_context"]["argv"]
+        ).to_dict()
+        altered_execution["request"]["builder_id"] = canonical_identity(
+            altered_execution["command_binding"]
+        ).uri
+        altered_execution["authorization"]["request_digest"] = canonical_identity(
+            altered_execution["request"]
+        ).uri
+        updates = {
+            canonical_identity(execution_document[name]).uri: store.put_manifest(
+                altered_execution[name], media_type="application/json"
+            )
+            for name in ("request", "authorization")
+        }
+        altered_execution_ref = store.put_manifest(
+            altered_execution, media_type="application/json"
+        )
+        updates[execution_identity.uri] = altered_execution_ref
+        altered_observation = replace(
+            first,
+            native_sdk_executions=(
+                ContentIdentity.parse_uri(altered_execution_ref.identity),
+                *first.native_sdk_executions[1:],
+            ),
+        )
+        altered_run = replace(
+            run, observations=(altered_observation, *run.observations[1:])
+        )
+        altered_observation_ref = store.put_manifest(
+            altered_observation.to_dict(), media_type="application/json"
+        )
+        altered_run_ref = store.put_manifest(
+            altered_run.to_dict(), media_type="application/json"
+        )
+        removed = {first.identity.uri, run.identity.uri, execution_identity.uri}
+        records = {
+            ref.identity: ref
+            for ref in admission.receipt.records
+            if ref.identity not in removed
+        }
+        for ref in (altered_observation_ref, altered_run_ref, altered_execution_ref):
+            records[ref.identity] = ref
+        altered_receipt = replace(
+            admission.receipt,
+            roots=tuple(
+                (name, altered_run_ref if name == "completed-run" else ref)
+                for name, ref in admission.receipt.roots
+            ),
+            records=tuple(records[key] for key in sorted(records)),
+        )
+        altered_planning = store.get_manifest(
+            retain_retained_unit_planning_evidence(admission)
+        )
+        altered_planning["retained_receipt_identity"] = altered_receipt.identity.uri
+        altered_inputs = read_retained_unit_planning_inputs(
+            admission.source,
+            run.source_bom.manifest,
+            run.source_bom.plan,
+            run.source_bom.component_locks,
+            store.put_manifest(
+                altered_receipt.to_dict(), media_type="application/json"
+            ),
+            store,
+            planning_evidence_reference=store.put_manifest(
+                altered_planning, media_type="application/json"
+            ),
+        )
+        altered_evidence = deepcopy(evidence)
+        altered_evidence["retained_receipt_identity"] = altered_receipt.identity.uri
+        altered_evidence["sdk_metadata_records"] = [
+            updates.get(
+                BlobRef.from_dict(value).identity, BlobRef.from_dict(value)
+            ).to_dict()
+            for value in evidence["sdk_metadata_records"]
+        ]
+        with self.assertRaisesRegex(ValueError, "historical-command-context-differs"):
+            reopen(
+                store.put_manifest(altered_evidence, media_type="application/json"),
+                altered_inputs,
+            )
 
     def test_private_filesystem_case_preserves_live_sdk_command_scope(self):
         select_filesystem_case(self.completed)

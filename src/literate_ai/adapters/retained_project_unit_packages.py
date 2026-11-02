@@ -8,6 +8,8 @@ construction and live SDK/runtime/LINK scope remain separate mandatory gates.
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
+from pathlib import Path
 
 from literate_ai.adapters import freebsd_packaging as native
 from literate_ai.adapters.freebsd_composed_tree_packaging import (
@@ -24,9 +26,13 @@ from literate_ai.adapters.native_tree_shards import prepare_native_tree
 from literate_ai.adapters.retained_project_metadata import (
     read_retained_project_document,
 )
-from literate_ai.adapters.retained_project_receipt import AdmittedRetainedProject
+from literate_ai.adapters.retained_project_receipt import (
+    AdmittedRetainedProject,
+    select_retained_package_payload,
+)
 from literate_ai.adapters.retained_unit_graphs import prepare_retained_unit_graph
 from literate_ai.contracts.blobs import BlobRef
+from literate_ai.contracts.component_locking import ComponentLock
 from literate_ai.contracts.executable_components.packages import (
     PackageFileKind,
     PackageInput,
@@ -45,7 +51,12 @@ from literate_ai.contracts.retained_component_ownership import (
     require_registered_retained_owners,
     retained_owner,
 )
-from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.retained_project import (
+    RetainedProjectLimits,
+    RetainedProjectManifest,
+)
+from literate_ai.contracts.retained_project_lifecycle import RetainedProjectPlan
+from literate_ai.contracts.retained_project_receipt import RetainedProjectReceipt
 from literate_ai.contracts.retained_unit_packages import (
     RetainedUnitDependency,
     RetainedUnitOwnership,
@@ -54,6 +65,7 @@ from literate_ai.contracts.retained_unit_packages import (
 )
 from literate_ai.contracts.retained_unit_partition import RetainedUnitPartition
 from literate_ai.contracts.retained_unit_requests import RetainedUnitPackageRequest
+from literate_ai.storage.cas import FileSystemCAS
 
 UNIT_REQUEST_SUFFIX = ".package-unit.json"
 
@@ -64,12 +76,62 @@ def _reference(content, media_type="application/json"):
     )
 
 
-class RetainedProjectUnitPackages:
-    """Original-authority package owner; a JSON assertion is not a live owner."""
+@dataclass(frozen=True, slots=True)
+class RetainedUnitPackagePlanningInputs:
+    """Typed assertions for pure planning, never a completed verifier or producer."""
+
+    source: Path
+    store: FileSystemCAS
+    receipt: RetainedProjectReceipt
+    plan: RetainedProjectPlan
+    source_manifest: RetainedProjectManifest
+    payload_manifest: RetainedProjectManifest
+    output_manifest: RetainedProjectManifest
+    component_locks: tuple[ComponentLock, ...]
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.source, Path)
+            or not isinstance(self.store, FileSystemCAS)
+            or not isinstance(self.receipt, RetainedProjectReceipt)
+            or not isinstance(self.plan, RetainedProjectPlan)
+            or not isinstance(self.source_manifest, RetainedProjectManifest)
+            or not isinstance(self.payload_manifest, RetainedProjectManifest)
+            or not isinstance(self.output_manifest, RetainedProjectManifest)
+            or type(self.component_locks) is not tuple
+            or any(not isinstance(lock, ComponentLock) for lock in self.component_locks)
+        ):
+            raise TypeError("retained.unit.typed-planning-inputs-required")
+        if (
+            self.receipt.root("plan").identity != self.plan.identity.uri
+            or self.receipt.root("input-manifest").identity
+            != self.source_manifest.identity.uri
+            or self.receipt.root("payload-manifest").identity
+            != self.payload_manifest.identity.uri
+            or self.plan.manifest_identity != self.source_manifest.identity
+            or tuple(lock.identity for lock in self.component_locks)
+            != self.plan.component_locks
+            or self.receipt.project_id != self.plan.project_id
+            or self.output_manifest.limits != self.source_manifest.limits
+            or self.receipt.root("output-manifest").identity
+            != self.output_manifest.identity.uri
+            or self.payload_manifest
+            != select_retained_package_payload(self.output_manifest, self.plan.profile)
+        ):
+            raise ValueError("retained.unit.planning-assertion-context-mismatch")
+
+
+def plan_retained_unit_packages(inputs, **policy):
+    """Compute exact payload-bound plans without retaining or granting authority."""
+    return _RetainedUnitPackagePlanner(inputs, **policy).projection
+
+
+class _RetainedUnitPackagePlanner:
+    """Pure computation over typed assertions; no native production methods."""
 
     def __init__(
         self,
-        admission,
+        inputs,
         *,
         pkg_tool,
         tar_tool,
@@ -92,13 +154,13 @@ class RetainedProjectUnitPackages:
         max_provider_memory_bytes=256 * 1024**2,
         max_verified_record_cache_bytes=1024**3,
     ):
-        if not isinstance(admission, AdmittedRetainedProject):
-            raise TypeError("retained.unit.live-admission-required")
+        if not isinstance(inputs, RetainedUnitPackagePlanningInputs):
+            raise TypeError("retained.unit.typed-planning-inputs-required")
         if not isinstance(limits, RetainedProjectLimits) or not isinstance(
             per_unit_limits, RetainedProjectLimits
         ):
             raise TypeError("retained.unit.explicit-package-limits-required")
-        self.admission, self.pkg_tool, self.tar_tool = admission, pkg_tool, tar_tool
+        self.inputs, self.pkg_tool, self.tar_tool = inputs, pkg_tool, tar_tool
         composed_freebsd_tool_identity(pkg_tool, tar_tool)
         self.limits, self.per_unit_limits = limits, per_unit_limits
         self.max_units, self.max_dependencies, self.max_metadata_bytes = (
@@ -136,71 +198,9 @@ class RetainedProjectUnitPackages:
             max_archive_bytes=max_archive_bytes,
             max_total_archive_bytes=max_total_archive_bytes,
         )
-        admission.require_current()
         self._metadata = {}
         self._metadata_bytes = 0
         self.projection = self._plan()
-        admission.require_current()
-
-    def require_current(self):
-        """Recompute original-authority bindings without executing native tools."""
-        self.admission.require_current()
-        self._metadata = {}
-        self._metadata_bytes = 0
-        current = self._plan()
-        if current.identity != self.projection.identity:
-            raise ValueError("retained.unit.package-plan-changed")
-        self.admission.require_current()
-
-    def construct(self, *, object_root):
-        """Produce and independently reopen every unit under current live scope."""
-        from literate_ai.adapters.freebsd_retained_unit_archives import (
-            construct_retained_unit_archives,
-        )
-
-        return construct_retained_unit_archives(self, object_root=object_root)
-
-    def construct_set(self, *, object_root):
-        """Retain bounded descriptors only after complete native verification."""
-        from literate_ai.adapters.retained_unit_results import (
-            retain_retained_unit_results,
-        )
-
-        results = self.construct(object_root=object_root)
-        reference = retain_retained_unit_results(
-            self.projection, results, self.admission.store, **self.tree_policy
-        )
-        self.require_current()
-        self.admission.require_native_package_scope()
-        self.pkg_tool.require_unchanged()
-        self.tar_tool.require_current()
-        return reference
-
-    def verify_set(self, reference, *, object_root):
-        """Reopen assertions under current live authority and native tools."""
-        from literate_ai.adapters.freebsd_composed_tree_packaging import (
-            verify_freebsd_composed_package_set,
-        )
-        from literate_ai.adapters.retained_unit_results import (
-            read_retained_unit_results,
-        )
-
-        self.require_current()
-        self.admission.require_native_package_scope()
-        index, results = read_retained_unit_results(
-            self.projection, reference, self.admission.store, **self.tree_policy
-        )
-        verify_freebsd_composed_package_set(
-            self.projection,
-            results,
-            store=self.admission.store,
-            object_root=object_root,
-        )
-        self.require_current()
-        self.admission.require_native_package_scope()
-        self.pkg_tool.require_unchanged()
-        self.tar_tool.require_current()
-        return index
 
     def _document(self, value, identity):
         if identity in self._known_metadata:
@@ -276,7 +276,7 @@ class RetainedProjectUnitPackages:
         wanted = {}
         memory = 128 * len(members)
         self._lock_ids = {}
-        for lock in self.admission.run.source_bom.component_locks:
+        for lock in self.inputs.component_locks:
             node = next(
                 value
                 for value in lock.nodes
@@ -319,7 +319,7 @@ class RetainedProjectUnitPackages:
                 ):
                     raise ValueError("retained.unit.request-decode-policy-exceeded")
                 document = read_retained_project_document(
-                    self.admission.source,
+                    self.inputs.source,
                     member,
                     maximum_bytes=8 * 1024**2,
                     error_prefix="retained.unit.request",
@@ -347,8 +347,8 @@ class RetainedProjectUnitPackages:
         return tuple(sorted(result, key=lambda value: value[0].unit_name))
 
     def _plan(self):
-        run, receipt = self.admission.run, self.admission.receipt
-        source = run.source_bom.manifest
+        inputs, receipt = self.inputs, self.inputs.receipt
+        source = inputs.source_manifest
         if (
             128 * len(source.members)
             > self.provider_policy["max_provider_memory_bytes"]
@@ -359,10 +359,10 @@ class RetainedProjectUnitPackages:
         targets = {lock.target_profile_identity for _, lock, _, _, _ in requests}
         if len(targets) != 1 or any(
             lock.target_profile_identity not in targets
-            for lock in run.source_bom.component_locks
+            for lock in inputs.component_locks
         ):
             raise ValueError("retained.unit.mixed-target-locks")
-        tree = self._tree(self.admission.payload_manifest)
+        tree = self._tree(inputs.payload_manifest)
         tree_ref = _reference(canonical_json_bytes(tree.index.to_dict()))
         self._known_metadata = {
             ContentIdentity.parse_uri(value.identity): value
@@ -376,7 +376,7 @@ class RetainedProjectUnitPackages:
         )
         receipt_ref = self._document(receipt.to_dict, receipt.identity)
         profile_ref = self._document(
-            run.source_bom.plan.profile.to_dict, run.source_bom.plan.profile.identity
+            inputs.plan.profile.to_dict, inputs.plan.profile.identity
         )
         definitions, parameters, declarations = {}, {}, {}
         for request, lock, revision, request_spec, provider_revision in requests:
@@ -391,7 +391,7 @@ class RetainedProjectUnitPackages:
             ):
                 raise ValueError("retained.unit.authoritative-source-license-required")
             license_ref = BlobRef(license_member.sha256, license_member.size)
-            self.admission.store.verify(license_ref)
+            self.inputs.store.verify(license_ref)
             evidence_refs = {
                 "component-authoring": self._document(
                     revision.definition.to_dict, revision.authoring_identity
@@ -471,7 +471,7 @@ class RetainedProjectUnitPackages:
                 request.unit_name,
                 revision.coordinate,
                 request_identity=request_identity,
-                retained_plan_identity=run.source_bom.plan.identity,
+                retained_plan_identity=inputs.plan.identity,
                 payload_identity=tree.identity,
                 target_identity=lock.target_profile_identity,
                 provider_revision=provider_revision,
@@ -552,6 +552,117 @@ class RetainedProjectUnitPackages:
             **self.closure_policy,
             **self.provider_policy,
         )
+
+
+class RetainedProjectUnitPackages(_RetainedUnitPackagePlanner):
+    """Original-authority owner; mechanical planning inputs cannot instantiate it."""
+
+    def __init__(self, admission, **policy):
+        if not isinstance(admission, AdmittedRetainedProject):
+            raise TypeError("retained.unit.live-admission-required")
+        admission.require_current()
+        self.admission = admission
+        super().__init__(_live_planning_inputs(admission), **policy)
+        admission.require_current()
+
+    def require_current(self):
+        """Recompute original-authority bindings without executing native tools."""
+        self.admission.require_current()
+        self.inputs = _live_planning_inputs(self.admission)
+        self._metadata = {}
+        self._metadata_bytes = 0
+        current = self._plan()
+        if current.identity != self.projection.identity:
+            raise ValueError("retained.unit.package-plan-changed")
+        self.admission.require_current()
+
+    def construct(self, *, object_root, link_handoff=None):
+        """Produce and independently reopen every unit under current live scope."""
+        from literate_ai.adapters.freebsd_retained_unit_archives import (
+            construct_retained_unit_archives,
+        )
+
+        return construct_retained_unit_archives(
+            self, object_root=object_root, link_handoff=link_handoff
+        )
+
+    def retain_planning_evidence(self):
+        """Capture historical joins without changing the aggregate receipt."""
+        from literate_ai.adapters.retained_unit_planning_evidence import (
+            retain_retained_unit_planning_evidence,
+        )
+
+        return retain_retained_unit_planning_evidence(
+            self.admission,
+            maximum_bytes=min(
+                self.tree_policy["max_descriptor_bytes"],
+                self.provider_policy["max_provider_metadata_bytes"],
+            ),
+            maximum_memory_bytes=self.provider_policy["max_provider_memory_bytes"],
+        )
+
+    def construct_set(self, *, object_root, link_handoff=None):
+        """Retain bounded descriptors only after complete native verification."""
+        from literate_ai.adapters.retained_unit_results import (
+            retain_retained_unit_results,
+        )
+
+        results = self.construct(object_root=object_root, link_handoff=link_handoff)
+        reference = retain_retained_unit_results(
+            self.projection, results, self.admission.store, **self.tree_policy
+        )
+        self.require_current()
+        self.admission.require_native_package_scope()
+        self.pkg_tool.require_unchanged()
+        self.tar_tool.require_current()
+        return reference
+
+    def verify_set(self, reference, *, object_root):
+        """Reopen assertions under current live authority and native tools."""
+        import platform
+
+        from literate_ai.adapters.freebsd_composed_tree_packaging import (
+            verify_freebsd_composed_package_set,
+        )
+        from literate_ai.adapters.retained_unit_link import link_retained_unit_packages
+        from literate_ai.adapters.retained_unit_results import (
+            read_retained_unit_results,
+        )
+        from literate_ai.application.packaging import PackagingError
+
+        if platform.system().casefold() != "freebsd":
+            raise PackagingError("Native unit package verification requires FreeBSD")
+        self.require_current()
+        self.admission.require_native_package_scope()
+        self.pkg_tool.require_unchanged()
+        self.tar_tool.require_current()
+        handoff = link_retained_unit_packages(self)
+        index, results = read_retained_unit_results(
+            self.projection, reference, self.admission.store, **self.tree_policy
+        )
+        verify_freebsd_composed_package_set(
+            self.projection,
+            results,
+            store=self.admission.store,
+            object_root=object_root,
+        )
+        handoff.require_current(self)
+        self.pkg_tool.require_unchanged()
+        self.tar_tool.require_current()
+        return index
+
+
+def _live_planning_inputs(admission):
+    return RetainedUnitPackagePlanningInputs(
+        admission.source,
+        admission.store,
+        admission.receipt,
+        admission.run.source_bom.plan,
+        admission.run.source_bom.manifest,
+        admission.payload_manifest,
+        admission.run.output_manifest,
+        admission.run.source_bom.component_locks,
+    )
 
 
 def node_selection(lock):

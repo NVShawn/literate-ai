@@ -48,6 +48,11 @@ litai run
 litai package plan
 litai package build
 litai package verify
+litai package retained-units observe-tools
+litai package retained-units plan
+litai package retained-units inspect
+litai package retained-units execution-plan
+litai package retained-units execute
 litai orchestrate plan
 litai orchestrate run
 litai clean

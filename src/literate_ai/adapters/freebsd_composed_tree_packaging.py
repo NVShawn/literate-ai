@@ -359,7 +359,9 @@ class FreeBsdComposedPackageSetProjection:
             "authority_mode": "retained-project",
             "release_authorized": False,
             "set_plan": self.set_plan.to_dict(),
-            "graph_identity": self.graph.identity.uri,
+            # The immutable graph was rehashed against this exact reference in
+            # __post_init__; avoid hashing its complete index once per unit.
+            "graph_identity": self.set_plan.graph_index.identity,
             "pkg_tool_identity": self.pkg_tool.identity.uri,
             "tar_tool_identity": self.tar_tool.identity.uri,
             "provider_policy": self.provider_policy,
@@ -445,7 +447,7 @@ class FreeBsdComposedPackageSetProjection:
                 "literate-ai:unit-plan": plan.identity.uri,
                 "literate-ai:unit-definition": definition.identity.uri,
                 "literate-ai:set-plan": self.set_plan.identity.uri,
-                "literate-ai:graph": self.graph.identity.uri,
+                "literate-ai:graph": self.set_plan.graph_index.identity,
                 "literate-ai:tool": self.set_plan.tool_identity.uri,
                 **{
                     "literate-ai:" + field.replace("_", "-"): getattr(
@@ -457,8 +459,12 @@ class FreeBsdComposedPackageSetProjection:
         }
 
     def unit_expansion_limit(self, identity):
+        return self.unit_geometry(identity)[1]
+
+    def unit_geometry(self, identity):
+        """Compute canonical geometry and its expansion reservation together."""
         members = self.unit_members(identity)
-        return (
+        expanded = (
             sum(
                 value.blob.size
                 if value.blob is not None
@@ -471,6 +477,7 @@ class FreeBsdComposedPackageSetProjection:
             + len(members) * 16384
             + 20480
         )
+        return members, expanded
 
 
 @dataclass(frozen=True, slots=True)

@@ -25,6 +25,7 @@ from .repository_orchestration import (
     _git,
     _read_document,
 )
+from .repository_refresh import _local_identity_wire
 from .repository_refresh_worktrees import (
     RegisteredRefreshWorktree,
     parse_refresh_worktrees,
@@ -133,7 +134,7 @@ class _Observation:
             {
                 "schema": "literate-ai/project-worktree-filesystem-observation@1",
                 "nodes": [
-                    {"path": str(path), "signature": node}
+                    {"path": str(path), "signature": _local_identity_wire(node)}
                     for path, node in sorted(self.nodes.items())
                 ],
             }

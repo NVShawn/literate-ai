@@ -131,19 +131,21 @@ class RetainedProjectSourceBom:
         object.__setattr__(self, "content", content)
         object.__setattr__(self, "binding", binding)
 
+    def to_dict(self):
+        """Canonical observation assertion; serialization grants no live scope."""
+        return {
+            "schema": "literate-ai/retained-source-bom-observation@1",
+            "plan_identity": self.plan.identity.uri,
+            "input_manifest_identity": self.manifest.identity.uri,
+            "managed_graph_identity": self.managed_graph.identity.uri,
+            "source_bom_identity": self.binding.bom_identity.uri,
+            "sdk_admitted": False,
+            "lifecycle_receipt": False,
+        }
+
     @property
     def identity(self) -> ContentIdentity:
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-source-bom-observation@1",
-                "plan_identity": self.plan.identity.uri,
-                "input_manifest_identity": self.manifest.identity.uri,
-                "managed_graph_identity": self.managed_graph.identity.uri,
-                "source_bom_identity": self.binding.bom_identity.uri,
-                "sdk_admitted": False,
-                "lifecycle_receipt": False,
-            }
-        )
+        return canonical_identity(self.to_dict())
 
     def require_content(self, content):
         if type(content) is not bytes or content != self.content:
@@ -227,31 +229,33 @@ class RetainedProjectResolvedBom:
         object.__setattr__(self, "content", content)
         object.__setattr__(self, "binding", binding)
 
+    def to_dict(self):
+        """Canonical observation assertion; serialization grants no live scope."""
+        return {
+            "schema": "literate-ai/retained-resolved-bom-observation@1",
+            "source_observation_identity": self.source.identity.uri,
+            "output_manifest_identity": self.output_manifest.identity.uri,
+            "resolved_bom_identity": self.binding.bom_identity.uri,
+            "tool_observation_identity": "sha256:"
+            + hashlib.sha256(self.tool_observation).hexdigest(),
+            "export_observation_identity": "sha256:"
+            + hashlib.sha256(self.export_observation).hexdigest(),
+            "sdk_admitted": False,
+            "lifecycle_receipt": False,
+            **(
+                {
+                    "sdk_dependencies": [
+                        item.identity.uri for item in self.sdk_dependencies
+                    ]
+                }
+                if self.sdk_dependencies
+                else {}
+            ),
+        }
+
     @property
     def identity(self) -> ContentIdentity:
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-resolved-bom-observation@1",
-                "source_observation_identity": self.source.identity.uri,
-                "output_manifest_identity": self.output_manifest.identity.uri,
-                "resolved_bom_identity": self.binding.bom_identity.uri,
-                "tool_observation_identity": "sha256:"
-                + hashlib.sha256(self.tool_observation).hexdigest(),
-                "export_observation_identity": "sha256:"
-                + hashlib.sha256(self.export_observation).hexdigest(),
-                "sdk_admitted": False,
-                "lifecycle_receipt": False,
-                **(
-                    {
-                        "sdk_dependencies": [
-                            item.identity.uri for item in self.sdk_dependencies
-                        ]
-                    }
-                    if self.sdk_dependencies
-                    else {}
-                ),
-            }
-        )
+        return canonical_identity(self.to_dict())
 
     def require_content(self, content):
         if type(content) is not bytes or content != self.content:

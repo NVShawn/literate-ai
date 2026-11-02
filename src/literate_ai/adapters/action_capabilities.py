@@ -171,6 +171,7 @@ def encode_capability_response(
     worker_identity: ContentIdentity,
     *,
     http_source: bool,
+    base_actions: tuple[LifecycleActionKind, ...] = _SUPPORTED,
     build_profile: ContentIdentity | None = None,
     build_toolchains: tuple[ContentIdentity, ...] = (),
     build_standard_tools: ContentIdentity | None = None,
@@ -189,6 +190,12 @@ def encode_capability_response(
         raise ActionWireError(
             "action_capability.worker_mismatch", "receiver binds another worker"
         )
+    if (
+        type(base_actions) is not tuple
+        or len(set(base_actions)) != len(base_actions)
+        or any(value not in _SUPPORTED for value in base_actions)
+    ):
+        raise ValueError("receiver base actions must be a private supported subset")
     deadline.remaining()
     code_identity = receiver_code_identity(deadline=deadline)
     python_content = _read_regular_file(
@@ -215,7 +222,7 @@ def encode_capability_response(
             "actions": sorted(
                 kind.value
                 for kind in (
-                    *_SUPPORTED,
+                    *base_actions,
                     *((LifecycleActionKind.BUILD,) if build else ()),
                     *((LifecycleActionKind.TEST,) if test else ()),
                     *((LifecycleActionKind.EXECUTE,) if execute else ()),

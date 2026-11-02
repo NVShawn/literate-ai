@@ -70,7 +70,7 @@ class CapturedRetainedSdkRuntimeTests(unittest.TestCase):
         self.assertFalse((f.source / "without-loader.txt").exists())
         args, kwargs = self.case.public_runtime_arguments()
         with patch(
-            "literate_ai.adapters.retained_project_sdk_runtime.project_component_roots",
+            "literate_ai.adapters.retained_sdk_authority.project_component_roots",
             return_value=(self.sdk_fixture.recipe_fixture.component,),
         ):
             admission, workspace = execute_local_retained_project(*args, **kwargs)
@@ -84,7 +84,7 @@ class CapturedRetainedSdkRuntimeTests(unittest.TestCase):
         sdk = [
             r
             for r in records
-            if r.get("schema") == "literate-ai/native-sdk-command-execution@4"
+            if r.get("schema") == "literate-ai/native-sdk-command-execution@5"
         ]
         self.assertEqual(len(sdk), 6)
         for command in sdk:
@@ -188,7 +188,7 @@ class CapturedRetainedSdkRuntimeTests(unittest.TestCase):
         commands = [
             v
             for v in self.case.documents.values()
-            if v.get("schema") == "literate-ai/native-sdk-command-execution@4"
+            if v.get("schema") == "literate-ai/native-sdk-command-execution@5"
         ]
         self.assertEqual(len(commands), 6)
 

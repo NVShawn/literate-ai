@@ -8,13 +8,18 @@ import lzma
 import os
 import platform
 import subprocess
+import sys
 import tarfile
 import unittest
 from dataclasses import replace
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest import mock
 
 from literate_ai.adapters import freebsd_tree_packaging as tree_pkg
+from literate_ai.adapters.action_blob_source import HttpActionBlobSource
+from literate_ai.adapters.action_command_blob_source import CommandActionBlobSource
+from literate_ai.adapters.action_dispatch_wire import ActionDispatchDeadline
 from literate_ai.adapters.freebsd_composed_tree_packaging import (
     inspect_freebsd_composed_package_set,
     verify_freebsd_composed_package_set,
@@ -24,6 +29,9 @@ from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
 from literate_ai.adapters.retained_unit_results import (
     read_retained_unit_results,
     retain_retained_unit_results,
+)
+from literate_ai.adapters.retained_unit_transfer import (
+    receive_retained_unit_package_set,
 )
 from literate_ai.adapters.tree_packaging import verify_tree_package_stage
 from literate_ai.application.packaging import PackagingError
@@ -35,18 +43,27 @@ from literate_ai.contracts.executable_components.packages import (
     RuntimeRequirement,
     RuntimeRequirementKind,
 )
+from literate_ai.contracts.execution_dispatch import (
+    LIFECYCLE_ACTION_WIRE_PROTOCOL,
+    ExecutionWorker,
+    ExecutionWorkerKind,
+)
 from literate_ai.contracts.native_sdk_trees import NativeSdkAlias, NativeSdkTree
 from literate_ai.contracts.native_sdks import NativeSdkFile
 from literate_ai.contracts.package_tree_inputs import PackageTreeInput
 from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.contracts.retained_unit_results import RetainedUnitPackageResultShard
 from literate_ai.contracts.tree_packages import TreePackagePlan, TreePackageResult
+from literate_ai.return_cas import CONFIG_SCHEMA
+from literate_ai.storage.cas import FileSystemCAS
 from tests.critical import test_tree_packages as tree_fixture
 from tests.support import fixtures_test_package_adapters as package_fixture
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_retained_unit_archives import (
     archive_assertion,
     composed_fixture,
 )
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 from tests.support.fixtures_test_executable_component_v2_schemas import (
     _official_validator,
 )
@@ -238,6 +255,102 @@ class FreeBsdTreePackageTests(unittest.TestCase):
         index, reopened = read_retained_unit_results(projection, reference, self.store)
         self.assertEqual(len(index.shards), 2)
         self.assertEqual(inspect(reopened), results)
+        returned = FileSystemCAS(self.work.parent / "returned-cas")
+        transferred = (reference, *index.shards, *(value.archive for value in results))
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
+        configuration = self.work.parent / "command-return.json"
+        worker = ExecutionWorker(
+            "unit-return",
+            ExecutionWorkerKind.COMMAND,
+            command=(
+                sys.executable,
+                "-m",
+                "literate_ai.return_cas",
+                "--config",
+                str(configuration),
+            ),
+            action_protocol=LIFECYCLE_ACTION_WIRE_PROTOCOL,
+        )
+        settings = {
+            "schema": CONFIG_SCHEMA,
+            "cas": str(self.store.root),
+            "worker_identity": worker.identity.uri,
+            "maximum_bytes": 16 * 1024**3,
+        }
+        configuration.write_bytes(canonical_json_bytes(settings))
+        command_return = FileSystemCAS(self.work.parent / "command-return-cas")
+        command_index, command_results, command_measurements = (
+            receive_retained_unit_package_set(
+                projection,
+                reference,
+                store=command_return,
+                source=CommandActionBlobSource(
+                    worker,
+                    deadline,
+                    registration_identity=canonical_identity(settings),
+                    cwd=self.work.parent.resolve(),
+                    environment=os.environ,
+                ),
+                object_root=self.work,
+                deadline=deadline,
+                admission_guard=lambda: None,
+                max_descriptor_bytes=4096,
+                max_descriptor_total_bytes=16384,
+                max_index_bytes=4096,
+                max_metadata_memory_bytes=1024**2,
+            )
+        )
+        self.assertEqual((command_index, command_results), (index, results))
+        self.assertEqual(command_measurements["blob_fetches"], len(transferred))
+        self.assertEqual(
+            command_measurements["payload_bytes_received"],
+            sum(ref.size for ref in transferred),
+        )
+        self.assertFalse(command_measurements["admitted"])
+        self.assertFalse(command_measurements["native_verified"])
+        with source_cas_server(
+            {blob_path(ref): self.store.path_for(ref) for ref in transferred}
+        ) as (url, requests):
+            source = HttpActionBlobSource(url, deadline, allow_http=True)
+
+            def receive(store=returned, guard=lambda: None, ref=reference):
+                return receive_retained_unit_package_set(
+                    projection,
+                    ref,
+                    store=store,
+                    source=source,
+                    object_root=self.work,
+                    deadline=deadline,
+                    admission_guard=guard,
+                    max_descriptor_bytes=4096,
+                    max_descriptor_total_bytes=16384,
+                    max_index_bytes=4096,
+                    max_metadata_memory_bytes=1024**2,
+                )
+
+            received_index, received_results, measurements = receive()
+            self.assertEqual((received_index, received_results), (index, results))
+            self.assertEqual(
+                measurements["payload_bytes_received"],
+                sum(ref.size for ref in transferred),
+            )
+            self.assertEqual(measurements["blob_fetches"], len(transferred))
+            self.assertFalse(measurements["admitted"])
+            self.assertFalse(measurements["native_verified"])
+            self.assertEqual(len(requests), len(transferred))
+            self.assertEqual(receive()[2]["payload_bytes_received"], 0)
+            self.assertEqual(len(requests), len(transferred))
+            partial = FileSystemCAS(self.work.parent / "refused-return-cas")
+            prior = partial.put_bytes(b"previous usable package")
+
+            def revoked():
+                if partial.path_for(results[0].archive).exists():
+                    raise ValueError("worker custody changed")
+
+            with self.assertRaisesRegex(ValueError, "worker custody changed"):
+                receive(partial, revoked)
+            partial.verify(prior)
+            self.assertFalse(partial.path_for(results[1].archive).exists())
         # An overfull first descriptor exhausts the exact result count. Refuse
         # before accessing a deliberately nonexistent later descriptor.
         combined = self.store.put_manifest(
@@ -254,6 +367,23 @@ class FreeBsdTreePackageTests(unittest.TestCase):
         altered_index = self.store.put_manifest(forged, media_type="application/json")
         with self.assertRaisesRegex(ValueError, "result-actual-count-exceeds-index"):
             read_retained_unit_results(projection, altered_index, self.store)
+        with source_cas_server(
+            {
+                blob_path(ref): self.store.path_for(ref)
+                for ref in (altered_index, combined)
+            }
+        ) as (url, requests):
+            source = HttpActionBlobSource(url, deadline, allow_http=True)
+            forged_return = FileSystemCAS(self.work.parent / "forged-return-cas")
+            with self.assertRaisesRegex(
+                ValueError, "result-actual-count-exceeds-index"
+            ):
+                receive(store=forged_return, ref=altered_index)
+            self.assertEqual(
+                [path for path, _credential in requests],
+                [blob_path(altered_index), blob_path(combined)],
+            )
+            returned.verify(results[0].archive)
         # These portable format assertions are not native tool execution or a
         # retained producer. The native front door must retain its platform gate.
         if platform.system().casefold() != "freebsd":

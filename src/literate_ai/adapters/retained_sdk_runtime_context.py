@@ -1,6 +1,6 @@
 """A reviewed captured loader projection, never an ambient-override permission."""
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from types import MappingProxyType
 
 from literate_ai.adapters.retained_project_dependencies import (
@@ -51,7 +51,17 @@ def _native_graph(components, edges, *, sdk_root=None):
 
 
 def _require_native_equivalence(
-    actual, children, expected, expected_children, seeds, loader_paths, loader_members
+    actual,
+    children,
+    expected,
+    expected_children,
+    seeds,
+    loader_paths,
+    loader_members,
+    *,
+    path_type=Path,
+    same_file=None,
+    resolve_path=None,
 ):
     """Compare the reachable SDK graph, allowing reviewed external byte copies."""
     pending, mapped = set(seeds), {}
@@ -61,19 +71,27 @@ def _require_native_equivalence(
             continue
         selected = path
         for directory in loader_paths:
-            candidate = str(Path(directory) / Path(path).name)
+            candidate = str(path_type(directory) / path_type(path).name)
             if candidate not in loader_members:
                 continue
             same = candidate == path
             if not same:
                 try:
-                    same = Path(candidate).samefile(path)
+                    same = (
+                        Path(candidate).samefile(path)
+                        if same_file is None
+                        else same_file(candidate, path)
+                    )
                 except OSError:
                     same = False
             if path in seeds and not same:
                 raise ValueError("retained.sdk.captured-loader-shadows-sdk-dependency")
             selected = (
-                candidate if candidate in actual else str(Path(candidate).resolve())
+                candidate
+                if candidate in actual
+                else str(Path(candidate).resolve())
+                if resolve_path is None
+                else resolve_path(candidate)
             )
             break
         if actual.get(selected) != expected[path]:
@@ -84,6 +102,151 @@ def _require_native_equivalence(
         expected_targets = {mapped[p] for p in expected_children[path]} - {selected}
         if children.get(selected) != expected_targets:
             raise ValueError("retained.sdk.captured-loader-shadows-sdk-dependency")
+
+
+def verify_historical_retained_sdk_runtime_context(
+    document,
+    *,
+    plan,
+    manifest,
+    command_context,
+    command_binding,
+    tool_observation,
+    sdk_values,
+    guard,
+    canonical_input_root=None,
+):
+    """Check captured loader facts using manifest aliases, never controller files."""
+
+    def require(value):
+        if not value:
+            raise ValueError("retained.sdk.historical-runtime-context-differs")
+
+    guard()
+    path_type = (
+        PureWindowsPath if command_context["platform"] == "windows" else PurePosixPath
+    )
+    input_root = path_type(command_context["workspace_root"]) / "snapshot" / "tree"
+    canonical_root = (
+        input_root if canonical_input_root is None else canonical_input_root
+    )
+    require(
+        isinstance(canonical_root, path_type)
+        and canonical_root.is_absolute()
+        and ".." not in canonical_root.parts
+    )
+    environment = command_context["environment"]
+    variable = (
+        "DYLD_LIBRARY_PATH"
+        if command_context["platform"] == "macos"
+        else "LD_LIBRARY_PATH"
+    )
+    loader_environment = {
+        variable: ":".join(
+            str(input_root / name) for name in plan.profile.runtime_library_paths
+        )
+    }
+    require(
+        type(document) is dict
+        and set(document)
+        == {
+            "schema",
+            "plan_identity",
+            "manifest_identity",
+            "environment_identity",
+            "captured_loader_environment",
+            "input_root",
+            "captured_runtime_members",
+            "observation",
+        }
+    )
+    require(
+        document["schema"] == "literate-ai/retained-sdk-runtime-context@1"
+        and document["plan_identity"] == plan.identity.to_dict()
+        and document["manifest_identity"] == manifest.identity.to_dict()
+        and document["environment_identity"]
+        == canonical_identity(environment).to_dict()
+        and command_binding["captured_runtime_identity"]
+        == canonical_identity(document).to_dict()
+        and document["input_root"] == str(input_root)
+        and document["captured_loader_environment"] == loader_environment
+        and all(
+            environment.get(name) == value for name, value in loader_environment.items()
+        )
+    )
+    members = tuple(
+        member
+        for member in manifest.members
+        if member.path.rpartition("/")[0] in plan.profile.runtime_library_paths
+    )
+    require(
+        document["captured_runtime_members"] == [member.to_dict() for member in members]
+        and canonical_json_bytes(document["observation"]) == tool_observation
+    )
+    # The typed retained manifest already rejects escaping/cyclic symlinks and
+    # requires hardlinks to their first physical member. Resolve only its exact
+    # recorded aliases; never invoke samefile/resolve on a worker path here.
+    by_path = {member.path: member for member in manifest.members}
+    resolved = {}
+
+    def physical(value):
+        guard()
+        path = path_type(value)
+        try:
+            relative = path.relative_to(input_root).as_posix()
+        except ValueError:
+            try:
+                relative = path.relative_to(canonical_root).as_posix()
+            except ValueError:
+                return str(path)
+        pending, seen = [], set()
+        while relative not in resolved:
+            require(relative not in seen)
+            seen.add(relative)
+            pending.append(relative)
+            member = by_path.get(relative)
+            if member is None or (
+                member.symlink_target is None and member.hardlink_target is None
+            ):
+                resolved[relative] = str(canonical_root / relative)
+                break
+            relative = (
+                member.symlink_destination
+                if member.symlink_target is not None
+                else member.hardlink_target
+            )
+        result = resolved[relative]
+        for name in pending:
+            resolved[name] = result
+        return result
+
+    observation = document["observation"]
+    actual, children, _seeds = _native_graph(
+        observation["components"], observation["edges"]
+    )
+    loader_members = {str(input_root / member.path) for member in members}
+    loader_paths = loader_environment[variable].split(":")
+    for prefix, dependency in sdk_values:
+        guard()
+        baseline = dependency.observation
+        expected, expected_children, seeds = _native_graph(
+            baseline.components,
+            baseline.edges,
+            sdk_root=canonical_root / prefix,
+        )
+        _require_native_equivalence(
+            actual,
+            children,
+            expected,
+            expected_children,
+            seeds,
+            loader_paths,
+            loader_members,
+            path_type=path_type,
+            same_file=lambda left, right: physical(left) == physical(right),
+            resolve_path=physical,
+        )
+    guard()
 
 
 class RetainedSdkRuntimeContext:

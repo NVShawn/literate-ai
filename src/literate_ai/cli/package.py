@@ -785,6 +785,10 @@ def _verify_packages(
 
 
 def package_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
+    if args.package_command == "retained-units":
+        from .retained_unit_package import retained_unit_package_from_args
+
+        return retained_unit_package_from_args(args)
     if args.package_command not in {"plan", "build", "verify"}:
         _fail("cli.usage", "a package command is required")
     try:
@@ -825,6 +829,9 @@ def add_package_parser(commands: argparse._SubParsersAction) -> None:
     package_commands = package.add_subparsers(
         dest="package_command", required=True, parser_class=type(package)
     )
+    from .retained_unit_package import add_retained_unit_package_parser
+
+    add_retained_unit_package_parser(package_commands)
     plan = package_commands.add_parser(
         "plan", help="create a read-only multi-provider package declaration"
     )

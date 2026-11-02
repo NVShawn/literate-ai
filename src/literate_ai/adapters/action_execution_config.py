@@ -244,10 +244,17 @@ class BoundActionExecution:
         return fetch
 
     def admit(
-        self, *, project_root: Path, target_profile: str, job_identity: ContentIdentity
+        self,
+        *,
+        project_root: Path,
+        target_profile: str,
+        job_identity: ContentIdentity,
+        phase: LifecycleActionKind = LifecycleActionKind.INDEX,
     ):
         if not isinstance(job_identity, ContentIdentity):
             raise TypeError("action execution requires a typed job identity")
+        if not isinstance(phase, LifecycleActionKind):
+            raise TypeError("action execution requires a typed lifecycle phase")
         root = project_root.resolve(strict=True)
         cas_root = self.source_cas_root.resolve(strict=False)
         if (
@@ -388,7 +395,7 @@ class BoundActionExecution:
             observations,
             health,
             deadline,
-            phase=LifecycleActionKind.INDEX,
+            phase=phase,
             source_handoff=self.source_handoff,
             target_profile=target_profile,
             cwd=project_root,

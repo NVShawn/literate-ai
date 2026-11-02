@@ -1,192 +1,198 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "literate-ai/retained-unit-package-graph-index@1",
-  "description": "Content-addressed graph roots bind local definitions before artifact production. Checked composition enforces counts, byte/memory policy, exact tree, output ownership, provenance joins and typed DAG constraints; decoding grants no live authority.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "schema",
-    "tree_index",
-    "definitions",
-    "ownership",
-    "dependencies",
-    "unit_count",
-    "ownership_count",
-    "dependency_count",
-    "per_unit_limits",
-    "max_units",
-    "max_dependencies",
-    "max_metadata_bytes",
-    "max_descriptor_bytes",
-    "max_descriptor_total_bytes",
-    "max_index_bytes",
-    "max_metadata_memory_bytes"
-  ],
-  "properties": {
-    "schema": {
-      "const": "literate-ai/retained-unit-package-graph-index@1"
-    },
-    "tree_index": {
-      "allOf": [
-        {
-          "$ref": "urn:literate-ai:schema:v1:blob-ref"
-        },
-        {
-          "properties": {
-            "media_type": {
-              "const": "application/json"
-            },
-            "size": {
-              "minimum": 1,
-              "maximum": 2097152
-            }
-          }
-        }
-      ]
-    },
-    "definitions": {
-      "type": "array",
-      "maxItems": 4096,
-      "items": {
-        "allOf": [
-          {
-            "$ref": "urn:literate-ai:schema:v1:blob-ref"
-          },
-          {
-            "properties": {
-              "media_type": {
-                "const": "application/json"
-              },
-              "size": {
-                "minimum": 1,
-                "maximum": 8388608
-              }
-            }
-          }
-        ]
-      },
-      "minItems": 1
-    },
-    "ownership": {
-      "type": "array",
-      "maxItems": 4096,
-      "items": {
-        "allOf": [
-          {
-            "$ref": "urn:literate-ai:schema:v1:blob-ref"
-          },
-          {
-            "properties": {
-              "media_type": {
-                "const": "application/json"
-              },
-              "size": {
-                "minimum": 1,
-                "maximum": 8388608
-              }
-            }
-          }
-        ]
-      },
-      "minItems": 1
-    },
-    "dependencies": {
-      "type": "array",
-      "maxItems": 4096,
-      "items": {
-        "allOf": [
-          {
-            "$ref": "urn:literate-ai:schema:v1:blob-ref"
-          },
-          {
-            "properties": {
-              "media_type": {
-                "const": "application/json"
-              },
-              "size": {
-                "minimum": 1,
-                "maximum": 8388608
-              }
-            }
-          }
-        ]
-      }
-    },
-    "unit_count": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 1000000
-    },
-    "ownership_count": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 1048576
-    },
-    "dependency_count": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 4000000
-    },
-    "per_unit_limits": {
+  "$id": "urn:literate-ai:schema:v2:retained-unit-package-graph-index-contracts",
+  "$ref": "urn:literate-ai:schema:v2:retained-unit-package-graph-index-contracts#/$defs/index",
+  "$defs": {
+    "index": {
+      "$id": "literate-ai/retained-unit-package-graph-index@1",
+      "description": "Content-addressed graph roots bind local definitions before artifact production. Checked composition enforces counts, byte/memory policy, exact tree, output ownership, provenance joins and typed DAG constraints; decoding grants no live authority.",
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "max_entries",
-        "max_file_bytes",
-        "max_total_bytes"
+        "schema",
+        "tree_index",
+        "definitions",
+        "ownership",
+        "dependencies",
+        "unit_count",
+        "ownership_count",
+        "dependency_count",
+        "per_unit_limits",
+        "max_units",
+        "max_dependencies",
+        "max_metadata_bytes",
+        "max_descriptor_bytes",
+        "max_descriptor_total_bytes",
+        "max_index_bytes",
+        "max_metadata_memory_bytes"
       ],
       "properties": {
-        "max_entries": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9223372036854775807
+        "schema": {
+          "const": "literate-ai/retained-unit-package-graph-index@1"
         },
-        "max_file_bytes": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9223372036854775807
+        "tree_index": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/json"
+                },
+                "size": {
+                  "minimum": 1,
+                  "maximum": 2097152
+                }
+              }
+            }
+          ]
         },
-        "max_total_bytes": {
+        "definitions": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v1:blob-ref"
+              },
+              {
+                "properties": {
+                  "media_type": {
+                    "const": "application/json"
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "maximum": 8388608
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "ownership": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v1:blob-ref"
+              },
+              {
+                "properties": {
+                  "media_type": {
+                    "const": "application/json"
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "maximum": 8388608
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "dependencies": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v1:blob-ref"
+              },
+              {
+                "properties": {
+                  "media_type": {
+                    "const": "application/json"
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "maximum": 8388608
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "unit_count": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 9223372036854775807
+          "maximum": 1000000
+        },
+        "ownership_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "dependency_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4000000
+        },
+        "per_unit_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_entries",
+            "max_file_bytes",
+            "max_total_bytes"
+          ],
+          "properties": {
+            "max_entries": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "max_file_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "max_total_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            }
+          }
+        },
+        "max_units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "max_dependencies": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4000000
+        },
+        "max_metadata_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_descriptor_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "max_descriptor_total_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_index_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "max_metadata_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
         }
       }
-    },
-    "max_units": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 1000000
-    },
-    "max_dependencies": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 4000000
-    },
-    "max_metadata_bytes": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 536870912
-    },
-    "max_descriptor_bytes": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 8388608
-    },
-    "max_descriptor_total_bytes": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 536870912
-    },
-    "max_index_bytes": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 2097152
-    },
-    "max_metadata_memory_bytes": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 17179869184
     }
   }
 }

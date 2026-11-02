@@ -41,6 +41,9 @@ from literate_ai.adapters.action_link import execute_link_action
 from literate_ai.adapters.action_observation_failure import encode_observation_failure
 from literate_ai.adapters.action_package_worker import ConfiguredPackageWorker
 from literate_ai.adapters.action_plan import execute_plan_action
+from literate_ai.adapters.action_retained_unit_package_worker import (
+    ConfiguredRetainedUnitPackageWorker,
+)
 from literate_ai.adapters.action_source_index import execute_source_index_action
 from literate_ai.adapters.action_test_worker import ConfiguredTestWorker
 from literate_ai.adapters.action_tool_dependencies import (
@@ -82,6 +85,11 @@ def _describe(request, deadline, expected_worker, *, http_source, workers):
         deadline,
         expected_worker,
         http_source=http_source,
+        **(
+            {"base_actions": ()}
+            if isinstance(package_worker, ConfiguredRetainedUnitPackageWorker)
+            else {}
+        ),
         test_profile=test_worker.identity if test_worker else None,
         test_toolchains=test_worker.tools.identities if test_worker else (),
         test_standard_tools=test_worker.standard_tools_identity
@@ -111,7 +119,7 @@ def _describe(request, deadline, expected_worker, *, http_source, workers):
     return response
 
 
-def _require_capability(expected, deadline, expected_worker, **describe):
+def _measure_capability(deadline, expected_worker, **describe):
     """Measure this receiver as a fresh ``--describe`` would, in process.
 
     A request that names its worker's admitted capability is refused unless the
@@ -131,8 +139,13 @@ def _require_capability(expected, deadline, expected_worker, **describe):
         _describe(request, deadline, expected_worker, **describe),
         request_content,
         receiver_code_identity(deadline=deadline),
-    ).capability_identity
-    if measured != expected:
+    )
+    return measured
+
+
+def _require_capability(expected, deadline, expected_worker, **describe):
+    measured = _measure_capability(deadline, expected_worker, **describe)
+    if measured.capability_identity != expected:
         raise ActionWireError(
             "action_admission.runtime_changed",
             "worker runtime or supported capabilities changed",
@@ -168,7 +181,9 @@ def main(
     execute_worker: ConfiguredExecuteWorker | None = None,
     accept_worker: ConfiguredAcceptWorker | None = None,
     generate_worker: ConfiguredGenerateWorker | None = None,
-    package_worker: ConfiguredPackageWorker | None = None,
+    package_worker: ConfiguredPackageWorker
+    | ConfiguredRetainedUnitPackageWorker
+    | None = None,
     finalize_worker: ConfiguredFinalizeWorker | None = None,
 ) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -219,7 +234,8 @@ def main(
         ):
             raise ValueError("invalid private GENERATE configuration")
         if package_worker is not None and not isinstance(
-            package_worker, ConfiguredPackageWorker
+            package_worker,
+            (ConfiguredPackageWorker, ConfiguredRetainedUnitPackageWorker),
         ):
             raise ValueError("invalid private PACKAGE configuration")
         if finalize_worker is not None and not isinstance(
@@ -250,6 +266,13 @@ def main(
         else:
             request, deadline, records, capability = decode_attested_action_request(
                 content
+            )
+        if (
+            isinstance(package_worker, ConfiguredRetainedUnitPackageWorker)
+            and not describing
+        ):
+            package_worker.admit_request(
+                request, deadline, records, expected_worker, capability
             )
     except (ValueError, OSError, RuntimeError):
         print("Invalid lifecycle-action request or receiver binding", file=sys.stderr)
@@ -452,6 +475,16 @@ def main(
                 cas=cas,
                 admission_guard=package_current,
                 blob_source=None if source is None else source.fetch,
+                **(
+                    {
+                        "capability_identity": capability,
+                        "measure_capability": lambda: _measure_capability(
+                            deadline, expected_worker, **describe
+                        ),
+                    }
+                    if isinstance(package_worker, ConfiguredRetainedUnitPackageWorker)
+                    else {}
+                ),
             )
         elif request.action.kind is LifecycleActionKind.FINALIZE:
             if finalize_worker is None:

@@ -198,11 +198,36 @@ class CommandLifecycleActionDispatcher:
         """
         return self._exchange(request, mode=None)
 
+    def dispatch_attested_record(
+        self, request: LifecycleActionDispatchRequest
+    ) -> tuple[LifecycleActionDispatchOutcome, bytes | None]:
+        """Require actual measured receiver attestation before recording a result.
+
+        Retained PACKAGE imports use this boundary. Ordinary dispatch keeps its
+        existing legacy revalidation fallback; that fallback is not evidence of
+        the receiver's in-process before/after measurements.
+        """
+        if self.attested_boundary is None:
+            raise ActionWireError(
+                "action_dispatch.attestation_required",
+                "action dispatch requires an admitted attestation boundary",
+            )
+        return self._exchange(request, mode=None, require_attested=True)
+
     def validate_request(self, request: LifecycleActionDispatchRequest) -> None:
         """Revalidate exact routing/current worker before local artifact admission."""
+        self.validate_request_state(request)
+        self.revalidate_worker(request.worker)
+        self.validate_request_state(request)
+
+    def validate_request_state(self, request: LifecycleActionDispatchRequest) -> None:
+        """Check route/deadline/cancellation without another remote worker probe.
+
+        Read-only result transfer polls this canonical latch. Full worker admission
+        still brackets execution and final artifact admission.
+        """
         self._selection(request)
         self.deadline.remaining()
-        self.revalidate_worker(request.worker)
         with self._lock:
             if request.identity in self._cancelled:
                 raise ActionWireError(
@@ -221,7 +246,11 @@ class CommandLifecycleActionDispatcher:
         return outcome if result_record is None else result_record
 
     def _exchange(
-        self, request: LifecycleActionDispatchRequest, *, mode: str | None
+        self,
+        request: LifecycleActionDispatchRequest,
+        *,
+        mode: str | None,
+        require_attested: bool = False,
     ) -> tuple[LifecycleActionDispatchOutcome, bytes | None]:
         worker = self._selection(request)
         self.deadline.remaining()
@@ -272,6 +301,11 @@ class CommandLifecycleActionDispatcher:
                 output, request
             )
             self.deadline.remaining()
+            if require_attested and attested is None:
+                raise ActionWireError(
+                    "action_dispatch.attestation_required",
+                    "worker response omitted the required measured attestation",
+                )
             if attested is None:
                 self.revalidate_worker(request.worker)
             elif attested != capability or (

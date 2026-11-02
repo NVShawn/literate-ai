@@ -1,0 +1,255 @@
+"""Reviewed native unit packaging inside the genuine retained lifecycle.
+
+Historical receipts are absent from this execution boundary. Original lifecycle
+owners issue fresh admission; packaging rechecks genuine SDK and LINK owners.
+"""
+
+import os
+import platform
+from pathlib import Path
+
+from literate_ai.adapters.component_lock_application import (
+    current_project_component_locks,
+)
+from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
+from literate_ai.adapters.native_tar_archives import NativeTarToolBinding
+from literate_ai.adapters.retained_project_runtime import (
+    execute_local_retained_project,
+    execute_receiver_retained_project,
+)
+from literate_ai.adapters.retained_project_unit_packages import (
+    RetainedProjectUnitPackages,
+)
+from literate_ai.adapters.retained_unit_link import link_retained_unit_packages
+from literate_ai.adapters.retained_unit_results import read_retained_unit_results
+from literate_ai.adapters.retained_unit_tool_observations import (
+    retained_unit_tool_observations,
+)
+from literate_ai.cache_directories import (
+    ensure_cache_directory,
+    select_cache_directories,
+)
+from literate_ai.contracts import ExecutionWorkerKind, canonical_identity
+
+from .execution_workers import (
+    admit_execution_worker_health,
+    dispatch_with_worker_health_poll,
+)
+from .retained_unit_package import _project_context
+
+EXECUTION_PLAN_SCHEMA = "literate-ai/retained-unit-package-execution-plan@1"
+EXECUTION_SCHEMA = "literate-ai/retained-unit-package-execution@1"
+
+
+def _worker_selection_identity(selected):
+    return canonical_identity(
+        {
+            "worker": selected.worker.identity.uri,
+            "catalog": selected.catalog_identity.uri,
+            "parameters": dict(selected.parameters),
+        }
+    )
+
+
+def execute_retained_unit_package_from_args(args, *, receiver_context=None):
+    project, binding, policy, observations, _pkg, _tar, authority = _project_context(
+        args
+    )
+    manifest, selected, planning = authority()
+    plan = planning.plan
+    request = {
+        "authority_mode": "retained-project",
+        "operation": "execute",
+        "retained_plan_identity": plan.identity.uri,
+        "worker_selection_identity": _worker_selection_identity(selected).uri,
+        "policy_identity": policy.identity.uri,
+        "native_tool_observations_identity": canonical_identity(observations).uri,
+        "requires_host_execution_authorization": True,
+        "release_authorized": False,
+    }
+    authorization = canonical_identity(request)
+    if args.retained_unit_command == "execution-plan":
+        return {
+            "schema": EXECUTION_PLAN_SCHEMA,
+            "request": request,
+            "authorization_identity": authorization.uri,
+            "executed": False,
+            "release_authorized": False,
+        }, 0
+    plan.require_authorization(args.authorize_retained_project)
+    if args.authorize_unit_packages != authorization.uri:
+        raise ValueError("retained.unit.exact-package-authorization-required")
+    if args.allow_host_execution is not True:
+        raise ValueError("retained.execution.authorization-required")
+    if receiver_context is None:
+        if selected.worker.kind is not ExecutionWorkerKind.LOCAL:
+            from .retained_unit_remote_execution import (
+                execute_remote_retained_unit_package,
+            )
+
+            return execute_remote_retained_unit_package(
+                args,
+                project=project,
+                binding=binding,
+                policy=policy,
+                observations=observations,
+                pkg_tool=_pkg,
+                tar_tool=_tar,
+                manifest=manifest,
+                selected=selected,
+                planning=planning,
+                execution_request=request,
+            )
+    else:
+        from literate_ai.adapters.retained_receiver_context import (
+            RetainedReceiverContext,
+        )
+
+        if not isinstance(receiver_context, RetainedReceiverContext):
+            raise TypeError("retained.receiver.live-measured-context-required")
+        receiver_context.require_plan(plan)
+        if (
+            selected.worker != receiver_context.worker
+            or selected.catalog_identity != receiver_context.catalog_identity
+        ):
+            raise ValueError("retained.unit.execution-worker-selection-changed")
+    if platform.system().casefold() != "freebsd":
+        raise ValueError("retained.unit.native-execution-requires-freebsd")
+    # These bindings come from the actual receiver, never the preview decoder.
+    pkg_tool, tar_tool = (
+        FreeBsdPkgToolBinding.discover(),
+        NativeTarToolBinding.discover(),
+    )
+    if retained_unit_tool_observations(pkg_tool, tar_tool) != observations:
+        raise ValueError("retained.unit.current-native-tools-differ")
+
+    def current_plan():
+        if receiver_context is not None:
+            receiver_context.require_plan(plan)
+        _manifest, current_worker, current = authority()
+        if _worker_selection_identity(current_worker) != _worker_selection_identity(
+            selected
+        ):
+            raise ValueError("retained.unit.execution-worker-selection-changed")
+        return current.plan
+
+    if current_plan() != plan:
+        raise ValueError("retained.unit.execution-authority-changed")
+    # The receiver observes this host directly through its live context. Health
+    # dispatch/polling belongs to the controller; recursively SSHing to this same
+    # worker from inside its job would invent another execution boundary.
+    health = (
+        admit_execution_worker_health(args, selected, authorization)
+        if receiver_context is None
+        else None
+    )
+    directories = select_cache_directories(
+        project.root, build_dir=args.build_dir, obj_dir=args.obj_dir
+    )
+    completed = []
+
+    def consume(admission, workspace):
+        if current_plan() != plan:
+            raise ValueError("retained.unit.execution-authority-changed")
+        owner = RetainedProjectUnitPackages(
+            admission, pkg_tool=pkg_tool, tar_tool=tar_tool, **policy.owner_arguments()
+        )
+        evidence = owner.retain_planning_evidence()
+        handoff = link_retained_unit_packages(owner)
+        work = (
+            ensure_cache_directory(
+                directories.obj_dir,
+                kind="object",
+                project_root=project.root,
+                required_subdirectories=(Path("retained-unit-packages"),),
+            )
+            / "retained-unit-packages"
+        )
+        reference = owner.construct_set(object_root=work, link_handoff=handoff)
+        index, _results = read_retained_unit_results(
+            owner.projection, reference, admission.store, **owner.tree_policy
+        )
+        handoff.require_current(owner)
+        request_reference = admission.store.put_manifest(
+            request, media_type="application/json"
+        )
+        if request_reference.identity != authorization.uri:
+            raise ValueError("retained.unit.execution-request-retention-differs")
+        completed.append(
+            {
+                "schema": EXECUTION_SCHEMA,
+                "authority_mode": "retained-project",
+                "authorization_identity": authorization.uri,
+                "execution_request": request_reference.to_dict(),
+                "retained_plan_identity": plan.identity.uri,
+                "retained_receipt_identity": admission.receipt.identity.uri,
+                "planning_evidence": evidence.to_dict(),
+                "link_proof": handoff.reference.to_dict(),
+                "set_plan_identity": owner.projection.set_plan.identity.uri,
+                "result_index": reference.to_dict(),
+                "archive_bytes": index.archive_bytes,
+                "unit_count": index.unit_count,
+                "custody_root": str(admission.store.root),
+                "workspace": str(workspace.root),
+                "admitted": True,
+                "native_verified": True,
+                "release_authorized": False,
+            }
+        )
+        if receiver_context is not None:
+            from literate_ai.adapters.retained_unit_run_evidence import (
+                retain_retained_unit_run_evidence,
+            )
+
+            completed[-1]["accepted_run_evidence"] = retain_retained_unit_run_evidence(
+                admission,
+                maximum_bytes=policy.max_provider_metadata_bytes,
+                maximum_memory_bytes=policy.max_provider_memory_bytes,
+                admission_guard=receiver_context.require_current,
+            ).to_dict()
+            handoff.require_current(owner)
+
+    def execute():
+        runtime = (
+            execute_local_retained_project
+            if receiver_context is None
+            else execute_receiver_retained_project
+        )
+        return runtime(
+            project.root,
+            manifest,
+            planning,
+            component_locks=current_project_component_locks(project),
+            **(
+                {"worker": selected.worker}
+                if receiver_context is None
+                else {"receiver_context": receiver_context}
+            ),
+            current_plan=current_plan,
+            test_receipt_policy=project.definition.test_receipt_policy,
+            cache_directories=directories,
+            authorization=args.authorize_retained_project,
+            allow_host_execution=args.allow_host_execution,
+            operator_environment=dict(os.environ),
+            sdk_project=project,
+            sdk_binding=binding,
+            consume_admission=consume,
+        )
+
+    if receiver_context is None:
+        (admission, _workspace), polls = dispatch_with_worker_health_poll(
+            args, selected, authorization, execute
+        )
+    else:
+        admission, _workspace = execute()
+        polls = ()
+    if len(completed) != 1 or current_plan() != plan:
+        raise ValueError("retained.unit.complete-current-execution-required")
+    admission.require_current()
+    pkg_tool.require_unchanged()
+    tar_tool.require_current()
+    return {
+        **completed[0],
+        "worker_health": health,
+        "worker_health_polls": list(polls),
+    }, 0

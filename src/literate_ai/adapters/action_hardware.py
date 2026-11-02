@@ -26,7 +26,6 @@ from literate_ai.adapters.action_transport import supports_action_transport
 from literate_ai.adapters.builders._process import run_bounded_process
 from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
-    ExecutionWorkerKind,
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_json_bytes
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservation
@@ -87,7 +86,7 @@ def encode_hardware_response(
 ) -> bytes:
     from literate_ai.adapters.worker_capabilities import (
         MAX_PROBE_OUTPUT_BYTES,
-        probe_worker_capabilities,
+        observe_receiver_host,
     )
 
     content = canonical_json_bytes(request)
@@ -117,8 +116,8 @@ def encode_hardware_response(
             argv, completed.returncode, completed.stdout, completed.stderr
         )
 
-    observation = probe_worker_capabilities(
-        ExecutionWorker(request["worker_id"], ExecutionWorkerKind.LOCAL),
+    observation = observe_receiver_host(
+        request["worker_id"],
         runner=run,
         timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
     )

@@ -22,6 +22,7 @@ from literate_ai.contracts.identity import (
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
 from literate_ai.contracts.native_sdks import NativeSdkSnapshot
 from literate_ai.contracts.paths import canonical_relative_posix_path
 from literate_ai.contracts.repositories import (
@@ -275,6 +276,33 @@ def _dependencies(document, binding, identity, snapshot, revision):
             {"name": f"literate-ai:native-sdk-{key}", "value": value.uri}
             in package["properties"]
         )
+    tree_properties = []
+    if isinstance(snapshot, NativeSdkTreeSnapshot):
+        tree_properties = [
+            {
+                "name": "literate-ai:native-sdk-tree",
+                "value": snapshot.tree.identity.uri,
+            },
+            {
+                "name": "literate-ai:native-sdk-case-sensitive",
+                "value": str(snapshot.tree.case_sensitive).lower(),
+            },
+            *(
+                {
+                    "name": "literate-ai:native-sdk-alias",
+                    "value": canonical_json_bytes(
+                        {**alias.to_dict(), "resolved_path": resolved}
+                    ).decode("utf-8"),
+                }
+                for alias, resolved in zip(
+                    snapshot.tree.aliases,
+                    snapshot.tree.resolve_all(
+                        tuple(alias.path for alias in snapshot.tree.aliases)
+                    ),
+                    strict=True,
+                )
+            ),
+        ]
     _require(
         package
         == {
@@ -290,10 +318,16 @@ def _dependencies(document, binding, identity, snapshot, revision):
                     {"name": f"literate-ai:native-sdk-{key}", "value": value.uri}
                     for key, value in sorted(expected.items())
                 ),
+                *tree_properties,
             ],
         }
     )
-    _require(set(snapshot.native_libraries).issubset(sdk_paths))
+    libraries = (
+        snapshot.tree.resolve_all(snapshot.native_libraries)
+        if isinstance(snapshot, NativeSdkTreeSnapshot)
+        else snapshot.native_libraries
+    )
+    _require(set(libraries).issubset(sdk_paths))
     source_ref = repository_dependency_bom_ref(resolution.dependency_identity)
     consumer_ref = component_bom_ref(revision)
     refs = {*components, source_ref, consumer_ref}
@@ -321,6 +355,55 @@ def _dependencies(document, binding, identity, snapshot, revision):
             reached.add(current)
             pending.extend(adjacency[current] - reached)
     _require(reached == refs)
+
+
+def verify_historical_sdk_authority_checks(
+    checks, grant, request, ordered_inputs, *, expected_count=2, not_before=None
+):
+    """Check recorded SDK authority at recorded times, without granting execution.
+
+    Generated and retained inspectors share these plan-independent checks. The
+    caller still binds request, tool, runtime and input identities to its exact
+    current contract; neither a decoded grant nor this result is a live owner.
+    """
+    _require(
+        isinstance(grant, BuildAuthorization) and isinstance(request, BuildRequest)
+    )
+    _require(
+        type(ordered_inputs) is tuple
+        and bool(ordered_inputs)
+        and all(isinstance(value, ContentIdentity) for value in ordered_inputs)
+        and len(set(ordered_inputs)) == len(ordered_inputs)
+        and type(expected_count) is int
+        and expected_count in (1, 2)
+    )
+    _require(type(checks) is list and len(checks) == expected_count)
+    _require(
+        not_before is None
+        or isinstance(not_before, datetime)
+        and not_before.tzinfo is not None
+    )
+    previous = not_before
+    for check in checks:
+        _fields(check, "checked_at revocations")
+        at = datetime.fromisoformat(check["checked_at"])
+        _require(at.tzinfo is not None and (previous is None or previous <= at))
+        previous = at
+        _require(
+            type(check["revocations"]) is list
+            and len(check["revocations"]) == len(ordered_inputs)
+        )
+        checked_inputs = []
+        for revocation in check["revocations"]:
+            _fields(revocation, "input_identity state")
+            checked_inputs.append(
+                ContentIdentity.from_dict(revocation["input_identity"])
+            )
+            AuthorizationRevocationSet.from_dict(
+                revocation["state"]
+            ).require_build_valid(grant, request, now=at)
+        _require(tuple(checked_inputs) == ordered_inputs)
+    return previous
 
 
 def sdk_process_fields(
@@ -657,28 +740,9 @@ def sdk_process_fields(
             reader.read_json(canonical_identity(value["authorization"]))
             == value["authorization"]
         )
-        checks = value["checks"]
-        _require(isinstance(checks, list) and len(checks) == 2)
-        previous = None
-        for check in checks:
-            _fields(check, "checked_at revocations")
-            at = datetime.fromisoformat(check["checked_at"])
-            _require(at.tzinfo is not None and (previous is None or previous <= at))
-            previous = at
-            _require(
-                isinstance(check["revocations"], list)
-                and len(check["revocations"]) == len(inputs)
-            )
-            checked_inputs = []
-            for revocation in check["revocations"]:
-                _fields(revocation, "input_identity state")
-                checked_inputs.append(
-                    ContentIdentity.from_dict(revocation["input_identity"])
-                )
-                AuthorizationRevocationSet.from_dict(
-                    revocation["state"]
-                ).require_build_valid(grant, request, now=at)
-            _require(checked_inputs == ordered)
+        verify_historical_sdk_authority_checks(
+            value["checks"], grant, request, tuple(ordered)
+        )
         return {field: identity.uri}
     except QualificationCaptureError:
         raise

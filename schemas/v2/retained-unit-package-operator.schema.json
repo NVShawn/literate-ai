@@ -1,0 +1,793 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/policy"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/tools"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/planning_evidence"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/inspection"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/link_proof"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/execution_plan"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts#/$defs/execution"
+    }
+  ],
+  "$defs": {
+    "policy": {
+      "$id": "literate-ai/retained-unit-package-policy@1",
+      "description": "Explicit package resource policy; retained source limits never silently expand package budgets.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "limits",
+        "per_unit_limits",
+        "max_units",
+        "max_dependencies",
+        "max_metadata_bytes",
+        "max_staging_bytes",
+        "max_transport_bytes",
+        "max_archive_bytes",
+        "max_total_archive_bytes",
+        "max_descriptor_bytes",
+        "max_descriptor_total_bytes",
+        "max_index_bytes",
+        "max_metadata_memory_bytes",
+        "max_closure_steps",
+        "max_closure_memory_bytes",
+        "max_provider_metadata_bytes",
+        "max_provider_memory_bytes",
+        "max_verified_record_cache_bytes"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-policy@1"
+        },
+        "limits": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:native-tree-index-contracts#/$defs/index/properties/limits"
+            },
+            {
+              "properties": {
+                "max_entries": {
+                  "maximum": 1048576
+                }
+              }
+            }
+          ]
+        },
+        "per_unit_limits": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:native-tree-index-contracts#/$defs/index/properties/limits"
+            },
+            {
+              "properties": {
+                "max_entries": {
+                  "maximum": 1048576
+                }
+              }
+            }
+          ]
+        },
+        "max_units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "max_dependencies": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4000000
+        },
+        "max_metadata_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_staging_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_transport_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_total_archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_descriptor_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "max_descriptor_total_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_index_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "max_metadata_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "max_closure_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16000000
+        },
+        "max_closure_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "max_provider_metadata_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_provider_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "max_verified_record_cache_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        }
+      }
+    },
+    "tools": {
+      "$id": "literate-ai/retained-unit-native-tool-observations@1",
+      "description": "Tool observations for planning. Parsing supplies no executable path or native currentness; native production must discover and revalidate actual installed tools.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "pkg",
+        "tar"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-native-tool-observations@1"
+        },
+        "pkg": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "executable_sha256",
+            "version",
+            "abi",
+            "architecture",
+            "configuration",
+            "plugins"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/freebsd-pkg-tool@1"
+            },
+            "executable_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[^\\u0000-\\u001f]+$"
+            },
+            "abi": {
+              "type": "string",
+              "pattern": "^FreeBSD:[1-9][0-9]*:(?:amd64|aarch64)$"
+            },
+            "architecture": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9:._-]{1,96}$"
+            },
+            "configuration": {
+              "const": "empty"
+            },
+            "plugins": {
+              "const": false
+            }
+          }
+        },
+        "tar": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "executable_sha256",
+            "version"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/native-libarchive-tar-tool@1"
+            },
+            "executable_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "allOf": [
+                {
+                  "pattern": "^bsdtar "
+                },
+                {
+                  "pattern": "\\blibarchive [0-9][0-9A-Za-z.+_-]*\\b"
+                },
+                {
+                  "pattern": "^[^\\u0000-\\u001f]+$"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "planning_evidence": {
+      "$id": "literate-ai/retained-unit-package-planning-evidence@1",
+      "description": "Opt-in observation joins captured from an actual live retained run. Historical parsing verifies consistency, never authenticates execution or creates a live producer. The original receipt and aggregate path remain unchanged.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "retained_receipt_identity",
+        "source_observation",
+        "resolved_observation",
+        "admitted",
+        "release_authorized"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-planning-evidence@1"
+        },
+        "retained_receipt_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_observation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "plan_identity",
+            "input_manifest_identity",
+            "managed_graph_identity",
+            "source_bom_identity",
+            "sdk_admitted",
+            "lifecycle_receipt"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-source-bom-observation@1"
+            },
+            "plan_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "input_manifest_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "managed_graph_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "source_bom_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "sdk_admitted": {
+              "const": false
+            },
+            "lifecycle_receipt": {
+              "const": false
+            }
+          }
+        },
+        "resolved_observation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "source_observation_identity",
+            "output_manifest_identity",
+            "resolved_bom_identity",
+            "tool_observation_identity",
+            "export_observation_identity",
+            "sdk_admitted",
+            "lifecycle_receipt"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-resolved-bom-observation@1"
+            },
+            "source_observation_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "output_manifest_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "resolved_bom_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "tool_observation_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "export_observation_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "sdk_admitted": {
+              "const": false
+            },
+            "lifecycle_receipt": {
+              "const": false
+            },
+            "sdk_dependencies": {
+              "type": "array",
+              "maxItems": 1048576,
+              "items": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "admitted": {
+          "const": false
+        },
+        "release_authorized": {
+          "const": false
+        }
+      }
+    },
+    "inspection": {
+      "$id": "literate-ai/retained-unit-package-inspection@1",
+      "description": "Exact payload-bound historical plan or portable archive inspection; this output grants no native or live admission.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "operation",
+        "authority_mode",
+        "admitted",
+        "native_verified",
+        "release_authorized",
+        "retained_receipt_identity",
+        "policy_identity",
+        "native_tool_observations_identity",
+        "set_plan_identity",
+        "set_plan",
+        "tree_index",
+        "graph_index"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-inspection@1"
+        },
+        "operation": {
+          "enum": [
+            "plan",
+            "inspect"
+          ]
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "admitted": {
+          "const": false
+        },
+        "native_verified": {
+          "const": false
+        },
+        "release_authorized": {
+          "const": false
+        },
+        "retained_receipt_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "native_tool_observations_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "set_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "set_plan": {
+          "$ref": "urn:literate-ai:schema:v2:retained-unit-package-set-plan-contracts#/$defs/plan"
+        },
+        "tree_index": {
+          "$ref": "urn:literate-ai:schema:v2:native-tree-index-contracts#/$defs/index"
+        },
+        "graph_index": {
+          "$ref": "urn:literate-ai:schema:v2:retained-unit-package-graph-index-contracts#/$defs/index"
+        },
+        "unit_plan": {
+          "$ref": "urn:literate-ai:schema:v2:retained-unit-package-plan-contracts#/$defs/plan"
+        },
+        "result_index": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        "archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "archive_bytes_verified": {
+          "const": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "inspect"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "result_index",
+              "archive_bytes",
+              "archive_bytes_verified"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "result_index"
+                  ]
+                },
+                {
+                  "required": [
+                    "archive_bytes"
+                  ]
+                },
+                {
+                  "required": [
+                    "archive_bytes_verified"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "link_proof": {
+      "$id": "literate-ai/retained-unit-link-proof@1",
+      "description": "Retained-origin LINK assertion bound to actual accepted payload and package closure. Decoding grants no live handoff or execution authority.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority_mode",
+        "retained_plan_identity",
+        "retained_receipt_identity",
+        "completed_run_identity",
+        "output_manifest_identity",
+        "payload_manifest_identity",
+        "graph_identity",
+        "tree_identity",
+        "set_plan_identity",
+        "provider_policy_identity",
+        "packager_identity",
+        "tool_identity",
+        "target_identity",
+        "unit_count",
+        "ownership_count",
+        "dependency_count",
+        "sdk_final_check_identity",
+        "link_complete",
+        "release_authorized"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-link-proof@1"
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "retained_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "retained_receipt_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "completed_run_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "output_manifest_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "payload_manifest_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "graph_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tree_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "set_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "provider_policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "packager_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "unit_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "ownership_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "dependency_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4000000
+        },
+        "sdk_final_check_identity": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "link_complete": {
+          "const": true
+        },
+        "release_authorized": {
+          "const": false
+        }
+      }
+    },
+    "execution_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request",
+        "authorization_identity",
+        "executed",
+        "release_authorized"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-execution-plan@1"
+        },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "authority_mode",
+            "operation",
+            "retained_plan_identity",
+            "worker_selection_identity",
+            "policy_identity",
+            "native_tool_observations_identity",
+            "requires_host_execution_authorization",
+            "release_authorized"
+          ],
+          "properties": {
+            "authority_mode": {
+              "const": "retained-project"
+            },
+            "operation": {
+              "const": "execute"
+            },
+            "retained_plan_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "worker_selection_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "policy_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "native_tool_observations_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "requires_host_execution_authorization": {
+              "const": true
+            },
+            "release_authorized": {
+              "const": false
+            }
+          }
+        },
+        "authorization_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "executed": {
+          "const": false
+        },
+        "release_authorized": {
+          "const": false
+        }
+      },
+      "$id": "literate-ai/retained-unit-package-execution-plan@1"
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority_mode",
+        "authorization_identity",
+        "execution_request",
+        "retained_plan_identity",
+        "retained_receipt_identity",
+        "planning_evidence",
+        "link_proof",
+        "set_plan_identity",
+        "result_index",
+        "archive_bytes",
+        "unit_count",
+        "custody_root",
+        "workspace",
+        "admitted",
+        "native_verified",
+        "release_authorized",
+        "worker_health",
+        "worker_health_polls"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-execution@1"
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "authorization_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "retained_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "retained_receipt_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "planning_evidence": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        "link_proof": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        "set_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "result_index": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        "archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "unit_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "custody_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admitted": {
+          "const": true
+        },
+        "native_verified": {
+          "const": true
+        },
+        "release_authorized": {
+          "const": false
+        },
+        "worker_health": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "worker_health_polls": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "execution_request": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        }
+      },
+      "$id": "literate-ai/retained-unit-package-execution@1"
+    }
+  }
+}
