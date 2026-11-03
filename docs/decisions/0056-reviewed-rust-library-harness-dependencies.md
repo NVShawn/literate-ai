@@ -1,7 +1,8 @@
 # ADR 0056: Review Rust library acceptance-harness dependencies explicitly
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-03
+- Acceptance: The directing user explicitly accepted ADRs 0056–0059 for 1.4 on 2026-11-03 ("Accept all four ADRs").
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0
 - Roadmap: [1.4 integration](../roadmap/1.4-integration.md), issue #217 disposition; concrete implementation tasks follow explicit acceptance
@@ -17,7 +18,7 @@ use `serde_json` unless the library happens to expose it. The existing
 harness file. Adding undeclared crates to every harness would change verifier
 inputs without review. ADR 0054 explicitly leaves this issue to a separate decision.
 
-## Decision proposed for acceptance
+## Decision
 
 ### Versioned verifier-owned declarations
 
@@ -98,5 +99,5 @@ Verifier dependencies become explicit, current, bounded evidence rather than an
 ambient Cargo cache assumption. This requires coordinated oracle, native execution
 and qualification-reopening work. It neither completes retained binary replacement
 #216 nor changes the separately included retained Cargo and release requirements.
-All remain in the 1.4 scope. Implementation of this proposal starts only after the
-directing user explicitly accepts the design under ADR 0006.
+All remain in the 1.4 scope. The directing user accepted this design under
+ADR 0006 on 2026-11-03; implementation and qualification remain open.

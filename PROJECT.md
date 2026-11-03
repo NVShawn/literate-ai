@@ -93,17 +93,22 @@ implementation follows the prioritized FreeBSD SDK and Daemonarchy unblock.
 
 RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 extend Goals 1 and 4
 with hierarchical retained-tree information cards and authenticated read-only
-worker observations. Issues #279 and #280 are included in 1.4. Proposed
-[ADR 0058](docs/decisions/0058-hierarchical-retained-tree-information-cards.md)
+worker observations. Issues #279 and #280 are included in 1.4. The directing user
+explicitly accepted [ADR 0058](docs/decisions/0058-hierarchical-retained-tree-information-cards.md)
 and [ADR 0059](docs/decisions/0059-authenticated-read-only-worker-telemetry.md)
-require directing-user design acceptance before implementation; installed,
-native/browser and integrated qualification remain open. Per-unit cards retain
+on 2026-11-03; implementation, installed/native/browser and integrated
+qualification remain open. Per-unit cards retain
 the #235 prerequisite; downstream monitor rendering remains consumer-owned.
 
 ADOPT-RELOCATE-001 extends Goals 1, 4 and 6 with supported retained implementation
 placement and transactional relocation, including repository-root placement and
-custom wrapper Component names. It is accepted for 1.4 under issue #265; design,
-implementation, rollback and fresh receipt qualification remain open.
+custom wrapper Component names. The directing user accepted ADR 0057 for 1.4 under issue #265 on
+2026-11-03; implementation, rollback and fresh receipt qualification remain open.
+
+Issue #217's reviewed Rust library acceptance-harness dependencies are covered by
+ADR 0056, explicitly accepted by the directing user on 2026-11-03. Implementation
+and offline verifier/native qualification remain open. FreeBSD SDK qualification
+and the Daemonarchy unblock retain execution priority across these accepted designs.
 
 OPENCODE-COMPAT-001 extends Goals 1, 3, and 4 with support for both OpenCode CLI
 majors. Capability selection preserves v1 pure mode and adds v2 private-server
