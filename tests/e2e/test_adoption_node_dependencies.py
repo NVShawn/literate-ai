@@ -12,6 +12,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from literate_ai.adapters.builders.make import discover_make_toolchain
 from tests.support.fixtures_test_project_cli import invoke
 
 
@@ -136,6 +137,17 @@ class AdoptionNodeDependencyTests(unittest.TestCase):
             "--harness-workspace-link", f"node_modules={self.external}"
         )
         self.assertEqual(status, 0, result)
+        # The generated wrapper still refuses a direct, unprojected invocation.
+        make = discover_make_toolchain()
+        unbound = subprocess.run(
+            (*make.command, "-f", str(self.root / "litai.harness.mk"), "build"),
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        self.assertNotEqual(unbound.returncode, 0)
+        self.assertIn("requires external workspace links", unbound.stderr)
         implementation = self.root / "components/legacy-project-wrapper/implementation"
         self.assertEqual(
             (implementation / "scripts/helper.mjs").read_bytes(), self.source

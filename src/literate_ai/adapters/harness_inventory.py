@@ -15,6 +15,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -27,6 +28,8 @@ from literate_ai.adapters._processes import (
     create_process_tree_ownership,
     terminate_process_tree,
 )
+from literate_ai.adapters.builders.make import discover_make_toolchain
+from literate_ai.adapters.builders.python import BuildError
 from literate_ai.adapters.harness_test_discovery import (
     capture_repo_test_result_files,
     discover_retained_test_command,
@@ -1238,8 +1241,19 @@ def _run_harness_command(
     diagnostic_limit_chars: int = HARNESS_DIAGNOSTIC_CHARS,
     observation_root: Path | None = None,
     source_scope: object | None = None,
+    command_arguments: tuple[str, ...] | None = None,
 ) -> dict[str, object]:
     diagnostic_limit_chars = validate_harness_diagnostic_limit(diagnostic_limit_chars)
+    if command_arguments is not None and (
+        not isinstance(command_arguments, tuple)
+        or not command_arguments
+        or any(not isinstance(arg, str) or "\x00" in arg for arg in command_arguments)
+    ):
+        raise HarnessBaselineError(
+            "project.convert_command_invalid",
+            "framework wrapper arguments must be literal and NUL-free",
+            {"schema": HARNESS_BASELINE_SCHEMA, "state": "failed", "phases": []},
+        )
     command = entry.get("command")
     evidence = entry.get("evidence")
     if not isinstance(command, str) or not command.strip():
@@ -1286,14 +1300,19 @@ def _run_harness_command(
         tempfile.TemporaryFile() as stdout_file,
         tempfile.TemporaryFile() as stderr_file,
     ):
-        trace_subprocess((command,), cwd=working_directory, environment=environment)
+        invocation = command if command_arguments is None else command_arguments
+        trace_subprocess(
+            (command,) if command_arguments is None else command_arguments,
+            cwd=working_directory,
+            environment=environment,
+        )
         ownership = create_process_tree_ownership()
         try:
             process = subprocess.Popen(
-                command,
+                invocation,
                 cwd=working_directory,
                 env=environment,
-                shell=True,
+                shell=command_arguments is None,
                 stdin=subprocess.DEVNULL,
                 stdout=stdout_file,
                 stderr=stderr_file,
@@ -1731,6 +1750,28 @@ def execute_harness_wrapper_parity(
         report["workspace_links"] = harness_workspace_link_evidence(workspace_links)
     parity_phases = report["phases"]
     assert isinstance(parity_phases, list)
+    wrapper_environment = dict(os.environ)
+    try:
+        wrapper_make = discover_make_toolchain(wrapper_environment)
+    except BuildError as exc:
+        report["state"] = "failed"
+        raise HarnessBaselineError(
+            "project.convert_wrapper_toolchain_unavailable",
+            "GNU Make is required for the generated retained harness wrapper",
+            report,
+        ) from exc
+
+    def require_wrapper_make():
+        try:
+            wrapper_make.require_unchanged(wrapper_environment)
+        except BuildError as exc:
+            report["state"] = "failed"
+            raise HarnessBaselineError(
+                "project.convert_wrapper_toolchain_changed",
+                "the selected GNU Make changed during wrapper parity",
+                report,
+            ) from exc
+
     with tempfile.TemporaryDirectory(
         prefix=".literate-ai-convert-wrapper-",
         dir=project_root,
@@ -1756,10 +1797,19 @@ def execute_harness_wrapper_parity(
                         "legacy baseline phase lacks its name",
                         report,
                     )
+                require_wrapper_make()
+                wrapper_argv = (
+                    *wrapper_make.command,
+                    "-f",
+                    wrapper.as_posix(),
+                    phase,
+                    f"LITAI_LEGACY={parity_root.as_posix()}",
+                )
                 wrapper_entry = {
                     "command": (
-                        f"make -f {wrapper.as_posix()} {phase} "
-                        f"LITAI_LEGACY={parity_root.as_posix()}"
+                        subprocess.list2cmdline(wrapper_argv)
+                        if os.name == "nt"
+                        else shlex.join(wrapper_argv)
                     ),
                     "evidence": HARNESS_WRAPPER_FILENAME,
                 }
@@ -1771,7 +1821,9 @@ def execute_harness_wrapper_parity(
                     timeout_seconds=timeout_seconds,
                     diagnostic_limit_chars=diagnostic_limit_chars,
                     source_scope=source_scope,
+                    command_arguments=wrapper_argv,
                 )
+                require_wrapper_make()
                 artifact_tree_equal = observed["tree"] == baseline_phase.get("tree")
                 equal = observed["exit_code"] == baseline_phase.get(
                     "exit_code"

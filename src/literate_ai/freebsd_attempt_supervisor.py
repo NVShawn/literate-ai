@@ -107,6 +107,27 @@ class _Reaper:
         return result.killed
 
 
+def _reap_completed_children(process):
+    """Drain dead adopted children without discarding the primary exit status.
+
+    This dedicated kernel reaper has only the attempt's child subtree. Leaving
+    dead orphans until final cleanup retains their PIDs and kernel resources for
+    the lifetime of a long-running attempt. Bound each drain so a busy subtree
+    cannot starve cancellation, deadlines or output handling.
+    """
+    for _ in range(256):
+        try:
+            pid, status = os.waitpid(-1, os.WNOHANG)
+        except ChildProcessError:
+            return
+        if pid == 0:
+            return
+        if pid == process.pid:
+            # poll() must observe this actual status, rather than interpreting
+            # ECHILD after our waitpid as a successful exit.
+            process.returncode = os.waitstatus_to_exitcode(status)
+
+
 def _cleanup(reaper, seconds):
     until = time.monotonic() + seconds
     sent = failures = 0
@@ -362,7 +383,10 @@ def _supervise_owned(reaper, control_fd, request, payload, expiry, monotonic_dea
                 pipe = getattr(process, name)
                 os.set_blocking(pipe.fileno(), False)
                 selector.register(pipe, selectors.EVENT_READ, name)
-            while process.poll() is None:
+            while True:
+                _reap_completed_children(process)
+                if process.poll() is not None:
+                    break
                 boundary()
                 for key, _events in selector.select(0.05):
                     if key.data in {"control", "child-control"}:

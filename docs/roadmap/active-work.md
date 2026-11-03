@@ -28180,6 +28180,81 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Native full-suite renewal at `33f1e62` with the accepted-ADR documentation union
+stopped after 874 passes, 36 skips and one process-tree timeout test failure;
+2,658 tests were selected and the remaining cases were not executed. The outer
+native owner proved empty-subtree cleanup. A focused reproduction confirms that
+the killed grandchild remains as a zombie adopted by the native guardian until
+outer cleanup. The supervisor now reaps completed adopted children while its
+primary continues, retaining the primary's actual exit status. Native red/green
+validation reproduces the failure with the old supervisor, then passes all six
+process-ownership tests with zero skips after the fix. The original timeout test
+is unchanged; the new nested-owner case also requires actual nonzero exit 17.
+Cancellation/deadline checks and final kernel-empty cleanup remain mandatory.
+Renew the complete suite before claiming framework qualification; the failed
+partial suite remains failure evidence.
+
+The next native full gate passes 1,195 cases, then stops on the receipt
+secondary-access protocol fixture. That fixture replaces the allocation/view
+owner but leaves the real privileged ACL preflight active on an unprivileged
+directory. Correct the fixture's existing external-kernel boundary consistently
+with the execution protocol controls; retain real commands/CAS and all late
+identity, cleanup, corruption and receipt-publication refusals. Production
+root-owned ACL checks and separately required native ACL qualification must
+remain unchanged. Renew the focused receipt controls and full gate afterward.
+
+The corrected receipt module passes all 16 native cases with zero skips and
+verified native cleanup. Fresh full gate v3 then passes 1,590 cases with 71
+skips before a conversion rollback-evidence fixture stops at default-parent
+release-tag discovery, before its intended baseline executes. The shared CLI
+fixture already supplies explicit root authority for disposable `init` projects;
+apply the same fixture-only boundary to `onboard adopt`. Preserve real noisy
+harness execution, refusal of rollback, retained diagnostics, original error
+classification and incomplete-recovery assertions. No production parent selection
+or release-tag requirement changes. Renew the focused adoption controls and the
+complete native gate; the partial run remains failed qualification evidence.
+
+The native adoption focus now reaches the real baseline after the parent-fixture
+repair, then exposes a second test assumption: it expects GNU Make's exit 2 for
+a failing recipe. FreeBSD Make returns a different nonzero code. Require a typed
+positive exit from the retained `test` phase, preserving
+all actual noisy-output, redaction, error-code and incomplete-rollback assertions.
+The failed focus selected six cases and stopped after two passes and one failure;
+its native guardian completed cleanup, and no full suite was launched. This is
+a portable fixture assertion correction, not normalization of production exits.
+
+Full gate v5 passes 1,595 cases with 71 skips, then stops on the real Node
+external-dependency adoption control: direct baseline build exits 0, while the
+framework wrapper exits 1. A bounded native diagnostic captures BSD Make rejecting
+the wrapper's GNU-only `ifeq`/`origin` workspace-link guard. The generated wrapper
+is declared GNU Make authority; use the existing compatible GNU Make resolver and
+current-tool checks for wrapper parity, retaining the original adopted harness
+command and its baseline semantics. Preserve the guard and avoid adding any
+undeclared shell requirement. Recheck the real Node success/refusal controls,
+then the wider adoption group and the complete gate. The failed full run and
+its native empty-subtree cleanup remain evidence, not framework qualification.
+
+The reviewed GNU-wrapper correction passes all 44 selected adoption cases on
+native FreeBSD with zero skips, including both real Node dependency cases and
+all six rollback-evidence cases. The selected GNU launcher is rechecked around
+each wrapper phase and invoked as literal arguments; original harness commands
+and the generated workspace-link guard are unchanged. Native kernel cleanup and
+all 5,193 source-file hashes/identities are verified. Report identity:
+`7b8d92d0313aa909a2e6fb233b0267ea00c16d4a0d4545bda354d33c71320cb3`.
+This focused result supports reviewed pin renewal; complete source and release
+qualification remain pending.
+
+Full gate v6 passes 2,414 cases with 106 skips, then stops when the multicall
+launcher tamper fixture copies a read-only native Python executable and cannot
+overwrite its disposable copy. Give only those copies owner-write permission
+before measuring their tool bindings; preserve the original interpreter and all
+byte-change/currentness assertions. The corrected module passes all ten native
+FreeBSD cases with zero skips, verified kernel cleanup and unchanged source
+custody. Report identity:
+`d3c10ebf7f233af4f18d08689ccaeab918ff87b6a703cb0c720993a647a1e3d8`.
+The suite source pin includes every test module, so this fixture correction
+requires a fresh complete source gate rather than reuse of the failed checkpoint.
+
 Worker bootstrap follow-up: the canonical Python bootstrap rejected
 FreeBSD before its existing tuple-specific native pkg provider can observe tools.
 Added actual-platform detection and explicit FreeBSD selection, preserving provider
@@ -32009,7 +32084,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   All 1.4.0 readiness goals, issue/review closure, native qualification and release
   checks remain prerequisites through the release policy. Its own publication
   outcome is recorded after synchronization rather than required before publication.
-- **Next action in progress:** qualify the combined current fixes from PRs #254/#255/#256/#257, preserve the live native PACKAGE candidate unchanged, and finish all remaining issue, native and release gates. Proposed ADRs still require explicit acceptance before implementation.
+- **Next action in progress:** qualify the combined current fixes from PRs #254/#255/#256/#257, preserve the live native PACKAGE candidate unchanged, and finish all remaining issue, native and release gates. ADRs 0054 and 0055 are accepted; their implementation follows the prioritized FreeBSD SDK unblock.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -32036,7 +32111,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   supply full retained-tree, two-physical-host cache/performance, compiler SDK or
   final candidate acceptance. Later integration changes still require renewal.
 
-- **Cargo design review pending:** [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) records the audited #222–#226 compatibility design. It remains Proposed; no v2 implementation or implementation-subtask acceptance is claimed. Explicit acceptance of ADR 0054 remains required by Accepted ADR 0006.
+- **Accepted designs:** The directing user explicitly accepted [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) and [ADR 0055](../decisions/0055-command-addressed-worker-reachability.md) for 1.4 on 2026-11-02. CARGO-COMPAT-001 owns #222–#226; COMMAND-WORKER-001 owns command-addressed reachability. Their implementation and qualification remain open. FreeBSD SDK qualification and the Daemonarchy unblock take priority in execution order; neither accepted design is deferred from 1.4.
 
 ### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
 
@@ -32823,6 +32898,23 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
 
+- **Current development status:** At source `33f1e62`, the SDK-bearing two-unit
+  native FreeBSD PACKAGE and fresh original-archive VERIFY both pass independent
+  controller admission. Verification retains the exact original result index
+  `sha256:fa6d0ced3d39d149f382fe83fcd68afa47443b60ca849d228dcf5f69024986cc`
+  and 43,364 archive bytes while producing a distinct fresh receipt. Real index
+  and archive transport corruption controls refuse, with matching native/controller
+  attested failure bytes, unchanged original CAS bytes and genuine native cleanup.
+  [Recorded development evidence](https://github.com/jordanhubbard/literate-ai/issues/235#issuecomment-6597949483).
+  The functional SDK blocker is resolved, and the directing user authorized the
+  downstream release to proceed under its own gates independently of framework
+  publication. This does not prove downstream acceptance or full issue completion.
+- **Current next action:** Renew full native regression after the separately
+  reproduced orphan-reaping repair, then complete the required real retained-tree
+  case beyond 100,000 members and all remaining installed/integrated qualification.
+  Issue #235 and this 1.4 goal remain open. The earlier attempts below retain their
+  historical scope and failures; they do not override this two-unit SDK result.
+
 - **2026-11-02 nested-source qualification correction:** The exact installed SDK-currentness candidate reaches per-unit planning in the actual authenticated FreeBSD round trip, then refuses with `retained.unit.locked-package-unit-specifications-required` after 2,559.261 seconds. Native empty-subtree cleanup is verified; no PACKAGE/LINK admission or downstream unblock is claimed. Locked specification references are Component-relative, while retained source members are project-relative. Qualify references through the already selected canonical catalog at each public planning/execution boundary, preserve the explicit standalone root-reference contract, and carry the exact qualified member association into package evidence. Basename, suffix, digest-only and failed-lookup fallbacks are not acceptable. Add actual nested public-lock/retained-package coverage with an identical-byte misplaced declaration, then renew source review, complete regression, installed/native PACKAGE/LINK and required negative controls.
 
 - **Priority:** P0
@@ -33036,7 +33128,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - The controller and public remote CLI now compose strict attested dispatch, exact input records, the explicitly selected catalog, structured admission failures, cancellation and bounded return custody. Independent review approves the source; actual SSH admission, cancellation during import and unknown-cleanup controls remain pending.
   - A fresh complete local gate stopped after 1,587 tests (70 skips, one error, 1,208.471 seconds). The actual macOS SDK case exhausted its fixture's 256 MiB accounted decoding budget. A separate real-case diagnostic reproduced the refusal in 87.179 seconds: 15,891,690 retained bytes plus a 1,985,740-byte command record exceeded the conservative decoding allowance. The fixture now explicitly allocates 1 GiB; production limits and refusal accounting are unchanged. Both failed attempts remain retained.
   - Preparing the two-package native qualification fixture exposed a lifecycle gap: output discovery still selected flat capture and export dependency observation rejected aliases. The reviewed correction carries the existing explicit tree policy through output capture and selects sealed native files for export observation, with complete topology verification before and after. A real compiled fixture now creates file links, hardlinks, an empty directory and a directory alias; its control covers default refusal and subsequent hardlink flattening. These latest bytes need focused and fresh full checks before commit or native qualification.
-  - Next action: complete the fresh output-tree and SDK focused gates, then full regression and exact installed-wheel qualification; execute the two-package authenticated FreeBSD controller round trip and the required real retained-tree case beyond 100,000 members. Issue #235 remains open and downstream readiness has not been announced.
+  - Earlier next action (superseded by current status above): complete the fresh output-tree and SDK focused gates, then full regression and exact installed-wheel qualification; execute the two-package authenticated FreeBSD controller round trip and the required real retained-tree case beyond 100,000 members. Issue #235 remains open and downstream readiness has not been announced.
   - Corrected focused gates pass: all 14 retained-package cases (one native-only skip, 122.823 seconds) and all 12 SDK cases (zero skips, 283.629 seconds). The real output-tree case checks explicit-policy admission, legacy refusal, live workspace topology drift, independently preserved LINK custody and actual sealed-CAS corruption refusal. The initial version's last assertion targeted disposable workspace mutation instead of retained custody; its failed 17.607-second run remains retained. Fresh complete regression is the next gate before commit/push, followed by native and installed qualification of these exact corrections.
 
 
@@ -33259,3 +33351,46 @@ independent review and the complete combined gate from test one.
   - [ ] Run real installed public CLI adoption, relocation, update, refresh, readmission and receipt-renewal journeys for a subdirectory, repository root and a non-default wrapper name.
   - [ ] Prove stale plans, destination collisions, escaping aliases, changed source and interrupted moves refuse without data loss; rollback restores exact original custody and prior evidence.
   - [ ] Verify legacy adopted projects keep their default layout and that changed placement cannot reuse an old receipt or manufacture live source authority.
+
+### [ ] CARGO-COMPAT-001 — Qualify reviewed retained Cargo workspace compatibility
+
+- **Release target:** 1.4.0
+- **Accepted decision:** [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md); explicit directing-user acceptance on 2026-11-02.
+- **Next action:** After the prioritized FreeBSD SDK/Daemonarchy unblock, implement the versioned authority first; all implementation and native acceptance below remain unchecked.
+
+- **Priority:** P1
+- **Owner:** Framework retained Cargo contracts, materialization, graph and admission; PROJECT Goals 1, 4, 5 and 6
+- **Direction:** Resolve issues #222 through #226 under the explicitly accepted ADR 0054 for 1.4.
+- **Conclusion:** Implement opt-in versioned authority for reviewed workspace scratch roots, registry patches, honest test protocols and bounded alias/streaming custody; preserve v1 contracts and independent acceptance. FreeBSD SDK and Daemonarchy unblock comes first in execution order.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Add versioned workspace-plan, gate-policy, test-inventory and receiving codecs with exact provenance and unchanged v1 defaults.
+  - [ ] Implement owned internal scratch materialization with collision-safe rollback and exact reviewed patch graph edges.
+  - [ ] Observe libtest ignored cases, custom harnesses and permitted exclusions without inventing executed coverage.
+  - [ ] Implement closed alias topology and finite streaming input budgets, then public CLI composition and receipts.
+- **Evidence:**
+  - [ ] Qualify real native adopted/offline Cargo workspaces, scratch ownership and rollback, reviewed patch edges, ignored/custom/excluded targets and all corresponding refusals.
+  - [ ] Prove native alias mutation/escape controls and a closure above 10000 entries and 256 MiB, with boundary, mutation and memory observations.
+  - [ ] Preserve v1 positives/refusals and require installed non-editable and integrated exact-head qualification before completion.
+
+### [ ] COMMAND-WORKER-001 — Address workers through reviewed reachability commands
+
+- **Release target:** 1.4.0
+- **Accepted decision:** [ADR 0055](../decisions/0055-command-addressed-worker-reachability.md); explicit directing-user acceptance on 2026-11-02.
+- **Next action:** After the prioritized FreeBSD SDK/Daemonarchy unblock, implement the versioned authority first; all implementation and native acceptance below remain unchecked.
+
+- **Priority:** P1
+- **Owner:** Framework execution-worker contracts, shared remote transport and operator CLI; PROJECT Goals 1, 4 and 5
+- **Direction:** Represent actual SSH, jump, scheduler and connector routes through private command vectors; qualify the user-selected worker under Accepted ADR 0055 for 1.4.
+- **Conclusion:** Add an opt-in v2 remote descriptor with exact execute/upload/download routes through one transport owner. Preserve v1 local, SSH and typed-command behavior, real custody, deadlines, cancellation and cleanup. FreeBSD SDK and Daemonarchy unblock comes first in execution order.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Add strict versioned remote descriptors with literal complete placeholders, finite argument budgets and unchanged v1 codecs and defaults.
+  - [ ] Implement the shared execution/upload/download owner and adapt every connectivity, capability, storage, health, alignment, bootstrap, lifecycle and cleanup caller.
+  - [ ] Expose operator CLI registration and diagnostics, then document private adapters and scope-specific discovery without direct-network fallback.
+- **Evidence:**
+  - [ ] Use an actual private command-addressed POSIX worker for nonce handshake, native platform/storage observations, alignment, source upload, native Component execution and evidence download through the same route.
+  - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
+  - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.

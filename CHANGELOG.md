@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Adoption: select and recheck a compatible GNU Make executable for the
+  framework-owned wrapper, preserving original harness commands and the external
+  workspace-link guard when the host's default Make is BSD Make.
+
+- FreeBSD attempt supervisors reap completed orphaned children during long runs,
+  preserving the primary child's actual exit status and final cleanup checks.
+
 - Native dependency hashes stream fresh file bytes with bounded memory while
   preserving path, descriptor and mutation checks for large SDK images.
 
