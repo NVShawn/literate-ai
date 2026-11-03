@@ -56,6 +56,41 @@ def verify_retained_cargo_inputs(
         or binding.source_store_id != configured_store_id
     ):
         raise ValueError("retained.cargo.importer-authority-mismatch")
+    _verify_retained_cargo_provider(
+        binding,
+        authority,
+        promotion,
+        current_generation_closure=current_generation_closure,
+        current_verifier_identity=current_verifier_identity,
+        current_policy_identity=current_policy_identity,
+    )
+    plan = reopen_retained_cargo_plan(content, binding, max_bytes=max_bytes)
+    if (
+        not isinstance(current_cargo_identity, ContentIdentity)
+        or not isinstance(current_rustc_identity, ContentIdentity)
+        or plan.cargo_identity != current_cargo_identity
+        or plan.rustc_identity != current_rustc_identity
+    ):
+        raise ValueError("retained.cargo.tool-authority-mismatch")
+    if (
+        not isinstance(current_gates, tuple)
+        or any(not isinstance(g, RepositoryBuildCommand) for g in current_gates)
+        or plan.gates != current_gates
+    ):
+        raise ValueError("retained.cargo.gate-authority-mismatch")
+    return plan
+
+
+def _verify_retained_cargo_provider(
+    binding,
+    authority,
+    promotion,
+    *,
+    current_generation_closure,
+    current_verifier_identity,
+    current_policy_identity,
+):
+    """Shared current native provider checks, never a binding/plan codec."""
     projection = verify_qualified_locked_source_promotion(
         authority,
         promotion,
@@ -82,21 +117,6 @@ def verify_retained_cargo_inputs(
         if p.artifact_export.identity in roots
     ):
         raise ValueError("retained.cargo.provider-revision-mismatch")
-    plan = reopen_retained_cargo_plan(content, binding, max_bytes=max_bytes)
-    if (
-        not isinstance(current_cargo_identity, ContentIdentity)
-        or not isinstance(current_rustc_identity, ContentIdentity)
-        or plan.cargo_identity != current_cargo_identity
-        or plan.rustc_identity != current_rustc_identity
-    ):
-        raise ValueError("retained.cargo.tool-authority-mismatch")
-    if (
-        not isinstance(current_gates, tuple)
-        or any(not isinstance(g, RepositoryBuildCommand) for g in current_gates)
-        or plan.gates != current_gates
-    ):
-        raise ValueError("retained.cargo.gate-authority-mismatch")
-    return plan
 
 
 def reopen_retained_cargo_plan(
@@ -199,6 +219,19 @@ def verify_retained_cargo_package_manifests(
         raise ValueError("retained.cargo.package-capture-mismatch")
     content = canonical_json_bytes(plan.to_dict())
     reopen_retained_cargo_plan(content, binding, max_bytes=len(content))
+    _verify_retained_cargo_package_values(
+        plan,
+        binding,
+        capture,
+        max_package_bytes=max_package_bytes,
+        max_entries=max_entries,
+    )
+
+
+def _verify_retained_cargo_package_values(
+    plan, binding, capture, *, max_package_bytes, max_entries
+):
+    """Shared manifest/export bytes after the version-specific plan was reopened."""
     packages = bound_cargo_packages(plan, binding)
     destinations = dict(binding.destinations)
     manifests = {item.path: item for item in plan.manifests}

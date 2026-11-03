@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Retained Cargo v2 development reserves fresh internal scratch roots through
+  live wrapper/source custody and exclusive publication of known private inodes.
+  Complete input capture accepts only those live exclusions and still captures
+  the entire declared Cargo home. Existing-output reopening, materialization and
+  public execution/admission integration remain pending.
+
 - Adoption: select and recheck a compatible GNU Make executable for the
   framework-owned wrapper, preserving original harness commands and the external
   workspace-link guard when the host's default Make is BSD Make.
@@ -42,6 +48,9 @@
   Custom callbacks retain conservative validation and configured deadlines.
 - Original-byte retained package verification accepts explicit custody leases up
   to three hours, while preserving its one-hour default and finite expiry checks.
+
+- Retained harness receipts reject implementation paths with symlinked or
+  redirected ancestors, including aliases that point back inside the project.
 
 - Workers: add opt-in v2 descriptors with literal execution, upload and download
   commands for operator-provided jump, scheduler and connector routes. Share
