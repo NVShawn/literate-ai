@@ -33088,3 +33088,22 @@ root's parent once while retaining and rejecting redirected state-root leaves.
 Keep canonical overlap checks and all safe-directory/append guards. Add a real
 ancestor-alias positive control plus explicit leaf-alias refusal, then renew
 independent review and the complete combined gate from test one.
+
+### [ ] ADOPT-RELOCATE-001 — Support selected and relocated retained implementation layouts
+
+- **Priority:** P1
+- **Owner:** Framework core: adopted-project layout, inventory, updates, retained receipts and readmission
+- **Release target:** 1.4.0
+- **GitHub issue:** [#265](https://github.com/jordanhubbard/literate-ai/issues/265)
+- **Direction:** Issue #265 requests a supported retained implementation path outside the legacy wrapper, including a plain subdirectory or repository root and a chosen wrapper Component name. The directing user accepted newly filed issues for 1.4.
+- **Conclusion:** Extend PROJECT.md Goals 1, 4 and 6 with one authoritative retained-layout selection and a reviewed transactional relocation path. Preserve legacy defaults, source custody and lineage; invalidate stale receipts and require fresh qualification after movement. Edited evidence and symlink shims are not migration authority. Root placement and custom wrapper naming remain required design and acceptance scope.
+- **Depends on:** Trace current lift-and-shift path consumers; settle reviewed ownership and migration semantics; implement canonical resolution and transactional plan/apply; qualify installed journeys and rollback.
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Trace every hard-coded wrapper/implementation path and establish one canonical resolver with backward-compatible legacy evidence.
+  - [ ] Specify and review subdirectory, repository-root and custom Component-name ownership, collision rules, plan currentness, atomic movement, rollback and receipt invalidation before changing authority.
+  - [ ] Implement supported initial placement and reviewed relocation through inventory, manifests, updates, retained-scope refresh, receipts and readmission; preserve original bytes, modes, internal aliases, hardlinks and Git custody.
+- **Evidence:**
+  - [ ] Run real installed public CLI adoption, relocation, update, refresh, readmission and receipt-renewal journeys for a subdirectory, repository root and a non-default wrapper name.
+  - [ ] Prove stale plans, destination collisions, escaping aliases, changed source and interrupted moves refuse without data loss; rollback restores exact original custody and prior evidence.
+  - [ ] Verify legacy adopted projects keep their default layout and that changed placement cannot reuse an old receipt or manufacture live source authority.
