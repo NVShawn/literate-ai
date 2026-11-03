@@ -144,6 +144,42 @@ class ModelFreeRebuildTests(unittest.TestCase):
         result = envelope["result"]
         self.assertTrue(result["passed"], result)
         self.assertTrue(result["receipt_committed"], result)
+        # A project-relative Component path must still select its declared
+        # demonstration input when the built artifact is run without args.
+        for command in ("build", "run"):
+            output = io.StringIO()
+            errors = io.StringIO()
+            arguments = [
+                "--json",
+                command,
+                "samples/hello-component",
+                "--project",
+                str(self.project),
+            ]
+            if command == "build":
+                arguments.append("--allow-host-execution")
+            with (
+                patch.dict(os.environ, self.environment),
+                patch(
+                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
+                    lambda driver: resolve_standard_project_lifecycle_driver(
+                        driver, distribution_observer=lambda: self.distribution
+                    ),
+                ),
+            ):
+                status = main(arguments, stdout=output, stderr=errors)
+            envelope = json.loads(output.getvalue() or errors.getvalue())
+            self.assertEqual(status, 0, envelope)
+        oracle = json.loads(
+            (self.project / "verification/acceptance/hello-component.json").read_text()
+        )
+        self.assertEqual(
+            json.loads(envelope["result"]["stdout"]),
+            oracle["cases"][0]["expected_result"],
+        )
+        self.assertEqual(
+            envelope["result"]["arguments_source"], "acceptance case 'primary'"
+        )
 
     def test_toolchain_admission_failure_is_a_typed_public_refusal(self):
         from literate_ai.adapters.builders import BuildError

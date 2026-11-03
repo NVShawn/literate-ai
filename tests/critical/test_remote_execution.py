@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -11,6 +13,7 @@ from unittest.mock import Mock, patch
 
 from literate_ai.adapters.remote_execution import (
     RemoteExecutionError,
+    _persist_artifact,
     _write_deterministic_tar_gz,
     import_remote_evidence_bundle,
     materialize_and_execute,
@@ -123,6 +126,83 @@ def observation() -> WorkerHardwareObservation:
 
 
 class RemoteExecutionTests(unittest.TestCase):
+    def test_nonzero_worker_process_retains_redacted_failure_evidence(self) -> None:
+        """A real failed process must not bypass diagnostic redaction or custody."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "project"
+            project.mkdir()
+            (project / "component.md").write_text("# app\n", encoding="utf-8")
+            staging = root / "staging"
+            staging.mkdir()
+            program = root / "program.py"
+            program.write_text(
+                "import sys\nprint('token=hunter2')\n"
+                "sys.stderr.write('failed at /Users/worker/private/build.log\\n')\n"
+                "raise SystemExit(7)\n",
+                encoding="utf-8",
+            )
+            cas = root / "worker-cas"
+            reference = _persist_artifact(
+                program,
+                {"argv": [sys.executable, str(program)], "environment": {}},
+                cas,
+                (identity("5"),),
+            )
+            run_request = request(
+                LifecycleDispatchAction.RUN, artifact_reference=reference
+            )
+            captured = capture_source_archive(project, run_request, directory=staging)
+            bundle = staging / "remote-evidence.tar.gz"
+
+            def never_rebuild(**_values):
+                raise AssertionError("running an admitted artifact must not rebuild")
+
+            with patch(
+                "literate_ai.adapters.remote_execution.probe_worker_capabilities",
+                return_value=observation(),
+            ):
+                result = materialize_and_execute(
+                    worker(),
+                    run_request,
+                    captured.materialization,
+                    archive=captured.path,
+                    workspace=root / "workspace",
+                    cas_root=cas,
+                    rebuild=never_rebuild,
+                    evidence_output=bundle,
+                    cleanup_ticket=staging / "cleanup-ticket.json",
+                )
+            self.assertEqual(result.status, DispatchResultStatus.FAILED)
+            self.assertEqual(result.exit_status, 7)
+            manifest = result.evidence_manifest
+            self.assertIsNotNone(manifest)
+            self.assertIsNotNone(manifest.failure)
+            self.assertEqual(manifest.failure.code, "execution.remote_process_failed")
+            self.assertEqual(result.diagnostic_digest, manifest.failure.identity.uri)
+            self.assertIn("status 7", manifest.failure.message)
+            self.assertNotIn("hunter2", manifest.failure.stdout)
+            self.assertNotIn("/Users/worker", manifest.failure.stderr)
+            with tarfile.open(bundle, mode="r:gz") as archive:
+                failure = json.load(archive.extractfile("diagnostic/failure.json"))
+                self.assertEqual(failure, manifest.failure.to_dict())
+                self.assertIn(
+                    "<redacted>",
+                    archive.extractfile("log/stdout.txt").read().decode(),
+                )
+                self.assertIn(
+                    "<private-path>",
+                    archive.extractfile("log/stderr.txt").read().decode(),
+                )
+            store, imported = import_remote_evidence_bundle(
+                bundle,
+                manifest,
+                expected_bundle_identity=result.evidence_reference.identity,
+                store_root=root / "coordinator-cas",
+            )
+            self.assertTrue(imported)
+            self.assertTrue(store.uri.startswith("sha256:"))
+
     def test_control_summary_is_redacted(self) -> None:
         failure = RemoteFailureDiagnostic(
             "lifecycle.failed",

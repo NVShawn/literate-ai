@@ -37,7 +37,7 @@ class ProjectHostFlavorTests(unittest.TestCase):
         ).items():
             path = self.root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content)
+            path.write_text(content, encoding="utf-8", newline="\n")
         self.project = load_project(self.root)
         self.packaged = Path(str(files("literate_ai.project_template") / "flavors"))
         self.shim = "+flavor://legacy-adoption/build-legacy-shim"

@@ -353,7 +353,9 @@ def _demonstration_arguments(
     )
 
     try:
-        _bound, cases = load_declared_cases(oracle_path(root, component, entrypoint))
+        _bound, cases = load_declared_cases(
+            oracle_path(root, Path(component).name, entrypoint)
+        )
     except ComponentAcceptanceError:
         return [], "none"
     if not cases:
