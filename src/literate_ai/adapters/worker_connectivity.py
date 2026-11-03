@@ -9,12 +9,12 @@ from concurrent.futures import ThreadPoolExecutor
 from literate_ai.contracts import (
     ExecutionWorker,
     ExecutionWorkerCatalog,
-    ExecutionWorkerKind,
 )
 
 from .builders._process import run_bounded_process
 from .builders.python import BuildError
-from .ssh_transport import SshTransportError, ssh_arguments
+from .remote_transport import remote_execute_arguments
+from .ssh_transport import SshTransportError
 from .worker_capabilities import ssh_failure_details
 
 
@@ -29,7 +29,7 @@ def test_worker_connection(
         "diagnostic": "",
         "remedy": "",
     }
-    if worker.kind is not ExecutionWorkerKind.SSH:
+    if not worker.is_remote:
         result.update(
             status="unsupported",
             cause="not-ssh",
@@ -38,15 +38,15 @@ def test_worker_connection(
         return result
     marker = "litai-ssh-" + secrets.token_hex(16)
     try:
-        command = ssh_arguments(
-            worker.endpoint,
+        command = remote_execute_arguments(
+            worker,
             f"echo {marker}",
             timeout_seconds,
-            transport=worker.transport,
             login_shell=False,
         )
         completed = run_bounded_process(
             command,
+            terminate_descendants=True,
             cwd=None,
             environment=os.environ,
             timeout_seconds=timeout_seconds,

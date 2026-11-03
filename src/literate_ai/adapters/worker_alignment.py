@@ -27,14 +27,16 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+from literate_ai.adapters.remote_transport import (
+    BoundedRemoteProcessRunner,
+    RemoteWorkerTransport,
+    remote_execute_arguments,
+)
 from literate_ai.adapters.ssh_transport import (
-    BoundedSshProcessRunner,
     SshTransportError,
     powershell_command,
     powershell_home_path,
     powershell_literal,
-    scp_arguments,
-    ssh_arguments,
 )
 from literate_ai.contracts.execution_dispatch import ExecutionWorker
 
@@ -598,7 +600,9 @@ class WorkerAligner:
         coding_cli: str | None,
         model: str | None,
         cwd: Path,
-        runner_factory: Callable[[], BoundedSshProcessRunner] = BoundedSshProcessRunner,
+        runner_factory: Callable[
+            [], BoundedRemoteProcessRunner
+        ] = BoundedRemoteProcessRunner,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.template = template
@@ -610,15 +614,13 @@ class WorkerAligner:
         self.clock = clock
 
     def _run(self, worker: ExecutionWorker, command: str, timeout: int):
-        assert worker.endpoint is not None
         return self.runner_factory().run(
-            ssh_arguments(
-                worker.endpoint,
+            remote_execute_arguments(
+                worker,
                 "/bin/sh -c " + shlex.quote(command)
                 if worker.requirements.os_family == "freebsd"
                 else command,
                 timeout,
-                transport=worker.transport,
                 login_shell=worker.requirements.os_family not in {"freebsd", "windows"},
             ),
             cwd=self.cwd,
@@ -1020,17 +1022,12 @@ class WorkerAligner:
                 "worker_alignment.sync_failed",
                 f"cannot prepare {item.destination} on {worker.worker_id}",
             )
-        assert worker.endpoint is not None
-        copied = self.runner_factory().run(
-            scp_arguments(
-                item.source,
-                worker.endpoint,
-                relative,
-                _PROBE_TIMEOUT_SECONDS,
-                transport=worker.transport,
-            ),
+        copied = RemoteWorkerTransport(worker).upload(
+            item.source,
+            relative,
             cwd=self.cwd,
             timeout_seconds=_PROBE_TIMEOUT_SECONDS,
+            runner=self.runner_factory(),
         )
         if copied.returncode:
             raise WorkerAlignmentError(

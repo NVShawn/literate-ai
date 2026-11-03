@@ -18,7 +18,7 @@ from pathlib import Path
 
 from literate_ai import worker_pressure_probe
 from literate_ai.adapters.builders.python import BuildError
-from literate_ai.adapters.ssh_transport import ssh_arguments
+from literate_ai.adapters.remote_transport import remote_execute_arguments
 from literate_ai.adapters.worker_storage import (
     _command_environment,
     _run_probe,
@@ -231,7 +231,7 @@ def _remote_samples(bindings, policy, runner):
             policy.sample_interval_ms * (policy.sustained_samples - 1) / 1000 + 5,
         ),
     )
-    if bindings.worker.kind is ExecutionWorkerKind.SSH:
+    if bindings.worker.is_remote:
         windows = bindings.os_family == "windows"
         receiver = _probe_command(
             bindings.python_executable or ("python" if windows else "python3")
@@ -239,11 +239,10 @@ def _remote_samples(bindings, policy, runner):
         remote_command = (
             subprocess.list2cmdline(receiver) if windows else shlex.join(receiver)
         )
-        command = ssh_arguments(
-            bindings.worker.endpoint,
+        command = remote_execute_arguments(
+            bindings.worker,
             remote_command,
             timeout,
-            transport=bindings.worker.transport,
             login_shell=bindings.os_family not in {"freebsd", "windows"},
         )
         if "SSH_AUTH_SOCK" in os.environ:

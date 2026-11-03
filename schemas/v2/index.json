@@ -107,6 +107,8 @@
         "urn:literate-ai:schema:v1:execution-worker-parameter-value",
         "urn:literate-ai:schema:v1:execution-worker-environment",
         "urn:literate-ai:schema:v1:execution-worker",
+        "urn:literate-ai:schema:v2:execution-worker",
+        "urn:literate-ai:schema:v2:worker-reachability",
         "urn:literate-ai:schema:v1:execution-worker-catalog",
         "urn:literate-ai:schema:v1:observed-gpu-device",
         "urn:literate-ai:schema:v1:worker-hardware-observation",

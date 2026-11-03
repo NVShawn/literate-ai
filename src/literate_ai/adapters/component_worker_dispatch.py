@@ -102,6 +102,7 @@ class RoutedComponentNodeDispatcher(Generic[NodeResultT]):
             ExecutionWorkerKind.LOCAL: local or LocalComponentNodeHandler(),
             ExecutionWorkerKind.COMMAND: command,
             ExecutionWorkerKind.SSH: ssh,
+            ExecutionWorkerKind.REMOTE: ssh,
         }
 
     def _selection(

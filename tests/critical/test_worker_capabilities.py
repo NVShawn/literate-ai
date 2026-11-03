@@ -191,7 +191,13 @@ class WorkerCapabilityTests(unittest.TestCase):
         self.assertIn("host-key-verification", errors[0].message)
 
     def test_native_gpu_serializer_preserves_unknown_and_known_memory(self):
-        for memory in ("[N/A]", "N/A", "8192", "query-failed"):
+        for memory in (
+            "[N/A]",
+            "N/A",
+            "[Insufficient Permissions]",
+            "8192",
+            "query-failed",
+        ):
             with (
                 self.subTest(memory=memory),
                 tempfile.TemporaryDirectory() as temporary,

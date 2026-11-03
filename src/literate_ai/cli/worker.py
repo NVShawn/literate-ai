@@ -224,7 +224,7 @@ def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
         workers = tuple(
             worker
             for worker in selected
-            if worker.endpoint is not None and worker.workspace is not None
+            if worker.is_remote and worker.workspace is not None
         )
         default_template = project.root / TEMPLATE_FILE
         # A project that declares no worker prerequisites still checks the user's

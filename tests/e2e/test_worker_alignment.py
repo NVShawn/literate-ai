@@ -14,11 +14,16 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from literate_ai.adapters import worker_alignment
+from literate_ai.adapters import remote_transport, worker_alignment
 from literate_ai.adapters.worker_alignment import (
     UserAlignment,
     WorkerAligner,
     WorkerTemplate,
+)
+from literate_ai.contracts import (
+    ExecutionRequirements,
+    ExecutionWorker,
+    ExecutionWorkerKind,
 )
 
 
@@ -95,12 +100,13 @@ class WorkerAlignmentTests(unittest.TestCase):
                     }
                 )
             )
-            worker = SimpleNamespace(
+            worker = ExecutionWorker(
                 worker_id="linux-worker",
-                endpoint="worker.invalid",
+                kind=ExecutionWorkerKind.SSH,
+                endpoint="user@worker.invalid",
                 workspace="~/ws",
                 transport="ssh",
-                requirements=SimpleNamespace(os_family="linux", cpu_architecture=None),
+                requirements=ExecutionRequirements(os_family="linux"),
             )
             aligner = WorkerAligner(
                 WorkerTemplate.load(template),
@@ -120,11 +126,11 @@ class WorkerAlignmentTests(unittest.TestCase):
                 patch.dict(os.environ, environment),
                 patch.object(
                     worker_alignment,
-                    "ssh_arguments",
+                    "remote_execute_arguments",
                     lambda _endpoint, command, *_a, **_k: ("bash", "-c", command),
                 ),
                 patch.object(
-                    worker_alignment,
+                    remote_transport,
                     "scp_arguments",
                     lambda source, _endpoint, destination, _timeout, **_kwargs: (
                         "cp",
@@ -217,7 +223,7 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
             )
             with patch.object(
                 worker_alignment,
-                "ssh_arguments",
+                "remote_execute_arguments",
                 lambda _endpoint, command, *_a, **_k: tuple(command.split()),
             ):
                 inspected = aligner.align((worker,), apply=False)
@@ -307,7 +313,7 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
             )
             with patch.object(
                 worker_alignment,
-                "ssh_arguments",
+                "remote_execute_arguments",
                 lambda _endpoint, command, *_a, **_k: tuple(command.split()),
             ):
                 inspected = aligner.align((worker,), apply=False)

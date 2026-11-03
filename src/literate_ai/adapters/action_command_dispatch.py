@@ -60,7 +60,7 @@ def command_worker_environment(
         for key in ("PATH", "SystemRoot", "ComSpec", "PATHEXT", "TMP", "TEMP")
         if lookup(key)
     }
-    if worker.kind is ExecutionWorkerKind.SSH and lookup("SSH_AUTH_SOCK"):
+    if worker.is_remote and lookup("SSH_AUTH_SOCK"):
         environment["SSH_AUTH_SOCK"] = lookup("SSH_AUTH_SOCK")
     for binding in worker.environment:
         value = lookup(binding.source_variable)

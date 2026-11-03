@@ -45,7 +45,6 @@ from literate_ai.contracts import (
     canonical_json_bytes,
 )
 from literate_ai.contracts.blobs import BlobRef
-from literate_ai.contracts.execution_dispatch import ExecutionWorkerKind
 from literate_ai.contracts.retained_unit_policy import RetainedUnitPackagePolicy
 from literate_ai.storage.cas import FileSystemCAS
 
@@ -262,7 +261,7 @@ def execute_and_import_retained_unit_package(
         and verification_selection.original_evidence is not None
     )
     _require(
-        worker.kind is ExecutionWorkerKind.SSH
+        worker.is_remote
         and worker.identity
         == plan.profile.worker_identity
         == request.worker.worker_identity

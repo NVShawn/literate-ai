@@ -9,12 +9,14 @@ from pathlib import Path
 
 from literate_ai.adapters.action_dispatch_wire import ActionDispatchDeadline
 from literate_ai.contracts import (
+    ExecutionRequirements,
     ExecutionWorker,
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.contracts.worker_reachability import WorkerReachability
 from literate_ai.retained_package_receiver import CONFIG_SCHEMA
 from literate_ai.return_cas import MAX_RETURN_BLOB_BYTES, READ_SCHEMA
 from literate_ai.storage.cas import FileSystemCAS
@@ -96,10 +98,39 @@ class RetainedReturnBlobTests(unittest.TestCase):
         )
 
     def test_real_subprocess_delivers_assertions_with_no_executable_project(self):
-        result = self.run_reader()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout, self.content)
-        self.assertFalse((self.root / "project/missing-manifest.json").exists())
+        original = self.worker
+        command_worker = ExecutionWorker(
+            "native",
+            ExecutionWorkerKind.REMOTE,
+            requirements=ExecutionRequirements(os_family="freebsd"),
+            workspace="/tmp/reader",
+            lifecycle_executable="/unused-read-only-lifecycle/litai",
+            reachability=WorkerReachability(
+                ("unused-read-only-route", "{remote_command}"),
+                ("unused-read-only-route", "{local_file}", "{remote_file}"),
+                ("unused-read-only-route", "{remote_file}", "{local_file}"),
+            ),
+        )
+        try:
+            for worker in (original, command_worker):
+                with self.subTest(kind=worker.kind.value):
+                    self.worker = worker
+                    self.catalog.write_bytes(
+                        canonical_json_bytes(
+                            ExecutionWorkerCatalog((worker,)).to_dict()
+                        )
+                    )
+                    result = self.run_reader()
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout, self.content)
+                    self.assertFalse(
+                        (self.root / "project/missing-manifest.json").exists()
+                    )
+        finally:
+            self.worker = original
+            self.catalog.write_bytes(
+                canonical_json_bytes(ExecutionWorkerCatalog((original,)).to_dict())
+            )
 
     def test_wrong_worker_and_registration_refuse_before_any_output(self):
         for field in ("worker_identity", "registration_identity"):
@@ -168,7 +199,7 @@ class RetainedReturnBlobTests(unittest.TestCase):
                 self.assertEqual(restored.returncode, 0, restored.stderr)
                 self.assertEqual(restored.stdout, self.content)
 
-    def test_non_ssh_private_worker_and_oversized_catalog_refuse_before_output(self):
+    def test_non_remote_private_worker_and_oversized_catalog_refuse_before_output(self):
         original = self.catalog.read_bytes()
         local = ExecutionWorker("native", ExecutionWorkerKind.LOCAL)
         try:

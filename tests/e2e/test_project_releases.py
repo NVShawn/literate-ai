@@ -12,7 +12,13 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import literate_ai.project_releases as project_releases
+from literate_ai.adapters import remote_transport
 from literate_ai.adapters.ssh_transport import SshTransportError
+from literate_ai.contracts import (
+    ExecutionRequirements,
+    ExecutionWorker,
+    ExecutionWorkerKind,
+)
 from literate_ai.evidence_ledger import load_run
 from literate_ai.project_releases import (
     PREPARED_RELEASE_SCHEMA,
@@ -686,7 +692,7 @@ class ProjectReleaseTests(unittest.TestCase):
 
         worker = SimpleNamespace(
             worker_id="linux-worker",
-            requirements=SimpleNamespace(os_family="linux", cpu_architecture=None),
+            requirements=ExecutionRequirements(os_family="linux"),
         )
         worker_started = threading.Event()
         host_started = threading.Event()
@@ -844,12 +850,13 @@ class ProjectReleaseTests(unittest.TestCase):
             operator.mkdir(parents=True)
             self.git(operator, "init", "-q")
             (operator / "mine.txt").write_text("operator work\n", encoding="utf-8")
-            worker = SimpleNamespace(
+            worker = ExecutionWorker(
                 worker_id="linux-worker",
-                endpoint="worker.invalid",
+                kind=ExecutionWorkerKind.SSH,
+                endpoint="user@worker.invalid",
                 workspace="~/ws",
                 transport="ssh",
-                requirements=SimpleNamespace(os_family="linux", cpu_architecture=None),
+                requirements=ExecutionRequirements(os_family="linux"),
             )
             uploads = []
 
@@ -875,11 +882,13 @@ class ProjectReleaseTests(unittest.TestCase):
                 ),
                 patch.object(
                     project_releases,
-                    "ssh_arguments",
+                    "remote_execute_arguments",
                     lambda _endpoint, command, *_a, **_k: ("bash", "-c", command),
                 ),
-                patch.object(project_releases, "scp_arguments", scp),
-                patch.object(project_releases, "BoundedSshProcessRunner", LocalRunner),
+                patch.object(remote_transport, "scp_arguments", scp),
+                patch.object(
+                    project_releases, "BoundedRemoteProcessRunner", LocalRunner
+                ),
                 patch.object(
                     project_releases,
                     "try_resolve_live_test_selection",
@@ -937,12 +946,12 @@ class ProjectReleaseTests(unittest.TestCase):
                 ),
                 patch.object(
                     project_releases,
-                    "ssh_arguments",
+                    "remote_execute_arguments",
                     lambda _endpoint, command, *_a, **_k: ("bash", "-c", command),
                 ),
-                patch.object(project_releases, "scp_arguments", scp),
+                patch.object(remote_transport, "scp_arguments", scp),
                 patch.object(
-                    project_releases, "BoundedSshProcessRunner", HangingGateRunner
+                    project_releases, "BoundedRemoteProcessRunner", HangingGateRunner
                 ),
                 patch.object(
                     project_releases,

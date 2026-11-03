@@ -351,6 +351,7 @@ def _build_packages(
     if selected_worker.worker.kind in {
         ExecutionWorkerKind.COMMAND,
         ExecutionWorkerKind.SSH,
+        ExecutionWorkerKind.REMOTE,
     }:
         remote_dispatch = _dispatch_remote_package_lifecycle(
             args,

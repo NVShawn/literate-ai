@@ -367,7 +367,7 @@ class SshExecutionDispatcher:
         *,
         cwd: Path,
     ) -> ExecutionDispatchResult:
-        if worker.kind is not ExecutionWorkerKind.SSH:
+        if not worker.is_remote:
             raise ExecutionDispatchAdapterError(
                 "execution.worker_kind_invalid",
                 "SSH dispatcher requires an SSH worker",

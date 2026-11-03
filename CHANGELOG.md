@@ -43,6 +43,14 @@
 - Original-byte retained package verification accepts explicit custody leases up
   to three hours, while preserving its one-hour default and finite expiry checks.
 
+- Workers: add opt-in v2 descriptors with literal execution, upload and download
+  commands for operator-provided jump, scheduler and connector routes. Share
+  bounded process and transfer custody while preserving existing v1 registrations.
+  Installed/native qualification, including Windows connectors, remains required.
+
+- Worker hardware probes preserve unavailable NVIDIA memory as unknown instead
+  of emitting malformed JSON when a successful query returns permission text.
+
 - Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
   installer with the ARM64 toolset selected. Native compiler image checks still
   determine readiness, including after an installer reports success.
