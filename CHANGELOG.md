@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
+  installer with the ARM64 toolset selected. Native compiler image checks still
+  determine readiness, including after an installer reports success.
 - Retained return-blob transport binds current private registration, worker
   catalog and CAS custody without rerunning project execution planning per object.
   Full result admission remains an independent controller operation.

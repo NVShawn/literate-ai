@@ -1,9 +1,10 @@
 # ADR 0054: Review retained Cargo compatibility without weakening admission
 
-- Status: Proposed
+- Status: Accepted
+- Accepted: 2026-11-02; directing user explicitly accepted both ADRs for 1.4
 - Date: 2026-11-01
 - Decision owners: directing user and literate-ai maintainers
-- Roadmap: [1.4 integration](../roadmap/1.4-integration.md)
+- Roadmap: [CARGO-COMPAT-001](../roadmap/active-work.md#cargo-compat-001-qualify-reviewed-retained-cargo-workspace-compatibility) and [1.4 integration](../roadmap/1.4-integration.md)
 - Issues: [#222](https://github.com/jordanhubbard/literate-ai/issues/222), [#223](https://github.com/jordanhubbard/literate-ai/issues/223), [#224](https://github.com/jordanhubbard/literate-ai/issues/224), [#225](https://github.com/jordanhubbard/literate-ai/issues/225), [#226](https://github.com/jordanhubbard/literate-ai/issues/226)
 - Governance: [ADR 0006](0006-significant-feature-request-governance.md)
 
@@ -24,7 +25,7 @@ The source audit confirms that `read_retained_cargo_consumer_files` defaults to
 contract. The proposed fix must preserve actual current defaults, rather than
 silently substituting a single larger allowance.
 
-## Proposed decision
+## Decision
 
 ### Explicit versioned authority
 

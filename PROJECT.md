@@ -86,6 +86,16 @@ resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integratio
 tracks every initial item, the existing release goals, native qualification and
 publication evidence. All required acceptance remains open until proven.
 
+CARGO-COMPAT-001 and COMMAND-WORKER-001 record the directing user's explicit
+acceptance of ADRs 0054 and 0055 for 1.4 under Goals 1, 4, 5 and 6.
+Reviewed Cargo compatibility and command-addressed remote workers remain open;
+implementation follows the prioritized FreeBSD SDK and Daemonarchy unblock.
+
+ADOPT-RELOCATE-001 extends Goals 1, 4 and 6 with supported retained implementation
+placement and transactional relocation, including repository-root placement and
+custom wrapper Component names. It is accepted for 1.4 under issue #265; design,
+implementation, rollback and fresh receipt qualification remain open.
+
 OPENCODE-COMPAT-001 extends Goals 1, 3, and 4 with support for both OpenCode CLI
 majors. Capability selection preserves v1 pure mode and adds v2 private-server
 execution with native permissions, fresh provider state, process environment
