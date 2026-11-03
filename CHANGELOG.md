@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retained return-blob transport binds current private registration, worker
+  catalog and CAS custody without rerunning project execution planning per object.
+  Full result admission remains an independent controller operation.
+
 - Retained SDK evidence copying polls live receiver custody during bounded CAS
   traversal, with full authority validation before copying and before success.
 

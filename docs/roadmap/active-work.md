@@ -32842,6 +32842,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   final authority-drift and corrupt-metadata controls before independent review,
   canonical pin renewal and complete source/native qualification. The existing
   native attempt remains unchanged; its timing is instrumented, not pristine.
+- **Return-byte transport follow-up:** V14's native guardian completed with exit
+  zero, two unit results and genuine empty-subtree cleanup. Controller import then
+  repeatedly launched the retained receiver in return-blob mode, where each
+  immutable CAS object reconstructed full public execution authority. Resolve only
+  the exact private catalog worker for this read-only mode, poll unchanged
+  registration/catalog/CAS custody and the existing deadline, and preserve bounded
+  same-handle CAS integrity. This transport grants no execution or admission;
+  complete controller source/capability/result validation remains mandatory.
+  Add real subprocess delivery and wrong-binding, mutation, corruption, size and
+  expiry controls before review, pin renewal and complete/native qualification.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a

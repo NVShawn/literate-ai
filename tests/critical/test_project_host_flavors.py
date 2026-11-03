@@ -23,7 +23,7 @@ from literate_ai.bootstrap.host_install_requirements import (
     parse_flavor_toolchain_sbom,
 )
 from literate_ai.projects import ProjectConfigurationStore, load_project
-from tests.smoke.test_project_reparenting import initialize_root
+from tests.support.fixtures_test_project_host_flavors import initialize_root
 
 
 class ProjectHostFlavorTests(unittest.TestCase):
