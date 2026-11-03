@@ -58,7 +58,7 @@
       },
       {
         "name": "literate-ai:host-install:acquisition-note",
-        "value": "MSVC Build Tools currently has only an x64 WinGet bootstrapper. Preserve already-ready tools; request ARM64 acquisition explicitly and refuse when unavailable. No x64 fallback is authorized."
+        "value": "Microsoft Visual Studio uses a shared bootstrapper that detects Windows ARM64 and selects its native payload. Request the ARM64 toolset explicitly; require native PE proof for the installed compiler. Other native packages explicitly select ARM64 acquisition."
       }
     ]
   },
@@ -197,7 +197,7 @@
         },
         {
           "name": "literate-ai:host-install:install-arguments",
-          "value": "[\"install\",\"--id\",\"{package}\",\"--exact\",\"--silent\",\"--disable-interactivity\",\"--accept-package-agreements\",\"--accept-source-agreements\",\"--override\",\"--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --includeRecommended\",\"--architecture\",\"arm64\"]"
+          "value": "[\"install\",\"--id\",\"{package}\",\"--exact\",\"--silent\",\"--disable-interactivity\",\"--accept-package-agreements\",\"--accept-source-agreements\",\"--override\",\"--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --includeRecommended\"]"
         }
       ],
       "externalReferences": [

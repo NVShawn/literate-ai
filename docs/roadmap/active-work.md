@@ -29243,6 +29243,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
+- **Current installer correction:** Microsoft documents one shared Visual Studio
+  bootstrapper that selects the native ARM64 payload on Windows ARM64. Remove
+  the MSVC-only installer-architecture filter and preserve explicit ARM64 toolset
+  selection plus installed-image proof. Other packages keep explicit ARM64
+  acquisition. A successful installer exit without a native compiler remains a
+  refusal. Native framework/toolchain qualification is still open; the pinned
+  cryptography dependency currently needs a native ARM64 wheel build.
+
 - **Current integration:** Combine the preserved authored ARM64 realization and
   packaged template with bounded actual PE-image/runtime observations. Preserve
   x86-64 bytes and explicit unavailable-capability closure. Portable version-only

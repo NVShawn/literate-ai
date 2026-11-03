@@ -4,7 +4,9 @@
 
 Windows ARM64 host installation SHALL select its own authored realization and
 SHALL NOT substitute the x86-64 realization. Acquisition SHALL explicitly request
-ARM64 packages and bind managed artifacts to their reviewed ARM64 bytes. Existing
+ARM64 packages, except for the documented shared Visual Studio bootstrapper,
+which SHALL explicitly select the ARM64 toolset and use native installed-image
+proof. Managed artifacts SHALL bind their reviewed ARM64 bytes. Existing
 ready capabilities SHALL remain unchanged. Unsupported providers or required
 capabilities SHALL refuse rather than select another architecture or provider.
 
@@ -20,6 +22,13 @@ capabilities SHALL refuse rather than select another architecture or provider.
 - **WHEN** a selected capability is absent or its ARM64 installer is unavailable
 - **THEN** preflight or the authorized acquisition reports the missing requirement
 - **AND** readiness does not succeed through the x86-64 catalog or an emulated replacement
+
+#### Scenario: Microsoft supplies a shared compiler bootstrapper
+
+- **WHEN** the ARM64 compiler is missing and acquisition is authorized
+- **THEN** the declared shared Visual Studio installer selects the ARM64 toolset
+- **AND** readiness still requires native ARM64 compiler images after installation
+- **AND** a successful installer exit alone does not establish native readiness
 
 #### Scenario: The selected coding provider has no reviewed ARM64 artifact
 

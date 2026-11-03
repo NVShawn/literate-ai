@@ -26,6 +26,10 @@
 - Original-byte retained package verification accepts explicit custody leases up
   to three hours, while preserving its one-hour default and finite expiry checks.
 
+- Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
+  installer with the ARM64 toolset selected. Native compiler image checks still
+  determine readiness, including after an installer reports success.
+
 - Retained unit packages qualify locked declarations through their registered
   Component paths, preserving exact captured-source ownership for nested catalogs.
   Invalid declarations refuse during preflight before SDK execution.
