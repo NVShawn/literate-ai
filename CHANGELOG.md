@@ -5,6 +5,10 @@
 - Retained SDK evidence copying polls live receiver custody during bounded CAS
   traversal, with full authority validation before copying and before success.
 
+- Adopted-project status resolves selected project-local Flavors by canonical
+  identity. Toolchain-free shims add no requirements; custom local observation
+  probes refuse explicitly, and copied framework Flavors retain their host tools.
+
 - C++ toolchain discovery, including MSVC environment initialization, now defaults
   to a finite five-minute budget instead of one minute.
 

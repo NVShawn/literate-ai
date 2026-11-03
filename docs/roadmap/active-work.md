@@ -33132,3 +33132,21 @@ independent review and the complete combined gate from test one.
 - **Evidence:**
   - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
   - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
+
+### [ ] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#268](https://github.com/jordanhubbard/literate-ai/issues/268)
+
+- **Priority:** P1
+- **Owner:** Operator status and canonical host-install Flavor composition; issue 268
+- **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
+- **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Resolve project-local selected Flavor coordinates independently of directory names and preserve built-in selection.
+  - [ ] Reuse trusted packaged host probes only for the same canonical Flavor coordinate and exact sidecar bytes; report custom local probes as unsupported without executing them or suppressing unavailable requirements.
+- **Evidence:**
+  - [ ] Exercise an adopted project with a differently named local Flavor directory and missing, duplicate and toolchain failure controls.
+  - [ ] Obtain independent source review, renew canonical pins and pass complete regression and exact CI before closure.

@@ -12,6 +12,7 @@ from literate_ai.adapters.component_lock_application import (
     current_project_component_lock_identities,
     current_rebuild_project_authority_identity,
 )
+from literate_ai.adapters.component_lock_planning import ComponentLockPlanningError
 from literate_ai.adapters.conversion_authority import (
     ConversionAuthorityError,
     FilesystemConversionAuthorityStore,
@@ -41,6 +42,7 @@ from literate_ai.adapters.standard_lifecycle_binding import (
     resolve_standard_project_lifecycle_driver,
 )
 from literate_ai.adapters.user_paths import UserPathError, resolve_host_paths
+from literate_ai.application.flavor_selection import FlavorSelectionError
 from literate_ai.contracts import StandardProjectLifecycleDriver
 from literate_ai.projects import PROJECT_FILENAME, ProjectError, discover_project
 from literate_ai.test_receipts import inspect_project_test_receipt
@@ -60,6 +62,7 @@ def inspect_host_preflight(
     *,
     environment: Mapping[str, str] | None = None,
     flavor_selectors: Sequence[str] = (),
+    project=None,
 ) -> dict[str, object]:
     """Observe host paths, composed native tools, and coding auth without writes."""
 
@@ -92,6 +95,14 @@ def inspect_host_preflight(
             )
         )
         sbom_root = Path(str(files("literate_ai.project_template").joinpath("flavors")))
+        if project is not None:
+            from literate_ai.adapters.project_host_flavors import (
+                project_host_flavor_names,
+            )
+
+            flavor_names = project_host_flavor_names(
+                project, flavor_selectors, sbom_root
+            )
         sbom_path, sbom = load_host_install_sbom(
             sbom_root, target, flavor_names=flavor_names
         )
@@ -100,7 +111,13 @@ def inspect_host_preflight(
             sbom=sbom,
             environment=configured,
         ).to_dict()
-    except (HostInstallError, OSError, ValueError) as exc:
+    except (
+        HostInstallError,
+        ComponentLockPlanningError,
+        FlavorSelectionError,
+        OSError,
+        ValueError,
+    ) as exc:
         host_tools = {
             "schema": "literate-ai/host-install-report@2",
             "ready": False,
@@ -292,6 +309,7 @@ def inspect_operator_status(
     host = inspect_host_preflight(
         environment=environment,
         flavor_selectors=project.definition.default_flavor_selectors,
+        project=project,
     )
     stage = None if stage_value is None else str(stage_value["stage"])
     standard_binding_distribution_mismatch = _standard_binding_distribution_mismatch(
