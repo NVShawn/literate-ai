@@ -198,6 +198,9 @@
       },
       {
         "id": "HOST-STATUS-001"
+      },
+      {
+        "id": "ADOPT-RELOCATE-001"
       }
     ]
   }
