@@ -29262,6 +29262,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   reviewed binding; Node-only language selection remains available. The existing
   model cannot infer that chain from a version string or ARM64 Node alone.
 
+- **Native baseline correction in progress:** The ARM64 runtime leaf must probe
+  `MSVCP140.dll` and `VCRUNTIME140.dll`, both with native PE custody checks.
+  Microsoft's ONNX Runtime omits `VCRUNTIME140_1.dll` specifically on ARM64:
+  https://github.com/microsoft/onnxruntime/blob/main/onnxruntime/__init__.py.
+  An unrelated x64 copy of that DLL must not invalidate the native baseline.
+  Preserve the x86-64 three-file probe and all selected-file refusal checks.
+  This is baseline readiness, not arbitrary application DLL closure or native
+  qualification. Next: implement the leaf override and prove selected-file
+  missing/foreign refusal plus native observation before installation.
+
 - **GitHub issue:** [#43](https://github.com/jordanhubbard/literate-ai/issues/43)
 - **Release target:** 1.4.0
 - **Historical target:** 1.3.0 (2026-10-18 reconciliation); current 1.4 integration includes all original open issues by directing-user authorization.

@@ -495,6 +495,12 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
     def test_ready_tools_are_preserved_without_installation(self):
         with tempfile.TemporaryDirectory() as directory:
             environment, locator, runner, installs = self.ports(directory)
+            # The native ARM64 baseline coexists with this unrelated x64 DLL.
+            system = Path(directory) / "System32"
+            unrelated = system / "VCRUNTIME140_1.dll"
+            content = bytearray(unrelated.read_bytes())
+            content[68:70] = (0x8664).to_bytes(2, "little")
+            unrelated.write_bytes(content)
             report = host_install.ensure_host_install_dependencies(
                 sbom_root=self.root / "flavors",
                 target=self.target,
@@ -511,6 +517,37 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
             self.assertEqual(installs, [])
             self.assertEqual(report.coding_agent, "codex")
             self.assertEqual(report.to_dict()["target"]["architecture"], "arm64")
+            sbom_path, sbom = host_install.load_host_install_sbom(
+                self.root / "flavors", self.target, flavor_names=self.flavors
+            )
+            for name in ("MSVCP140.dll", "VCRUNTIME140.dll"):
+                selected = system / name
+                original = selected.read_bytes()
+                for variant in ("missing", "foreign"):
+                    with self.subTest(selected=name, variant=variant):
+                        if variant == "missing":
+                            selected.unlink()
+                        else:
+                            foreign = bytearray(original)
+                            foreign[68:70] = (0x8664).to_bytes(2, "little")
+                            selected.write_bytes(foreign)
+                        observation = host_install.observe_host_install_dependencies(
+                            sbom_path=sbom_path,
+                            sbom=sbom,
+                            environment=environment,
+                            locator=locator,
+                            runner=runner,
+                            managed_tool_root=Path(directory) / "managed",
+                        )
+                        runtime = next(
+                            item
+                            for item in observation.observations
+                            if item.requirement.capability == "vcruntime"
+                        )
+                        self.assertFalse(runtime.ready)
+                        self.assertFalse(observation.ready)
+                        self.assertEqual(installs, [])
+                        selected.write_bytes(original)
 
     def test_missing_required_compiler_never_falls_back_to_x64(self):
         with tempfile.TemporaryDirectory() as directory:

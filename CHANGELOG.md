@@ -34,6 +34,9 @@
   Component paths, preserving exact captured-source ownership for nested catalogs.
   Invalid declarations refuse during preflight before SDK execution.
 
+- Windows ARM64 baseline runtime detection checks the two required native DLLs,
+  allowing an unrelated x64 runtime companion without weakening selected-image checks.
+
 - Retained SDK packages distinguish completed-command evidence from execution
   grants. Commands still require unexpired authorization through teardown; later
   retention checks live owners and fresh revocations without extending grants.
