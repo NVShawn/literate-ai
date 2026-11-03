@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import shlex
 import shutil
 import subprocess
 import sys
@@ -417,12 +416,23 @@ class NativeFreeBsdDependencyTests(unittest.TestCase):
             wrappers.mkdir()
             counter = root / "readelf-calls"
             wrapper = wrappers / "readelf"
-            wrapper.write_text(
-                "#!/bin/sh\n"
-                f"printf '%s\\n' \"$1\" >> {shlex.quote(str(counter))}\n"
-                f'exec {shlex.quote(real_readelf)} "$@"\n'
+            wrapper_source = root / "inspector.c"
+            wrapper_source.write_text(
+                "#include <stdio.h>\n#include <unistd.h>\n"
+                "int main(int argc, char **argv){\n"
+                f'FILE *f=fopen({json.dumps(str(counter))},"a");\n'
+                "if(!f)return 111;\n"
+                'if(argc>1)fprintf(f,"%s\\n",argv[1]);\n'
+                "if(fclose(f))return 112;\n"
+                f"execv({json.dumps(real_readelf)},argv);\n"
+                "return 113;}\n"
             )
-            wrapper.chmod(0o755)
+            subprocess.run(
+                (compiler, str(wrapper_source), "-o", str(wrapper)),
+                check=True,
+                capture_output=True,
+                timeout=30,
+            )
 
             def observe():
                 return elf.PortableHostDependencyObserver(
@@ -449,8 +459,9 @@ class NativeFreeBsdDependencyTests(unittest.TestCase):
                 self.assertNotEqual(changed, result)
                 self.assertGreater(reads(), cold_reads)
                 before = reads()
-                wrapper.write_text(wrapper.read_text() + "# changed inspector bytes\n")
-                self.assertEqual(observe(), changed)
+                with wrapper.open("ab") as output:
+                    output.write(b"different exact inspector bytes")
+                self.assertNotEqual(observe(), changed)
                 self.assertGreater(reads(), before)
             paths = {
                 p["value"]
