@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+import stat
 import sys
 import tempfile
 import unittest
@@ -241,6 +242,10 @@ class StandardCargoLifecycleTests(unittest.TestCase):
             for name in ("cargo", "rustc"):
                 executable = root / name
                 shutil.copy2(sys.executable, executable)
+                # Some native installations make the interpreter read-only.
+                # These disposable copies must support the later byte-tamper
+                # control; set that mode before measuring either tool binding.
+                executable.chmod(executable.stat().st_mode | stat.S_IWUSR)
                 commands[name] = str(executable)
             with patch.object(shutil, "which", side_effect=commands.__getitem__):
                 ports, _plan, _candidate = self._system(root, native=True)

@@ -2,9 +2,27 @@
 
 ## Unreleased
 
-- Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
-  installer with the ARM64 toolset selected. Native compiler image checks still
-  determine readiness, including after an installer reports success.
+- Adoption: select and recheck a compatible GNU Make executable for the
+  framework-owned wrapper, preserving original harness commands and the external
+  workspace-link guard when the host's default Make is BSD Make.
+
+- FreeBSD attempt supervisors reap completed orphaned children during long runs,
+  preserving the primary child's actual exit status and final cleanup checks.
+
+- Native dependency hashes stream fresh file bytes with bounded memory while
+  preserving path, descriptor and mutation checks for large SDK images.
+
+- Retained receivers can preview original-byte verification intent before live
+  source transport exists. Actual execution still reopens original metadata
+  under current custody before starting a fresh lifecycle.
+
+- FreeBSD dependency rechecks reuse bounded native ABI and filter facts for exact
+  image and inspector bytes. Loader configuration and complete closure stay fresh.
+
+- Retained original-byte verification can bind the original receipt, run, LINK
+  and package projection to a distinct fresh admission through explicit evidence.
+  Original archive identities remain fixed; native qualification is pending.
+
 - Retained return-blob transport binds current private registration, worker
   catalog and CAS custody without rerunning project execution planning per object.
   Full result admission remains an independent controller operation.
@@ -25,9 +43,16 @@
 - Original-byte retained package verification accepts explicit custody leases up
   to three hours, while preserving its one-hour default and finite expiry checks.
 
+- Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
+  installer with the ARM64 toolset selected. Native compiler image checks still
+  determine readiness, including after an installer reports success.
+
 - Retained unit packages qualify locked declarations through their registered
   Component paths, preserving exact captured-source ownership for nested catalogs.
   Invalid declarations refuse during preflight before SDK execution.
+
+- Windows ARM64 baseline runtime detection checks the two required native DLLs,
+  allowing an unrelated x64 runtime companion without weakening selected-image checks.
 
 - Retained SDK packages distinguish completed-command evidence from execution
   grants. Commands still require unexpired authorization through teardown; later

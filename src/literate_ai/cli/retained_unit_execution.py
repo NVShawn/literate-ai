@@ -92,6 +92,34 @@ def execute_retained_unit_package_from_args(
     if verifying:
         request.update(verification_selection.to_dict())
     authorization = canonical_identity(request)
+    original_context = None
+    if (
+        verifying
+        and verification_selection.original_evidence is not None
+        and receiver_context is None
+        and (
+            verification_selection.source is not None
+            or args.retained_unit_command != "verify-plan"
+        )
+    ):
+        # A receiver's read-only preview has intent assertions, not the
+        # controller's filesystem custody. Actual receiver execution reopens
+        # original metadata below under its live transport before any lifecycle.
+        from .retained_unit_verification import original_context_for_verification
+
+        original_context = original_context_for_verification(
+            verification_selection,
+            project=project,
+            binding=binding,
+            manifest=manifest,
+            planning=planning,
+            selected=selected,
+            policy=policy,
+            pkg_tool=_pkg,
+            tar_tool=_tar,
+            request=request,
+            specification_context=specification_context,
+        )
     if args.retained_unit_command in {"execution-plan", "verify-plan"}:
         return {
             "schema": "literate-ai/retained-unit-package-verification-plan@1"
@@ -192,7 +220,51 @@ def execute_retained_unit_package_from_args(
     directories = select_cache_directories(
         project.root, build_dir=args.build_dir, obj_dir=args.obj_dir
     )
+    work = (
+        ensure_cache_directory(
+            directories.obj_dir,
+            kind="object",
+            project_root=project.root,
+            required_subdirectories=(Path("retained-unit-packages"),),
+        )
+        / "retained-unit-packages"
+    )
+    if (
+        verifying
+        and verification_selection.original_evidence is not None
+        and receiver_context is not None
+    ):
+        from literate_ai.storage.cas import FileSystemCAS
+
+        from .retained_unit_verification import original_context_for_verification
+
+        custody = (
+            ensure_cache_directory(
+                directories.build_dir,
+                kind="generated-source",
+                project_root=project.root,
+                required_subdirectories=(Path("retained-project-cas"),),
+            )
+            / "retained-project-cas"
+        )
+        original_context = original_context_for_verification(
+            verification_selection,
+            project=project,
+            binding=binding,
+            manifest=manifest,
+            planning=planning,
+            selected=selected,
+            policy=policy,
+            pkg_tool=pkg_tool,
+            tar_tool=tar_tool,
+            request=request,
+            specification_context=specification_context,
+            receiver_context=receiver_context,
+            object_root=work,
+            store=FileSystemCAS(custody),
+        )
     completed = []
+    original_evidence = []
     verified_projections = []
 
     def consume(admission, workspace):
@@ -207,15 +279,60 @@ def execute_retained_unit_package_from_args(
         )
         evidence = owner.retain_planning_evidence()
         handoff = link_retained_unit_packages(owner)
-        work = (
-            ensure_cache_directory(
-                directories.obj_dir,
-                kind="object",
-                project_root=project.root,
-                required_subdirectories=(Path("retained-unit-packages"),),
+        run_reference = None
+        if (
+            receiver_context is not None
+            or original_context is not None
+            or getattr(args, "verification_evidence_output", None) is not None
+        ):
+            from literate_ai.adapters.retained_unit_run_evidence import (
+                retain_retained_unit_run_evidence,
             )
-            / "retained-unit-packages"
-        )
+
+            run_reference = retain_retained_unit_run_evidence(
+                admission,
+                maximum_bytes=policy.max_provider_metadata_bytes,
+                maximum_memory_bytes=policy.max_provider_memory_bytes,
+                admission_guard=(
+                    admission.require_current
+                    if receiver_context is None
+                    else receiver_context.require_current
+                ),
+                metadata_poll_guard=(
+                    receiver_context.require_custody_current
+                    if type(receiver_context) is RetainedReceiverContext
+                    else None
+                ),
+            )
+            handoff.require_current(owner)
+        fresh_workspace_roots = ()
+        if original_context is not None:
+            from literate_ai.adapters.retained_original_unit_context import (
+                reopen_fresh_unit_workspace_roots,
+            )
+            from literate_ai.adapters.retained_sdk_authority import (
+                current_retained_sdk_snapshots,
+            )
+
+            locks = current_project_component_locks(project)
+            snapshots = (
+                current_retained_sdk_snapshots(project, locks)
+                if any(m.role == "sdk-policy" for m in manifest.members)
+                else ()
+            )
+            fresh_workspace_roots = reopen_fresh_unit_workspace_roots(
+                original_context,
+                owner,
+                planning,
+                policy,
+                run_reference,
+                sdk_snapshots=snapshots,
+                guard=(
+                    admission.require_current
+                    if receiver_context is None
+                    else receiver_context.require_custody_current
+                ),
+            )
         if verifying:
             from .retained_unit_verification import receive_selected_unit_packages
 
@@ -224,15 +341,33 @@ def execute_retained_unit_package_from_args(
                 owner,
                 object_root=work,
                 receiver_context=receiver_context,
+                original_context=original_context,
             )
             # The owner reopens these exact bytes under genuine fresh admission.
             # A different projection is refused by the canonical result reader.
-            owner.verify_set(reference, object_root=work)
-            verified_projections.append(owner.projection)
+            if original_context is None:
+                owner.verify_set(reference, object_root=work)
+            else:
+                owner.verify_original_set(
+                    original_context,
+                    object_root=work,
+                    link_handoff=handoff,
+                    fresh_workspace_roots=fresh_workspace_roots,
+                )
+            verified_projections.append(
+                owner.projection
+                if original_context is None
+                else original_context.projection
+            )
         else:
             reference = owner.construct_set(object_root=work, link_handoff=handoff)
+        package_projection = (
+            owner.projection
+            if original_context is None
+            else original_context.projection
+        )
         index, _results = read_retained_unit_results(
-            owner.projection, reference, admission.store, **owner.tree_policy
+            package_projection, reference, admission.store, **owner.tree_policy
         )
         handoff.require_current(owner)
         request_reference = admission.store.put_manifest(
@@ -252,7 +387,7 @@ def execute_retained_unit_package_from_args(
                 "retained_receipt_identity": admission.receipt.identity.uri,
                 "planning_evidence": evidence.to_dict(),
                 "link_proof": handoff.reference.to_dict(),
-                "set_plan_identity": owner.projection.set_plan.identity.uri,
+                "set_plan_identity": package_projection.set_plan.identity.uri,
                 "result_index": reference.to_dict(),
                 "archive_bytes": index.archive_bytes,
                 "unit_count": index.unit_count,
@@ -267,23 +402,65 @@ def execute_retained_unit_package_from_args(
             completed[-1].update(
                 operation="verify", verified_result_index=reference.to_dict()
             )
-        if receiver_context is not None:
-            from literate_ai.adapters.retained_unit_run_evidence import (
-                retain_retained_unit_run_evidence,
+        if run_reference is not None:
+            completed[-1]["accepted_run_evidence"] = run_reference.to_dict()
+        if original_context is not None:
+            from literate_ai.adapters.retained_original_unit_context import (
+                original_unit_verification_proof,
             )
+            from literate_ai.adapters.retained_unit_inspection import (
+                retained_unit_metadata_reference,
+            )
+            from literate_ai.contracts.blobs import BlobRef
 
-            completed[-1]["accepted_run_evidence"] = retain_retained_unit_run_evidence(
-                admission,
-                maximum_bytes=policy.max_provider_metadata_bytes,
-                maximum_memory_bytes=policy.max_provider_memory_bytes,
-                admission_guard=receiver_context.require_current,
-                metadata_poll_guard=(
-                    receiver_context.require_custody_current
-                    if type(receiver_context) is RetainedReceiverContext
-                    else None
+            proof = original_unit_verification_proof(
+                original_context,
+                owner.projection,
+                fresh_completed_run=admission.run,
+                fresh_inputs=owner.inputs,
+                fresh_workspace_roots=fresh_workspace_roots,
+                fresh_receipt=retained_unit_metadata_reference(
+                    admission.store,
+                    admission.receipt.identity,
+                    maximum_bytes=min(64 * 1024**2, policy.max_provider_metadata_bytes),
                 ),
+                fresh_planning=evidence,
+                fresh_run=BlobRef.from_dict(completed[-1]["accepted_run_evidence"]),
+                fresh_link=handoff.reference,
+                result_index=reference,
+                results=_results,
+            )
+            completed[-1]["original_verification_proof"] = admission.store.put_manifest(
+                proof, media_type="application/json"
             ).to_dict()
             handoff.require_current(owner)
+        if getattr(args, "verification_evidence_output", None) is not None:
+            from literate_ai.adapters.retained_original_unit_evidence import (
+                OriginalRetainedUnitEvidence,
+            )
+            from literate_ai.adapters.retained_unit_inspection import (
+                retained_unit_metadata_reference,
+            )
+            from literate_ai.contracts.blobs import BlobRef
+
+            original_evidence.append(
+                OriginalRetainedUnitEvidence(
+                    plan.identity,
+                    selected.worker.identity,
+                    request_reference,
+                    retained_unit_metadata_reference(
+                        admission.store,
+                        admission.receipt.identity,
+                        maximum_bytes=min(
+                            64 * 1024**2, policy.max_provider_metadata_bytes
+                        ),
+                    ),
+                    evidence,
+                    BlobRef.from_dict(completed[-1]["accepted_run_evidence"]),
+                    handoff.reference,
+                    reference,
+                )
+            )
 
     def execute():
         runtime = (
@@ -332,6 +509,15 @@ def execute_retained_unit_package_from_args(
     admission.require_current()
     pkg_tool.require_unchanged()
     tar_tool.require_current()
+    if getattr(args, "verification_evidence_output", None) is not None:
+        from .retained_unit_verification import write_original_verification_evidence
+
+        if len(original_evidence) != 1:
+            raise ValueError("retained.unit.complete-original-evidence-required")
+        original_evidence[0].require_budget(policy)
+        write_original_verification_evidence(
+            args.verification_evidence_output, original_evidence[0]
+        )
     return {
         **completed[0],
         "worker_health": health,

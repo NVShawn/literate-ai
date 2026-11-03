@@ -107,8 +107,14 @@ class RetainedProjectReceiptTests(unittest.TestCase):
         owner.deactivate.side_effect = lambda: events.append(
             value["view_observations"][2]
         )
-        with patch.object(
-            commands.execution, "FreeBsdRetainedViewOwner", return_value=owner
+        # This fixture tests receipt/view protocol transitions, not privileged
+        # native ACL allocation. Keep both parts of that external boundary
+        # together; real ACL preflight retains its independent native controls.
+        with (
+            patch.object(
+                commands.execution, "FreeBsdRetainedViewOwner", return_value=owner
+            ),
+            patch.object(commands.execution, "preflight_freebsd_posix_acl"),
         ):
             workspace = self.fixture.workspace(allocation_owner=allocation)
         self.addCleanup(workspace.close_secondary_access)

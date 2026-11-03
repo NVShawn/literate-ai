@@ -172,7 +172,16 @@ class ConversionFailureStoreTests(unittest.TestCase):
             report["recovery"], "incomplete" if rollback_fails else "rolled-back"
         )
         self.assertFalse(report["acceptance"])
-        self.assertTrue(any(p.get("exit_code") == 2 for p in report["phases"]))
+        # GNU Make and BSD Make return different nonzero recipe-failure codes.
+        # Require the real test failure, preserving the native process status.
+        self.assertTrue(
+            any(
+                phase.get("phase") == "test"
+                and type(phase.get("exit_code")) is int
+                and phase["exit_code"] > 0
+                for phase in report["phases"]
+            )
+        )
         if not rollback_fails:
             self.assertEqual(
                 original, {p.name: p.read_bytes() for p in self.project.iterdir()}

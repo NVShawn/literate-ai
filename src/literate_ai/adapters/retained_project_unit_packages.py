@@ -642,6 +642,22 @@ class RetainedProjectUnitPackages(_RetainedUnitPackagePlanner):
         self.tar_tool.require_current()
         return reference
 
+    def verify_original_set(
+        self, context, *, object_root, link_handoff, fresh_workspace_roots
+    ):
+        """Verify immutable original archives under this distinct admitted epoch."""
+        from literate_ai.adapters.retained_original_unit_context import (
+            verify_original_unit_packages,
+        )
+
+        return verify_original_unit_packages(
+            context,
+            self,
+            link_handoff,
+            object_root=object_root,
+            fresh_workspace_roots=fresh_workspace_roots,
+        )[0]
+
     def verify_set(self, reference, *, object_root):
         """Reopen assertions under current live authority and native tools."""
         import platform

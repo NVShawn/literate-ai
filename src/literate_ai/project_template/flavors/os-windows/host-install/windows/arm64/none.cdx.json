@@ -136,6 +136,10 @@
         {
           "name": "literate-ai:host-install:base-capabilities",
           "value": "[\"vcruntime\"]"
+        },
+        {
+          "name": "literate-ai:host-install:probe-candidates",
+          "value": "[\"%SystemRoot%/System32/MSVCP140.dll\",\"%SystemRoot%/System32/VCRUNTIME140.dll\"]"
         }
       ],
       "externalReferences": [

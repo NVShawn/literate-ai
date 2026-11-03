@@ -127,6 +127,21 @@ class FreeBsdDependencyTests(unittest.TestCase):
         self.fail("unmodeled inspector invocation")
 
     def observe(self, **changes):
+        # A changed mock inspector response represents changed inspector bytes.
+        # Keep that external boundary faithful to the real content-bound tool.
+        self.reader.write_bytes(
+            b"\x7fELFfixture-inspector\n"
+            + json.dumps(
+                {
+                    "needed": self.needed,
+                    "rpaths": self.rpaths,
+                    "interpreters": self.interpreters,
+                    "headers": self.headers,
+                    "extra_dynamic": self.extra_dynamic,
+                },
+                sort_keys=True,
+            ).encode()
+        )
         return elf.PortableHostDependencyObserver(
             **{"freebsd_loader_paths": FreeBsdLoaderPaths(), **changes}
         ).observe(
@@ -395,9 +410,59 @@ class NativeFreeBsdDependencyTests(unittest.TestCase):
                 capture_output=True,
                 timeout=30,
             )
-            result = elf.PortableHostDependencyObserver(
-                artifact_files=(program,), freebsd_loader_paths=FreeBsdLoaderPaths()
-            ).observe({"artifact_path": str(root)}, root_ref="urn:test:native-program")
+            real_readelf = shutil.which("readelf")
+            self.assertIsNotNone(real_readelf)
+            wrappers = root / "inspectors"
+            wrappers.mkdir()
+            counter = root / "readelf-calls"
+            wrapper = wrappers / "readelf"
+            wrapper_source = root / "inspector.c"
+            wrapper_source.write_text(
+                "#include <stdio.h>\n#include <unistd.h>\n"
+                "int main(int argc, char **argv){\n"
+                f'FILE *f=fopen({json.dumps(str(counter))},"a");\n'
+                "if(!f)return 111;\n"
+                'if(argc>1)fprintf(f,"%s\\n",argv[1]);\n'
+                "if(fclose(f))return 112;\n"
+                f"execv({json.dumps(real_readelf)},argv);\n"
+                "return 113;}\n"
+            )
+            subprocess.run(
+                (compiler, str(wrapper_source), "-o", str(wrapper)),
+                check=True,
+                capture_output=True,
+                timeout=30,
+            )
+
+            def observe():
+                return elf.PortableHostDependencyObserver(
+                    artifact_files=(program,), freebsd_loader_paths=FreeBsdLoaderPaths()
+                ).observe(
+                    {"artifact_path": str(root)}, root_ref="urn:test:native-program"
+                )
+
+            def reads():
+                return counter.read_text().splitlines().count("-d")
+
+            with patch.dict(
+                os.environ,
+                {"PATH": str(wrappers) + os.pathsep + os.environ.get("PATH", "")},
+            ):
+                result = observe()
+                cold_reads = reads()
+                self.assertGreater(cold_reads, 0)
+                self.assertEqual(observe(), result)
+                self.assertEqual(reads(), cold_reads)
+                with program.open("ab") as output:
+                    output.write(b"different exact image bytes")
+                changed = observe()
+                self.assertNotEqual(changed, result)
+                self.assertGreater(reads(), cold_reads)
+                before = reads()
+                with wrapper.open("ab") as output:
+                    output.write(b"different exact inspector bytes")
+                self.assertNotEqual(observe(), changed)
+                self.assertGreater(reads(), before)
             paths = {
                 p["value"]
                 for c in result.components

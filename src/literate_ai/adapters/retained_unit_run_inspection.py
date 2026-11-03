@@ -163,7 +163,10 @@ def reopen_retained_unit_run(
     expected_sdk_platform=None,
     expected_sdk_architecture=None,
     current_sdk_snapshots=(),
+    workspace_root_observer=None,
 ):
+    if workspace_root_observer is not None and not callable(workspace_root_observer):
+        raise TypeError("retained.unit.callable-workspace-observer-required")
     reader = _Reader(inputs, policy, admission_guard)
     plan, receipt = inputs.plan, inputs.receipt
     if planning.plan != plan:
@@ -461,7 +464,7 @@ def reopen_retained_unit_run(
             policy.max_provider_memory_bytes // 512,
         ),
     )
-    verify_retained_sdk_run_assertions(
+    workspace_roots = verify_retained_sdk_run_assertions(
         reader,
         inputs,
         reopened,
@@ -476,4 +479,6 @@ def reopen_retained_unit_run(
     }:
         raise ValueError("retained.unit.exact-sdk-metadata-closure-required")
     admission_guard()
+    if workspace_root_observer is not None:
+        workspace_root_observer(workspace_roots)
     return reopened

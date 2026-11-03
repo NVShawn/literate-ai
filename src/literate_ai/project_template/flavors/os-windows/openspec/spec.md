@@ -41,6 +41,14 @@ capabilities SHALL refuse rather than select another architecture or provider.
 - **THEN** readiness refuses and preserves the existing tool before acquisition
 - **AND** version output alone never establishes native readiness
 
+#### Scenario: Native ARM64 baseline runtime coexists with x64 companions
+
+- **WHEN** the ARM64 runtime baseline is observed
+- **THEN** `MSVCP140.dll` and `VCRUNTIME140.dll` must both exist and pass native PE custody checks
+- **AND** a missing or foreign selected DLL refuses readiness
+- **AND** an unrelated `VCRUNTIME140_1.dll` is outside this ARM64 baseline probe
+- **AND** the x86-64 three-DLL baseline and application-specific dependency checks remain unchanged
+
 #### Scenario: NPM is selected on ARM64
 
 - **WHEN** a selected Flavor requires NPM

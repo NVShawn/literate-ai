@@ -241,6 +241,12 @@ def execute_remote_retained_unit_package(
         args, selected, authorization, execute
     )
     result = admitted.to_dict()
+    if getattr(args, "verification_evidence_output", None) is not None:
+        from .retained_unit_verification import write_original_verification_evidence
+
+        write_original_verification_evidence(
+            args.verification_evidence_output, admitted.original_evidence
+        )
     return {
         **result,
         "custody_root": str(store.root),

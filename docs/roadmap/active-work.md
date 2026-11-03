@@ -28180,6 +28180,81 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Native full-suite renewal at `33f1e62` with the accepted-ADR documentation union
+stopped after 874 passes, 36 skips and one process-tree timeout test failure;
+2,658 tests were selected and the remaining cases were not executed. The outer
+native owner proved empty-subtree cleanup. A focused reproduction confirms that
+the killed grandchild remains as a zombie adopted by the native guardian until
+outer cleanup. The supervisor now reaps completed adopted children while its
+primary continues, retaining the primary's actual exit status. Native red/green
+validation reproduces the failure with the old supervisor, then passes all six
+process-ownership tests with zero skips after the fix. The original timeout test
+is unchanged; the new nested-owner case also requires actual nonzero exit 17.
+Cancellation/deadline checks and final kernel-empty cleanup remain mandatory.
+Renew the complete suite before claiming framework qualification; the failed
+partial suite remains failure evidence.
+
+The next native full gate passes 1,195 cases, then stops on the receipt
+secondary-access protocol fixture. That fixture replaces the allocation/view
+owner but leaves the real privileged ACL preflight active on an unprivileged
+directory. Correct the fixture's existing external-kernel boundary consistently
+with the execution protocol controls; retain real commands/CAS and all late
+identity, cleanup, corruption and receipt-publication refusals. Production
+root-owned ACL checks and separately required native ACL qualification must
+remain unchanged. Renew the focused receipt controls and full gate afterward.
+
+The corrected receipt module passes all 16 native cases with zero skips and
+verified native cleanup. Fresh full gate v3 then passes 1,590 cases with 71
+skips before a conversion rollback-evidence fixture stops at default-parent
+release-tag discovery, before its intended baseline executes. The shared CLI
+fixture already supplies explicit root authority for disposable `init` projects;
+apply the same fixture-only boundary to `onboard adopt`. Preserve real noisy
+harness execution, refusal of rollback, retained diagnostics, original error
+classification and incomplete-recovery assertions. No production parent selection
+or release-tag requirement changes. Renew the focused adoption controls and the
+complete native gate; the partial run remains failed qualification evidence.
+
+The native adoption focus now reaches the real baseline after the parent-fixture
+repair, then exposes a second test assumption: it expects GNU Make's exit 2 for
+a failing recipe. FreeBSD Make returns a different nonzero code. Require a typed
+positive exit from the retained `test` phase, preserving
+all actual noisy-output, redaction, error-code and incomplete-rollback assertions.
+The failed focus selected six cases and stopped after two passes and one failure;
+its native guardian completed cleanup, and no full suite was launched. This is
+a portable fixture assertion correction, not normalization of production exits.
+
+Full gate v5 passes 1,595 cases with 71 skips, then stops on the real Node
+external-dependency adoption control: direct baseline build exits 0, while the
+framework wrapper exits 1. A bounded native diagnostic captures BSD Make rejecting
+the wrapper's GNU-only `ifeq`/`origin` workspace-link guard. The generated wrapper
+is declared GNU Make authority; use the existing compatible GNU Make resolver and
+current-tool checks for wrapper parity, retaining the original adopted harness
+command and its baseline semantics. Preserve the guard and avoid adding any
+undeclared shell requirement. Recheck the real Node success/refusal controls,
+then the wider adoption group and the complete gate. The failed full run and
+its native empty-subtree cleanup remain evidence, not framework qualification.
+
+The reviewed GNU-wrapper correction passes all 44 selected adoption cases on
+native FreeBSD with zero skips, including both real Node dependency cases and
+all six rollback-evidence cases. The selected GNU launcher is rechecked around
+each wrapper phase and invoked as literal arguments; original harness commands
+and the generated workspace-link guard are unchanged. Native kernel cleanup and
+all 5,193 source-file hashes/identities are verified. Report identity:
+`7b8d92d0313aa909a2e6fb233b0267ea00c16d4a0d4545bda354d33c71320cb3`.
+This focused result supports reviewed pin renewal; complete source and release
+qualification remain pending.
+
+Full gate v6 passes 2,414 cases with 106 skips, then stops when the multicall
+launcher tamper fixture copies a read-only native Python executable and cannot
+overwrite its disposable copy. Give only those copies owner-write permission
+before measuring their tool bindings; preserve the original interpreter and all
+byte-change/currentness assertions. The corrected module passes all ten native
+FreeBSD cases with zero skips, verified kernel cleanup and unchanged source
+custody. Report identity:
+`d3c10ebf7f233af4f18d08689ccaeab918ff87b6a703cb0c720993a647a1e3d8`.
+The suite source pin includes every test module, so this fixture correction
+requires a fresh complete source gate rather than reuse of the failed checkpoint.
+
 Worker bootstrap follow-up: the canonical Python bootstrap rejected
 FreeBSD before its existing tuple-specific native pkg provider can observe tools.
 Added actual-platform detection and explicit FreeBSD selection, preserving provider
@@ -29261,6 +29336,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   NPM is explicitly unavailable until its actual script/runtime chain has a
   reviewed binding; Node-only language selection remains available. The existing
   model cannot infer that chain from a version string or ARM64 Node alone.
+
+- **Native baseline correction in progress:** The ARM64 runtime leaf must probe
+  `MSVCP140.dll` and `VCRUNTIME140.dll`, both with native PE custody checks.
+  Microsoft's ONNX Runtime omits `VCRUNTIME140_1.dll` specifically on ARM64:
+  https://github.com/microsoft/onnxruntime/blob/main/onnxruntime/__init__.py.
+  An unrelated x64 copy of that DLL must not invalidate the native baseline.
+  Preserve the x86-64 three-file probe and all selected-file refusal checks.
+  This is baseline readiness, not arbitrary application DLL closure or native
+  qualification. Next: implement the leaf override and prove selected-file
+  missing/foreign refusal plus native observation before installation.
 
 - **GitHub issue:** [#43](https://github.com/jordanhubbard/literate-ai/issues/43)
 - **Release target:** 1.4.0
@@ -32813,6 +32898,23 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
 
+- **Current development status:** At source `33f1e62`, the SDK-bearing two-unit
+  native FreeBSD PACKAGE and fresh original-archive VERIFY both pass independent
+  controller admission. Verification retains the exact original result index
+  `sha256:fa6d0ced3d39d149f382fe83fcd68afa47443b60ca849d228dcf5f69024986cc`
+  and 43,364 archive bytes while producing a distinct fresh receipt. Real index
+  and archive transport corruption controls refuse, with matching native/controller
+  attested failure bytes, unchanged original CAS bytes and genuine native cleanup.
+  [Recorded development evidence](https://github.com/jordanhubbard/literate-ai/issues/235#issuecomment-6597949483).
+  The functional SDK blocker is resolved, and the directing user authorized the
+  downstream release to proceed under its own gates independently of framework
+  publication. This does not prove downstream acceptance or full issue completion.
+- **Current next action:** Renew full native regression after the separately
+  reproduced orphan-reaping repair, then complete the required real retained-tree
+  case beyond 100,000 members and all remaining installed/integrated qualification.
+  Issue #235 and this 1.4 goal remain open. The earlier attempts below retain their
+  historical scope and failures; they do not override this two-unit SDK result.
+
 - **2026-11-02 nested-source qualification correction:** The exact installed SDK-currentness candidate reaches per-unit planning in the actual authenticated FreeBSD round trip, then refuses with `retained.unit.locked-package-unit-specifications-required` after 2,559.261 seconds. Native empty-subtree cleanup is verified; no PACKAGE/LINK admission or downstream unblock is claimed. Locked specification references are Component-relative, while retained source members are project-relative. Qualify references through the already selected canonical catalog at each public planning/execution boundary, preserve the explicit standalone root-reference contract, and carry the exact qualified member association into package evidence. Basename, suffix, digest-only and failed-lookup fallbacks are not acceptable. Add actual nested public-lock/retained-package coverage with an identical-byte misplaced declaration, then renew source review, complete regression, installed/native PACKAGE/LINK and required negative controls.
 
 - **Priority:** P0
@@ -32860,6 +32962,68 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   complete controller source/capability/result validation remains mandatory.
   Add real subprocess delivery and wrong-binding, mutation, corruption, size and
   expiry controls before review, pin renewal and complete/native qualification.
+- **Original-byte verification correctness correction:** V14 completed native
+  PACKAGE/LINK and independent controller admission for two packages. The planned
+  second lifecycle cannot verify those archives: each fresh accepted run has a new
+  receipt, while the original index binds its original receipt-dependent set plan.
+  The current transfer compares it with the fresh projection and must refuse.
+  Existing positive coverage uses only one owner, so it misses this boundary.
+  Preserve the original projection/provenance and exact archive matching while
+  joining it explicitly to genuine fresh retained/SDK/LINK authority and complete
+  current source/policy/provider/payload equivalence. Historical decoders must not
+  create live owners or relax guards. Add a two-distinct-lifecycle original-byte
+  positive and source/policy/SDK/archive/provenance refusal controls, then renew
+  installed native qualification. Do not launch the known-failing long path or
+  present release regression gates as an additional downstream handoff prerequisite.
+  The working bridge now captures explicit original roots, preflights historical
+  source/run/LINK assertions, and separately binds fresh verification proof.
+  It remains unqualified. The working comparison now validates FreeBSD image and
+  loader relocation through manifest hashes and verified launch roots, including
+  hardlinks. Ordinary launch candidates require every recorded clean-environment
+  digest to match. SDK inputs receive explicit stable counterparts only after
+  both epochs validate their full source/SDK provenance; source indexing,
+  resolver, snapshot, recipe, license, placement, complete loader graphs and
+  remaining cache facts stay exact. Runtime diagnostics reopen V14's real
+  returned assertions successfully but grant no native admission. The public
+  native owner control now requires two actual lifecycle admissions and checks
+  original identities, corruption and stale source; native execution and final
+  independent review of the implementation remain open.
+  A bounded read-only stack observation of the native public-owner controls found
+  repeated FreeBSD header/dynamic inspector subprocesses during dependency
+  currentness checks. Compact process-local reuse now binds successful ABI/filter
+  facts to the exact inspector digest, image path and freshly hashed image bytes;
+  capture signatures/hash checks and all loader/resolution/final guards remain.
+  The persisted fact format is unchanged. Sixteen focused controls pass locally,
+  with one honest native skip. The actual native compiled-program control now
+  checks warm reuse and recapture after image and inspector mutations. Source
+  review approves the change. All 17 dependency controls now pass on native
+  FreeBSD with no skips, using a real ELF inspector proxy for cache invalidation.
+  The preceding 15 public package controls also pass natively, including two
+  separate admissions and original archive corruption/stale-source refusal.
+  SDK-bearing public PACKAGE-to-VERIFY and scale qualification remain pending.
+  Tracing that public route found a separate receiver-preview blocker: decoded
+  verification intent has no controller filesystem source, so read-only preview
+  must defer metadata acquisition until genuine receiver transport exists.
+  Controller filesystem planning and actual source-less execution keep their
+  original preflight; real receiver execution still validates original metadata
+  before a fresh lifecycle. Source correction and native qualification are in
+  progress without changing the active installed candidate or its evidence.
+  A subsequent bounded stack sample of the real SDK-bearing PACKAGE attempt
+  found fresh native image hashing allocating and joining complete ELF images
+  during live LINK checks. Replace whole-file allocation only for hashing with
+  a bounded chunk stream, preserving fresh reads of every byte, exact path and
+  descriptor before/after checks, partial-read behavior and explicit descriptor
+  cleanup. Refuse growth beyond the initial full-read bound. Source review and
+  public dependency mutation controls are required before installing the next
+  isolated candidate; the active runtime remains unchanged.
+  The streamed implementation passes 99 portable dependency/custody/PE controls
+  with one native-only skip. A read-only native ABBA comparison hashes the same
+  99,348,440-byte LLVM library to the same identity: median hash wall time is
+  0.138 seconds before and 0.041 seconds streamed; median peak process RSS is 270,164
+  KiB before and 50,194 KiB streamed. This is isolated hash evidence, with no
+  installed candidate mutation or whole-PACKAGE speedup claim. See
+  `verification/native-dependency-hash-streaming-development.json`; full native
+  runtime and SDK PACKAGE-to-VERIFY qualification remain open.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a
@@ -32964,7 +33128,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - The controller and public remote CLI now compose strict attested dispatch, exact input records, the explicitly selected catalog, structured admission failures, cancellation and bounded return custody. Independent review approves the source; actual SSH admission, cancellation during import and unknown-cleanup controls remain pending.
   - A fresh complete local gate stopped after 1,587 tests (70 skips, one error, 1,208.471 seconds). The actual macOS SDK case exhausted its fixture's 256 MiB accounted decoding budget. A separate real-case diagnostic reproduced the refusal in 87.179 seconds: 15,891,690 retained bytes plus a 1,985,740-byte command record exceeded the conservative decoding allowance. The fixture now explicitly allocates 1 GiB; production limits and refusal accounting are unchanged. Both failed attempts remain retained.
   - Preparing the two-package native qualification fixture exposed a lifecycle gap: output discovery still selected flat capture and export dependency observation rejected aliases. The reviewed correction carries the existing explicit tree policy through output capture and selects sealed native files for export observation, with complete topology verification before and after. A real compiled fixture now creates file links, hardlinks, an empty directory and a directory alias; its control covers default refusal and subsequent hardlink flattening. These latest bytes need focused and fresh full checks before commit or native qualification.
-  - Next action: complete the fresh output-tree and SDK focused gates, then full regression and exact installed-wheel qualification; execute the two-package authenticated FreeBSD controller round trip and the required real retained-tree case beyond 100,000 members. Issue #235 remains open and downstream readiness has not been announced.
+  - Earlier next action (superseded by current status above): complete the fresh output-tree and SDK focused gates, then full regression and exact installed-wheel qualification; execute the two-package authenticated FreeBSD controller round trip and the required real retained-tree case beyond 100,000 members. Issue #235 remains open and downstream readiness has not been announced.
   - Corrected focused gates pass: all 14 retained-package cases (one native-only skip, 122.823 seconds) and all 12 SDK cases (zero skips, 283.629 seconds). The real output-tree case checks explicit-policy admission, legacy refusal, live workspace topology drift, independently preserved LINK custody and actual sealed-CAS corruption refusal. The initial version's last assertion targeted disposable workspace mutation instead of retained custody; its failed 17.607-second run remains retained. Fresh complete regression is the next gate before commit/push, followed by native and installed qualification of these exact corrections.
 
 
@@ -33133,6 +33297,42 @@ Keep canonical overlap checks and all safe-directory/append guards. Add a real
 ancestor-alias positive control plus explicit leaf-alias refusal, then renew
 independent review and the complete combined gate from test one.
 
+### [ ] CPP-DISCOVERY-BUDGET-001 — Allow five minutes for bounded C++ toolchain discovery
+
+- **Release target:** 1.4.0
+- **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
+
+- **Priority:** P1
+- **Owner:** C++ toolchain discovery and MSVC environment initialization
+- **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.
+- **Conclusion:** Raise the default discovery allowance to 300 seconds, including MSVC vendor environment setup, while preserving explicit caller budgets, bounded output, cancellation and owned process cleanup. This does not change build-command budgets or turn timeouts into skips.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Set the default C++ version and MSVC environment discovery budget to 300 seconds and document the scope.
+  - [ ] Preserve explicit short discovery budgets and existing timeout, output and process cleanup behavior.
+- **Evidence:**
+  - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
+  - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
+
+### [ ] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#268](https://github.com/jordanhubbard/literate-ai/issues/268)
+
+- **Priority:** P1
+- **Owner:** Operator status and canonical host-install Flavor composition; issue 268
+- **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
+- **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Resolve project-local selected Flavor coordinates independently of directory names and preserve built-in selection.
+  - [ ] Reuse trusted packaged host probes only for the same canonical Flavor coordinate and exact sidecar bytes; report custom local probes as unsupported without executing them or suppressing unavailable requirements.
+- **Evidence:**
+  - [ ] Exercise an adopted project with a differently named local Flavor directory and missing, duplicate and toolchain failure controls.
+  - [ ] Obtain independent source review, renew canonical pins and pass complete regression and exact CI before closure.
+
 ### [ ] ADOPT-RELOCATE-001 — Support selected and relocated retained implementation layouts
 
 - **Priority:** P1
@@ -33194,38 +33394,3 @@ independent review and the complete combined gate from test one.
   - [ ] Use an actual private command-addressed POSIX worker for nonce handshake, native platform/storage observations, alignment, source upload, native Component execution and evidence download through the same route.
   - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
   - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.
-### [ ] CPP-DISCOVERY-BUDGET-001 — Allow five minutes for bounded C++ toolchain discovery
-
-- **Release target:** 1.4.0
-- **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
-
-- **Priority:** P1
-- **Owner:** C++ toolchain discovery and MSVC environment initialization
-- **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.
-- **Conclusion:** Raise the default discovery allowance to 300 seconds, including MSVC vendor environment setup, while preserving explicit caller budgets, bounded output, cancellation and owned process cleanup. This does not change build-command budgets or turn timeouts into skips.
-- **Depends on:** none
-- **Completion prerequisites:** none
-- **Implementation:**
-  - [ ] Set the default C++ version and MSVC environment discovery budget to 300 seconds and document the scope.
-  - [ ] Preserve explicit short discovery budgets and existing timeout, output and process cleanup behavior.
-- **Evidence:**
-  - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
-  - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
-
-### [ ] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
-
-- **Release target:** 1.4.0
-- **GitHub issue:** [#268](https://github.com/jordanhubbard/literate-ai/issues/268)
-
-- **Priority:** P1
-- **Owner:** Operator status and canonical host-install Flavor composition; issue 268
-- **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
-- **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
-- **Depends on:** none
-- **Completion prerequisites:** none
-- **Implementation:**
-  - [ ] Resolve project-local selected Flavor coordinates independently of directory names and preserve built-in selection.
-  - [ ] Reuse trusted packaged host probes only for the same canonical Flavor coordinate and exact sidecar bytes; report custom local probes as unsupported without executing them or suppressing unavailable requirements.
-- **Evidence:**
-  - [ ] Exercise an adopted project with a differently named local Flavor directory and missing, duplicate and toolchain failure controls.
-  - [ ] Obtain independent source review, renew canonical pins and pass complete regression and exact CI before closure.

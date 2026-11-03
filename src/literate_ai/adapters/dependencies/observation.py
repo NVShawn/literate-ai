@@ -610,6 +610,9 @@ _INSPECTION_FACTS: dict[tuple[object, ...], object] = {}
 _INSPECTION_FACTS_LIMIT = 65536
 # Legacy PE captures could persist facts after a failed mutable-inspector capture.
 _PE_IMPORT_FACT_KIND = "pe-imports-v2"
+# These validated FreeBSD loader tags are intentionally process-local. The
+# operator-private persisted fact protocol remains unchanged.
+_FREEBSD_LOADER_FACT_KIND = "freebsd-loader-tags-v1"
 # Concurrent independent native inspections within one closure frontier.
 _INSPECTION_WORKERS = min(8, os.cpu_count() or 1)
 _BOOT_SESSION: list[str | None] = []
@@ -771,6 +774,8 @@ def _save_persistent_dependency_facts() -> None:
         return
     entries = []
     for (kind, digest, image, identity), fact in list(_INSPECTION_FACTS.items()):
+        if kind == _FREEBSD_LOADER_FACT_KIND:
+            continue
         if identity[0] == "file":
             binding = identity[1]
             identity = (
@@ -4814,12 +4819,27 @@ def _symlink_chain_snapshot(
 
 
 def _file_digest(path: Path) -> str:
-    return "sha256:" + hashlib.sha256(_stable_file_bytes(path)).hexdigest()
+    digest = hashlib.sha256()
+    chunks = _stable_file_chunks(path)
+    try:
+        for chunk in chunks:
+            digest.update(chunk)
+    finally:
+        chunks.close()
+    return "sha256:" + digest.hexdigest()
 
 
 def _stable_file_bytes(
     path: Path, *, offset: int = 0, limit: int | None = None
 ) -> bytes:
+    chunks = _stable_file_chunks(path, offset=offset, limit=limit)
+    try:
+        return b"".join(chunks)
+    finally:
+        chunks.close()
+
+
+def _stable_file_chunks(path: Path, *, offset: int = 0, limit: int | None = None):
     if isinstance(offset, bool) or not isinstance(offset, int) or offset < 0:
         raise ValueError("offset must be a non-negative integer")
     if limit is not None and (
@@ -4830,6 +4850,7 @@ def _stable_file_bytes(
     flags |= getattr(os, "O_CLOEXEC", 0)
     flags |= getattr(os, "O_NOFOLLOW", 0)
     flags |= getattr(os, "O_BINARY", 0)
+    flags |= getattr(os, "O_NONBLOCK", 0)
     try:
         path_before = os.stat(path, follow_symlinks=False)
         if not stat.S_ISREG(path_before.st_mode):
@@ -4855,24 +4876,34 @@ def _stable_file_bytes(
             )
         if offset:
             os.lseek(descriptor, offset, os.SEEK_SET)
-        chunks: list[bytes] = []
         remaining = limit
+        expected = max(0, descriptor_before.st_size - offset) if limit is None else None
+        count = 0
         while True:
             if remaining == 0:
                 break
             chunk = os.read(
                 descriptor,
-                min(1024 * 1024, remaining) if remaining is not None else 1024 * 1024,
+                min(1024 * 1024, remaining)
+                if remaining is not None
+                else min(1024 * 1024, expected - count + 1),
             )
             if not chunk:
                 break
-            chunks.append(chunk)
+            count += len(chunk)
+            if expected is not None and count > expected:
+                raise DependencyObservationError(
+                    "dependencies.file-changed",
+                    f"dependency evidence path grew while reading: {path}",
+                )
+            yield chunk
             if remaining is not None:
                 remaining -= len(chunk)
         descriptor_after = os.fstat(descriptor)
         path_after = os.stat(path, follow_symlinks=False)
         if (
-            _stat_identity(descriptor_after) != _stat_identity(descriptor_before)
+            (expected is not None and count != expected)
+            or _stat_identity(descriptor_after) != _stat_identity(descriptor_before)
             or _stat_identity(path_after) != _stat_identity(path_before)
             or _stat_binding_identity(path_after)
             != _stat_binding_identity(descriptor_after)
@@ -4881,7 +4912,6 @@ def _stable_file_bytes(
                 "dependencies.file-changed",
                 f"dependency evidence path changed while reading: {path}",
             )
-        return b"".join(chunks)
     except OSError as exc:
         raise DependencyObservationError(
             "dependencies.file-unreadable",

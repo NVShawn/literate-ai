@@ -45,6 +45,67 @@ from literate_ai.retained_package_receiver import CONFIG_SCHEMA, _Registration
 class FreeBsdAttemptOwnershipTests(unittest.TestCase):
     """Real kernel ownership must reach nested sessions and survive parent loss."""
 
+    def test_completed_orphans_are_reaped_before_primary_failure_exit(self):
+        root = Path(tempfile.mkdtemp(prefix="freebsd-live-reaping-")).resolve()
+        cleanup_verified = False
+        driver = r"""
+import json,os,pathlib,subprocess,sys,time
+from literate_ai.adapters._processes import run_with_tree_kill
+root=pathlib.Path.cwd()
+pid_file=root/'grandchild.pid'
+child=root/'grandchild.py'
+child.write_text(
+ "import os,pathlib,time;pathlib.Path("+repr(str(pid_file))+
+ ").write_text(str(os.getpid()));time.sleep(60)"
+)
+parent=root/'parent.py'
+parent.write_text(
+ "import subprocess,sys,time;subprocess.Popen([sys.executable,"+
+ repr(str(child))+"]);time.sleep(60)"
+)
+try:run_with_tree_kill([sys.executable,str(parent)],timeout=1)
+except subprocess.TimeoutExpired:pass
+else:raise RuntimeError('fixture did not time out')
+pid=int(pid_file.read_text())
+deadline=time.monotonic()+5
+while True:
+ try:os.kill(pid,0)
+ except ProcessLookupError:break
+ if time.monotonic()>=deadline:
+  raise RuntimeError('dead orphan retained until primary exit')
+ time.sleep(0.05)
+print(json.dumps({'orphan_reaped_before_primary_exit':True,'orphan_pid':pid}),flush=True)
+raise SystemExit(17)
+"""
+        try:
+            try:
+                result = run_owned_freebsd_attempt(
+                    [sys.executable, "-I", "-c", driver],
+                    cwd=root,
+                    staging_root=root,
+                    environment={"PATH": os.environ["PATH"], "HOME": str(root)},
+                    expires_at=datetime.now(UTC) + timedelta(seconds=30),
+                    admission_guard=lambda: None,
+                    stdout_limit_bytes=4096,
+                    stderr_limit_bytes=4096,
+                )
+                cleanup_verified = True
+            except FreeBsdOwnedAttemptError as exc:
+                cleanup_verified = exc.cleanup_verified
+                raise
+            self.assertEqual(result.returncode, 17, result.stderr.decode())
+            observation = json.loads(result.stdout)
+            self.assertTrue(observation["orphan_reaped_before_primary_exit"])
+            with self.assertRaises(ProcessLookupError):
+                os.kill(observation["orphan_pid"], 0)
+        finally:
+            if cleanup_verified:
+                shutil.rmtree(root)
+            else:
+                raise RuntimeError(
+                    f"native ownership unproven; fixture retained at {root}"
+                )
+
     def test_parent_boundary_preserves_failure_status_and_cleans_revoked_nested_job(
         self,
     ):

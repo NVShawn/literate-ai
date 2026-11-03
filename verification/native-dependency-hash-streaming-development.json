@@ -1,0 +1,109 @@
+{
+  "schema": "literate-ai/native-dependency-hash-development@1",
+  "development_only": true,
+  "source_module_sha256": "a9e71e8d3a98cbc6ad0cf5d544bba7fb9f78a1512d15d2b638f017ebcf6cc454",
+  "candidate_functions_sha256": "b658ffbf70761e7a458b5da76fc9fc11b0e2e7a137076be95954c7e59f266525",
+  "baseline_source_module_sha256": "aeed046978d8442d8b679c7284e1aec6db7cdb82c1fe39886effd59a66f05f59",
+  "portable_controls": {
+    "dependency": {
+      "summary": {
+        "executed": 83,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 83,
+        "selected": 84,
+        "skipped": 1
+      },
+      "pin_identity": {
+        "algorithm": "sha256",
+        "digest": "e4a65711deb20cfa441af27066c593304c06a79e982c7c6783c9fa8d63c73926",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      }
+    },
+    "custody": {
+      "summary": {
+        "executed": 12,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 12,
+        "selected": 12,
+        "skipped": 0
+      },
+      "pin_identity": {
+        "algorithm": "sha256",
+        "digest": "8980705526cb627ae26fc193941c3195358704facee8de1c7a7f586ec57b2120",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      }
+    },
+    "pe": {
+      "summary": {
+        "executed": 4,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 4,
+        "selected": 4,
+        "skipped": 0
+      },
+      "pin_identity": {
+        "algorithm": "sha256",
+        "digest": "1aa27a024b1c178adfd3c2b33303d544d43e1a0f1b83039fdcfbc97e88b68b47",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      }
+    }
+  },
+  "native_isolated_hash_diagnostic": {
+    "platform": "FreeBSD",
+    "library_name": "libprivatellvm.so.21",
+    "image_bytes": 99348440,
+    "order": "ABBA",
+    "observations": [
+      {
+        "mode": "baseline",
+        "digest": "sha256:6c665527c1d869598e8f80c739a1122a137e138e5149d479ecda5304d895b43e",
+        "wall_seconds": 0.13736245599284302,
+        "cpu_seconds": 0.13735999999999998,
+        "maximum_rss_kib": 270164
+      },
+      {
+        "mode": "streamed",
+        "digest": "sha256:6c665527c1d869598e8f80c739a1122a137e138e5149d479ecda5304d895b43e",
+        "wall_seconds": 0.0422721399954753,
+        "cpu_seconds": 0.04227000000000003,
+        "maximum_rss_kib": 50204
+      },
+      {
+        "mode": "streamed",
+        "digest": "sha256:6c665527c1d869598e8f80c739a1122a137e138e5149d479ecda5304d895b43e",
+        "wall_seconds": 0.039113396996981464,
+        "cpu_seconds": 0.03911300000000001,
+        "maximum_rss_kib": 50184
+      },
+      {
+        "mode": "baseline",
+        "digest": "sha256:6c665527c1d869598e8f80c739a1122a137e138e5149d479ecda5304d895b43e",
+        "wall_seconds": 0.13838285600650124,
+        "cpu_seconds": 0.13838100000000003,
+        "maximum_rss_kib": 270164
+      }
+    ],
+    "medians": {
+      "baseline": {
+        "wall_seconds": 0.13787265599967213,
+        "cpu_seconds": 0.1378705,
+        "maximum_rss_kib": 270164.0
+      },
+      "streamed": {
+        "wall_seconds": 0.04069276849622838,
+        "cpu_seconds": 0.04069150000000002,
+        "maximum_rss_kib": 50194.0
+      }
+    },
+    "same_file_identity_before_and_after": true,
+    "candidate_code_installed": false,
+    "whole_PACKAGE_speedup_claimed": false
+  },
+  "native_runtime_qualification": false,
+  "public_SDK_PACKAGE_VERIFY_qualification": false,
+  "admitted": false,
+  "release_qualified": false
+}

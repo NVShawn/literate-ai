@@ -24,8 +24,13 @@ class RootParentProjectInitializationAdapter(FilesystemProjectInitializationAdap
 def root_parent_for_fixture_project(arguments: tuple[str, ...]):
     """Keep throwaway CLI project fixtures independent of checkout history."""
 
-    if (arguments and arguments[0] == "init") or (
-        arguments[:2] == ("spec", "accept") and "--integrate-project" not in arguments
+    if (
+        (arguments and arguments[0] == "init")
+        or arguments[:2] == ("onboard", "adopt")
+        or (
+            arguments[:2] == ("spec", "accept")
+            and "--integrate-project" not in arguments
+        )
     ):
         return mock.patch(
             "literate_ai.adapters.project_initialization._default_repository_parent",
