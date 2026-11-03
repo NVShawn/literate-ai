@@ -120,7 +120,14 @@ Existing tools must satisfy the same version and package-provenance requirements
 MSVC acquisition requests the ARM64 toolset through the
 [shared Visual Studio installer](https://learn.microsoft.com/en-us/visualstudio/install/visual-studio-on-arm-devices).
 Readiness requires native ARM64 compiler images after installation; installer
-success alone is insufficient. GNU Make, Bazel, Elixir, Erlang and NPM have
+success alone is insufficient. An explicit `CXX` or compiler on `PATH` takes
+priority. Otherwise, bounded discovery reads the vendor's default-toolset metadata
+under the standard Visual Studio 2022/2019 installation roots; custom installation
+locations require explicit `CXX` or `PATH`. A discovered compatible compiler is
+checked before acquisition, so an installed toolset is not reinstalled merely
+because its developer shell is inactive. C++ setup selects the exact compiler's
+compilation target, which can differ from its host executable architecture.
+GNU Make, Bazel, Elixir, Erlang and NPM have
 no reviewed binding in this tuple; selecting a Flavor that requires them fails
 the capability-closure check. Readiness reports installed provenance and capability
 probes. Native executable machine types and actual ARM64 worker execution require

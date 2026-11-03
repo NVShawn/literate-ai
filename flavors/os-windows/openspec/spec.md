@@ -41,6 +41,13 @@ capabilities SHALL refuse rather than select another architecture or provider.
 - **THEN** readiness refuses and preserves the existing tool before acquisition
 - **AND** version output alone never establishes native readiness
 
+#### Scenario: A native Visual Studio compiler is installed outside PATH
+
+- **WHEN** the selected C++ capability has no compiler on PATH and a compatible Visual Studio toolset is already installed
+- **THEN** bounded vendor discovery locates the compiler for the selected Windows target before proposing acquisition
+- **AND** the discovered compiler must pass the same version and native-image checks as a compiler on PATH
+- **AND** an explicitly selected incompatible tool is refused rather than silently replaced
+
 #### Scenario: Native ARM64 baseline runtime coexists with x64 companions
 
 - **WHEN** the ARM64 runtime baseline is observed

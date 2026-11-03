@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
+  before acquisition, preserving explicit compiler selections. C++ developer
+  setup follows the selected compiler's compilation target instead of always
+  selecting x64 libraries.
+
 - Windows worker probes preserve unknown NVIDIA memory as null when the device
   reports permission text, matching the POSIX observation behavior.
 

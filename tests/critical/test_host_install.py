@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -455,7 +456,9 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
             "rustc": "rustc 1.94.0",
             "cargo": "cargo 1.94.0",
             "cmake": "cmake version 4.2.3",
-            "cl": "Microsoft C/C++ 19.44",
+            "cl": (
+                "Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35224 for ARM64"
+            ),
             "codex": "codex-cli 0.153.0",
         }
         installs = []
@@ -548,6 +551,146 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
                         self.assertFalse(observation.ready)
                         self.assertEqual(installs, [])
                         selected.write_bytes(original)
+
+    def test_registered_msvc_discovery_preserves_tools_and_selected_targets(self):
+        """An installed compiler cannot be reinstalled or bypass a selected target.
+
+        Controlled OS-boundary counterexamples are not native qualification.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            environment, locator, runner, installs = self.ports(directory)
+            root = Path(directory).resolve()
+            original = root / "tools/cl"
+            image = original.read_bytes()
+            vc = root / "programs/Microsoft Visual Studio/2022/BuildTools/VC"
+            metadata = vc / "Auxiliary/Build/Microsoft.VCToolsVersion.default.txt"
+            metadata.parent.mkdir(parents=True)
+            metadata.write_text("14.44.35207\n", encoding="ascii")
+            compiler = vc / "Tools/MSVC/14.44.35207/bin/Hostarm64/arm64/cl.exe"
+            compiler.parent.mkdir(parents=True)
+            original.rename(compiler)
+            cross = compiler.parent.parent / "x64/cl.exe"
+            cross.parent.mkdir()
+            cross.write_bytes(image)
+            environment["LITAI_INSTALL_DEPENDENCIES"] = "yes"
+
+            def selected_locator(command, path):
+                if Path(command).name.removesuffix(".exe") == "cl":
+                    candidate = Path(command)
+                    if candidate.is_absolute():
+                        return str(candidate) if candidate.is_file() else None
+                    return str(original) if original.is_file() else None
+                return locator(command, path)
+
+            def native_commands(argv, **kwargs):
+                if Path(argv[0]).name.removesuffix(".exe") == "cl":
+                    target = "x64" if Path(argv[0]) == cross else "ARM64"
+                    return subprocess.CompletedProcess(
+                        argv,
+                        0,
+                        "/O1 maximum optimizations\n",
+                        "Microsoft (R) C/C++ Optimizing Compiler Version "
+                        f"19.44.35224 for {target}\n",
+                    )
+                return runner(argv, **kwargs)
+
+            for variant, error in (
+                ("installed", None),
+                ("explicit", None),
+                ("foreign-path", "host-install.native-image-unverified"),
+                ("cross-target", "host-install.compiler-target-mismatch"),
+                ("missing-explicit", "host-install.compiler-command-unavailable"),
+                ("unsafe-version", "host-install.native-image-unverified"),
+                ("oversize-version", "host-install.native-image-unverified"),
+                ("metadata-drift", "host-install.native-image-unverified"),
+            ):
+                with self.subTest(variant=variant):
+                    environment.pop("CXX", None)
+                    original.unlink(missing_ok=True)
+                    metadata.write_text("14.44.35207\n", encoding="ascii")
+                    if variant == "explicit":
+                        environment["CXX"] = f'"{compiler}"'
+                    elif variant == "foreign-path":
+                        foreign = bytearray(image)
+                        foreign[68:70] = (0x8664).to_bytes(2, "little")
+                        original.write_bytes(foreign)
+                    elif variant == "cross-target":
+                        environment["CXX"] = f'"{cross}"'
+                    elif variant == "missing-explicit":
+                        environment["CXX"] = f'"{root / "missing/cl.exe"}"'
+                    elif variant == "unsafe-version":
+                        metadata.write_text("../../foreign\n", encoding="ascii")
+                    elif variant == "oversize-version":
+                        metadata.write_bytes(b"1" * 129)
+                    elif variant == "metadata-drift":
+                        # Keep the first inode alive so replacement cannot reuse
+                        # it, even though the new file contains identical bytes.
+                        os.link(metadata, metadata.with_suffix(".prior"))
+                    before = {
+                        p.relative_to(root): p.read_bytes()
+                        for p in root.rglob("*")
+                        if p.is_file()
+                    }
+                    arguments = dict(
+                        sbom_root=self.root / "flavors",
+                        target=self.target,
+                        flavor_names=self.flavors,
+                        environment=environment,
+                        locator=selected_locator,
+                        runner=native_commands,
+                        interactive=False,
+                        managed_tool_root=root / "managed",
+                        downloader=lambda *a: self.fail(
+                            "ready native tools need no archive"
+                        ),
+                    )
+
+                    def inspect(*, variant=variant, arguments=arguments):
+                        if variant != "metadata-drift":
+                            return host_install.ensure_host_install_dependencies(
+                                **arguments
+                            )
+                        native_open = os.open
+
+                        def replace_before_open(path, *args, **kwargs):
+                            if Path(path) == metadata:
+                                payload = metadata.read_bytes()
+                                metadata.unlink()
+                                metadata.write_bytes(payload)
+                            return native_open(path, *args, **kwargs)
+
+                        with mock.patch.object(
+                            os, "open", side_effect=replace_before_open
+                        ):
+                            return host_install.ensure_host_install_dependencies(
+                                **arguments
+                            )
+
+                    if error is None:
+                        report = inspect()
+                        self.assertTrue(report.ready)
+                        observed = next(
+                            row
+                            for row in report.observations
+                            if row.requirement.capability == "cxx"
+                        )
+                        self.assertEqual(observed.executable, compiler)
+                        self.assertIn("19.44.35224", observed.observed_version)
+                    else:
+                        with self.assertRaises(
+                            host_install.HostInstallError
+                        ) as refused:
+                            inspect()
+                        self.assertEqual(refused.exception.code, error)
+                    self.assertFalse(installs)
+                    self.assertEqual(
+                        before,
+                        {
+                            p.relative_to(root): p.read_bytes()
+                            for p in root.rglob("*")
+                            if p.is_file()
+                        },
+                    )
 
     def test_missing_required_compiler_never_falls_back_to_x64(self):
         with tempfile.TemporaryDirectory() as directory:

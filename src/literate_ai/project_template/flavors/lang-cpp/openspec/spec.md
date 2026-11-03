@@ -13,3 +13,10 @@ third-party or platform-specific dependency unless the selected OS Flavor requir
 
 - **WHEN** the generated source is compiled by the selected host C++ toolchain
 - **THEN** the native executable implements the same acceptance contract as every other language Flavor selected for the application
+
+#### Scenario: A selected MSVC compiler requires its developer environment
+
+- **WHEN** the selected compiler uses a Visual Studio developer environment
+- **THEN** setup selects that compiler's compilation target and binds its exact toolset
+- **AND** the compiler executable's host architecture is not substituted for its compilation target
+- **AND** a conflicting or unproven target refuses before compilation

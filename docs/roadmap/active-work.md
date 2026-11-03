@@ -29323,8 +29323,27 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   the MSVC-only installer-architecture filter and preserve explicit ARM64 toolset
   selection plus installed-image proof. Other packages keep explicit ARM64
   acquisition. A successful installer exit without a native compiler remains a
-  refusal. Native framework/toolchain qualification is still open; the pinned
-  cryptography dependency currently needs a native ARM64 wheel build.
+  refusal. The pinned cryptography dependency now has a genuine native ARM64
+  wheel; broader framework/toolchain qualification remains open.
+
+- **Current next action (in progress):** Discover an already-installed native
+  Visual Studio compiler before acquisition and select its developer environment
+  from the selected compiler's compilation target, preserving explicit tools and
+  Windows x86-64 behavior. The actual ordinary SSH C++ preflight reports an
+  unresolved `cxx` despite registered Build Tools and a previously used native
+  ARM64 compiler. Package registration is not physical tool absence, and another
+  installer invocation is not the repair.
+
+- **Retained native evidence:** An isolated non-editable candidate at source
+  `d5956efdbd5d06c514c61cfdd4196c1928a63779` reopens all 37 installed
+  distribution RECORD closures, executes its public CLI and native dependency
+  controls, and passes the public Codex/JavaScript Windows ARM64 preflight.
+  Unsupported Make refuses, and 23 existing tool files retain identical bytes
+  and metadata. The native cryptography 50.0.1 wheel has SHA-256
+  `c4252d1f1bdc31c79b201278827b2dba61bfe6a6d6df316e787eb5bf9bd84c53`.
+  These are scoped installed/native observations, not release qualification:
+  Git's ARM64 Bash launcher reports an x64 MSYS runtime, configure-only Perl was
+  x64, and the ordinary C++ environment still needs the repair above.
 
 - **Current integration:** Combine the preserved authored ARM64 realization and
   packaged template with bounded actual PE-image/runtime observations. Preserve
