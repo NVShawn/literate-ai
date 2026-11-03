@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
+  installer with the ARM64 toolset selected. Native compiler image checks still
+  determine readiness, including after an installer reports success.
+
+- Retained unit packages qualify locked declarations through their registered
+  Component paths, preserving exact captured-source ownership for nested catalogs.
+  Invalid declarations refuse during preflight before SDK execution.
+
 - Retained SDK packages distinguish completed-command evidence from execution
   grants. Commands still require unexpired authorization through teardown; later
   retention checks live owners and fresh revocations without extending grants.

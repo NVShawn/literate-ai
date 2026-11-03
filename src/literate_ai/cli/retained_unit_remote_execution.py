@@ -21,6 +21,9 @@ from literate_ai.adapters.retained_sdk_authority import current_retained_sdk_sna
 from literate_ai.adapters.retained_unit_controller import (
     execute_and_import_retained_unit_package,
 )
+from literate_ai.adapters.retained_unit_specifications import (
+    bind_retained_unit_specifications,
+)
 from literate_ai.adapters.user_assets import WORKER_CONFIG_ENVIRONMENT
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
@@ -224,6 +227,14 @@ def execute_remote_retained_unit_package(
             source_guard=source_current,
             sdk_snapshots=snapshots,
             verification_selection=verification_selection,
+            specification_context=lambda: bind_retained_unit_specifications(
+                project,
+                project.root,
+                manifest,
+                locks,
+                maximum_units=policy.max_units,
+                maximum_memory_bytes=policy.max_provider_memory_bytes,
+            ),
         )
 
     admitted, polls = dispatch_with_worker_health_poll(

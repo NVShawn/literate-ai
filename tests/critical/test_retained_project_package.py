@@ -10,10 +10,14 @@ import subprocess
 import unittest
 import zipfile
 from dataclasses import replace
+from functools import partial
+from pathlib import Path
 from unittest.mock import PropertyMock, patch
 
+from literate_ai.adapters.component_lock_application import current_component_lock
 from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
 from literate_ai.adapters.native_tar_archives import NativeTarToolBinding
+from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
 from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_PATH
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -38,13 +42,20 @@ from literate_ai.adapters.retained_unit_run_evidence import (
     retain_retained_unit_run_evidence,
 )
 from literate_ai.adapters.retained_unit_run_inspection import reopen_retained_unit_run
+from literate_ai.adapters.retained_unit_specifications import (
+    bind_retained_unit_specifications,
+)
 from literate_ai.application.packaging import PackagingError
+from literate_ai.cli import main as cli_main
 from literate_ai.contracts import (
     BlobRef,
     ContentIdentity,
     ContentReference,
+    RepositoryLineage,
+    RepositoryParentSelection,
     canonical_json_bytes,
 )
+from literate_ai.contracts.authoring_markdown import render_authoring_markdown
 from literate_ai.contracts.component_locking import (
     ComponentLock,
     ComponentLockNode,
@@ -60,6 +71,7 @@ from literate_ai.contracts.executable_components.packages import (
     PackageResult,
 )
 from literate_ai.contracts.flavors import FlavorAxis, FlavorCardinality, FlavorSlot
+from literate_ai.contracts.projects import ProjectDefinition
 from literate_ai.contracts.retained_project import (
     RetainedProjectLimits,
     RetainedProjectTreePolicy,
@@ -76,6 +88,7 @@ from literate_ai.contracts.retained_project_sbom import (
 )
 from literate_ai.contracts.retained_unit_policy import RetainedUnitPackagePolicy
 from literate_ai.contracts.retained_unit_requests import RetainedUnitPackageRequest
+from literate_ai.projects import discover_project
 from literate_ai.storage.cas import BlobIntegrityError, FileSystemCAS
 from tests.critical import test_retained_project_completion as completed
 from tests.critical import test_retained_project_execution as commands
@@ -170,6 +183,76 @@ def package_lock(specification, provider="zip", extra_specifications=()):
     os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
 )
 class RetainedProjectPackageTests(unittest.TestCase):
+    def test_actual_nested_lock_uses_exact_captured_declaration_not_identical_copy(
+        self,
+    ):
+        """Only the registered Component path can supply a locked unit declaration."""
+        for captured in (True, False):
+            with self.subTest(nested_declaration_captured=captured):
+                self.fixture = completed.RetainedProjectCompletionTests()
+                self.fixture.setUp()
+                self.addCleanup(self.fixture.doCleanups)
+                self.package_provider = "pkg"
+                request = RetainedUnitPackageRequest(
+                    "application",
+                    (),
+                    True,
+                    "specs/LICENSE",
+                    "retained-application",
+                    "1.0.0",
+                    "misc/retained-application",
+                    "/usr/local",
+                    (),
+                )
+                self.finish(unit_request=request, registered_component=captured)
+                arguments = self.unit_plan_arguments()
+                source = self.admission.source
+                project = discover_project(source)
+                self.assertIsNotNone(project)
+
+                context = partial(
+                    bind_retained_unit_specifications,
+                    project,
+                    source,
+                    self.admission.run.source_bom.manifest,
+                    self.admission.run.source_bom.component_locks,
+                    maximum_units=arguments["max_units"],
+                    maximum_memory_bytes=256 * 1024**2,
+                )
+
+                if not captured:
+                    with self.assertRaisesRegex(
+                        ValueError, "locked-specification-source-mismatch"
+                    ):
+                        context()
+                    continue
+                owner = RetainedProjectUnitPackages(
+                    self.admission, specification_context=context(), **arguments
+                )
+                owner.require_current()
+                self.assertEqual(len(owner.projection.graph.partition.definitions), 1)
+                evidence = owner.retain_planning_evidence()
+                receipt = self.admission.receipt
+                inputs = read_retained_unit_planning_inputs(
+                    source,
+                    self.admission.run.source_bom.manifest,
+                    self.admission.run.source_bom.plan,
+                    self.admission.run.source_bom.component_locks,
+                    BlobRef(
+                        receipt.identity.digest,
+                        len(canonical_json_bytes(receipt.to_dict())),
+                        media_type="application/json",
+                    ),
+                    self.store,
+                    planning_evidence_reference=evidence,
+                )
+                self.assertEqual(
+                    plan_retained_unit_packages(
+                        inputs, specification_context=context(), **arguments
+                    ).identity,
+                    owner.projection.identity,
+                )
+
     def test_actual_output_links_require_policy_and_bind_package_custody(self):
         """Native output aliases must enter the verified lifecycle before packaging."""
         for selected in (False, True):
@@ -611,6 +694,7 @@ class RetainedProjectPackageTests(unittest.TestCase):
         documentation_path="docs.txt",
         tree_outputs=False,
         selected_tree_policy=True,
+        registered_component=None,
     ):
         f = self.fixture.fixture
         specification = b"# Retained package\nPreserve original bytes and behavior.\n"
@@ -639,6 +723,10 @@ class RetainedProjectPackageTests(unittest.TestCase):
             provider=getattr(self, "package_provider", "zip"),
             extra_specifications=extra,
         )
+        if registered_component is not None:
+            self.lock = self.registered_unit_lock(
+                f.source, unit_request_path, registered_component
+            )
         self.fixture.locks = (self.lock,)
         roles = {
             "src": "source",
@@ -647,6 +735,8 @@ class RetainedProjectPackageTests(unittest.TestCase):
         }
         if include_specification:
             roles["specs"] = "specification"
+        if registered_component:
+            roles["components"] = "specification"
         f.manifest = discover_retained_project_inputs(
             f.source,
             roles,
@@ -749,6 +839,131 @@ class RetainedProjectPackageTests(unittest.TestCase):
         self.store = FileSystemCAS(f.base / "package-cas")
         self.admission = admit_retained_project(workspace, self.store)
         return workspace
+
+    def registered_unit_lock(self, source, declaration, nested_captured):
+        """Real public lock authority for a nested retained Component."""
+        repository = Path(__file__).resolve().parents[2]
+        component = source / "components/retained-package"
+        (component / "specs").mkdir(parents=True)
+        original = source / declaration
+        (component / "specs/application.package-unit.json").write_bytes(
+            original.read_bytes()
+        )
+        if nested_captured:
+            original.rename(original.with_name("copied.package-unit.json"))
+        # An equal-content original-root copy is not the registered declaration.
+        (component / "specs/retained-package.md").write_text(
+            "# Retained application\n\n"
+            "### Requirement: Preserve original native behavior\n\n"
+            "The application SHALL preserve its retained C source "
+            "and original tests.\n\n"
+            "#### Scenario: Complete the retained lifecycle\n\n"
+            "- **WHEN** original tests and independent acceptance run\n"
+            "- **THEN** exact accepted products retain original source provenance\n"
+        )
+        document = {
+            "namespace": "qualification",
+            "version": "1.0.0",
+            "display_name": "Retained application",
+            "profiles": ["retained-contract"],
+            "sample": True,
+            "provides": [
+                {"name": "qualification.retained-application", "version": "1.0.0"},
+                {"name": "sample.portable-app", "version": "1.0.0"},
+            ],
+            "requires": [],
+            "specification_provider": "openspec",
+            "specification_roots": [
+                "specs/application.package-unit.json",
+                "specs/retained-package.md",
+            ],
+            "authoring_inputs": [
+                {
+                    "kind": "specification-to-source-skill",
+                    "uri": (
+                        "skills/specification-to-source/"
+                        "portable-application-implementation/SKILL.md"
+                    ),
+                }
+            ],
+            "workflow_definition": "workflows/sample-host.md",
+            "routing_policy": "routing/sample-host.json",
+            "flavor_slots": [
+                {
+                    "slot_id": name,
+                    "axis": axis,
+                    "cardinality": "exactly-one",
+                    "capability_contract": "sample.portable-app",
+                }
+                for name, axis in [("os", "platform.os"), ("packaging", "packaging")]
+            ],
+            "entrypoints": [],
+            "acceptance_contracts": [],
+            "source_dependencies": [],
+        }
+        (component / "component.md").write_bytes(
+            render_authoring_markdown(
+                document,
+                "# Retained application\n\n"
+                "Preserve original native bytes and acceptance.\n",
+            )
+        )
+        for leaf in ("os-freebsd", "package-pkg"):
+            shutil.copytree(repository / "flavors" / leaf, source / "flavors" / leaf)
+        for relative in [
+            "workflows/sample-host.md",
+            "routing/sample-host.json",
+            "skills/specification-to-source/portable-application-implementation/SKILL.md",
+            "skills/specification-to-source/portable-specification-planning/SKILL.md",
+            "skills/agent/package-artifacts/SKILL.md",
+        ]:
+            path = source / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(repository / relative, path)
+        definition = ProjectDefinition.from_dict(
+            json.loads((repository / "literate.project.json").read_text())
+        )
+        (source / "SKILL.md").write_text(
+            "---\nname: retained-package-fixture\n"
+            "description: Preserve original native source and acceptance.\n"
+            "---\n# Retained source fixture\n"
+        )
+        definition = replace(
+            definition,
+            component_roots=("components",),
+            flavor_roots=("flavors",),
+            skill_roots=("skills",),
+            workflow_roots=("workflows",),
+            routing_roots=("routing",),
+            lifecycle_driver=None,
+            test_receipt=None,
+            test_receipt_policy=None,
+            default_flavor_selectors=(),
+            component_flavor_selectors={},
+        )
+        (source / "literate.project.json").write_text(json.dumps(definition.to_dict()))
+        selection = RepositoryParentSelection.root()
+        FilesystemRepositoryLineageStore(source).replace(
+            selection, RepositoryLineage(selection, (), ()), expected_absent=True
+        )
+        output, errors = io.StringIO(), io.StringIO()
+        status = cli_main(
+            [
+                "--json",
+                "lock",
+                str(component),
+                "--target",
+                "freebsd",
+                "--flavor",
+                "+os-freebsd",
+                "--flavor",
+                "+package-pkg",
+            ],
+            stdout=output,
+            stderr=errors,
+        )
+        self.assertEqual(status, 0, output.getvalue() + errors.getvalue())
+        return current_component_lock(component)
 
     def provider(self, admission=None, **changes):
         return RetainedProjectZipPackage(

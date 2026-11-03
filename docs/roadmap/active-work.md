@@ -29243,6 +29243,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
+- **Current installer correction:** Microsoft documents one shared Visual Studio
+  bootstrapper that selects the native ARM64 payload on Windows ARM64. Remove
+  the MSVC-only installer-architecture filter and preserve explicit ARM64 toolset
+  selection plus installed-image proof. Other packages keep explicit ARM64
+  acquisition. A successful installer exit without a native compiler remains a
+  refusal. Native framework/toolchain qualification is still open; the pinned
+  cryptography dependency currently needs a native ARM64 wheel build.
+
 - **Current integration:** Combine the preserved authored ARM64 realization and
   packaged template with bounded actual PE-image/runtime observations. Preserve
   x86-64 bytes and explicit unavailable-capability closure. Portable version-only
@@ -32804,6 +32812,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   selector is still required; choosing an entry by recency is not a repair.
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
+
+- **2026-11-02 nested-source qualification correction:** The exact installed SDK-currentness candidate reaches per-unit planning in the actual authenticated FreeBSD round trip, then refuses with `retained.unit.locked-package-unit-specifications-required` after 2,559.261 seconds. Native empty-subtree cleanup is verified; no PACKAGE/LINK admission or downstream unblock is claimed. Locked specification references are Component-relative, while retained source members are project-relative. Qualify references through the already selected canonical catalog at each public planning/execution boundary, preserve the explicit standalone root-reference contract, and carry the exact qualified member association into package evidence. Basename, suffix, digest-only and failed-lookup fallbacks are not acceptable. Add actual nested public-lock/retained-package coverage with an identical-byte misplaced declaration, then renew source review, complete regression, installed/native PACKAGE/LINK and required negative controls.
 
 - **Priority:** P0
 - **Release target:** 1.4.0
