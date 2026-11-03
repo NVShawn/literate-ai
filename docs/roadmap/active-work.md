@@ -32896,6 +32896,15 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   native owner control now requires two actual lifecycle admissions and checks
   original identities, corruption and stale source; native execution and final
   independent review of the implementation remain open.
+  A bounded read-only stack observation of the native public-owner controls found
+  repeated FreeBSD header/dynamic inspector subprocesses during dependency
+  currentness checks. Compact process-local reuse now binds successful ABI/filter
+  facts to the exact inspector digest, image path and freshly hashed image bytes;
+  capture signatures/hash checks and all loader/resolution/final guards remain.
+  The persisted fact format is unchanged. Sixteen focused controls pass locally,
+  with one honest native skip. The actual native compiled-program control now
+  checks warm reuse and recapture after image and inspector mutations. Source
+  review approves the change; native execution/performance remains pending.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a

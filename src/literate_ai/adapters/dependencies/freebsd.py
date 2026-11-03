@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+import stat
 import sys
 from collections import deque
 from pathlib import Path
@@ -209,6 +210,7 @@ class FreeBsdElfDependencyObserver:
                 _fail("resolution-changed", "Native library search candidates changed")
         for path, digest in tool_hashes.items():
             if elf._file_digest(path) != digest:
+                elf._forget_inspection_facts(digest)
                 _fail("inspector-changed", "FreeBSD dependency inspector changed")
         return elf._normalized_observation(components, edges)
 
@@ -250,7 +252,6 @@ class FreeBsdElfDependencyObserver:
         digest = elf._file_digest(readelf)
         images = {}
         hashes = {}
-        dynamic = {}
         filters = {}
         filtees = {}
         edges = set()
@@ -264,26 +265,87 @@ class FreeBsdElfDependencyObserver:
                 if len(images) >= elf._MAX_OBSERVED_FILES:
                     _fail("image-limit", "Native ELF closure exceeds its image bound")
                 hashes[path] = elf._file_digest(Path(path))
-                header = elf._run_bounded_tool(
-                    readelf, ("-h", path), code="dependencies.freebsd-readelf-header"
+                file = Path(path)
+                key = elf._content_fact_key(
+                    elf._FREEBSD_LOADER_FACT_KIND, digest, file, hashes[path]
                 )
-                if not re.search(r"OS/ABI:\s+.*FreeBSD", header, re.IGNORECASE):
-                    _fail("abi-unsupported", "ELF image lacks a native FreeBSD ABI")
-                dynamic[path] = elf._run_bounded_tool(
-                    readelf, ("-d", path), code="dependencies.freebsd-readelf-dynamic"
-                )
-                if re.search(r"NODEFLIB|NODEFAULTLIB", dynamic[path]):
-                    _fail(
-                        "dynamic-unsupported", "ELF image uses unqualified loader flags"
+                cached = elf._INSPECTION_FACTS.get(key)
+                if cached is None:
+
+                    def signature(value):
+                        metadata = value.lstat()
+                        if not stat.S_ISREG(metadata.st_mode):
+                            _fail(
+                                "image-unsafe",
+                                "ELF inspection requires direct regular files",
+                            )
+                        return (
+                            metadata.st_dev,
+                            metadata.st_ino,
+                            metadata.st_mode,
+                            metadata.st_size,
+                            metadata.st_mtime_ns,
+                            metadata.st_ctime_ns,
+                        )
+
+                    image_before, inspector_before = signature(file), signature(readelf)
+                    header = elf._run_bounded_tool(
+                        readelf,
+                        ("-h", path),
+                        code="dependencies.freebsd-readelf-header",
                     )
-                filters[path] = []
-                for line in dynamic[path].splitlines():
-                    if not re.search(r"\((?:FILTER|AUXILIARY)\)", line):
-                        continue
-                    match = re.search(r"\((FILTER|AUXILIARY)\).*?\[([^]]+)]", line)
-                    if match is None:
-                        _fail("filtee-invalid", "ELF inspector omitted a filtee name")
-                    filters[path].append((match[1].lower(), match[2]))
+                    if not re.search(r"OS/ABI:\s+.*FreeBSD", header, re.IGNORECASE):
+                        _fail("abi-unsupported", "ELF image lacks a native FreeBSD ABI")
+                    dynamic = elf._run_bounded_tool(
+                        readelf,
+                        ("-d", path),
+                        code="dependencies.freebsd-readelf-dynamic",
+                    )
+                    if re.search(r"NODEFLIB|NODEFAULTLIB", dynamic):
+                        _fail(
+                            "dynamic-unsupported",
+                            "ELF image uses unqualified loader flags",
+                        )
+                    selected_filters = []
+                    for line in dynamic.splitlines():
+                        if not re.search(r"\((?:FILTER|AUXILIARY)\)", line):
+                            continue
+                        match = re.search(r"\((FILTER|AUXILIARY)\).*?\[([^]]+)]", line)
+                        if match is None:
+                            _fail(
+                                "filtee-invalid", "ELF inspector omitted a filtee name"
+                            )
+                        selected_filters.append((match[1].lower(), match[2]))
+                    if (
+                        signature(readelf) != inspector_before
+                        or elf._file_digest(readelf) != digest
+                    ):
+                        elf._forget_inspection_facts(digest)
+                        _fail(
+                            "inspector-changed",
+                            "FreeBSD ELF inspector changed during capture",
+                        )
+                    if (
+                        signature(file) != image_before
+                        or elf._file_digest(file) != hashes[path]
+                    ):
+                        _fail(
+                            "image-changed", "Native ELF image changed during capture"
+                        )
+                    cached = tuple(selected_filters)
+                    # Bound additional memo space. Larger valid tag sets remain
+                    # supported through uncached inspection.
+                    if (
+                        key is not None
+                        and len(cached) <= 64
+                        and sum(
+                            len(kind.encode()) + len(name.encode()) + 64
+                            for kind, name in cached
+                        )
+                        <= 4096
+                    ):
+                        elf._remember_inspection_fact(key, cached)
+                filters[path] = cached
                 images[path] = elf._inspect_elf(
                     readelf, Path(path), readelf_digest=digest
                 )

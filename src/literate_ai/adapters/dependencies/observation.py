@@ -610,6 +610,9 @@ _INSPECTION_FACTS: dict[tuple[object, ...], object] = {}
 _INSPECTION_FACTS_LIMIT = 65536
 # Legacy PE captures could persist facts after a failed mutable-inspector capture.
 _PE_IMPORT_FACT_KIND = "pe-imports-v2"
+# These validated FreeBSD loader tags are intentionally process-local. The
+# operator-private persisted fact protocol remains unchanged.
+_FREEBSD_LOADER_FACT_KIND = "freebsd-loader-tags-v1"
 # Concurrent independent native inspections within one closure frontier.
 _INSPECTION_WORKERS = min(8, os.cpu_count() or 1)
 _BOOT_SESSION: list[str | None] = []
@@ -771,6 +774,8 @@ def _save_persistent_dependency_facts() -> None:
         return
     entries = []
     for (kind, digest, image, identity), fact in list(_INSPECTION_FACTS.items()):
+        if kind == _FREEBSD_LOADER_FACT_KIND:
+            continue
         if identity[0] == "file":
             binding = identity[1]
             identity = (

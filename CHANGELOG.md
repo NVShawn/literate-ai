@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- FreeBSD dependency rechecks reuse bounded native ABI and filter facts for exact
+  image and inspector bytes. Loader configuration and complete closure stay fresh.
+
 - Retained original-byte verification can bind the original receipt, run, LINK
   and package projection to a distinct fresh admission through explicit evidence.
   Original archive identities remain fixed; native qualification is pending.
