@@ -33415,3 +33415,47 @@ independent review and the complete combined gate from test one.
   - [ ] Use an actual private command-addressed POSIX worker for nonce handshake, native platform/storage observations, alignment, source upload, native Component execution and evidence download through the same route.
   - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
   - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.
+
+### [ ] RETAINED-TREE-EXPLORER-001 — Publish hierarchical retained-tree HTML information cards
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#279](https://github.com/jordanhubbard/literate-ai/issues/279)
+- **Proposed decision:** [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md); directing-user planning review is required before implementation.
+- **Next action:** Obtain the directing user's explicit planning acceptance of the independently reviewed Proposed design under ADR 0006. Issue inclusion in 1.4 is authorized; design acceptance and implementation are not claimed.
+
+- **Planning verification:** Independent source/design review by `native_transport_review` approves Proposed ADRs 0058/0059; its Markdown table finding is corrected. Canonical work recording and documentation/driver review pass. The read-only contribution sweep validates 41 goals with no invalid entries, preserving the original 39 and prior release history; overall release readiness remains false. The complete local Make gate selects 2,664 tests: 2,577 pass, 87 declared skips and zero failures in 4,261.977 seconds; lint, format and documentation checks also pass. Test-report identity: `0eb956ba4e3c3b27988e405bb049106e75ad4650e0751dbc21c12c4350964e77`. These results validate the proposal branch, not explorer implementation, native/browser acceptance or release qualification.
+
+- **Priority:** P1
+- **Owner:** HTML observability contracts, retained-tree projection and atomic publication
+- **Direction:** Include issue #279 in the complete 1.4 scope under directing-user authorization. Publish a top-level index and hierarchical directory/unit information cards for retained native trees.
+- **Conclusion:** Proposed ADR 0058 requires explicit directing-user acceptance before implementation. Preserve hierarchical child commitments, no-script operation, scalable declaration, multi-file atomic publication and tree freshness; independently qualify installed wheel and browser at real source and ports scale. Per-unit Component cards depend on retained unit packaging. Do not claim a source browser beyond actual displayed content.
+- **Depends on:** none
+- **Completion prerequisites:** RETAINED-UNIT-PACKAGE-001
+- **Implementation:**
+  - [ ] Audit existing HTML producers/declarations/limits and author independent-reviewed ADR; get explicit design acceptance before new wire/schema implementation.
+  - [ ] Implement complete hierarchy and provenance commitments using canonical retained tree/unit owners, no new JS dependency, scalable declarations, atomic multi-file publication and tree freshness.
+- **Evidence:**
+  - [ ] Installed noneditable native source/ports tree qualification, actual browser inspection, stale/tamper/partial publication and resource-bound refusals.
+  - [ ] Per-unit Component-card joins after #235, independent review, full gates and exact integrated qualification.
+
+### [ ] WORKER-TELEMETRY-001 — Expose bounded authenticated read-only worker telemetry
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#280](https://github.com/jordanhubbard/literate-ai/issues/280)
+- **Proposed decision:** [ADR 0059](../decisions/0059-authenticated-read-only-worker-telemetry.md); directing-user planning review is required before implementation.
+- **Next action:** Obtain the directing user's explicit planning acceptance of the independently reviewed Proposed design under ADR 0006. Issue inclusion in 1.4 is authorized; design acceptance and implementation are not claimed.
+
+- **Planning verification:** Proposed ADR 0059 and this intake have independent source/design approval. The combined proposal-branch checks are recorded under [RETAINED-TREE-EXPLORER-001](#retained-tree-explorer-001-publish-hierarchical-retained-tree-html-information-cards). The current source audit distinguishes pressure probes and discrete action attestations from the missing telemetry feed; it claims no live telemetry or job-attribution qualification. Directing-user design acceptance and every implementation/evidence item remain pending.
+
+- **Priority:** P1
+- **Owner:** Worker process/action observations, shared transport and versioned telemetry contracts
+- **Direction:** Include issue #280 in the complete 1.4 scope under directing-user authorization. Expose authenticated read-only worker action/stage/progress and network/disk/CPU/memory/state observations over existing transport.
+- **Conclusion:** First audit existing actual worker progress/state/pressure surfaces and their authentication. Review and accept a design before any new versioned wire/schema. Observation must be read-only and unable to affect jobs; no new listener, bounded rates/sizes with sampling/coalescing and strict secret-safe fields. Keep downstream monitor rendering in the consumer.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Document current confirmed live progress and I/O surfaces and narrow actual gaps.
+  - [ ] Review necessary versioned telemetry contract/rate/authentication design under ADR 0006 before implementation, then compose existing transport with bounded safe observations.
+- **Evidence:**
+  - [ ] Real live-worker action/stage/state and network/disk/cpu/memory observations with declared unsupported values, not invented measurements.
+  - [ ] Authentication, secret/command/environment/path redaction, no-listener/no-job-mutation, volume/coalescing/cancellation controls, independent review and integrated native qualification.

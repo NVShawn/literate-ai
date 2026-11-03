@@ -91,6 +91,15 @@ acceptance of ADRs 0054 and 0055 for 1.4 under Goals 1, 4, 5 and 6.
 Reviewed Cargo compatibility and command-addressed remote workers remain open;
 implementation follows the prioritized FreeBSD SDK and Daemonarchy unblock.
 
+RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 extend Goals 1 and 4
+with hierarchical retained-tree information cards and authenticated read-only
+worker observations. Issues #279 and #280 are included in 1.4. Proposed
+[ADR 0058](docs/decisions/0058-hierarchical-retained-tree-information-cards.md)
+and [ADR 0059](docs/decisions/0059-authenticated-read-only-worker-telemetry.md)
+require directing-user design acceptance before implementation; installed,
+native/browser and integrated qualification remain open. Per-unit cards retain
+the #235 prerequisite; downstream monitor rendering remains consumer-owned.
+
 ADOPT-RELOCATE-001 extends Goals 1, 4 and 6 with supported retained implementation
 placement and transactional relocation, including repository-root placement and
 custom wrapper Component names. It is accepted for 1.4 under issue #265; design,
