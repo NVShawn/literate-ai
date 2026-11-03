@@ -201,6 +201,12 @@
       },
       {
         "id": "COMMAND-WORKER-001"
+      },
+      {
+        "id": "CPP-DISCOVERY-BUDGET-001"
+      },
+      {
+        "id": "HOST-STATUS-001"
       }
     ]
   }

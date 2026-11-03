@@ -191,6 +191,52 @@ class _Registration:
             raise ValueError("retained.receiver.registration-changed")
 
 
+def _read_registered_return_blob(config, content, output):
+    """Deliver assertions under private byte custody, without execution admission."""
+    from literate_ai.adapters.execution_dispatch import MAX_CATALOG_BYTES
+    from literate_ai.cli.execution_workers import select_execution_worker
+    from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
+    from literate_ai.return_cas import MAX_RETURN_BLOB_BYTES, read_return_blob
+
+    raw, document = _document(config.worker_config, maximum_bytes=MAX_CATALOG_BYTES)
+    catalog = ExecutionWorkerCatalog.from_dict(document)
+    selected = select_execution_worker(
+        config.args, project_root=config.project, target_profile=config.args.target
+    )
+    if (
+        selected.worker.kind is not ExecutionWorkerKind.SSH
+        or selected.configuration != config.worker_config
+        or selected.catalog_identity != catalog.identity
+    ):
+        raise ValueError("retained.receiver.exact-return-worker-required")
+    catalog_bytes_identity = record_identity(raw)
+    require_safe_directory(config.cas)
+    node = config.cas.stat()
+    cas_node = (node.st_dev, node.st_ino)
+
+    def current():
+        config.require_unchanged()
+        fresh, _ = _document(config.worker_config, maximum_bytes=MAX_CATALOG_BYTES)
+        if record_identity(fresh) != catalog_bytes_identity:
+            raise ValueError("retained.receiver.return-catalog-changed")
+        require_safe_directory(config.cas)
+        observed = config.cas.stat()
+        if (observed.st_dev, observed.st_ino) != cas_node:
+            raise ValueError("retained.receiver.return-custody-changed")
+
+    current()
+    read_return_blob(
+        content,
+        cas_root=config.cas,
+        worker_identity=selected.worker.identity,
+        registration_identity=config.identity,
+        maximum_bytes=MAX_RETURN_BLOB_BYTES,
+        registration_guard=current,
+        output=output,
+    )
+    current()
+
+
 def _configured_worker(config, *, owned_child=None):
     def preview_current():
         return execute_retained_unit_package_from_args(
@@ -329,21 +375,12 @@ def _main(argv=None):
                 config, ["--describe" if args.describe else "--describe-hardware"]
             )
         if args.read_return_blob:
-            from literate_ai.return_cas import (
-                MAX_READ_REQUEST_BYTES,
-                MAX_RETURN_BLOB_BYTES,
-                read_return_blob,
-            )
+            from literate_ai.return_cas import MAX_READ_REQUEST_BYTES
 
-            worker = _configured_worker(config)
-            read_return_blob(
+            _read_registered_return_blob(
+                config,
                 sys.stdin.buffer.read(MAX_READ_REQUEST_BYTES + 1),
-                cas_root=config.cas,
-                worker_identity=worker.worker.identity,
-                registration_identity=config.identity,
-                maximum_bytes=MAX_RETURN_BLOB_BYTES,
-                registration_guard=worker.require_current,
-                output=sys.stdout.buffer,
+                sys.stdout.buffer,
             )
             return 0
         content = sys.stdin.buffer.read(MAX_ACTION_WIRE_BYTES + 1)

@@ -32840,6 +32840,26 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   its corrected 24-case native runtime/refusal group passes. Next: qualify the
   completed candidate and repeat the full native PACKAGE/LINK/original-verification,
   exact-identity, corruption and large-tree acceptance contract.
+- **SDK metadata retention follow-up:** The live installed V14 receiver's bounded
+  read-only stack sample found full preview/project validation on every SDK
+  metadata edge after native unit construction. Copying these historical assertions
+  issues no admission. Preserve full receiver and admitted-run checks at entry and
+  successful exit; poll exact live receiver custody, cancellation and deadline on
+  each intermediate read/write/cache hit. Custom or omitted polling retains the
+  existing full guard. Add real SDK-bearing copy/reopen, prompt poll refusal,
+  final authority-drift and corrupt-metadata controls before independent review,
+  canonical pin renewal and complete source/native qualification. The existing
+  native attempt remains unchanged; its timing is instrumented, not pristine.
+- **Return-byte transport follow-up:** V14's native guardian completed with exit
+  zero, two unit results and genuine empty-subtree cleanup. Controller import then
+  repeatedly launched the retained receiver in return-blob mode, where each
+  immutable CAS object reconstructed full public execution authority. Resolve only
+  the exact private catalog worker for this read-only mode, poll unchanged
+  registration/catalog/CAS custody and the existing deadline, and preserve bounded
+  same-handle CAS integrity. This transport grants no execution or admission;
+  complete controller source/capability/result validation remains mandatory.
+  Add real subprocess delivery and wrong-binding, mutation, corruption, size and
+  expiry controls before review, pin renewal and complete/native qualification.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a
@@ -33174,3 +33194,38 @@ independent review and the complete combined gate from test one.
   - [ ] Use an actual private command-addressed POSIX worker for nonce handshake, native platform/storage observations, alignment, source upload, native Component execution and evidence download through the same route.
   - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
   - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.
+### [ ] CPP-DISCOVERY-BUDGET-001 — Allow five minutes for bounded C++ toolchain discovery
+
+- **Release target:** 1.4.0
+- **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
+
+- **Priority:** P1
+- **Owner:** C++ toolchain discovery and MSVC environment initialization
+- **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.
+- **Conclusion:** Raise the default discovery allowance to 300 seconds, including MSVC vendor environment setup, while preserving explicit caller budgets, bounded output, cancellation and owned process cleanup. This does not change build-command budgets or turn timeouts into skips.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Set the default C++ version and MSVC environment discovery budget to 300 seconds and document the scope.
+  - [ ] Preserve explicit short discovery budgets and existing timeout, output and process cleanup behavior.
+- **Evidence:**
+  - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
+  - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
+
+### [ ] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#268](https://github.com/jordanhubbard/literate-ai/issues/268)
+
+- **Priority:** P1
+- **Owner:** Operator status and canonical host-install Flavor composition; issue 268
+- **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
+- **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Resolve project-local selected Flavor coordinates independently of directory names and preserve built-in selection.
+  - [ ] Reuse trusted packaged host probes only for the same canonical Flavor coordinate and exact sidecar bytes; report custom local probes as unsupported without executing them or suppressing unavailable requirements.
+- **Evidence:**
+  - [ ] Exercise an adopted project with a differently named local Flavor directory and missing, duplicate and toolchain failure controls.
+  - [ ] Obtain independent source review, renew canonical pins and pass complete regression and exact CI before closure.

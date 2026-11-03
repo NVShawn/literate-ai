@@ -31,10 +31,10 @@ from .python import (
     require_unsandboxed_host_build_authorization,
 )
 
-# Toolchain startup can exceed the ordinary command-probe budget while Xcode or
-# Bazel is active in the parallel sample matrix.  Discovery is still bounded,
-# but should not reject a healthy compiler solely because macOS is under load.
-DEFAULT_CPP_VERSION_TIMEOUT_SECONDS = 60.0
+# Discovery includes vendor environment setup, such as MSVC's vcvarsall.bat.
+# Allow five minutes by default while preserving explicit caller budgets and
+# the bounded runner's timeout and process cleanup behavior.
+DEFAULT_CPP_VERSION_TIMEOUT_SECONDS = 300.0
 DEFAULT_CPP_BUILD_TIMEOUT_SECONDS = 120.0
 DEFAULT_COMPILER_STDOUT_LIMIT_BYTES = 1024 * 1024
 DEFAULT_COMPILER_STDERR_LIMIT_BYTES = 1024 * 1024

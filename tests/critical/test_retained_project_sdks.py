@@ -69,6 +69,7 @@ from literate_ai.security import (
     BuildRequest,
     SecurityProfile,
 )
+from literate_ai.storage.cas import BlobIntegrityError
 from tests.critical import test_retained_project_completion as completion
 from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_native_sdk_source_build as producer_fixtures
@@ -531,6 +532,72 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
             maximum_bytes=policy.max_provider_metadata_bytes,
             maximum_memory_bytes=policy.max_provider_memory_bytes,
         )
+        # Real SDK-bearing metadata must preserve the exact evidence root while
+        # polling private custody instead of revalidating authority per edge.
+        full_checks, polls = [], []
+
+        def full_guard():
+            full_checks.append(len(polls))
+            admission.require_current()
+
+        def poll_guard():
+            polls.append(True)
+
+        guarded_reference = retain_retained_unit_run_evidence(
+            admission,
+            maximum_bytes=policy.max_provider_metadata_bytes,
+            maximum_memory_bytes=policy.max_provider_memory_bytes,
+            admission_guard=full_guard,
+            metadata_poll_guard=poll_guard,
+        )
+        self.assertEqual(guarded_reference, evidence_reference)
+        self.assertGreater(len(polls), 20)
+        self.assertEqual(full_checks, [0, len(polls)])
+        for reason in ("registration-revoked", "cancelled", "deadline-expired"):
+            with self.subTest(metadata_poll_refusal=reason):
+                interrupted = []
+
+                def refuse_during_copy(interrupted=interrupted, reason=reason):
+                    interrupted.append(True)
+                    if len(interrupted) == 3:
+                        raise ValueError(reason)
+
+                with self.assertRaisesRegex(ValueError, reason):
+                    retain_retained_unit_run_evidence(
+                        admission,
+                        maximum_bytes=policy.max_provider_metadata_bytes,
+                        maximum_memory_bytes=policy.max_provider_memory_bytes,
+                        admission_guard=admission.require_current,
+                        metadata_poll_guard=refuse_during_copy,
+                    )
+                self.assertEqual(len(interrupted), 3)
+        changed_input = admission.source / "sdk-policy.json"
+        original_input = changed_input.read_bytes()
+        mutation_polls = []
+
+        def mutate_source_during_copy():
+            mutation_polls.append(True)
+            if len(mutation_polls) == 3:
+                changed_input.write_bytes(b" " + original_input[1:])
+
+        try:
+            with self.assertRaisesRegex(ValueError, "Retained input bytes"):
+                retain_retained_unit_run_evidence(
+                    admission,
+                    maximum_bytes=policy.max_provider_metadata_bytes,
+                    maximum_memory_bytes=policy.max_provider_memory_bytes,
+                    metadata_poll_guard=mutate_source_during_copy,
+                )
+            self.assertGreater(len(mutation_polls), 3)
+        finally:
+            changed_input.write_bytes(original_input)
+        admission.require_current()
+        # Interrupted/finally refused copies leave existing retained evidence
+        # usable. Their partial CAS objects never stand in for admission.
+        self.assertEqual(
+            store.get_manifest(evidence_reference)["schema"],
+            "literate-ai/retained-unit-accepted-run-evidence@1",
+        )
         inputs = read_retained_unit_planning_inputs(
             admission.source,
             run.source_bom.manifest,
@@ -592,6 +659,24 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
             for v in evidence["sdk_metadata_records"]
         }
         execution_document = store.get_manifest(references[execution_identity.uri])
+        # Corrupt a real reachable SDK metadata object. Lightweight polling
+        # must not bypass immutable CAS integrity, and restoration preserves the
+        # original accepted evidence for the remaining independent controls.
+        execution_path = store.path_for(references[execution_identity.uri])
+        original_bytes = execution_path.read_bytes()
+        try:
+            execution_path.write_bytes(b"!" + original_bytes[1:])
+            with self.assertRaisesRegex(BlobIntegrityError, "failed verification"):
+                retain_retained_unit_run_evidence(
+                    admission,
+                    maximum_bytes=policy.max_provider_metadata_bytes,
+                    maximum_memory_bytes=policy.max_provider_memory_bytes,
+                    admission_guard=lambda: None,
+                    metadata_poll_guard=poll_guard,
+                )
+        finally:
+            execution_path.write_bytes(original_bytes)
+        self.assertEqual(reopen(evidence_reference).identity, run.identity)
         altered_execution = deepcopy(execution_document)
         altered_execution["retained_command_context"]["argv"].append(
             "unreviewed-argument"

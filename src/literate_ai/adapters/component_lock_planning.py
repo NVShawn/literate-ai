@@ -1124,6 +1124,32 @@ def _provider_satisfies(provider: ComponentAuthoring, requirement: Any) -> bool:
     return True
 
 
+def observe_flavor_catalog(
+    roots: tuple[Path, ...],
+    *,
+    boundary: Path,
+    scale_limits: ProjectScaleLimits | None = None,
+) -> tuple[_LoadedFlavor, ...]:
+    """Read canonical Flavor identities and locations without planning or writes.
+
+    These observations grant no permission to execute authored toolchain probes.
+    """
+    return _load_flavors(roots, boundary=boundary, scale_limits=scale_limits)
+
+
+def observe_flavor_host_toolchain(flavor, *, boundary: Path) -> bytes | None:
+    """Read an optional sidecar with the catalog's same safety and byte bounds."""
+    path = flavor.path.parent / "host-toolchain.cdx.json"
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return None
+    return _bounded_bytes(
+        _resolve_path(flavor.path.parent, path.name, boundary=boundary),
+        code="component_lock.flavor_toolchain_unavailable",
+    )
+
+
 def _load_flavors(
     roots: tuple[Path, ...],
     *,

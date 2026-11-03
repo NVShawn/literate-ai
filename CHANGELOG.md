@@ -5,6 +5,20 @@
 - Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
   installer with the ARM64 toolset selected. Native compiler image checks still
   determine readiness, including after an installer reports success.
+- Retained return-blob transport binds current private registration, worker
+  catalog and CAS custody without rerunning project execution planning per object.
+  Full result admission remains an independent controller operation.
+
+- Retained SDK evidence copying polls live receiver custody during bounded CAS
+  traversal, with full authority validation before copying and before success.
+
+- Adopted-project status resolves selected project-local Flavors by canonical
+  identity. Toolchain-free shims add no requirements; custom local observation
+  probes refuse explicitly, and copied framework Flavors retain their host tools.
+
+- C++ toolchain discovery, including MSVC environment initialization, now defaults
+  to a finite five-minute budget instead of one minute.
+
 - Retained receivers compose host observation and fresh planning checks without
   repeating the complete receiver preview at each nested platform check.
   Custom callbacks retain conservative validation and configured deadlines.
