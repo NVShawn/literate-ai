@@ -111,6 +111,59 @@ class RetainedLocalPlatform:
         return result
 
 
+_RECEIVER_REPLANNER = object()
+
+
+class _RetainedReceiverReplanner:
+    """A process-local composition of genuine receiver and fresh source checks."""
+
+    def __init__(self, context, plan, observe_authority, *, _seal=None):
+        if _seal is not _RECEIVER_REPLANNER:
+            raise TypeError("retained.receiver.private-replanner-required")
+        self.context, self.plan = context, plan
+        self._observe_authority = observe_authority
+
+    def __reduce__(self):
+        raise TypeError("retained.receiver.replanner-cannot-be-transported")
+
+    def __call__(self):
+        self.context.require_plan(self.plan)
+        observed = self._observe_authority()
+        if observed != self.plan:
+            raise ValueError("retained.receiver.current-plan-changed")
+        self.context.require_custody_current()
+        return observed
+
+    def observe_platform(self, platform):
+        if (
+            type(platform) is not RetainedReceiverPlatform
+            or platform.context is not self.context
+            or platform.plan != self.plan
+        ):
+            raise ValueError("retained.receiver.replanner-platform-differs")
+        # Read-only OS observation issues no authority. The genuine full receiver
+        # check and source replan below must succeed before these facts are used.
+        self.context.require_custody_current()
+        platform._observe_host()
+        return self()
+
+
+def _compose_receiver_current_plan(context, plan, observe_authority):
+    from literate_ai.adapters.retained_receiver_context import RetainedReceiverContext
+    from literate_ai.contracts.retained_project_lifecycle import RetainedProjectPlan
+
+    if (
+        type(context) is not RetainedReceiverContext
+        or not isinstance(plan, RetainedProjectPlan)
+        or not callable(observe_authority)
+    ):
+        raise TypeError("retained.receiver.genuine-replanner-inputs-required")
+    context.require_plan(plan)
+    return _RetainedReceiverReplanner(
+        context, plan, observe_authority, _seal=_RECEIVER_REPLANNER
+    )
+
+
 class RetainedReceiverPlatform:
     """Actual receiver host facts under a live original SSH request context.
 
@@ -136,6 +189,16 @@ class RetainedReceiverPlatform:
 
     def require_current(self):
         self.context.require_plan(self.plan)
+        self._observe_host()
+        self.context.require_current()
+
+    def current_plan(self, observe_authority):
+        if type(observe_authority) is _RetainedReceiverReplanner:
+            return observe_authority.observe_platform(self)
+        self.require_current()
+        return observe_authority()
+
+    def _observe_host(self):
         try:
             observation = observe_receiver_host(
                 self.worker.worker_id,
@@ -150,7 +213,6 @@ class RetainedReceiverPlatform:
             raise ValueError("retained.worker.platform-changed")
         self.initial = observation if self.initial is None else self.initial
         self.latest = observation
-        self.context.require_current()
 
     def require_plan(self, plan):
         if plan != self.plan or self.initial is None or self.latest is None:

@@ -203,6 +203,8 @@ def _execute_retained_project(
     platform.require_current()
 
     def current_local_plan():
+        if receiver_context is not None:
+            return platform.current_plan(current_plan)
         platform.require_current()
         return current_plan()
 

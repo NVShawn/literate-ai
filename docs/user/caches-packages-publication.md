@@ -604,6 +604,14 @@ historical native verification/readmission, installed public-path qualification,
 the remote round trip and the large real-tree qualification remain open in
 [RETAINED-UNIT-PACKAGE-001](../roadmap/active-work.md#retained-unit-package-001-deliver-per-unit-retained-tree-packages-and-verified-freebsd-transport).
 Package execution does not install, publish or authorize a release.
+
+A canonical receiver may compose read-only host observation and current planning
+within one check. Private custody, cancellation and deadline checks bracket the
+observation; fresh capability and complete source/namespace authority checks must
+succeed before the check returns. This does not cache admission, extend a deadline
+or restore live owners from retained documents. Custom planning callbacks retain
+the conservative independent platform and planning checks.
+
 Completed retained attempts leave recovery records beside the private registration
 with the validated guardian response, including bounded stdout/stderr, before
 reservation release. Worker failures retain their authenticated frame in controller custody
@@ -627,7 +635,11 @@ tools and worker arguments for both commands. `verify` additionally requires
 `--authorize-retained-project`, `--authorize-unit-packages` and
 `--allow-host-execution`; an execution operation's authorization cannot authorize
 verification. A valid destination cache cannot hide missing or corrupt archives
-in the selected source custody.
+in the selected source custody. `--verification-timeout-seconds` accepts a finite
+original-byte custody lease from 1 to 10,800 seconds (three hours); its default
+remains 3,600 seconds. Configure the private action-execution duration and any
+temporary transport/source leases to cover the intended run as well. Extending a
+future attempt does not renew an expired grant or change retained evidence.
 
 SSH verification uses the private receiver registration version 2. Its additional
 `verification` object contains `selection` (the plan's `verification_mode`, full

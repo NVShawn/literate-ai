@@ -12,6 +12,7 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from literate_ai.adapters import retained_project_execution, retained_project_platform
 from literate_ai.adapters.action_capabilities import (
     CAPABILITY_REQUEST_SCHEMA,
     decode_capability_request,
@@ -23,7 +24,13 @@ from literate_ai.adapters.action_dispatch_wire import ActionDispatchDeadline
 from literate_ai.adapters.action_package_worker import ConfiguredPackageWorker
 from literate_ai.adapters.packaging import DirectoryPackageAdapter
 from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
-from literate_ai.adapters.retained_project_runtime import execute_local_retained_project
+from literate_ai.adapters.retained_project_platform import (
+    _compose_receiver_current_plan,
+)
+from literate_ai.adapters.retained_project_runtime import (
+    execute_local_retained_project,
+    execute_receiver_retained_project,
+)
 from literate_ai.adapters.retained_receiver_context import (
     _admit_retained_receiver_context,
 )
@@ -167,8 +174,7 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         self.assertFalse(diagnostic["admission"])
         self.assertEqual(len(diagnostic["command_observations"]), 4)
 
-    def test_revoked_receiver_context_refuses_before_first_retained_command(self):
-        """An unchanged planner cannot override a revoked live receiver capability."""
+    def receiver_context(self):
         f = self.fixture.fixture
         worker = ExecutionWorker(
             "receiver",
@@ -255,12 +261,96 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
             registration_guard=registered,
             measure_capability=measure,
         )
+        return context
+
+    def test_revoked_receiver_context_refuses_before_first_retained_command(self):
+        """An unchanged planner cannot override a revoked live receiver capability."""
+        f = self.fixture.fixture
+        context = self.receiver_context()
         workspace = f.workspace(receiver_context=context)
         context.close()
         with self.assertRaisesRegex(ValueError, "context-not-live"):
             workspace.execute_next()
         self.assertEqual(workspace.observations, ())
         self.assertFalse((workspace.outputs / "app.bin").exists())
+
+    def test_receiver_composition_runs_native_actions_and_refuses_warm_revocation(self):
+        """A fresh host query cannot hide private revocation after prior success."""
+        f = self.fixture.fixture
+        original_observe = retained_project_platform.observe_receiver_host
+        original_run = retained_project_execution.run_bounded_process
+        for revoke in (False, True):
+            with self.subTest(revoke=revoke):
+                context = self.receiver_context()
+                self.addCleanup(context.close)
+                state = {"armed": False, "host_checks": 0, "revoked": False}
+
+                def authority(*, state=state, revoke=revoke):
+                    # Initial planning precedes platform construction. Arm only
+                    # after startup and one composed observation have succeeded.
+                    state["armed"] = revoke and state["host_checks"] >= 2
+                    return f.current
+
+                current = _compose_receiver_current_plan(context, f.plan, authority)
+
+                def observe(*args, state=state, **kwargs):
+                    result = original_observe(*args, **kwargs)
+                    state["host_checks"] += 1
+                    if state["armed"]:
+                        (f.base / "private-receiver-registration.json").write_bytes(
+                            b"revoked after successful planning"
+                        )
+                        state["revoked"] = True
+                    return result
+
+                def run(*args, state=state, **kwargs):
+                    self.assertFalse(
+                        state["revoked"], "retained command ran after revocation"
+                    )
+                    return original_run(*args, **kwargs)
+
+                planning = RetainedProjectPlanningResult(
+                    f.plan,
+                    project_retained_project_managed_graph(
+                        f.plan, self.fixture.locks, version="1.0.0"
+                    ),
+                )
+                with (
+                    patch.object(
+                        retained_project_platform,
+                        "observe_receiver_host",
+                        side_effect=observe,
+                    ),
+                    patch.object(
+                        retained_project_execution,
+                        "run_bounded_process",
+                        side_effect=run,
+                    ),
+                ):
+                    options = dict(
+                        receiver_context=context,
+                        component_locks=self.fixture.locks,
+                        current_plan=current,
+                        test_receipt_policy=f.configured_test_policy,
+                        cache_directories=self.directories,
+                        authorization=f.plan.identity.uri,
+                        allow_host_execution=True,
+                    )
+                    if revoke:
+                        with self.assertRaisesRegex(ValueError, "registration changed"):
+                            execute_receiver_retained_project(
+                                f.source, f.manifest, planning, **options
+                            )
+                        self.assertTrue(state["revoked"])
+                    else:
+                        admission, workspace = execute_receiver_retained_project(
+                            f.source, f.manifest, planning, **options
+                        )
+                        admission.require_current()
+                        self.assertEqual(admission.receipt.passed, 1)
+                        self.assertTrue((workspace.outputs / "app.bin").is_file())
+                        self.assertEqual(len(workspace.observations), 4)
+                context.close()
 
     def test_secondary_policy_without_owner_refuses_before_platform_or_cache(self):
         f = self.fixture.fixture

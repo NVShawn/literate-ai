@@ -23,7 +23,7 @@ from literate_ai.storage.cas import FileSystemCAS
 def verification_selection_from_args(args, policy):
     """Bind private custody and a complete root reference without host execution."""
     seconds = args.verification_timeout_seconds
-    if type(seconds) is not int or not 1 <= seconds <= 3600:
+    if type(seconds) is not int or not 1 <= seconds <= 3 * 60 * 60:
         raise ValueError("retained.unit.finite-verification-deadline-required")
     store = FileSystemCAS(Path(args.custody_root), create=False)
     deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=seconds))
