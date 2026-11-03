@@ -192,6 +192,9 @@
       },
       {
         "id": "HOST-WINARM-001"
+      },
+      {
+        "id": "ADOPT-RELOCATE-001"
       }
     ]
   }

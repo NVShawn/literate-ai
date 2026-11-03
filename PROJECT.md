@@ -86,6 +86,11 @@ resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integratio
 tracks every initial item, the existing release goals, native qualification and
 publication evidence. All required acceptance remains open until proven.
 
+ADOPT-RELOCATE-001 extends Goals 1, 4 and 6 with supported retained implementation
+placement and transactional relocation, including repository-root placement and
+custom wrapper Component names. It is accepted for 1.4 under issue #265; design,
+implementation, rollback and fresh receipt qualification remain open.
+
 OPENCODE-COMPAT-001 extends Goals 1, 3, and 4 with support for both OpenCode CLI
 majors. Capability selection preserves v1 pure mode and adds v2 private-server
 execution with native permissions, fresh provider state, process environment
