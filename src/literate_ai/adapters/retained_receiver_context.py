@@ -19,7 +19,6 @@ from literate_ai.application.action_dag_scheduler import (
 )
 from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
-    ExecutionWorkerKind,
 )
 from literate_ai.contracts.identity import ContentIdentity
 
@@ -122,7 +121,7 @@ def _admit_retained_receiver_context(
         not isinstance(request, LifecycleActionDispatchRequest)
         or not isinstance(deadline, ActionDispatchDeadline)
         or not isinstance(worker, ExecutionWorker)
-        or worker.kind is not ExecutionWorkerKind.SSH
+        or not worker.is_remote
         or request.action.kind is not LifecycleActionKind.PACKAGE
         or any(
             not isinstance(value, ContentIdentity)

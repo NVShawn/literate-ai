@@ -2649,6 +2649,50 @@ or compiler SDK admission. See [secondary-account retained tests](retained-secon
 `add WORKER_ID --endpoint user@host --os linux --workspace '~/litai'` registers an
 SSH worker; `--kind local` registers the controller. `--file` accepts a complete
 versioned worker descriptor for advanced command-worker or hardware requirements.
+An opt-in `urn:literate-ai:schema:v2:execution-worker` with `kind: "remote"`
+uses private reachability commands for jump hosts, schedulers or organization
+connectors. It requires platform requirements, workspace, an exact LitAI lifecycle
+launcher, slots and all three routes. It has no SSH endpoint or SSH transport field.
+Existing v1 local, SSH and structured-command descriptors retain their wire formats
+and identities; registering a remote route does not migrate them.
+
+The `reachability` field in a complete v2 descriptor has this shape; the adapter
+and target below are synthetic and must be replaced in private configuration:
+
+```json
+{
+  "schema": "urn:literate-ai:schema:v2:worker-reachability",
+  "execute": ["/usr/local/bin/worker-route", "exec", "build-node", "{remote_command}"],
+  "upload": ["/usr/local/bin/worker-route", "upload", "build-node", "{local_file}", "{remote_file}"],
+  "download": ["/usr/local/bin/worker-route", "download", "build-node", "{remote_file}", "{local_file}"]
+}
+```
+
+Each route is a literal argument vector with 1–128 arguments of at most 4096
+characters each. Placeholders occupy whole arguments exactly once in their
+specified operation; partial or unknown placeholders, executable substitution and
+NUL/newline arguments refuse. The controller performs no shell or environment
+expansion. Declare the remote shell in the adapter when needed. All routes must
+resolve before remote readiness; execute-only access does not establish transfer
+capability. A private adapter must preserve arbitrary file bytes and the selected
+connector scope across execution and both transfers, without guessing a direct
+network fallback. Keep routing IDs, credentials and actual commands outside Git.
+
+The shared process owner bounds operation time, descendants, stdout and diagnostic
+tails. Upload guards retain and rehash the staged regular file. Downloads use private
+staging, a finite size allowance, fresh hashes and collision-safe publication;
+receiver evidence is independently imported and checked afterward. The POSIX
+controller also imposes a hard per-file limit with a 64 MiB floor; this is not an
+aggregate disk sandbox. Command-based downloads currently require a POSIX controller.
+Native Windows connector qualification remains open. Failed or uncertain mutations
+are not automatically replayed by the new route.
+
+Run `worker align --all`, `worker test --all`, and native storage/capability probes
+against the selected private catalog before lifecycle work. Choose explicit scopes
+for connector discovery; a miss or destroyed target in one scope does not establish
+absence in another. Discovery never starts or provisions instances. A passing nonce
+or alignment check alone does not establish an installed receiver or lifecycle proof.
+
 `update WORKER_ID` changes only supplied fields, while `remove WORKER_ID` removes
 only the local registration. These commands never allocate, stop, or destroy a VM.
 Mutations validate before publication, sort entries, serialize competing CLI writes,
@@ -2658,7 +2702,8 @@ unknown updates/removals, invalid declarations and unsafe paths fail without rep
 paths use the supported home-relative representation, such as `~/litai`.
 
 `litai worker test --all` or repeated `--worker-id ID` runs a bounded,
-noninteractive SSH echo handshake without requiring Python, GPU tooling, or LitAI
+noninteractive nonce handshake through each selected remote route without requiring
+Python, GPU tooling, or LitAI
 on the worker. Results identify each worker, SSH status, diagnostic and remediation.
 DNS, connection refusal, timeout, unknown/changed host keys and authentication failures
 remain distinct. One failure never suppresses peer results. A nonzero exit status means

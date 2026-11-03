@@ -35,7 +35,7 @@ def add_registry_arguments(commands):
                 "add": "register a worker without provisioning a VM",
                 "update": "update a private worker registration",
                 "remove": "remove a registration without deleting its VM",
-                "test": "test SSH connectivity independently for each selected worker",
+                "test": "test selected remote worker connections independently",
             }[name],
         )
         parser.add_argument(
@@ -50,7 +50,10 @@ def add_registry_arguments(commands):
         if name in ("add", "update"):
             parser.add_argument(
                 "--file",
-                help="complete versioned descriptor; replaces the selected entry",
+                help=(
+                    "complete versioned descriptor, including v2 remote routes; "
+                    "replaces the selected entry"
+                ),
             )
             parser.add_argument("--kind", choices=("local", "ssh", "command"))
             parser.add_argument("--endpoint")

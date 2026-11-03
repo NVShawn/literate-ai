@@ -114,7 +114,6 @@ from literate_ai.contracts import (
     ContentIdentity,
     ContractValidationError,
     ExecutionWorker,
-    ExecutionWorkerKind,
     ProjectUpdateClassification,
     RepositoryParentReference,
     RepositoryParentSelection,
@@ -1369,7 +1368,7 @@ def _select_retained_execution_worker(
             "retained_receipt.worker_unknown",
             f"no exact configured worker matches {args.worker_id!r}",
         ) from exc
-    if worker.kind is not ExecutionWorkerKind.SSH:
+    if not worker.is_remote:
         raise CliFailure(
             "retained_receipt.worker_kind_unsupported",
             "run-retained supports only local execution or a configured SSH worker",

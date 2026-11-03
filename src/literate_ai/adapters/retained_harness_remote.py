@@ -38,6 +38,11 @@ from literate_ai.adapters.harness_inventory import (
 )
 from literate_ai.adapters.harness_tree import observe_retained_tree
 from literate_ai.adapters.remote_execution import _redact_diagnostic
+from literate_ai.adapters.remote_transport import (
+    BoundedRemoteProcessRunner,
+    RemoteWorkerTransport,
+    remote_execute_arguments,
+)
 from literate_ai.adapters.source_materialization import (
     SourceMaterializationError,
     write_bounded_source_archive,
@@ -50,16 +55,12 @@ from literate_ai.adapters.ssh_execution import (
 )
 from literate_ai.adapters.ssh_transport import (
     MAX_SSH_OUTPUT_BYTES,
-    BoundedSshProcessRunner,
     SshProcessRunner,
     SshTransportError,
-    scp_arguments,
-    ssh_arguments,
 )
 from literate_ai.contracts import (
     ContentIdentity,
     ExecutionWorker,
-    ExecutionWorkerKind,
     canonical_identity,
     canonical_json_bytes,
 )
@@ -677,7 +678,7 @@ class RetainedHarnessRemoteResult:
 
 
 def _require_posix_ssh_worker(worker: ExecutionWorker) -> None:
-    if worker.kind is not ExecutionWorkerKind.SSH:
+    if not worker.is_remote:
         raise RetainedHarnessRemoteError(
             "retained_receipt.worker_kind_unsupported",
             "remote retained execution requires a configured SSH worker",
@@ -911,7 +912,7 @@ class RetainedHarnessSshExecutor:
     """Stage one retained projection and return a bounded typed receiver result."""
 
     def __init__(self, runner: SshProcessRunner | None = None) -> None:
-        self.runner = runner or BoundedSshProcessRunner()
+        self.runner = runner or BoundedRemoteProcessRunner()
 
     def execute(
         self,
@@ -930,7 +931,7 @@ class RetainedHarnessSshExecutor:
         cwd: Path,
     ) -> RetainedHarnessRemoteResult:
         _require_posix_ssh_worker(worker)
-        assert worker.endpoint is not None and worker.workspace is not None
+        assert worker.is_remote and worker.workspace is not None
         inventory_identity = canonical_identity(inventory)
         if inventory_bytes != canonical_json_bytes(inventory):
             raise RetainedHarnessRemoteError(
@@ -1009,17 +1010,22 @@ class RetainedHarnessSshExecutor:
                     (request_path, "request.json"),
                     (worker_path, "worker.json"),
                 ):
-                    self._run_argv(
-                        scp_arguments(
+                    try:
+                        uploaded = RemoteWorkerTransport(worker).upload(
                             source,
-                            worker.endpoint,
                             f"{incoming}/{name}",
-                            deadline.remaining(),
-                            transport=worker.transport,
-                        ),
-                        cwd,
-                        deadline,
-                    )
+                            cwd=cwd,
+                            timeout_seconds=deadline.remaining(),
+                            runner=self.runner,
+                        )
+                    except SshTransportError as exc:
+                        raise RetainedHarnessRemoteError(exc.code, exc.message) from exc
+                    if uploaded.returncode:
+                        raise RetainedHarnessRemoteError(
+                            "retained_receipt.remote_transport_failed",
+                            "remote retained upload phase exited with status "
+                            f"{uploaded.returncode}",
+                        )
                 completed = self._run(
                     worker,
                     self._execute_command(worker, incoming, workspace),
@@ -1108,13 +1114,11 @@ class RetainedHarnessSshExecutor:
         *,
         require_success: bool = True,
     ):
-        assert worker.endpoint is not None
         return self._run_argv(
-            ssh_arguments(
-                worker.endpoint,
+            remote_execute_arguments(
+                worker,
                 command,
                 deadline.remaining(),
-                transport=worker.transport,
             ),
             cwd,
             deadline,

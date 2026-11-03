@@ -834,8 +834,10 @@ from .worker_capacity import (
     WorkerCapacityObservation,
     WorkerCapacityPolicy,
 )
+from .worker_reachability import WorkerReachability
 
 __all__ = [
+    "WorkerReachability",
     "SHARED_CACHE_CONFIGURATION_SCHEMA",
     "SHARED_CACHE_NAMESPACE_POLICY_SCHEMA",
     "SharedCacheAccessMode",

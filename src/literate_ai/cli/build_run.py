@@ -119,6 +119,7 @@ def _build_from_args(args: Any, *, action: LifecycleDispatchAction) -> dict[str,
     if selected_worker.worker.kind in {
         ExecutionWorkerKind.COMMAND,
         ExecutionWorkerKind.SSH,
+        ExecutionWorkerKind.REMOTE,
     }:
         try:
             dispatcher = (
@@ -486,6 +487,7 @@ def run_from_args(args: Any) -> tuple[dict[str, Any], int]:
     if selected_worker.worker.kind in {
         ExecutionWorkerKind.COMMAND,
         ExecutionWorkerKind.SSH,
+        ExecutionWorkerKind.REMOTE,
     }:
         try:
             dispatcher = (

@@ -17,7 +17,8 @@ from typing import Protocol
 
 from literate_ai.adapters.builders._process import run_bounded_process
 from literate_ai.adapters.builders.python import BuildError
-from literate_ai.adapters.ssh_transport import SshTransportError, ssh_arguments
+from literate_ai.adapters.remote_transport import remote_execute_arguments
+from literate_ai.adapters.ssh_transport import SshTransportError
 from literate_ai.contracts import (
     ContractValidationError,
     ExecutionWorker,
@@ -129,6 +130,7 @@ def _run(
     try:
         result = run_bounded_process(
             argv,
+            terminate_descendants=True,
             cwd=None,
             environment=os.environ,
             timeout_seconds=timeout_seconds,
@@ -172,16 +174,14 @@ def _invoke(
     try:
         if worker.kind is ExecutionWorkerKind.LOCAL:
             return runner(command, timeout)
-        if worker.kind is ExecutionWorkerKind.SSH:
-            assert worker.endpoint is not None
+        if worker.is_remote:
             windows = worker.requirements.os_family == "windows"
             remote_command = " ".join(command) if windows else shlex.join(command)
             result = runner(
-                ssh_arguments(
-                    worker.endpoint,
+                remote_execute_arguments(
+                    worker,
                     remote_command,
                     timeout,
-                    transport=worker.transport,
                     login_shell=worker.requirements.os_family
                     not in {"freebsd", "windows"},
                 ),
@@ -267,7 +267,7 @@ gpu_status=absent; gpu_json='[]'; diagnostic=null
 if command -v nvidia-smi >/dev/null 2>&1; then
   output=$(nvidia-smi --query-gpu=index,name,uuid,memory.total,compute_cap,driver_version --format=csv,noheader,nounits 2>&1) && gpu_status=ok || gpu_status=degraded  # noqa: E501
   if [ "$gpu_status" = ok ]; then
-    gpu_json=$(printf '%s\n' "$output" | awk -F', *' 'BEGIN{printf "["}{if(NR>1)printf ","; gsub(/\\/,"\\\\",$2); gsub(/"/,"\\\"",$2); printf "{\"index\":%d,\"model\":\"%s\",\"uuid\":\"%s\",\"memory_mib\":%s,\"compute_capability\":\"%s\",\"driver_version\":\"%s\"}",$1,$2,$3,($4=="[N/A]" || $4=="N/A" ? "null" : $4),$5,$6}END{printf "]"}')  # noqa: E501
+    gpu_json=$(printf '%s\n' "$output" | awk -F', *' 'BEGIN{printf "["}{if(NR>1)printf ","; gsub(/\\/,"\\\\",$2); gsub(/"/,"\\\"",$2); printf "{\"index\":%d,\"model\":\"%s\",\"uuid\":\"%s\",\"memory_mib\":%s,\"compute_capability\":\"%s\",\"driver_version\":\"%s\"}",$1,$2,$3,($4 ~ /^[0-9]+$/ ? $4 : "null"),$5,$6}END{printf "]"}')  # noqa: E501
   else diagnostic='"nvidia-smi is installed but its device query failed"'; fi
 fi
 printf '{"os_name":"%s","os_version":"%s","architecture":"%s","physical_cores":%s,"logical_cores":%s,"memory_mib":%s,"nvidia_status":"%s","gpus":%s,"diagnostic":%s}\n' "$name" "$version" "$(uname -m)" "$physical" "$(getconf _NPROCESSORS_ONLN)" "$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo)" "$gpu_status" "$gpu_json" "$diagnostic"'''  # noqa: E501

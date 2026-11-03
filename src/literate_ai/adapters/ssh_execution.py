@@ -12,18 +12,19 @@ import uuid
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+from literate_ai.adapters.remote_transport import (
+    BoundedRemoteProcessRunner,
+    RemoteWorkerTransport,
+    remote_execute_arguments,
+)
 from literate_ai.adapters.source_materialization import (
     SourceMaterializationError,
     capture_source_archive,
 )
 from literate_ai.adapters.ssh_transport import (
     MAX_SSH_OUTPUT_BYTES,
-    BoundedSshProcessRunner,
     SshProcessRunner,
     SshTransportError,
-    scp_arguments,
-    scp_download_arguments,
-    ssh_arguments,
 )
 from literate_ai.contracts import (
     ContentIdentity,
@@ -186,7 +187,7 @@ class SshLifecycleRequestHandler:
     """Materialize current authority and invoke the installed worker receiver."""
 
     def __init__(self, runner: SshProcessRunner | None = None) -> None:
-        self.runner = runner or BoundedSshProcessRunner()
+        self.runner = runner or BoundedRemoteProcessRunner()
 
     def execute(
         self,
@@ -195,7 +196,7 @@ class SshLifecycleRequestHandler:
         *,
         cwd: Path,
     ) -> ExecutionDispatchResult:
-        if worker.endpoint is None or worker.workspace is None:
+        if not worker.is_remote or worker.workspace is None:
             raise ExecutionDispatchAdapterError(
                 "execution.ssh_worker_invalid",
                 "SSH worker requires an endpoint and workspace",
@@ -252,16 +253,14 @@ class SshLifecycleRequestHandler:
                             )
                         )
                     for source, name in transfers:
-                        self._run_argv(
-                            scp_arguments(
+                        self._require_success(
+                            RemoteWorkerTransport(worker).upload(
                                 source,
-                                worker.endpoint,
                                 f"{incoming}/{name}",
-                                deadline.remaining(),
-                                transport=worker.transport,
-                            ),
-                            cwd,
-                            deadline,
+                                cwd=cwd,
+                                timeout_seconds=deadline.remaining(),
+                                runner=self.runner,
+                            )
                         )
                     completed = self._run(
                         worker,
@@ -324,19 +323,19 @@ class SshLifecycleRequestHandler:
             local_bundle = Path(transfer_custody.name) / "remote-evidence.tar.gz"
             try:
                 transfer_error: SshTransportError | None = None
-                for _attempt in range(3):
+                for _attempt in range(3 if worker.reachability is None else 1):
                     try:
                         local_bundle.unlink(missing_ok=True)
-                        self._run_argv(
-                            scp_download_arguments(
-                                worker.endpoint,
+                        self._require_success(
+                            RemoteWorkerTransport(worker).download(
                                 evidence_bundle,
                                 local_bundle,
-                                deadline.remaining(),
-                                transport=worker.transport,
-                            ),
-                            cwd,
-                            deadline,
+                                cwd=cwd,
+                                timeout_seconds=deadline.remaining(),
+                                runner=self.runner,
+                                maximum_bytes=control.bundle_size,
+                                expected_digest=control.evidence_reference.identity.digest,
+                            )
                         )
                         transfer_error = None
                         break
@@ -375,7 +374,7 @@ class SshLifecycleRequestHandler:
             acknowledgement_identity: ContentIdentity | None = None
             acknowledgement_error: Exception | None = None
             acknowledged = None
-            for _attempt in range(3):
+            for _attempt in range(3 if worker.reachability is None else 1):
                 acknowledged = self._run(
                     worker,
                     self._acknowledgement_command(
@@ -465,15 +464,13 @@ class SshLifecycleRequestHandler:
         *,
         require_success: bool = True,
     ):
-        assert worker.endpoint is not None
         return self._run_argv(
-            ssh_arguments(
-                worker.endpoint,
+            remote_execute_arguments(
+                worker,
                 "/bin/sh -c " + shlex.quote(command)
                 if worker.requirements.os_family == "freebsd"
                 else command,
                 deadline.remaining(),
-                transport=worker.transport,
                 login_shell=worker.requirements.os_family not in {"freebsd", "windows"},
             ),
             cwd,
@@ -490,7 +487,11 @@ class SshLifecycleRequestHandler:
         require_success: bool = True,
     ):
         completed = self.runner.run(argv, cwd=cwd, timeout_seconds=deadline.remaining())
-        if require_success and completed.returncode != 0:
+        return self._require_success(completed) if require_success else completed
+
+    @staticmethod
+    def _require_success(completed):
+        if completed.returncode != 0:
             raise SshTransportError(
                 "execution.ssh_transport_phase_failed",
                 f"SSH transport phase exited with status {completed.returncode}",

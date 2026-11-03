@@ -35,7 +35,6 @@ from literate_ai.contracts import (
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
-    ExecutionWorkerKind,
 )
 
 INPUT_SCHEMA = "literate-ai/retained-unit-package-worker-input@1"
@@ -146,7 +145,7 @@ class ConfiguredRetainedUnitPackageWorker:
     def __post_init__(self):
         if (
             not isinstance(self.worker, ExecutionWorker)
-            or self.worker.kind is not ExecutionWorkerKind.SSH
+            or not self.worker.is_remote
             or any(
                 not isinstance(value, ContentIdentity)
                 for value in (

@@ -44,7 +44,7 @@ from literate_ai.cli.retained_unit_execution import (
     execute_retained_unit_package_from_args,
 )
 from literate_ai.cli.retained_unit_package import _project_context
-from literate_ai.contracts import ContentIdentity, ExecutionWorkerKind
+from literate_ai.contracts import ContentIdentity
 from literate_ai.contracts.paths import canonical_relative_posix_path
 from literate_ai.projects import read_only_project_configuration_parses
 
@@ -204,7 +204,7 @@ def _read_registered_return_blob(config, content, output):
         config.args, project_root=config.project, target_profile=config.args.target
     )
     if (
-        selected.worker.kind is not ExecutionWorkerKind.SSH
+        not selected.worker.is_remote
         or selected.configuration != config.worker_config
         or selected.catalog_identity != catalog.identity
     ):
@@ -251,7 +251,7 @@ def _configured_worker(config, *, owned_child=None):
     )
     _manifest, selected, planning = authority()
     if (
-        selected.worker.kind is not ExecutionWorkerKind.SSH
+        not selected.worker.is_remote
         or selected.worker.identity != planning.plan.profile.worker_identity
         or planning.plan.identity.uri != preview["request"]["retained_plan_identity"]
     ):

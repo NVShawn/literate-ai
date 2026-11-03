@@ -25,6 +25,7 @@ from .remote_evidence import (
     RemoteEvidenceCustodyReceipt,
     RemoteLifecycleEvidenceManifest,
 )
+from .worker_reachability import WorkerReachability
 
 GPU_REQUIREMENT_SCHEMA = "urn:literate-ai:schema:v1:gpu-requirement"
 EXECUTION_REQUIREMENTS_SCHEMA = "urn:literate-ai:schema:v1:execution-requirements"
@@ -38,6 +39,7 @@ EXECUTION_WORKER_ENVIRONMENT_SCHEMA = (
     "urn:literate-ai:schema:v1:execution-worker-environment"
 )
 EXECUTION_WORKER_SCHEMA = "urn:literate-ai:schema:v1:execution-worker"
+REMOTE_EXECUTION_WORKER_SCHEMA = "urn:literate-ai:schema:v2:execution-worker"
 EXECUTION_WORKER_CATALOG_SCHEMA = "urn:literate-ai:schema:v1:execution-worker-catalog"
 LIFECYCLE_ACTION_WIRE_PROTOCOL = "literate-ai/lifecycle-action-wire@1"
 EXECUTION_DISPATCH_REQUEST_SCHEMA = (
@@ -347,6 +349,7 @@ class ExecutionWorkerKind(StrEnum):
     LOCAL = "local"
     SSH = "ssh"
     COMMAND = "command"
+    REMOTE = "remote"
 
 
 class LifecycleDispatchAction(StrEnum):
@@ -707,6 +710,7 @@ class ExecutionWorker:
     slots: int = 1
     action_protocol: str | None = None
     action_command: tuple[str, ...] = ()
+    reachability: WorkerReachability | None = None
 
     SCHEMA: ClassVar[str] = EXECUTION_WORKER_SCHEMA
 
@@ -714,6 +718,16 @@ class ExecutionWorker:
         _identifier(self.worker_id, "ExecutionWorker.worker_id")
         if not isinstance(self.kind, ExecutionWorkerKind):
             fail("ExecutionWorker.kind", "must be typed")
+        if self.kind is ExecutionWorkerKind.REMOTE:
+            if not isinstance(self.reachability, WorkerReachability):
+                fail(
+                    "ExecutionWorker.reachability",
+                    "requires complete typed remote routes",
+                )
+        elif self.reachability is not None:
+            fail(
+                "ExecutionWorker.reachability", "is available only on v2 remote workers"
+            )
         _identifier(self.target_profile, "ExecutionWorker.target_profile")
         if not isinstance(self.requirements, ExecutionRequirements):
             fail("ExecutionWorker.requirements", "must be typed ExecutionRequirements")
@@ -734,7 +748,7 @@ class ExecutionWorker:
             fail("ExecutionWorker.action_command", "must be a tuple")
         if self.action_command:
             if (
-                self.kind is not ExecutionWorkerKind.SSH
+                not self.is_remote
                 or self.action_protocol != LIFECYCLE_ACTION_WIRE_PROTOCOL
                 or len(self.action_command) > MAX_WORKER_ARGUMENTS
                 or any(
@@ -748,7 +762,12 @@ class ExecutionWorker:
             ):
                 fail(
                     "ExecutionWorker.action_command",
-                    "requires bounded literal SSH action arguments and protocol opt-in",
+                    "requires bounded literal SSH action arguments and protocol opt-in"
+                    if self.kind is ExecutionWorkerKind.SSH
+                    else (
+                        "requires bounded literal remote action arguments "
+                        "and protocol opt-in"
+                    ),
                 )
         if self.kind is ExecutionWorkerKind.LOCAL:
             if (
@@ -764,14 +783,30 @@ class ExecutionWorker:
                     "ExecutionWorker",
                     "local workers cannot configure transport or command fields",
                 )
-        elif self.kind is ExecutionWorkerKind.SSH:
-            if not isinstance(self.endpoint, str) or not _SSH_ENDPOINT.fullmatch(
-                self.endpoint
-            ):
-                fail("ExecutionWorker.endpoint", "must be a username@host SSH endpoint")
+        elif self.is_remote:
+            if self.kind is ExecutionWorkerKind.SSH:
+                if not isinstance(self.endpoint, str) or not _SSH_ENDPOINT.fullmatch(
+                    self.endpoint
+                ):
+                    fail(
+                        "ExecutionWorker.endpoint",
+                        "must be a username@host SSH endpoint",
+                    )
+            elif self.endpoint is not None or self.transport != "ssh":
+                fail(
+                    "ExecutionWorker",
+                    "v2 remote workers cannot configure SSH addressing",
+                )
             if self.workspace is None:
-                fail("ExecutionWorker.workspace", "is required for SSH workers")
+                fail("ExecutionWorker.workspace", "is required for remote workers")
             _workspace(self.workspace, "ExecutionWorker.workspace")
+            if self.kind is ExecutionWorkerKind.REMOTE and (
+                self.lifecycle_executable is None or self.requirements.os_family is None
+            ):
+                fail(
+                    "ExecutionWorker",
+                    "v2 remote workers require platform and lifecycle launcher",
+                )
             if self.lifecycle_executable is not None:
                 _workspace(
                     self.lifecycle_executable,
@@ -825,7 +860,34 @@ class ExecutionWorker:
     def identity(self) -> ContentIdentity:
         return canonical_identity(self.to_dict())
 
+    @property
+    def is_remote(self) -> bool:
+        return self.kind in {ExecutionWorkerKind.SSH, ExecutionWorkerKind.REMOTE}
+
     def to_dict(self) -> dict[str, object]:
+        if self.reachability is not None:
+            return {
+                "schema": REMOTE_EXECUTION_WORKER_SCHEMA,
+                "worker_id": self.worker_id,
+                "kind": self.kind.value,
+                "target_profile": self.target_profile,
+                "requirements": self.requirements.to_dict(),
+                "parameters": [item.to_dict() for item in self.parameters],
+                "workspace": self.workspace,
+                "lifecycle_executable": self.lifecycle_executable,
+                "slots": self.slots,
+                "reachability": self.reachability.to_dict(),
+                **(
+                    {"action_protocol": self.action_protocol}
+                    if self.action_protocol is not None
+                    else {}
+                ),
+                **(
+                    {"action_command": list(self.action_command)}
+                    if self.action_command
+                    else {}
+                ),
+            }
         return {
             "schema": self.SCHEMA,
             "worker_id": self.worker_id,
@@ -854,6 +916,42 @@ class ExecutionWorker:
 
     @classmethod
     def from_dict(cls, value: Any, *, path: str = "ExecutionWorker") -> ExecutionWorker:
+        reachability = None
+        if (
+            isinstance(value, dict)
+            and value.get("schema") == REMOTE_EXECUTION_WORKER_SCHEMA
+        ):
+            remote = contract_fields(
+                value,
+                path=path,
+                schema_uri=REMOTE_EXECUTION_WORKER_SCHEMA,
+                required=frozenset(
+                    {
+                        "worker_id",
+                        "kind",
+                        "target_profile",
+                        "requirements",
+                        "parameters",
+                        "workspace",
+                        "lifecycle_executable",
+                        "slots",
+                        "reachability",
+                    }
+                ),
+                optional=frozenset({"action_protocol", "action_command"}),
+            )
+            if remote["kind"] != ExecutionWorkerKind.REMOTE.value:
+                fail(path + ".kind", "v2 descriptors require the remote kind")
+            reachability = WorkerReachability.from_dict(
+                remote["reachability"], path=path + ".reachability"
+            )
+            value = {
+                **{key: item for key, item in remote.items() if key != "reachability"},
+                "schema": cls.SCHEMA,
+                "endpoint": None,
+                "command": [],
+                "environment": [],
+            }
         data = contract_fields(
             value,
             path=path,
@@ -924,6 +1022,7 @@ class ExecutionWorker:
                     data.get("action_command", []), f"{path}.action_command"
                 )
             ),
+            reachability,
         )
 
 

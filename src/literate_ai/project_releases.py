@@ -36,14 +36,16 @@ from literate_ai.adapters.release_readme import (
     ReleaseReadmeError,
     verify_remote_release_readme,
 )
+from literate_ai.adapters.remote_transport import (
+    BoundedRemoteProcessRunner,
+    RemoteWorkerTransport,
+    remote_execute_arguments,
+)
 from literate_ai.adapters.ssh_transport import (
-    BoundedSshProcessRunner,
     SshTransportError,
     powershell_command,
     powershell_home_path,
     powershell_literal,
-    scp_arguments,
-    ssh_arguments,
 )
 from literate_ai.adapters.user_assets import (
     UserAssetPathError,
@@ -2690,9 +2692,7 @@ def _select_release_workers(
             "the local target requires a configured private worker fleet "
             f"({WORKERS_CATALOG_FILE} in the user configuration root): {exc.message}",
         ) from exc
-    ssh_workers = tuple(
-        worker for worker in catalog.workers if worker.kind is ExecutionWorkerKind.SSH
-    )
+    ssh_workers = tuple(worker for worker in catalog.workers if worker.is_remote)
     if not ssh_workers:
         raise ProjectReleaseError(
             "release.target_unconfigured",
@@ -2727,8 +2727,8 @@ def _posix_ssh_path(value: str) -> str:
     return shlex.quote(value)
 
 
-def _redact_worker_dialog(text: str, endpoint: str) -> str:
-    return text.replace(endpoint, "<worker-endpoint>")
+def _redact_worker_dialog(text: str, endpoint: str | None) -> str:
+    return text.replace(endpoint, "<worker-endpoint>") if endpoint else text
 
 
 def _remote_live_gate_overlay(root: Path) -> dict[str, str]:
@@ -2765,7 +2765,7 @@ def _sync_worker_checkout(
     policy: ReleasePolicy,
     worker: ExecutionWorker,
     revision: str,
-    runner: BoundedSshProcessRunner,
+    runner: BoundedRemoteProcessRunner,
     *,
     windows: bool,
     evidence_node: EvidenceNode | None,
@@ -2780,7 +2780,7 @@ def _sync_worker_checkout(
     expression. A failure leaves the worker unavailable, never half-qualified.
     """
 
-    assert worker.endpoint is not None and worker.workspace is not None
+    assert worker.is_remote and worker.workspace is not None
     base = worker.workspace.rstrip("/\\")
     relative = f"release/{_release_checkout_name(root, policy)}"
     # Gates record the repository's origin (e.g. wheel build metadata). A bundle
@@ -2869,11 +2869,10 @@ def _sync_worker_checkout(
     def remote(command: str, step: str) -> str:
         try:
             completed = runner.run(
-                ssh_arguments(
-                    worker.endpoint,
+                remote_execute_arguments(
+                    worker,
                     command,
                     timeout,
-                    transport=worker.transport,
                     login_shell=not windows,
                 ),
                 cwd=root,
@@ -2922,16 +2921,12 @@ def _sync_worker_checkout(
                     else f"{base}/{relative}/{_SYNC_BUNDLE}"
                 )
                 try:
-                    uploaded = runner.run(
-                        scp_arguments(
-                            bundle,
-                            worker.endpoint,
-                            destination,
-                            timeout,
-                            transport=worker.transport,
-                        ),
+                    uploaded = RemoteWorkerTransport(worker).upload(
+                        bundle,
+                        destination,
                         cwd=root,
                         timeout_seconds=timeout,
+                        runner=runner,
                     )
                 except SshTransportError as exc:
                     raise ProjectReleaseError(
@@ -2980,7 +2975,7 @@ def _run_release_gate_on_one_worker(
     re-running the probe/dispatch sequence per worker.
     """
 
-    assert worker.endpoint is not None and worker.workspace is not None
+    assert worker.is_remote and worker.workspace is not None
     argv = policy.gate_argv if argv is None else argv
     context = (
         evidence_run.node(
@@ -2990,7 +2985,11 @@ def _run_release_gate_on_one_worker(
             host={"kind": "ssh", "worker_id": worker.worker_id},
             pins={
                 "worker_id": worker.worker_id,
-                "endpoint_digest": _digest_text(worker.endpoint),
+                **(
+                    {"endpoint_digest": _digest_text(worker.endpoint)}
+                    if worker.endpoint is not None
+                    else {"worker_identity": worker.identity.uri}
+                ),
                 "workspace": worker.workspace,
             },
         )
@@ -2998,7 +2997,7 @@ def _run_release_gate_on_one_worker(
         else None
     )
     with context if context is not None else nullcontext() as evidence_node:
-        runner = BoundedSshProcessRunner()
+        runner = BoundedRemoteProcessRunner()
         revision = str(snapshot["head"])
         # Windows OpenSSH workers have no POSIX shell; they run PowerShell.
         windows = worker.requirements.os_family == "windows"
@@ -3037,11 +3036,10 @@ def _run_release_gate_on_one_worker(
             )
         try:
             completed = runner.run(
-                ssh_arguments(
-                    worker.endpoint,
+                remote_execute_arguments(
+                    worker,
                     gate_command,
                     policy.gate_timeout_seconds,
-                    transport=worker.transport,
                     login_shell=not windows,
                 ),
                 cwd=root,
@@ -3250,9 +3248,7 @@ def _qualification_workers(
         tuple(
             worker
             for worker in catalog.workers
-            if worker.kind is ExecutionWorkerKind.SSH
-            and worker.endpoint is not None
-            and worker.workspace is not None
+            if worker.is_remote and worker.workspace is not None
         ),
         (),
     )
