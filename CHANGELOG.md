@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Windows worker probes preserve unknown NVIDIA memory as null when the device
+  reports permission text, matching the POSIX observation behavior.
+
+- Bare Component runs resolve their declared demonstration inputs from the
+  Component name even when selected through a project-relative path. Remote
+  processes that exit nonzero retain bounded, redacted failure evidence rather
+  than failing a secondary evidence-manifest validation.
+
 - Retained Cargo v2 development reserves fresh internal scratch roots through
   live wrapper/source custody and exclusive publication of known private inodes.
   Complete input capture accepts only those live exclusions and still captures

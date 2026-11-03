@@ -1408,6 +1408,29 @@ def materialize_and_execute(
                 failure.message,
                 failure.identity.uri,
             )
+        if (
+            deferred_cleanup
+            and failure is None
+            and result.status is not DispatchResultStatus.PASSED
+        ):
+            failure = RemoteFailureDiagnostic(
+                code="execution.remote_process_failed",
+                message=(
+                    f"worker {request.action.value} exited "
+                    f"with status {result.exit_status}"
+                ),
+                stdout=(
+                    _redact_diagnostic(result.stdout, limit=65536)
+                    if result.stdout
+                    else ""
+                ),
+                stderr=(
+                    _redact_diagnostic(result.stderr, limit=65536)
+                    if result.stderr
+                    else ""
+                ),
+            )
+            result = replace(result, diagnostic_digest=failure.identity.uri)
         if evidence_output is None or cleanup_ticket is None:
             return result
         manifest, reference = _write_remote_evidence(
