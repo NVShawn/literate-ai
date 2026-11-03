@@ -23,7 +23,12 @@ RUN_EVIDENCE_SCHEMA = "literate-ai/retained-unit-accepted-run-evidence@1"
 
 
 def retain_retained_unit_run_evidence(
-    admission, *, maximum_bytes, maximum_memory_bytes, admission_guard=lambda: None
+    admission,
+    *,
+    maximum_bytes,
+    maximum_memory_bytes,
+    admission_guard=lambda: None,
+    metadata_poll_guard=None,
 ):
     if not isinstance(admission, AdmittedRetainedProject):
         raise TypeError("retained.unit.live-admission-required")
@@ -36,6 +41,12 @@ def retain_retained_unit_run_evidence(
         raise ValueError("retained.unit.bounded-run-evidence-required")
     if not callable(admission_guard):
         raise TypeError("retained.unit.callable-operation-guard-required")
+    if metadata_poll_guard is not None and not callable(metadata_poll_guard):
+        raise TypeError("retained.unit.callable-metadata-poll-guard-required")
+    # Copying assertions issues no authority. Full admission brackets the entire
+    # operation; the genuine receiver can poll live private custody at each byte
+    # boundary without recursively replanning the project for every metadata edge.
+    poll = admission_guard if metadata_poll_guard is None else metadata_poll_guard
     admission_guard()
     admission.require_current()
     run, store = admission.run, admission.store
@@ -56,19 +67,19 @@ def retain_retained_unit_run_evidence(
 
     def retain(content, media_type="application/json"):
         nonlocal total
-        admission_guard()
+        poll()
         digest = hashlib.sha256(content).hexdigest()
         check_budget(len(content), digest)
         if digest not in references:
             total += len(content)
             references[digest] = store.put_bytes(content, media_type=media_type)
-        admission_guard()
+        poll()
         return references[digest].to_dict()
 
     sdk_references = {}
 
     def read_sdk_document(identity, *, reference=None):
-        admission_guard()
+        poll()
         if reference is None:
             reference = retained_unit_metadata_reference(
                 store, identity, maximum_bytes=min(maximum_bytes, 64 * 1024**2)
@@ -103,7 +114,7 @@ def retain_retained_unit_run_evidence(
     retained_sdk_metadata_closure(
         execution_identities,
         read_document=read_sdk_document,
-        guard=admission_guard,
+        guard=poll,
         maximum_records=min(
             1_000_000, maximum_bytes // 512, maximum_memory_bytes // 512
         ),

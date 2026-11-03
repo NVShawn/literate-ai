@@ -277,6 +277,11 @@ def execute_retained_unit_package_from_args(
                 maximum_bytes=policy.max_provider_metadata_bytes,
                 maximum_memory_bytes=policy.max_provider_memory_bytes,
                 admission_guard=receiver_context.require_current,
+                metadata_poll_guard=(
+                    receiver_context.require_custody_current
+                    if type(receiver_context) is RetainedReceiverContext
+                    else None
+                ),
             ).to_dict()
             handoff.require_current(owner)
 

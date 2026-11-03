@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Retained SDK evidence copying polls live receiver custody during bounded CAS
+  traversal, with full authority validation before copying and before success.
+
 - C++ toolchain discovery, including MSVC environment initialization, now defaults
   to a finite five-minute budget instead of one minute.
 

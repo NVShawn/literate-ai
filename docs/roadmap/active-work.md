@@ -32832,6 +32832,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   its corrected 24-case native runtime/refusal group passes. Next: qualify the
   completed candidate and repeat the full native PACKAGE/LINK/original-verification,
   exact-identity, corruption and large-tree acceptance contract.
+- **SDK metadata retention follow-up:** The live installed V14 receiver's bounded
+  read-only stack sample found full preview/project validation on every SDK
+  metadata edge after native unit construction. Copying these historical assertions
+  issues no admission. Preserve full receiver and admitted-run checks at entry and
+  successful exit; poll exact live receiver custody, cancellation and deadline on
+  each intermediate read/write/cache hit. Custom or omitted polling retains the
+  existing full guard. Add real SDK-bearing copy/reopen, prompt poll refusal,
+  final authority-drift and corrupt-metadata controls before independent review,
+  canonical pin renewal and complete source/native qualification. The existing
+  native attempt remains unchanged; its timing is instrumented, not pristine.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a
