@@ -293,7 +293,7 @@ $devices=@(); $status='absent'; $diagnostic=$null
 if ($null -ne $smi) {
   $lines=@(& $smi.Source --query-gpu=index,name,uuid,memory.total,compute_cap,driver_version --format=csv,noheader,nounits 2>&1)  # noqa: E501
   if ($LASTEXITCODE -eq 0) {
-    $status='ok'; foreach($line in $lines){$v=$line -split ',\s*'; $memory=if($v[3] -in @('[N/A]','N/A')){$null}else{[int]$v[3]}; $devices += [ordered]@{index=[int]$v[0];model=$v[1];uuid=$v[2];memory_mib=$memory;compute_capability=$v[4];driver_version=$v[5]}}  # noqa: E501
+    $status='ok'; foreach($line in $lines){$v=$line -split ',\s*'; $memory=if($v[3] -cmatch '^[0-9]+$'){[int]$v[3]}else{$null}; $devices += [ordered]@{index=[int]$v[0];model=$v[1];uuid=$v[2];memory_mib=$memory;compute_capability=$v[4];driver_version=$v[5]}}  # noqa: E501
   } else {$status='degraded';$diagnostic='nvidia-smi is installed but its device query failed'}  # noqa: E501
 }
 [ordered]@{os_name=$os.Caption;os_version=$release;architecture=$env:PROCESSOR_ARCHITECTURE;physical_cores=($cpus|Measure-Object NumberOfCores -Sum).Sum;logical_cores=($cpus|Measure-Object NumberOfLogicalProcessors -Sum).Sum;memory_mib=[math]::Floor($cs.TotalPhysicalMemory/1MB);nvidia_status=$status;gpus=$devices;diagnostic=$diagnostic}|ConvertTo-Json -Compress -Depth 5"""  # noqa: E501
