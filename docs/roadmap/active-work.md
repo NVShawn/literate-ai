@@ -32904,7 +32904,18 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   The persisted fact format is unchanged. Sixteen focused controls pass locally,
   with one honest native skip. The actual native compiled-program control now
   checks warm reuse and recapture after image and inspector mutations. Source
-  review approves the change; native execution/performance remains pending.
+  review approves the change. All 17 dependency controls now pass on native
+  FreeBSD with no skips, using a real ELF inspector proxy for cache invalidation.
+  The preceding 15 public package controls also pass natively, including two
+  separate admissions and original archive corruption/stale-source refusal.
+  SDK-bearing public PACKAGE-to-VERIFY and scale qualification remain pending.
+  Tracing that public route found a separate receiver-preview blocker: decoded
+  verification intent has no controller filesystem source, so read-only preview
+  must defer metadata acquisition until genuine receiver transport exists.
+  Controller filesystem planning and actual source-less execution keep their
+  original preflight; real receiver execution still validates original metadata
+  before a fresh lifecycle. Source correction and native qualification are in
+  progress without changing the active installed candidate or its evidence.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a

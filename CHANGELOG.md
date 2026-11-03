@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retained receivers can preview original-byte verification intent before live
+  source transport exists. Actual execution still reopens original metadata
+  under current custody before starting a fresh lifecycle.
+
 - FreeBSD dependency rechecks reuse bounded native ABI and filter facts for exact
   image and inspector bytes. Loader configuration and complete closure stay fresh.
 

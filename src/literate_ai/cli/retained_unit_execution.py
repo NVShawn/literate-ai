@@ -97,7 +97,14 @@ def execute_retained_unit_package_from_args(
         verifying
         and verification_selection.original_evidence is not None
         and receiver_context is None
+        and (
+            verification_selection.source is not None
+            or args.retained_unit_command != "verify-plan"
+        )
     ):
+        # A receiver's read-only preview has intent assertions, not the
+        # controller's filesystem custody. Actual receiver execution reopens
+        # original metadata below under its live transport before any lifecycle.
         from .retained_unit_verification import original_context_for_verification
 
         original_context = original_context_for_verification(
