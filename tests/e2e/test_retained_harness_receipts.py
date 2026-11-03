@@ -116,6 +116,40 @@ class RetainedHarnessReceiptTests(unittest.TestCase):
             convert=True,
         )
 
+    def test_retained_receipt_refuses_redirected_implementation_ancestor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "converted"
+            shutil.copytree(self.template, project, symlinks=True)
+            alias = project / "retained-alias"
+            try:
+                alias.symlink_to(
+                    project / "components/legacy-project-wrapper",
+                    target_is_directory=True,
+                )
+            except (OSError, NotImplementedError):
+                self.skipTest("directory symlinks are unavailable on this host")
+            lift = project / ".literate/legacy-lift-shift.json"
+            document = json.loads(lift.read_bytes())
+            document["implementation_directory"] = "retained-alias/implementation"
+            lift.write_bytes(canonical_json_bytes(document))
+            candidate = root / "candidate.json"
+            status, result = _invoke(
+                "project",
+                "test-receipt",
+                "run-retained",
+                str(candidate),
+                "--project",
+                str(project),
+                "--worker-id",
+                "local",
+            )
+            self.assertEqual(status, 2, result)
+            self.assertEqual(
+                result["error"]["code"], "retained_receipt.lift_shift_invalid"
+            )
+            self.assertFalse(candidate.exists())
+
     def test_passing_retained_harness_emits_and_promotes_finalized_candidate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -106,6 +106,15 @@ def verify_cargo_workspace_graph(
     toolchain, target and features, and maintain package custody before/after build.
     This function does no I/O. Unknown additive Cargo metadata fields are tolerated.
     """
+    _verify_cargo_workspace_graph(
+        metadata, workspace_root=workspace_root, expected=expected
+    )
+
+
+def _verify_cargo_workspace_graph(
+    metadata, *, workspace_root, expected, reviewed_patch_edges=frozenset()
+):
+    """Shared graph checks; only the explicit v2 owner supplies exact patch edges."""
     _require(isinstance(expected, CargoWorkspaceExpectation), "invalid_expectation")
     _require(
         isinstance(workspace_root, Path)
@@ -265,6 +274,7 @@ def verify_cargo_workspace_graph(
     )
     nodes = {}
     edges = []
+    observed_patches = set()
     for item in _array(resolution.get("nodes")):
         node = _mapping(item)
         identity = node.get("id")
@@ -303,6 +313,20 @@ def verify_cargo_workspace_graph(
                 )
                 provider = roots_by_id.get(provider_id)
                 if provider is not None:
+                    patched = (
+                        identity,
+                        provider_id,
+                        dep["name"],
+                        kind.get("kind"),
+                        kind.get("target"),
+                    )
+                    if patched in reviewed_patch_edges:
+                        _require(
+                            patched not in observed_patches,
+                            "duplicate_patch_resolution",
+                        )
+                        observed_patches.add(patched)
+                        continue
                     _require(consumer is not None, "external_to_local_dependency")
                     edges.append(
                         (
@@ -332,3 +356,4 @@ def verify_cargo_workspace_graph(
         and set(edges) == set(wanted_edges),
         "resolved_edge_drift",
     )
+    _require(observed_patches == reviewed_patch_edges, "reviewed_patch_edge_missing")

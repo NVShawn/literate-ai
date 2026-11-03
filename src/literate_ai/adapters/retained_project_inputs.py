@@ -434,6 +434,7 @@ def _inventory(
     allow_internal_symlinks: bool = False,
     access=None,
     observe=None,
+    excluded_roots: frozenset[str] = frozenset(),
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     names: list[str] = []
     directories: list[str] = []
@@ -453,6 +454,19 @@ def _inventory(
             metadata = access.metadata(path)
         if observe is not None:
             observe(name, metadata)
+        if name in excluded_roots:
+            # Exclusions are selected by a separate live owner. Never follow a
+            # redirected excluded root; a linked-worktree .git marker is the
+            # sole supported regular-file metadata exclusion.
+            if not stat.S_ISDIR(metadata.st_mode) and not (
+                name == ".git"
+                and stat.S_ISREG(metadata.st_mode)
+                and metadata.st_nlink == 1
+            ):
+                raise RetainedProjectInputError("Retained excluded root is unsafe")
+            if access is None and path_is_link_or_reparse(path):
+                raise RetainedProjectInputError("Retained excluded root is redirected")
+            return
         if stat.S_ISLNK(metadata.st_mode) and allow_internal_symlinks:
             names.append(name)
             return  # The link is an input; never traverse its target.

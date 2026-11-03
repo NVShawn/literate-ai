@@ -43,6 +43,9 @@
 - Original-byte retained package verification accepts explicit custody leases up
   to three hours, while preserving its one-hour default and finite expiry checks.
 
+- Retained harness receipts reject implementation paths with symlinked or
+  redirected ancestors, including aliases that point back inside the project.
+
 - Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
   installer with the ARM64 toolset selected. Native compiler image checks still
   determine readiness, including after an installer reports success.

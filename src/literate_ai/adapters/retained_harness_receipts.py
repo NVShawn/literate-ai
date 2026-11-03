@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from literate_ai._filesystem import UnsafeFilesystemPathError, require_safe_directory
 from literate_ai.adapters.component_lock_application import (
     ProjectComponentLockSetError,
     current_component_lock_identity,
@@ -714,12 +715,16 @@ def _implementation_root(
         )
     candidate = project.root.joinpath(*relative.parts)
     try:
+        require_safe_directory(candidate)
         resolved = candidate.resolve(strict=True)
         resolved.relative_to(project.root)
-    except (OSError, ValueError):
+        if resolved != candidate:
+            raise ValueError("redirected implementation")
+        require_safe_directory(candidate)
+    except (OSError, ValueError, UnsafeFilesystemPathError):
         _error(
             "retained_receipt.lift_shift_invalid",
-            "retained implementation path escapes the project",
+            "retained implementation path is redirected or escapes the project",
         )
     if candidate.is_symlink() or not resolved.is_dir():
         _error(
