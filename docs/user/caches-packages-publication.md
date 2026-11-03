@@ -625,8 +625,30 @@ custody, current lifecycle/worker selection, tools and package policy. `verify`
 requires that exact operation authorization and explicit host-execution
 acknowledgement because it obtains fresh lifecycle admission. It verifies the
 original selected archive bytes, without constructing replacement packages. A
-different fresh receipt or projection refuses verification and preserves the
-original evidence. Historical `inspect` remains an observation without admission.
+different fresh receipt requires an explicit original-evidence selection rather
+than substituting the fresh projection for the archived one. Historical `inspect`
+remains an observation without admission.
+
+For archives that will be verified in another lifecycle, pass
+`--verification-evidence-output FILE` to `execute`. After successful admission it
+creates a private assertions file naming the original request, receipt, planning,
+accepted-run, LINK and result-index roots. It refuses an existing output file.
+Supply that file as `--original-evidence FILE` to both `verify-plan` and `verify`;
+the exact contents join the reviewed verification authorization. Decoding the
+file restores no execution, retained, SDK or LINK authority. Omitting the file
+preserves the existing exact-projection mode.
+
+The original-evidence mode keeps the original archive and projection identities
+and obtains a separate fresh retained/SDK/LINK admission. It compares source,
+locks, policy, payload bytes/modes/aliases, unit ownership and typed dependencies.
+FreeBSD runtime graphs can relocate only files joined to the admitted manifests
+or SDK image assertions, with launch roots bound to recorded command contexts or
+exact clean-environment digests. External paths, hashes, architecture, loader
+configuration and dependency topology remain exact. SDK authorization/result and
+cache provenance may differ only after both complete epochs validate; resolver,
+index, snapshot, recipe, license, placement and remaining cache facts stay bound.
+The verification proof retains both full sets of evidence. Unsupported relocation
+forms refuse; they do not create exemptions.
 Local and remote artifact import share bounded streaming custody; endpoint and
 credential selection remain private operator configuration. Native verification
 and final currentness checks, rather than transfer success, determine admission.
@@ -643,7 +665,8 @@ future attempt does not renew an expired grant or change retained evidence.
 
 SSH verification uses the private receiver registration version 2. Its additional
 `verification` object contains `selection` (the plan's `verification_mode`, full
-`result_index` and `source_custody_identity`) and `source`. A null `source` selects
+`result_index` and `source_custody_identity`, plus `original_evidence` for the
+explicit original-evidence mode) and `source`. A null `source` selects
 the receiver's existing private CAS; otherwise it contains the private incoming
 CAS `endpoint`, optional `bearer_token_env`, and explicit `allow_http` boolean.
 Credentials come from the registered child environment. URLs, credentials and

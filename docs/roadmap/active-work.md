@@ -32852,6 +32852,32 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   complete controller source/capability/result validation remains mandatory.
   Add real subprocess delivery and wrong-binding, mutation, corruption, size and
   expiry controls before review, pin renewal and complete/native qualification.
+- **Original-byte verification correctness correction:** V14 completed native
+  PACKAGE/LINK and independent controller admission for two packages. The planned
+  second lifecycle cannot verify those archives: each fresh accepted run has a new
+  receipt, while the original index binds its original receipt-dependent set plan.
+  The current transfer compares it with the fresh projection and must refuse.
+  Existing positive coverage uses only one owner, so it misses this boundary.
+  Preserve the original projection/provenance and exact archive matching while
+  joining it explicitly to genuine fresh retained/SDK/LINK authority and complete
+  current source/policy/provider/payload equivalence. Historical decoders must not
+  create live owners or relax guards. Add a two-distinct-lifecycle original-byte
+  positive and source/policy/SDK/archive/provenance refusal controls, then renew
+  installed native qualification. Do not launch the known-failing long path or
+  present release regression gates as an additional downstream handoff prerequisite.
+  The working bridge now captures explicit original roots, preflights historical
+  source/run/LINK assertions, and separately binds fresh verification proof.
+  It remains unqualified. The working comparison now validates FreeBSD image and
+  loader relocation through manifest hashes and verified launch roots, including
+  hardlinks. Ordinary launch candidates require every recorded clean-environment
+  digest to match. SDK inputs receive explicit stable counterparts only after
+  both epochs validate their full source/SDK provenance; source indexing,
+  resolver, snapshot, recipe, license, placement, complete loader graphs and
+  remaining cache facts stay exact. Runtime diagnostics reopen V14's real
+  returned assertions successfully but grant no native admission. The public
+  native owner control now requires two actual lifecycle admissions and checks
+  original identities, corruption and stale source; native execution and final
+  independent review of the implementation remain open.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a

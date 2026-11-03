@@ -60,19 +60,26 @@ def retained_unit_verification_input(verification_request):
     if (
         type(verification_request) is not dict
         or set(verification_request)
-        != {
-            "authority_mode",
-            "operation",
-            "retained_plan_identity",
-            "worker_selection_identity",
-            "policy_identity",
-            "native_tool_observations_identity",
-            "requires_host_execution_authorization",
-            "release_authorized",
-            "verification_mode",
-            "result_index",
-            "source_custody_identity",
-        }
+        != (
+            {
+                "authority_mode",
+                "operation",
+                "retained_plan_identity",
+                "worker_selection_identity",
+                "policy_identity",
+                "native_tool_observations_identity",
+                "requires_host_execution_authorization",
+                "release_authorized",
+                "verification_mode",
+                "result_index",
+                "source_custody_identity",
+            }
+            | (
+                {"original_evidence"}
+                if "original_evidence" in verification_request
+                else set()
+            )
+        )
         or verification_request.get("operation") != "verify"
         or verification_request.get("authority_mode") != "retained-project"
         or verification_request.get("requires_host_execution_authorization") is not True
@@ -82,7 +89,16 @@ def retained_unit_verification_input(verification_request):
     RetainedUnitVerificationSelection.from_dict(
         {
             name: verification_request[name]
-            for name in ("verification_mode", "result_index", "source_custody_identity")
+            for name in (
+                "verification_mode",
+                "result_index",
+                "source_custody_identity",
+                *(
+                    ("original_evidence",)
+                    if "original_evidence" in verification_request
+                    else ()
+                ),
+            )
         }
     )
     for name in (
@@ -342,6 +358,14 @@ class ConfiguredRetainedUnitPackageWorker:
                     operation="verify",
                     verified_result_index=self.verification_selection.result.to_dict(),
                 )
+            if (
+                self.verification_selection is not None
+                and self.verification_selection.original_evidence is not None
+            ):
+                selected["original_verification_proof"] = result[
+                    "original_verification_proof"
+                ]
+                cas.verify(BlobRef.from_dict(selected["original_verification_proof"]))
             selected["retained_receipt"] = retained_unit_metadata_reference(
                 cas,
                 ContentIdentity.parse_uri(selected["retained_receipt_identity"]),

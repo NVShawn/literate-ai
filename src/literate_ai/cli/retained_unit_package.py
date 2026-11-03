@@ -270,6 +270,10 @@ def add_retained_unit_package_parser(commands):
                 "--obj-dir", help="owned temporary inspection staging root"
             )
         if operation in {"verify-plan", "verify"}:
+            parser.add_argument(
+                "--original-evidence",
+                help="explicit original receipt, run, LINK and package root assertions",
+            )
             parser.add_argument("--custody-root", required=True)
             parser.add_argument(
                 "--result", required=True, help="original set-result index identity"
@@ -279,6 +283,11 @@ def add_retained_unit_package_parser(commands):
                 type=int,
                 default=3600,
                 help="original-byte custody lease, 1-10800 seconds (default: 3600)",
+            )
+        if operation == "execute":
+            parser.add_argument(
+                "--verification-evidence-output",
+                help="write original verification assertions after admission",
             )
         if operation in {"execute", "verify"}:
             parser.add_argument("--authorize-retained-project", required=True)

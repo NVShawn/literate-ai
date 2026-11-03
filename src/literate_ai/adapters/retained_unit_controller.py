@@ -68,6 +68,19 @@ _EXECUTION_FIELDS = frozenset(
 )
 
 
+def _original_evidence(request, plan, references):
+    from literate_ai.adapters.retained_original_unit_evidence import (
+        ORIGINAL_EVIDENCE_ROLES,
+        OriginalRetainedUnitEvidence,
+    )
+
+    return OriginalRetainedUnitEvidence(
+        plan.identity,
+        request.worker.worker_identity,
+        *(references[role] for role in ORIGINAL_EVIDENCE_ROLES),
+    )
+
+
 def _require(value):
     if not value:
         raise ActionWireError(
@@ -105,12 +118,14 @@ class AdmittedRemoteRetainedUnitPackageSet:
         guard,
         *,
         verification_selection=None,
+        original_evidence=None,
         _seal=None,
     ):
         if _seal is not _ADMITTED_REMOTE_SET:
             raise TypeError("retained.unit.actual-controller-admission-required")
         self.request, self.inputs, self.run = request, inputs, run
         self.verification_selection = verification_selection
+        self._original_evidence = original_evidence
         self.projection, self.index, self.results = projection, index, results
         self.references, self.metrics, self.store, self._guard = (
             references,
@@ -118,6 +133,14 @@ class AdmittedRemoteRetainedUnitPackageSet:
             store,
             guard,
         )
+
+    @property
+    def original_evidence(self):
+        """Original assertions captured by this operation, never an admission token."""
+        self.require_current()
+        if self._original_evidence is None:
+            raise ValueError("retained.unit.construction-evidence-required")
+        return self._original_evidence
 
     def require_current(self):
         self._guard()
@@ -234,6 +257,10 @@ def execute_and_import_retained_unit_package(
     )
     input_identity = record_identity(intent)
     authorization = canonical_identity(execution_request)
+    original_verification = (
+        verification_selection is not None
+        and verification_selection.original_evidence is not None
+    )
     _require(
         worker.kind is ExecutionWorkerKind.SSH
         and worker.identity
@@ -276,6 +303,13 @@ def execute_and_import_retained_unit_package(
 
     def verified_current():
         final_current()
+        if original_verification:
+            store.verify(proof_ref)
+            for fresh_ref in tuple(metadata.observed.values()):
+                metadata.verify(fresh_ref)
+            original_context.inputs.store.guard()
+            for original_ref in tuple(original_context.inputs.store.observed.values()):
+                original_context.inputs.store.verify(original_ref)
         if verification_selection is not None:
             verification_selection.require_original_source(
                 projection,
@@ -338,7 +372,11 @@ def execute_and_import_retained_unit_package(
         == (
             _EXECUTION_FIELDS
             if verification_selection is None
-            else _EXECUTION_FIELDS | {"operation", "verified_result_index"}
+            else (
+                _EXECUTION_FIELDS
+                | {"operation", "verified_result_index"}
+                | ({"original_verification_proof"} if original_verification else set())
+            )
         )
         and execution["authorization_identity"] == authorization.uri
         and execution["retained_plan_identity"] == plan.identity.uri
@@ -383,6 +421,12 @@ def execute_and_import_retained_unit_package(
     metadata = custody.metadata_store(
         maximum_bytes=min(64 * 1024**2, policy.max_provider_metadata_bytes)
     )
+    if original_verification:
+        from literate_ai.adapters.retained_original_unit_context import (
+            OriginalUnitMetadataBudget,
+        )
+
+        metadata = OriginalUnitMetadataBudget(metadata, policy, current)
     _require(
         _document(metadata, references["execution_request"], 65536) == execution_request
     )
@@ -397,6 +441,7 @@ def execute_and_import_retained_unit_package(
         maximum_metadata_bytes=policy.max_provider_metadata_bytes,
         maximum_metadata_memory_bytes=policy.max_provider_memory_bytes,
     )
+    fresh_workspace_roots = []
     run = reopen_retained_unit_run(
         inputs,
         planning,
@@ -409,6 +454,7 @@ def execute_and_import_retained_unit_package(
             hardware.cpu_architecture.casefold(), hardware.cpu_architecture.casefold()
         ),
         current_sdk_snapshots=sdk_snapshots(),
+        workspace_root_observer=fresh_workspace_roots.extend,
     )
     projection = plan_retained_unit_packages(
         inputs,
@@ -418,12 +464,65 @@ def execute_and_import_retained_unit_package(
         **policy.owner_arguments(),
     )
     _require(
-        projection.set_plan.identity.uri == execution["set_plan_identity"]
+        (
+            original_verification
+            or projection.set_plan.identity.uri == execution["set_plan_identity"]
+        )
         and _document(metadata, references["link_proof"], policy.max_index_bytes)
         == retained_unit_link_document(
             run, inputs.receipt, projection, inputs.payload_manifest
         )
     )
+    fresh_projection = projection
+    original_context = None
+    if original_verification:
+        from literate_ai.adapters.retained_original_unit_context import (
+            OriginalUnitMetadataBudget,
+            read_original_unit_context,
+            require_equivalent_unit_projection,
+        )
+
+        selection = verification_selection
+        original_store = OriginalUnitMetadataBudget(
+            selection.source.store, policy, current, shared_budget=metadata
+        )
+        expected_request = {
+            key: value
+            for key, value in execution_request.items()
+            if key not in selection.to_dict()
+        }
+        expected_request["operation"] = "execute"
+        original_context = read_original_unit_context(
+            selection.original_evidence,
+            source=source,
+            manifest=manifest,
+            planning=planning,
+            component_locks=component_locks,
+            store=original_store,
+            policy=policy,
+            pkg_tool=pkg_tool,
+            tar_tool=tar_tool,
+            test_receipt_policy=test_receipt_policy,
+            admission_guard=current,
+            expected_request=expected_request,
+            expected_worker_identity=request.worker.worker_identity,
+            expected_sdk_platform=hardware.os_family,
+            expected_sdk_architecture={"amd64": "x86_64", "aarch64": "arm64"}.get(
+                hardware.cpu_architecture.casefold(),
+                hardware.cpu_architecture.casefold(),
+            ),
+            sdk_snapshots=sdk_snapshots(),
+            specification_context=specification_context(),
+        )
+        require_equivalent_unit_projection(
+            original_context,
+            fresh_projection,
+            run,
+            inputs,
+            tuple(fresh_workspace_roots),
+        )
+        projection = original_context.projection
+        _require(projection.set_plan.identity.uri == execution["set_plan_identity"])
     index, results, metrics = receive_retained_unit_package_set(
         projection,
         references["result_index"],
@@ -443,6 +542,33 @@ def execute_and_import_retained_unit_package(
         index.archive_bytes == execution["archive_bytes"]
         and index.unit_count == execution["unit_count"]
     )
+    if original_verification:
+        from literate_ai.adapters.retained_original_unit_context import (
+            original_unit_verification_proof,
+        )
+
+        proof_ref = BlobRef.from_dict(execution["original_verification_proof"])
+        proof = original_unit_verification_proof(
+            original_context,
+            fresh_projection,
+            fresh_completed_run=run,
+            fresh_inputs=inputs,
+            fresh_workspace_roots=tuple(fresh_workspace_roots),
+            fresh_receipt=references["retained_receipt"],
+            fresh_planning=references["planning_evidence"],
+            fresh_run=references["accepted_run_evidence"],
+            fresh_link=references["link_proof"],
+            result_index=references["result_index"],
+            results=results,
+        )
+        _require(
+            _document(
+                metadata,
+                proof_ref,
+                min(64 * 1024**2, policy.max_provider_metadata_bytes),
+            )
+            == proof
+        )
     final_current()
     # Retain the exact attested result assertion separately from the in-process
     # admission capability. It remains unadmitted when decoded on its own.
@@ -470,6 +596,11 @@ def execute_and_import_retained_unit_package(
         store,
         verified_current,
         verification_selection=verification_selection,
+        original_evidence=(
+            _original_evidence(request, plan, references)
+            if verification_selection is None
+            else None
+        ),
         _seal=_ADMITTED_REMOTE_SET,
     )
     capability.require_current()

@@ -344,12 +344,110 @@ class RetainedProjectPackageTests(unittest.TestCase):
         self.assertEqual(len(first), 1)
         self.store.verify(first[0].archive)
         self.assertGreater(first[0].archive.size, 0)
+        # A second real lifecycle has a distinct receipt and projection. Verify
+        # the original bytes through the public owner instead of constructing a
+        # replacement archive or reusing the first admission's package scope.
+        from literate_ai.adapters.retained_original_unit_context import (
+            OriginalUnitMetadataBudget,
+            read_original_unit_context,
+        )
+        from literate_ai.adapters.retained_original_unit_evidence import (
+            OriginalRetainedUnitEvidence,
+        )
+
+        old = self.admission
+        policy = RetainedUnitPackagePolicy(
+            **{
+                key: value
+                for key, value in arguments.items()
+                if key not in {"pkg_tool", "tar_tool"}
+            }
+        )
+        planning = RetainedProjectPlanningResult(
+            old.run.source_bom.plan, old.run.source_bom.managed_graph
+        )
+        request = {
+            "authority_mode": "retained-project",
+            "operation": "execute",
+            "retained_plan_identity": planning.plan.identity.uri,
+            "release_authorized": False,
+        }
+        evidence = OriginalRetainedUnitEvidence(
+            planning.plan.identity,
+            planning.plan.profile.worker_identity,
+            self.store.put_manifest(request, media_type="application/json"),
+            self.store.put_manifest(
+                old.receipt.to_dict(), media_type="application/json"
+            ),
+            owner.retain_planning_evidence(),
+            retain_retained_unit_run_evidence(
+                old,
+                maximum_bytes=policy.max_provider_metadata_bytes,
+                maximum_memory_bytes=policy.max_provider_memory_bytes,
+            ),
+            link_retained_unit_packages(owner).reference,
+            reference,
+        )
+        context = read_original_unit_context(
+            evidence,
+            source=old.source,
+            manifest=old.run.source_bom.manifest,
+            planning=planning,
+            component_locks=old.run.source_bom.component_locks,
+            store=OriginalUnitMetadataBudget(self.store, policy, old.require_current),
+            policy=policy,
+            pkg_tool=arguments["pkg_tool"],
+            tar_tool=arguments["tar_tool"],
+            test_receipt_policy=old.run.configured_test_policy,
+            admission_guard=old.require_current,
+            expected_request=request,
+            expected_worker_identity=planning.plan.profile.worker_identity,
+        )
+        workspace, _run = self.fixture.finish()
+        fresh_admission = admit_retained_project(workspace, self.store)
+        fresh = RetainedProjectUnitPackages(fresh_admission, **arguments)
+        self.assertNotEqual(fresh_admission.receipt.identity, old.receipt.identity)
+        self.assertNotEqual(fresh.projection.identity, owner.projection.identity)
+        handoff = link_retained_unit_packages(fresh)
+        self.assertEqual(
+            fresh.verify_original_set(
+                context,
+                object_root=root,
+                link_handoff=handoff,
+                fresh_workspace_roots=(),
+            ),
+            index,
+        )
+        original_index, original_archives = read_retained_unit_results(
+            owner.projection, reference, self.store, **owner.tree_policy
+        )
+        self.assertEqual((original_index, original_archives), (index, first))
+        archive_path = self.store.path_for(first[0].archive)
+        archive_bytes = archive_path.read_bytes()
+        archive_path.write_bytes(b"corrupt original archive")
+        try:
+            with self.assertRaises((BlobIntegrityError, PackagingError, ValueError)):
+                fresh.verify_original_set(
+                    context,
+                    object_root=root,
+                    link_handoff=handoff,
+                    fresh_workspace_roots=(),
+                )
+        finally:
+            archive_path.write_bytes(archive_bytes)
         path = self.fixture.fixture.source / "specs/LICENSE"
         original = path.read_bytes()
         path.write_bytes(original + b"changed license\n")
         try:
             with self.assertRaises(ValueError):
                 owner.verify_set(reference, object_root=root)
+            with self.assertRaises(ValueError):
+                fresh.verify_original_set(
+                    context,
+                    object_root=root,
+                    link_handoff=handoff,
+                    fresh_workspace_roots=(),
+                )
             self.store.verify(first[0].archive)
         finally:
             path.write_bytes(original)

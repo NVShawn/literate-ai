@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retained original-byte verification can bind the original receipt, run, LINK
+  and package projection to a distinct fresh admission through explicit evidence.
+  Original archive identities remain fixed; native qualification is pending.
+
 - Retained return-blob transport binds current private registration, worker
   catalog and CAS custody without rerunning project execution planning per object.
   Full result admission remains an independent controller operation.

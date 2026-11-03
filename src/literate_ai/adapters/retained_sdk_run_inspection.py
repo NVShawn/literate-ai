@@ -167,6 +167,7 @@ def verify_retained_sdk_run_assertions(
     ):
         raise ValueError("retained.sdk.bounded-historical-inspection-required")
     remaining = maximum_steps
+    workspace_roots = set()
 
     def require(value):
         if not value:
@@ -202,7 +203,7 @@ def verify_retained_sdk_run_assertions(
             and not run.resolved_bom.sdk_dependencies
             and run.native_sdk_final_check_identity is None
         )
-        return
+        return ()
     require(
         type(current_sdk_snapshots) is tuple
         and len(current_sdk_snapshots) == len(inputs.component_locks)
@@ -805,6 +806,18 @@ def verify_retained_sdk_run_assertions(
                     guard=reader.guard,
                     canonical_input_root=scope_canonical_input_root,
                 )
+            placements = tuple(sorted((value[0], key.uri) for key, value in values))
+            workspace_roots.add(
+                (context["platform"], context["workspace_root"], placements)
+            )
+            if scope_canonical_input_root is not None:
+                workspace_roots.add(
+                    (
+                        context["platform"],
+                        str(scope_canonical_input_root.parent.parent),
+                        placements,
+                    )
+                )
             scopes.append((grant, request, ordered, after))
         final_scopes = scopes
     require(run.native_sdk_final_check_identity is not None)
@@ -836,3 +849,4 @@ def verify_retained_sdk_run_assertions(
     for snapshot in current_sdk_snapshots:
         snapshot.require_unchanged()
     step()
+    return tuple(sorted(workspace_roots))
