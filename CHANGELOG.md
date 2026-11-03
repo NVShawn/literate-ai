@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Retained Cargo v2 development reserves fresh internal scratch roots through
+  live wrapper/source custody and exclusive publication of known private inodes.
+  Complete input capture accepts only those live exclusions and still captures
+  the entire declared Cargo home. Existing-output reopening, materialization and
+  public execution/admission integration remain pending.
+
 - Adoption: select and recheck a compatible GNU Make executable for the
   framework-owned wrapper, preserving original harness commands and the external
   workspace-link guard when the host's default Make is BSD Make.
@@ -45,6 +51,14 @@
 
 - Retained harness receipts reject implementation paths with symlinked or
   redirected ancestors, including aliases that point back inside the project.
+
+- Workers: add opt-in v2 descriptors with literal execution, upload and download
+  commands for operator-provided jump, scheduler and connector routes. Share
+  bounded process and transfer custody while preserving existing v1 registrations.
+  Installed/native qualification, including Windows connectors, remains required.
+
+- Worker hardware probes preserve unavailable NVIDIA memory as unknown instead
+  of emitting malformed JSON when a successful query returns permission text.
 
 - Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
   installer with the ARM64 toolset selected. Native compiler image checks still

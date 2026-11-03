@@ -38,12 +38,12 @@ from literate_ai.adapters.live_test_selection import (
     resolve_live_test_selection,
 )
 from literate_ai.adapters.models.coding_cli import CodingCliError
-from literate_ai.adapters.ssh_transport import (
-    scp_arguments as bounded_scp_arguments,
+from literate_ai.adapters.remote_transport import (
+    BoundedRemoteProcessRunner,
+    RemoteWorkerTransport,
+    remote_execute_arguments,
 )
-from literate_ai.adapters.ssh_transport import (
-    ssh_arguments as bounded_ssh_arguments,
-)
+from literate_ai.adapters.ssh_transport import SshTransportError
 from literate_ai.adapters.test_matrix_config import (
     GLOBAL_TEST_MATRIX_SCHEMA,
     TestMatrixConfigError,
@@ -57,7 +57,6 @@ from literate_ai.adapters.user_assets import (
 from literate_ai.contracts import (
     ContractValidationError,
     ExecutionWorker,
-    ExecutionWorkerKind,
 )
 from literate_ai.evidence_ledger import EvidenceNode, attach_run, record_retained_output
 from literate_ai.remote_source_guard import (
@@ -191,6 +190,8 @@ class Worker:
 
     @property
     def destination(self) -> str:
+        if self.definition.reachability is not None:
+            return self.definition.identity.uri
         if self.definition.endpoint is None or self.definition.workspace is None:
             raise ValueError(
                 f"worker {self.worker_id!r} does not declare an SSH destination"
@@ -207,13 +208,17 @@ class Worker:
         )
 
     @property
-    def host_and_base(self) -> tuple[str, str]:
-        if self.definition.kind is not ExecutionWorkerKind.SSH:
+    def route_and_base(self) -> tuple[str, str]:
+        if not self.definition.is_remote:
             raise ValueError(
                 f"worker {self.worker_id!r} must be an SSH worker for sample fan-out"
             )
         host = self.definition.endpoint
         base = self.definition.workspace
+        if self.definition.reachability is not None and base is not None:
+            from literate_ai.contracts import canonical_identity
+
+            return canonical_identity(self.definition.reachability.to_dict()).uri, base
         if host is None or base is None:
             raise ValueError(
                 f"worker {self.worker_id!r} does not declare an SSH destination"
@@ -478,19 +483,23 @@ def _configuration(
                 f"worker {worker.worker_id!r} requirements must declare its "
                 "matrix platform Flavor"
             )
-        _ = worker.host_and_base
+        _ = worker.route_and_base
         workers.append(worker)
     if len({item.worker_id for item in workers}) != len(workers):
         raise ValueError("global test matrix worker IDs must be unique")
-    destinations: set[tuple[str, str, str]] = set()
+    destinations: set[tuple[str, ...]] = set()
     for worker in workers:
-        host, base = worker.host_and_base
-        username, hostname = host.rsplit("@", 1)
+        host, base = worker.route_and_base
         canonical_base = base.rstrip("/")
         if worker.platform_target == "windows":
-            username = username.casefold()
             canonical_base = canonical_base.casefold()
-        destination = (username, hostname.casefold(), canonical_base)
+        if worker.definition.reachability is not None:
+            destination = ("remote", host, canonical_base)
+        else:
+            username, hostname = host.rsplit("@", 1)
+            if worker.platform_target == "windows":
+                username = username.casefold()
+            destination = ("ssh", username, hostname.casefold(), canonical_base)
         if destination in destinations:
             raise ValueError("global test matrix worker destinations must be unique")
         destinations.add(destination)
@@ -681,23 +690,48 @@ def _git_run_path(base: str, run_id: str) -> str:
 
 
 def _ssh_arguments(target: Worker, command: str, timeout_seconds: float) -> list[str]:
-    host, _base = target.host_and_base
     return list(
-        bounded_ssh_arguments(
-            host,
+        remote_execute_arguments(
+            target.definition,
             command,
             timeout_seconds,
-            transport=target.definition.transport,
             login_shell=target.platform_target != "windows",
         )
     )
 
 
-def _scp_arguments(source: Path, destination: str, timeout_seconds: float) -> list[str]:
-    endpoint, separator, remote = destination.partition(":")
-    if not separator:
-        raise ValueError("SCP destination must be endpoint:path")
-    return list(bounded_scp_arguments(source, endpoint, remote, timeout_seconds))
+def _run_remote_route(
+    target: Worker, command: str, timeout_seconds: float, *, check: bool = False
+) -> subprocess.CompletedProcess[str]:
+    result = BoundedRemoteProcessRunner().run(
+        tuple(_ssh_arguments(target, command, timeout_seconds)),
+        cwd=Path.cwd(),
+        timeout_seconds=timeout_seconds,
+    )
+    completed = subprocess.CompletedProcess(
+        args=(target.worker_id,),
+        returncode=result.returncode,
+        stdout=result.stdout.decode("utf-8", errors="replace"),
+        stderr=result.stderr.decode("utf-8", errors="replace"),
+    )
+    if check:
+        completed.check_returncode()
+    return completed
+
+
+def _upload_remote_route(
+    source: Path, target: Worker, destination: str, timeout_seconds: float
+) -> None:
+    result = RemoteWorkerTransport(target.definition).upload(
+        source,
+        destination,
+        cwd=Path.cwd(),
+        timeout_seconds=timeout_seconds,
+    )
+    if result.returncode:
+        raise subprocess.CalledProcessError(
+            result.returncode, (target.worker_id,), result.stdout, result.stderr
+        )
 
 
 def _worker_timeout(timeout_seconds: int) -> int:
@@ -1272,14 +1306,10 @@ def _probe_workspace(
             )
         )
     try:
-        completed = subprocess.run(
-            _ssh_arguments(target, command, _REMOTE_DIAGNOSTIC_TIMEOUT_SECONDS),
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=_REMOTE_DIAGNOSTIC_TIMEOUT_SECONDS,
+        completed = _run_remote_route(
+            target, command, _REMOTE_DIAGNOSTIC_TIMEOUT_SECONDS
         )
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError, SshTransportError):
         return {
             "workspace_root": None,
             "workspace_state": "unknown",
@@ -1411,7 +1441,7 @@ def _run_worker(
     model: str | None = None,
 ) -> dict[str, object]:
     deadline = time.monotonic() + timeout_seconds
-    host, base = target.host_and_base
+    host, base = target.route_and_base
     remote_path = _run_path(base, run_id)
     source_identity = _source_identity(target, archive_source_identity, git_source)
     if target.source_mode == "git":
@@ -1442,14 +1472,8 @@ def _run_worker(
                 model=model,
             )
         )
-        completed = subprocess.run(
-            _ssh_arguments(
-                target, command, _remaining_timeout(deadline, timeout_seconds)
-            ),
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=_remaining_timeout(deadline, timeout_seconds),
+        completed = _run_remote_route(
+            target, command, _remaining_timeout(deadline, timeout_seconds)
         )
         log = _worker_log(report_root, target.worker_id)
         log.write_text(
@@ -1610,39 +1634,23 @@ def _run_worker(
         )
     )
     preflight_timeout = _remaining_timeout(deadline, timeout_seconds)
-    subprocess.run(
-        _ssh_arguments(target, mkdir, preflight_timeout),
-        check=True,
-        capture_output=True,
-        text=True,
-        timeout=_remaining_timeout(deadline, timeout_seconds),
-    )
-    subprocess.run(
-        _scp_arguments(
-            archive,
-            f"{host}:{incoming}/repo.tar.gz",
-            _remaining_timeout(deadline, timeout_seconds),
-        ),
-        check=True,
-        capture_output=True,
-        text=True,
-        timeout=_remaining_timeout(deadline, timeout_seconds),
+    _run_remote_route(target, mkdir, preflight_timeout, check=True)
+    _upload_remote_route(
+        archive,
+        target,
+        f"{incoming}/repo.tar.gz",
+        _remaining_timeout(deadline, timeout_seconds),
     )
     guard_path = (
         Path(__file__).resolve().parents[1] / "src/literate_ai/remote_source_guard.py"
     )
     if hashlib.sha256(guard_path.read_bytes()).hexdigest() != guard_digest:
         raise ValueError("remote source guard changed before upload")
-    subprocess.run(
-        _scp_arguments(
-            guard_path,
-            f"{host}:{incoming}/remote_source_guard.py",
-            _remaining_timeout(deadline, timeout_seconds),
-        ),
-        check=True,
-        capture_output=True,
-        text=True,
-        timeout=_remaining_timeout(deadline, timeout_seconds),
+    _upload_remote_route(
+        guard_path,
+        target,
+        f"{incoming}/remote_source_guard.py",
+        _remaining_timeout(deadline, timeout_seconds),
     )
     command = (
         _windows_command(
@@ -1673,12 +1681,8 @@ def _run_worker(
             model=model,
         )
     )
-    completed = subprocess.run(
-        _ssh_arguments(target, command, _remaining_timeout(deadline, timeout_seconds)),
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=_remaining_timeout(deadline, timeout_seconds),
+    completed = _run_remote_route(
+        target, command, _remaining_timeout(deadline, timeout_seconds)
     )
     log = _worker_log(report_root, target.worker_id)
     log.write_text(
@@ -1728,9 +1732,11 @@ def _record_worker(
             coding_cli,
             model,
         )
-    except (OSError, subprocess.SubprocessError, ValueError) as exc:
+    except (OSError, subprocess.SubprocessError, ValueError, SshTransportError) as exc:
         log = _worker_log(report_root, target.worker_id)
-        timed_out = isinstance(exc, subprocess.TimeoutExpired)
+        timed_out = isinstance(exc, subprocess.TimeoutExpired) or (
+            isinstance(exc, SshTransportError) and exc.code == "execution.ssh_timed_out"
+        )
         detail = (
             f"target exceeded its {timeout_seconds}-second wall-time limit"
             if timed_out
@@ -1745,7 +1751,7 @@ def _record_worker(
             )
         except ValueError:
             source_identity = None
-        host, base = target.host_and_base
+        host, base = target.route_and_base
         observation = (
             {
                 "workspace_root": None,
@@ -2117,13 +2123,19 @@ def main() -> int:
     remote_workers = tuple(
         worker
         for worker in workers
-        if not worker.host_and_base[0].endswith("@localhost")
+        if not worker.route_and_base[0].endswith("@localhost")
     )
     required_commands = set()
-    if remote_workers:
-        required_commands.add("ssh")
-    if any(worker.source_mode == "working-tree" for worker in remote_workers):
-        required_commands.add("scp")
+    for worker in remote_workers:
+        routes = worker.definition.reachability
+        if routes is not None:
+            required_commands.update(
+                route[0] for route in (routes.execute, routes.upload, routes.download)
+            )
+        else:
+            required_commands.add(worker.definition.transport)
+            if worker.source_mode == "working-tree":
+                required_commands.add("scp")
     for command in sorted(required_commands):
         if shutil.which(command) is None:
             raise SystemExit(f"{command} is required for remote sample fan-out")

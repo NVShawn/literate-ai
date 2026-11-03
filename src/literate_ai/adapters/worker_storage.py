@@ -25,7 +25,8 @@ from literate_ai.adapters.builders._process import (
     run_bounded_process,
 )
 from literate_ai.adapters.builders.python import BuildError
-from literate_ai.adapters.ssh_transport import SshTransportError, ssh_arguments
+from literate_ai.adapters.remote_transport import remote_execute_arguments
+from literate_ai.adapters.ssh_transport import SshTransportError
 from literate_ai.contracts import (
     CapacityMetric,
     CapacityProbeStatus,
@@ -118,7 +119,7 @@ class WorkerStorageBindings:
             )
             if (
                 "\x00" in self.python_executable
-                or self.worker.kind is not ExecutionWorkerKind.SSH
+                or not self.worker.is_remote
                 or (
                     self.os_family == "windows"
                     and not re.fullmatch(
@@ -177,6 +178,7 @@ class StorageProbeRunner(Protocol):
 def _run_probe(command, *, environment, timeout_seconds, input_bytes=None):
     return run_bounded_process(
         command,
+        terminate_descendants=True,
         cwd=None,
         environment=environment,
         timeout_seconds=timeout_seconds,
@@ -330,7 +332,7 @@ def observe_worker_storage(
             for key in ("SystemRoot", "SYSTEMROOT", "WINDIR", "PATH", "TEMP", "TMP")
             if key in os.environ
         }
-        remote = bindings.worker.kind is ExecutionWorkerKind.SSH
+        remote = bindings.worker.is_remote
         external = bindings.worker.kind is ExecutionWorkerKind.COMMAND
         if not remote and not external:
             environment[worker_storage_probe.REQUEST_ENVIRONMENT] = payload.decode(
@@ -364,11 +366,10 @@ def observe_worker_storage(
                     if windows
                     else shlex.join(receiver)
                 )
-                command = ssh_arguments(
-                    bindings.worker.endpoint,
+                command = remote_execute_arguments(
+                    bindings.worker,
                     remote_command,
                     policy.probe_timeout_ms / 1000,
-                    transport=bindings.worker.transport,
                     login_shell=bindings.os_family not in {"freebsd", "windows"},
                 )
             else:

@@ -1033,7 +1033,7 @@ def execute_remote_request(
 ) -> ExecutionDispatchResult:
     """Execute after transport extraction, retaining only immutable worker artifacts."""
 
-    if worker.kind is not ExecutionWorkerKind.SSH:
+    if not worker.is_remote:
         raise RemoteExecutionError(
             "execution.remote_worker_kind_invalid", "receiver requires an SSH worker"
         )

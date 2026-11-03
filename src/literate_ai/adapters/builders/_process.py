@@ -28,6 +28,7 @@ class BoundedProcessResult:
     stdout: bytes
     stderr: bytes
     elapsed_seconds: float = 0.0
+    stderr_truncated: bool = False
 
 
 def _close_process_pipes(process: subprocess.Popen[bytes]) -> None:
@@ -58,6 +59,7 @@ def run_bounded_process(
     interrupt_guard: Callable[[], None] | None = None,
     terminate_descendants: bool = False,
     stdout_sink: BinaryIO | None = None,
+    stderr_tail_bytes: int | None = None,
 ) -> BoundedProcessResult:
     """Drain bounded streams and kill the owned process tree on failure.
 
@@ -74,6 +76,11 @@ def run_bounded_process(
         raise ValueError("tool process poll interval must be positive")
     if stdout_limit_bytes <= 0 or stderr_limit_bytes <= 0:
         raise ValueError("tool process output limits must be positive")
+    if stderr_tail_bytes is not None and (
+        type(stderr_tail_bytes) is not int
+        or not 1 <= stderr_tail_bytes <= stderr_limit_bytes
+    ):
+        raise ValueError("tool diagnostic tail must fit its configured byte limit")
     if (
         isinstance(input_limit_bytes, bool)
         or not isinstance(input_limit_bytes, int)
@@ -164,13 +171,16 @@ def run_bounded_process(
                 remaining = remaining[written:]
         else:
             buffers[name].extend(chunk)
+            if name == "stderr" and stderr_tail_bytes is not None:
+                del buffers[name][:-stderr_tail_bytes]
         counts[name] += len(chunk)
 
     def drain(name: str) -> None:
         stream, limit = streams[name]
         try:
             while True:
-                remaining = limit - counts[name]
+                tail = name == "stderr" and stderr_tail_bytes is not None
+                remaining = _PIPE_READ_BYTES if tail else limit - counts[name]
                 read_available = getattr(stream, "read1", stream.read)
                 chunk = read_available(min(_PIPE_READ_BYTES, remaining + 1))
                 if not chunk:
@@ -303,6 +313,8 @@ def run_bounded_process(
             stdout=bytes(buffers["stdout"]),
             stderr=bytes(buffers["stderr"]),
             elapsed_seconds=clock() - started_monotonic,
+            stderr_truncated=stderr_tail_bytes is not None
+            and counts["stderr"] > stderr_tail_bytes,
         )
         if trace:
             trace_subprocess(

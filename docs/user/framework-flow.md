@@ -296,7 +296,8 @@ flowchart LR
     X --> B[Build, test, or run result]
 ```
 
-Local, synchronous `command`, and bounded SSH workers implement this single-component
+Local, synchronous `command`, bounded SSH and opt-in command-addressed remote workers
+implement this single-component
 lifecycle. SSH transfers one request-bound source archive into an attempt-scoped
 workspace, verifies its accepted manifest and transport bytes, runs the installed
 Standard receiver, and retains accepted artifacts in the worker CAS. Before any attempt

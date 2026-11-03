@@ -1,5 +1,7 @@
 """Real archive-to-package transactions with foreign-state preservation."""
 
+import os
+import shutil
 import tempfile
 import unittest
 from dataclasses import replace
@@ -7,15 +9,23 @@ from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters import retained_cargo_materialization as materialization
+from literate_ai.adapters import retained_cargo_scratch_v2 as scratch_owner
 from literate_ai.adapters.qualification_archive import encode_qualification_archive
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.adapters.retained_cargo_files import read_retained_cargo_files
+from literate_ai.adapters.retained_cargo_input_scope_v2 import (
+    capture_retained_cargo_input_scope_v2,
+)
+from literate_ai.adapters.retained_cargo_wrapper_v2 import (
+    retained_cargo_wrapper_context_v2,
+)
 from literate_ai.application.source_promotion import qualify_locked_source_promotion
 from literate_ai.authority import ComponentAuthorityLifecycle
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.projects import serialize_project_configuration
 from tests.support import fixtures_test_project_configuration as projects
 from tests.support import fixtures_test_retained_cargo_import as imports
+from tests.support.fixtures_retained_cargo_scratch import scratch_review_fixture
 from tests.support.fixtures_test_retained_cargo_files import blob
 
 
@@ -148,3 +158,85 @@ class RetainedCargoMaterializationTests(unittest.TestCase):
         materialized = self.run_materializer()
         self.assertEqual(len(materialized.packages), len(self.destinations))
         self.assertTrue(all(path.is_dir() for path in self.destinations))
+
+
+@unittest.skipUnless(
+    os.name != "nt" and shutil.which("git") and shutil.which("make"),
+    "requires native POSIX adoption and Git",
+)
+class RetainedCargoScratchCustodyTests(unittest.TestCase):
+    """Ignored foreign source cannot become owned or hidden scratch input."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base = Path(
+            cls.enterClassContext(tempfile.TemporaryDirectory(prefix="cs-"))
+        ).resolve()
+        cls.reviewed = cls.enterClassContext(scratch_review_fixture(cls.base))
+
+    def test_foreign_replacement_and_ended_scope_cannot_grant_exclusions(self):
+        home = self.base / "cargo-home"
+        home.mkdir()
+        (home / "config.toml").write_text("[net]\noffline = true\n")
+        environment = {"CARGO_HOME": str(home), "PATH": os.environ["PATH"]}
+        with retained_cargo_wrapper_context_v2(self.reviewed) as context:
+            foreign = context.workspace / "pkgs"
+            foreign.mkdir()
+            member = foreign / "original.rs"
+            member.write_bytes(b"foreign ignored source")
+            with self.assertRaisesRegex(ValueError, "scratch-existing-root"):
+                with scratch_owner.reserve_retained_cargo_scratch_v2(context):
+                    self.fail("foreign ignored source became owned")
+            self.assertEqual(member.read_bytes(), b"foreign ignored source")
+            member.unlink()
+            foreign.rmdir()
+
+            publish = scratch_owner.publish_directory_between_owned_parents_exclusive
+
+            def replace_after_publication(stage, destination, **kwargs):
+                publish(stage, destination, **kwargs)
+                destination.rename(stage)
+                destination.mkdir()
+                (destination / "foreign.rs").write_bytes(b"concurrent replacement")
+
+            with patch.object(
+                scratch_owner,
+                "publish_directory_between_owned_parents_exclusive",
+                side_effect=replace_after_publication,
+            ):
+                with self.assertRaisesRegex(ValueError, "scratch-publication-changed"):
+                    with scratch_owner.reserve_retained_cargo_scratch_v2(context):
+                        self.fail("replacement became owned")
+            member = context.workspace / "cargo-output/foreign.rs"
+            self.assertEqual(member.read_bytes(), b"concurrent replacement")
+            member.unlink()
+            member.parent.rmdir()
+
+            with scratch_owner.reserve_retained_cargo_scratch_v2(context) as scratch:
+                inputs = capture_retained_cargo_input_scope_v2(
+                    context.workspace,
+                    policy=self.reviewed.policy,
+                    environment=environment,
+                    scratch=scratch,
+                )
+                output = context.workspace / "cargo-output/generated"
+                output.write_bytes(b"owned output")
+                inputs.require_unchanged(environment=environment)
+                for path, guard in (
+                    (context.workspace / "new-source.rs", scratch.require_unchanged),
+                    (
+                        home / "new-source.rs",
+                        lambda: inputs.require_unchanged(environment=environment),
+                    ),
+                ):
+                    with self.subTest(path=path.name, owner=str(path.parent)):
+                        path.write_bytes(b"new unreviewed source")
+                        try:
+                            with self.assertRaisesRegex(ValueError, "custody-changed"):
+                                guard()
+                        finally:
+                            path.unlink()
+                inputs.require_unchanged(environment=environment)
+            self.assertEqual(output.read_bytes(), b"owned output")
+            with self.assertRaisesRegex(ValueError, "scratch-operation-ended"):
+                inputs.require_unchanged(environment=environment)

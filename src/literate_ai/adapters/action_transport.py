@@ -9,7 +9,8 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-from literate_ai.adapters.ssh_transport import SshTransportError, ssh_arguments
+from literate_ai.adapters.remote_transport import remote_execute_arguments
+from literate_ai.adapters.ssh_transport import SshTransportError
 from literate_ai.contracts.execution_dispatch import (
     LIFECYCLE_ACTION_WIRE_PROTOCOL,
     ExecutionWorker,
@@ -20,7 +21,7 @@ from literate_ai.contracts.execution_dispatch import (
 def supports_action_transport(worker: ExecutionWorker) -> bool:
     return worker.action_protocol == LIFECYCLE_ACTION_WIRE_PROTOCOL and (
         worker.kind is ExecutionWorkerKind.COMMAND
-        or (worker.kind is ExecutionWorkerKind.SSH and bool(worker.action_command))
+        or (worker.is_remote and bool(worker.action_command))
     )
 
 
@@ -69,17 +70,15 @@ def action_receiver_command(
             )
     else:
         command = "exec " + shlex.join(argv)
-    assert worker.endpoint is not None
     if len(command.encode("utf-8")) > 32768:
         raise ActionWireError(
             "action_transport.command_oversized", "SSH receiver command exceeds bounds"
         )
     try:
-        return ssh_arguments(
-            worker.endpoint,
+        return remote_execute_arguments(
+            worker,
             command,
             deadline.remaining(),
-            transport=worker.transport,
             # FreeBSD receivers use their exact configured argv through sshd's
             # native command shell. Interactive Bash is not a platform prerequisite
             # and can wait indefinitely in a pipe-only session.
