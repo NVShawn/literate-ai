@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- C++ toolchain discovery, including MSVC environment initialization, now defaults
+  to a finite five-minute budget instead of one minute.
+
 - Retained receivers compose host observation and fresh planning checks without
   repeating the complete receiver preview at each nested platform check.
   Custom callbacks retain conservative validation and configured deadlines.

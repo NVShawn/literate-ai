@@ -33104,3 +33104,21 @@ root's parent once while retaining and rejecting redirected state-root leaves.
 Keep canonical overlap checks and all safe-directory/append guards. Add a real
 ancestor-alias positive control plus explicit leaf-alias refusal, then renew
 independent review and the complete combined gate from test one.
+
+### [ ] CPP-DISCOVERY-BUDGET-001 — Allow five minutes for bounded C++ toolchain discovery
+
+- **Release target:** 1.4.0
+- **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
+
+- **Priority:** P1
+- **Owner:** C++ toolchain discovery and MSVC environment initialization
+- **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.
+- **Conclusion:** Raise the default discovery allowance to 300 seconds, including MSVC vendor environment setup, while preserving explicit caller budgets, bounded output, cancellation and owned process cleanup. This does not change build-command budgets or turn timeouts into skips.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Set the default C++ version and MSVC environment discovery budget to 300 seconds and document the scope.
+  - [ ] Preserve explicit short discovery budgets and existing timeout, output and process cleanup behavior.
+- **Evidence:**
+  - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
+  - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
