@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Windows ARM64 compiler acquisition uses Microsoft's shared Visual Studio
+  installer with the ARM64 toolset selected. Native compiler image checks still
+  determine readiness, including after an installer reports success.
 - Retained receivers compose host observation and fresh planning checks without
   repeating the complete receiver preview at each nested platform check.
   Custom callbacks retain conservative validation and configured deadlines.

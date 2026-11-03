@@ -192,6 +192,15 @@
       },
       {
         "id": "HOST-WINARM-001"
+      },
+      {
+        "id": "ADOPT-RELOCATE-001"
+      },
+      {
+        "id": "CARGO-COMPAT-001"
+      },
+      {
+        "id": "COMMAND-WORKER-001"
       }
     ]
   }

@@ -110,16 +110,17 @@ bootstrap have separate declared requirements and do not by themselves qualify
 agent authentication, native sandboxing, or an application lifecycle.
 
 The development Windows ARM64 tuple is separate from Windows x86-64. WinGet
-acquisition explicitly requests `arm64`; a missing installer never retries as
-x86-64. The catalog includes Python, Git with Git LFS and its compatibility shell,
+acquisition explicitly requests `arm64`, with Microsoft's documented shared Visual
+Studio bootstrapper selecting its native ARM64 payload. The catalog includes Python, Git with Git LFS and its compatibility shell,
 the ARM64 Visual C++ runtime, Node.js, Rust and CMake. Its reviewed coding-agent
 alternative is the pinned ARM64 Codex package. Explicit selections of other
 providers refuse rather than replacing the operator's choice.
 
 Existing tools must satisfy the same version and package-provenance requirements.
-MSVC's native ARM64 toolset can be observed when already ready; its WinGet entry
-currently supplies only an x64 bootstrapper, so an absent compiler cannot be
-acquired through an architecture fallback. GNU Make, Bazel, Elixir, Erlang and NPM have
+MSVC acquisition requests the ARM64 toolset through the
+[shared Visual Studio installer](https://learn.microsoft.com/en-us/visualstudio/install/visual-studio-on-arm-devices).
+Readiness requires native ARM64 compiler images after installation; installer
+success alone is insufficient. GNU Make, Bazel, Elixir, Erlang and NPM have
 no reviewed binding in this tuple; selecting a Flavor that requires them fails
 the capability-closure check. Readiness reports installed provenance and capability
 probes. Native executable machine types and actual ARM64 worker execution require
