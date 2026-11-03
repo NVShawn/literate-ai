@@ -1,7 +1,8 @@
 # ADR 0058: Publish hierarchical retained-tree information cards
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-03
+- Acceptance: The directing user explicitly accepted ADRs 0056–0059 for 1.4 on 2026-11-03 ("Accept all four ADRs").
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0
 - Roadmap: [RETAINED-TREE-EXPLORER-001](../roadmap/active-work.md#retained-tree-explorer-001-publish-hierarchical-retained-tree-html-information-cards)
@@ -23,7 +24,7 @@ real retained source and ports trees. Merely raising the old request limit or
 flattening the entire tree into one graph does not satisfy it. Per-unit Component
 cards additionally need the exact partition and provenance supplied by #235.
 
-## Decision proposed for acceptance
+## Decision
 
 ### Explicit tree-view declaration and commitments
 
@@ -140,5 +141,5 @@ and exact-commit native qualification before closing the 1.4 goal.
 One declaration can describe a complete retained-tree explorer without weakening
 small-view limits or source custody. A generation manifest and one index commit
 point add ownership, storage and recovery obligations. All #279 requirements,
-including per-unit cards after #235, remain in 1.4. This decision remains Proposed;
-implementation starts only after directing-user design acceptance under ADR 0006.
+including per-unit cards after #235, remain in 1.4. The directing user accepted this
+design under ADR 0006 on 2026-11-03; implementation and qualification remain open.

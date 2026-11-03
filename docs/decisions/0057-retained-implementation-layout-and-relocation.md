@@ -1,7 +1,8 @@
 # ADR 0057: Select and relocate retained implementation layouts transactionally
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-03
+- Acceptance: The directing user explicitly accepted ADRs 0056–0059 for 1.4 on 2026-11-03 ("Accept all four ADRs").
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0
 - Roadmap: [ADOPT-RELOCATE-001](../roadmap/active-work.md#adopt-relocate-001-support-selected-and-relocated-retained-implementation-layouts)
@@ -17,7 +18,7 @@ one evidence field or leaving a symlink cannot safely migrate that authority.
 Users need a plain subdirectory, repository-root placement and a chosen wrapper
 Component name. All three remain required for 1.4.
 
-## Decision proposed for acceptance
+## Decision
 
 ### One current layout authority
 
@@ -123,6 +124,6 @@ platform evidence and the integrated release gates before closing #265.
 Retained source can use ordinary repository layouts while one current authority
 owns path selection. Root placement requires explicit source/metadata ownership
 and transactional recovery, rather than a path substitution. This changes public
-adoption and relocation behavior and therefore remains Proposed until the
-directing user accepts, amends or rejects it under ADR 0006. It does not reduce the
+adoption and relocation behavior. The directing user accepted it under ADR 0006
+on 2026-11-03; implementation and qualification remain open. It does not reduce the
 remaining Cargo, FreeBSD SDK or 1.4 qualification scope.

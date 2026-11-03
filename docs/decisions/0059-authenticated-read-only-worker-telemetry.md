@@ -1,7 +1,8 @@
 # ADR 0059: Observe bounded authenticated worker telemetry
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-03
+- Acceptance: The directing user explicitly accepted ADRs 0056–0059 for 1.4 on 2026-11-03 ("Accept all four ADRs").
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0
 - Roadmap: [WORKER-TELEMETRY-001](../roadmap/active-work.md#worker-telemetry-001-expose-bounded-authenticated-read-only-worker-telemetry)
@@ -25,7 +26,7 @@ network I/O is already streamed. This is a source audit; no live worker telemetr
 qualification is claimed. Issue #280 requests the missing safe observational feed,
 while downstream activity-monitor rendering remains consumer-owned.
 
-## Decision proposed for acceptance
+## Decision
 
 ### Add an observation protocol, not a job control path
 
@@ -136,5 +137,6 @@ release gates. An activity display or passing pressure probe alone cannot comple
 Consumers gain a documented bounded feed whose measurements and unsupported
 values are interpretable. Receiver-side action attribution, authentication,
 rate enforcement and native counters require implementation and actual evidence.
-All #280 requirements remain in 1.4; this decision remains Proposed until the
-directing user accepts it under ADR 0006. It grants no job-control authority.
+All #280 requirements remain in 1.4. The directing user accepted this design under
+ADR 0006 on 2026-11-03; implementation and qualification remain open. It grants no
+job-control authority.
