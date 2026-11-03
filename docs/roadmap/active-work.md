@@ -32916,6 +32916,22 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   original preflight; real receiver execution still validates original metadata
   before a fresh lifecycle. Source correction and native qualification are in
   progress without changing the active installed candidate or its evidence.
+  A subsequent bounded stack sample of the real SDK-bearing PACKAGE attempt
+  found fresh native image hashing allocating and joining complete ELF images
+  during live LINK checks. Replace whole-file allocation only for hashing with
+  a bounded chunk stream, preserving fresh reads of every byte, exact path and
+  descriptor before/after checks, partial-read behavior and explicit descriptor
+  cleanup. Refuse growth beyond the initial full-read bound. Source review and
+  public dependency mutation controls are required before installing the next
+  isolated candidate; the active runtime remains unchanged.
+  The streamed implementation passes 99 portable dependency/custody/PE controls
+  with one native-only skip. A read-only native ABBA comparison hashes the same
+  99,348,440-byte LLVM library to the same identity: median hash wall time is
+  0.138 seconds before and 0.041 seconds streamed; median peak process RSS is 270,164
+  KiB before and 50,194 KiB streamed. This is isolated hash evidence, with no
+  installed candidate mutation or whole-PACKAGE speedup claim. See
+  `verification/native-dependency-hash-streaming-development.json`; full native
+  runtime and SDK PACKAGE-to-VERIFY qualification remain open.
 
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)
 - **Failure recovery, 2026-11-02:** The installed native attempt returned a

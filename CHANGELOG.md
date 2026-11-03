@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Native dependency hashes stream fresh file bytes with bounded memory while
+  preserving path, descriptor and mutation checks for large SDK images.
+
 - Retained receivers can preview original-byte verification intent before live
   source transport exists. Actual execution still reopens original metadata
   under current custody before starting a fresh lifecycle.
