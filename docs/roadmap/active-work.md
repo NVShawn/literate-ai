@@ -31999,7 +31999,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   All 1.4.0 readiness goals, issue/review closure, native qualification and release
   checks remain prerequisites through the release policy. Its own publication
   outcome is recorded after synchronization rather than required before publication.
-- **Next action in progress:** qualify the combined current fixes from PRs #254/#255/#256/#257, preserve the live native PACKAGE candidate unchanged, and finish all remaining issue, native and release gates. Proposed ADRs still require explicit acceptance before implementation.
+- **Next action in progress:** qualify the combined current fixes from PRs #254/#255/#256/#257, preserve the live native PACKAGE candidate unchanged, and finish all remaining issue, native and release gates. ADRs 0054 and 0055 are accepted; their implementation follows the prioritized FreeBSD SDK unblock.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -32026,7 +32026,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   supply full retained-tree, two-physical-host cache/performance, compiler SDK or
   final candidate acceptance. Later integration changes still require renewal.
 
-- **Cargo design review pending:** [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) records the audited #222–#226 compatibility design. It remains Proposed; no v2 implementation or implementation-subtask acceptance is claimed. Explicit acceptance of ADR 0054 remains required by Accepted ADR 0006.
+- **Accepted designs:** The directing user explicitly accepted [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) and [ADR 0055](../decisions/0055-command-addressed-worker-reachability.md) for 1.4 on 2026-11-02. CARGO-COMPAT-001 owns #222–#226; COMMAND-WORKER-001 owns command-addressed reachability. Their implementation and qualification remain open. FreeBSD SDK qualification and the Daemonarchy unblock take priority in execution order; neither accepted design is deferred from 1.4.
 
 ### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
 
@@ -33107,3 +33107,46 @@ independent review and the complete combined gate from test one.
   - [ ] Run real installed public CLI adoption, relocation, update, refresh, readmission and receipt-renewal journeys for a subdirectory, repository root and a non-default wrapper name.
   - [ ] Prove stale plans, destination collisions, escaping aliases, changed source and interrupted moves refuse without data loss; rollback restores exact original custody and prior evidence.
   - [ ] Verify legacy adopted projects keep their default layout and that changed placement cannot reuse an old receipt or manufacture live source authority.
+
+### [ ] CARGO-COMPAT-001 — Qualify reviewed retained Cargo workspace compatibility
+
+- **Release target:** 1.4.0
+- **Accepted decision:** [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md); explicit directing-user acceptance on 2026-11-02.
+- **Next action:** After the prioritized FreeBSD SDK/Daemonarchy unblock, implement the versioned authority first; all implementation and native acceptance below remain unchecked.
+
+- **Priority:** P1
+- **Owner:** Framework retained Cargo contracts, materialization, graph and admission; PROJECT Goals 1, 4, 5 and 6
+- **Direction:** Resolve issues #222 through #226 under the explicitly accepted ADR 0054 for 1.4.
+- **Conclusion:** Implement opt-in versioned authority for reviewed workspace scratch roots, registry patches, honest test protocols and bounded alias/streaming custody; preserve v1 contracts and independent acceptance. FreeBSD SDK and Daemonarchy unblock comes first in execution order.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Add versioned workspace-plan, gate-policy, test-inventory and receiving codecs with exact provenance and unchanged v1 defaults.
+  - [ ] Implement owned internal scratch materialization with collision-safe rollback and exact reviewed patch graph edges.
+  - [ ] Observe libtest ignored cases, custom harnesses and permitted exclusions without inventing executed coverage.
+  - [ ] Implement closed alias topology and finite streaming input budgets, then public CLI composition and receipts.
+- **Evidence:**
+  - [ ] Qualify real native adopted/offline Cargo workspaces, scratch ownership and rollback, reviewed patch edges, ignored/custom/excluded targets and all corresponding refusals.
+  - [ ] Prove native alias mutation/escape controls and a closure above 10000 entries and 256 MiB, with boundary, mutation and memory observations.
+  - [ ] Preserve v1 positives/refusals and require installed non-editable and integrated exact-head qualification before completion.
+
+### [ ] COMMAND-WORKER-001 — Address workers through reviewed reachability commands
+
+- **Release target:** 1.4.0
+- **Accepted decision:** [ADR 0055](../decisions/0055-command-addressed-worker-reachability.md); explicit directing-user acceptance on 2026-11-02.
+- **Next action:** After the prioritized FreeBSD SDK/Daemonarchy unblock, implement the versioned authority first; all implementation and native acceptance below remain unchecked.
+
+- **Priority:** P1
+- **Owner:** Framework execution-worker contracts, shared remote transport and operator CLI; PROJECT Goals 1, 4 and 5
+- **Direction:** Represent actual SSH, jump, scheduler and connector routes through private command vectors; qualify the user-selected worker under Accepted ADR 0055 for 1.4.
+- **Conclusion:** Add an opt-in v2 remote descriptor with exact execute/upload/download routes through one transport owner. Preserve v1 local, SSH and typed-command behavior, real custody, deadlines, cancellation and cleanup. FreeBSD SDK and Daemonarchy unblock comes first in execution order.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Add strict versioned remote descriptors with literal complete placeholders, finite argument budgets and unchanged v1 codecs and defaults.
+  - [ ] Implement the shared execution/upload/download owner and adapt every connectivity, capability, storage, health, alignment, bootstrap, lifecycle and cleanup caller.
+  - [ ] Expose operator CLI registration and diagnostics, then document private adapters and scope-specific discovery without direct-network fallback.
+- **Evidence:**
+  - [ ] Use an actual private command-addressed POSIX worker for nonce handshake, native platform/storage observations, alignment, source upload, native Component execution and evidence download through the same route.
+  - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
+  - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.
