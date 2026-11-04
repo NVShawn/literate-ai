@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import os
+import sys
+import time
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from literate_ai.adapters.action_capabilities import (
     probe_command_action_capabilities,
@@ -94,3 +96,59 @@ class ActionCapabilityTests(unittest.TestCase):
                 },
             )
         self.assertEqual(raised.exception.code, "action_capability.probe_failed")
+
+    @unittest.skipIf(os.name == "nt", "POSIX process absence observation")
+    def test_slow_real_receiver_respects_caller_deadline_and_reaps_on_expiry(self):
+        """Real startup may exceed one minute; an earlier caller still owns expiry."""
+        for delay, budget, succeeds in ((61, 90, True), (5, 1, False)):
+            with self.subTest(delay=delay, budget=budget):
+                pid_file = self.fixture.root / f"receiver-{delay}.pid"
+                bootstrap = (
+                    "import os,pathlib,runpy,sys,time; "
+                    f"pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid())); "
+                    f"time.sleep({delay}); "
+                    "sys.argv=['literate_ai.action_worker',*sys.argv[1:]]; "
+                    "runpy.run_module('literate_ai.action_worker',run_name='__main__')"
+                )
+                worker = replace(
+                    self.worker,
+                    command=(
+                        sys.executable,
+                        "-I",
+                        "-c",
+                        bootstrap,
+                        *self.worker.command[4:],
+                    ),
+                )
+                deadline = ActionDispatchDeadline(
+                    datetime.now(UTC) + timedelta(seconds=budget)
+                )
+                started = time.monotonic()
+                if succeeds:
+                    observed = probe_command_action_capabilities(
+                        worker,
+                        deadline,
+                        cwd=self.fixture.root,
+                        environment={
+                            **os.environ,
+                            "INDEX_WORKER_IDENTITY": worker.identity.uri,
+                        },
+                    )
+                    self.assertEqual(observed.worker_identity, worker.identity)
+                    self.assertGreater(time.monotonic() - started, 60)
+                else:
+                    with self.assertRaises(ActionWireError):
+                        probe_command_action_capabilities(
+                            worker,
+                            deadline,
+                            cwd=self.fixture.root,
+                            environment={
+                                **os.environ,
+                                "INDEX_WORKER_IDENTITY": worker.identity.uri,
+                            },
+                        )
+                    self.assertLess(time.monotonic() - started, delay)
+                self.assertTrue(pid_file.is_file(), "the actual receiver must start")
+                with self.assertRaises(ProcessLookupError):
+                    os.kill(int(pid_file.read_text()), 0)
+                self.assertEqual(list(self.fixture.workspace.iterdir()), [])
