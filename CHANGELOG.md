@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
+  before acquisition, preserving explicit compiler selections. C++ developer
+  setup follows the selected compiler's compilation target instead of always
+  selecting x64 libraries, and forwards complete CMD option/value pairs.
+
+- Worker capability and hardware probes allow up to five minutes within the caller
+  deadline. Retained receiver startup avoids a redundant full preview while
+  preserving registration custody and full publication and execution checks.
+
 - POSIX and Windows worker probes preserve observed NVIDIA devices with unknown
   memory when the device reports permission text. Requirements needing a known
   memory capacity still refuse; no capacity is inferred.

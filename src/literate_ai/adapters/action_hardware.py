@@ -32,7 +32,7 @@ from literate_ai.contracts.worker_capabilities import WorkerHardwareObservation
 
 HARDWARE_PROTOCOL = "literate-ai/action-hardware@1"
 # Bound one hardware observation, including receiver start-up on slow hosts.
-HARDWARE_PROBE_TIMEOUT_SECONDS = 180
+HARDWARE_PROBE_TIMEOUT_SECONDS = 300
 MAX_HARDWARE_BYTES = 64 * 1024
 _REQUEST = "literate-ai/action-hardware-request@1"
 _RESPONSE = "literate-ai/action-hardware-response@1"

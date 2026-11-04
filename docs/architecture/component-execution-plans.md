@@ -840,9 +840,9 @@ This guard is separate from per-tool admission checks. Data-only projection cann
 create controller launchers or infer missing local tools. Tool aliases sharing an
 identity retain all observation guards and must agree on command and environment.
 
-Hardware admission preserves its earlier caller deadline and 60-second operation
-limit. If an admitted probe expires, its bounded error identifies whether receiver
-code observation, transport, or response validation was active. Already-expired
+Hardware admission preserves its earlier caller deadline and finite five-minute
+operation limit. If an admitted probe expires, its bounded error identifies whether
+receiver code observation, transport, or response validation was active. Already-expired
 requests retain their initial deadline refusal; other errors keep their existing
 codes. Diagnostics must not disclose private command or environment values.
 
