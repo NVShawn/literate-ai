@@ -15,6 +15,7 @@ from literate_ai.adapters.retained_project_planning import (
 )
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_lifecycle import RetainedProjectProfile
+from literate_ai.projects import ProjectError
 
 from .errors import CliFailure
 from .execution_workers import (
@@ -97,6 +98,11 @@ def current_retained_project_authority(project: Any, binding: Any, args: Any):
         )
     if args.specification != ".":
         raise ValueError("Retained-project admission requires the complete project")
+    return _current_authority_factory(project, binding, args)
+
+
+def _current_authority_factory(project: Any, binding: Any, args: Any):
+    """Re-plan from the manifest/profile files; shared with receipt promotion."""
     profile_path = project.root / args.retained_project_profile
 
     def current_authority():
@@ -199,3 +205,92 @@ def retained_project_from_args(
         raise
     except (ValueError, TypeError, OSError) as exc:
         raise CliFailure("retained_project.admission_invalid", str(exc)) from exc
+
+
+def promote_retained_receipt_from_args(project: Any, binding: Any, args: Any) -> dict:
+    """Verify one admitted retained run and write its finalized receipt candidate."""
+    from literate_ai.adapters.component_lock_application import (
+        current_project_component_locks,
+    )
+    from literate_ai.adapters.retained_receipt_promotion import (
+        RetainedReceiptPromotionError,
+        promote_retained_run,
+        promoted_project_revision,
+        verify_retained_run,
+    )
+    from literate_ai.contracts.identity import ContentIdentity
+    from literate_ai.storage.cas import FileSystemCAS, StorageError
+    from literate_ai.test_receipts import (
+        validate_project_test_receipt_finalized_value,
+        write_project_test_receipt_finalized_candidate,
+    )
+
+    policy = project.definition.test_receipt_policy
+    if policy is None or project.definition.test_receipt is None:
+        raise CliFailure(
+            "project.test_receipt_policy_unconfigured",
+            "the project must configure test_receipt and test_receipt_policy",
+        )
+    try:
+        if not args.retained_project or not args.retained_project_profile:
+            raise ValueError(
+                "--retained-project and --retained-project-profile are required"
+            )
+        _manifest, worker, planning = _current_authority_factory(
+            project, binding, args
+        )()
+        locks = current_project_component_locks(project)
+        lock_ids = tuple(sorted((lock.identity for lock in locks), key=lambda i: i.uri))
+        from literate_ai.adapters.project_validation import (
+            validated_project_authority_identity as adapter_identity,
+        )
+
+        revision = promoted_project_revision(adapter_identity(project.root), lock_ids)
+        store = FileSystemCAS(Path(args.custody_root), create=False)
+        verified = verify_retained_run(
+            store,
+            ContentIdentity.parse_uri(args.retained_receipt),
+            source=project.root,
+            manifest=_manifest,
+            planning=planning,
+            component_locks=locks,
+            test_receipt_policy=policy,
+            expected_plan_identity=(
+                ContentIdentity.parse_uri(args.plan) if args.plan else None
+            ),
+        )
+        runner = verified.runner_identity.uri
+        candidate = promote_retained_run(
+            verified,
+            project_id=project.definition.project_id,
+            project_revision_identity=revision,
+            component_lock_identities=lock_ids,
+            receipt_policy=policy,
+        )
+        validate_project_test_receipt_finalized_value(
+            project, candidate, project_revision_identity=adapter_identity(project.root)
+        )
+        if not args.dry_run:
+            write_project_test_receipt_finalized_candidate(
+                Path(args.candidate), candidate
+            )
+    except CliFailure:
+        raise
+    except RetainedReceiptPromotionError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    except ProjectError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    except (ValueError, TypeError, OSError, StorageError) as exc:
+        raise CliFailure("retained_promotion.invalid", str(exc)) from exc
+    return {
+        "schema": "literate-ai/retained-project-promotion@1",
+        "written": not args.dry_run,
+        "candidate": None if args.dry_run else str(args.candidate),
+        "candidate_identity": candidate.identity.uri,
+        "receipt_identity": candidate.receipt_identity.uri,
+        "retained_receipt_identity": verified.receipt.identity.uri,
+        "plan_identity": verified.plan.identity.uri,
+        "runner_identity": runner,
+        "tests_passed": verified.passed,
+        "next": "litai project test-receipt update CANDIDATE --project .",
+    }

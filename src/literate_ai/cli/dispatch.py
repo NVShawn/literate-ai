@@ -150,7 +150,8 @@ SDLC catalog (verbs unchanged; grouped for flow):
     litai project agent-entrypoints [PATH]
     litai project tracker inspect | peer-work | parent checkout | ci-plan
     litai project retained-cargo check | materialize | admit
-    litai project test-receipt run-retained | update | check | require-current
+    litai project test-receipt run-retained | promote-retained | update | check
+    litai project test-receipt require-current
     litai project test-receipt verify-evidence | publish-evidence
     litai project test-receipt require-current-evidence
     litai project source-intelligence sync | check
@@ -2331,6 +2332,25 @@ def _parser() -> JsonArgumentParser:
             "implementation; repeat exactly the destinations qualified at conversion"
         ),
     )
+    receipt_promote = project_receipt_commands.add_parser(
+        "promote-retained",
+        help=(
+            "re-verify an admitted retained-project run against the project's "
+            "receipt policy and emit a finalized candidate for 'update'"
+        ),
+    )
+    receipt_promote.add_argument("candidate")
+    receipt_promote.add_argument("--project", default=".")
+    receipt_promote.add_argument("--retained-project", required=True)
+    receipt_promote.add_argument("--retained-project-profile", required=True)
+    receipt_promote.add_argument("--custody-root", required=True)
+    receipt_promote.add_argument("--retained-receipt", required=True)
+    receipt_promote.add_argument("--plan", help="expected current plan identity")
+    receipt_promote.add_argument("--target", default="host")
+    receipt_promote.add_argument("--dry-run", action="store_true")
+    from .execution_workers import add_execution_worker_arguments as _worker_args
+
+    _worker_args(receipt_promote)
     receipt_current = project_receipt_commands.add_parser("require-current")
     receipt_current.add_argument("--project", default=".")
     project_test_checkpoint = project_commands.add_parser(

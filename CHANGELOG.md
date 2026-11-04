@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `litai project test-receipt promote-retained` re-verifies an admitted
+  retained-project run against the current project and its receipt policy and writes
+  the finalized candidate that `project test-receipt update` accepts (issue #295; ADR
+  0060 proposed, not yet accepted). It executes nothing and weakens no policy check.
+
 - Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
   before acquisition, preserving explicit compiler selections. C++ developer
   setup follows the selected compiler's compilation target instead of always

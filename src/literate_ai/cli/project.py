@@ -1227,7 +1227,7 @@ def project_test_receipt_from_args(args) -> dict[str, Any]:
 
         return publish_evidence_from_args(args)
 
-    if args.test_receipt_command in {"run-retained", "update"}:
+    if args.test_receipt_command in {"run-retained", "update", "promote-retained"}:
         from literate_ai.adapters.lifecycle_lock import (
             ProjectLifecycleLockError,
             project_lifecycle_lock,
@@ -1293,6 +1293,21 @@ def _project_test_receipt_from_args(args) -> dict[str, Any]:
                 harness_workspace_links=harness_workspace_links,
                 execution_worker=execution_worker,
                 worker_catalog_identity=worker_catalog_identity,
+            )
+        if args.test_receipt_command == "promote-retained":
+            from literate_ai.contracts.projects import StandardProjectLifecycleDriver
+
+            from .rebuild import _resolve_standard_binding
+            from .retained_project import promote_retained_receipt_from_args
+
+            driver = project.definition.lifecycle_driver
+            if not isinstance(driver, StandardProjectLifecycleDriver):
+                raise CliFailure(
+                    "retained_project.standard_required",
+                    "Retained-project promotion requires the Standard lifecycle",
+                )
+            return promote_retained_receipt_from_args(
+                project, _resolve_standard_binding(driver), args
             )
         if args.test_receipt_command == "update":
             return update_project_test_receipt(
