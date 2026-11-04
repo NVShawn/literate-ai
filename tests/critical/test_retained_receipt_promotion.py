@@ -10,8 +10,10 @@ import os
 import shutil
 import unittest
 from dataclasses import replace
+from unittest import mock
 
 from literate_ai import test_receipts
+from literate_ai.adapters import retained_receipt_promotion as retained_promotion
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
@@ -236,6 +238,17 @@ class RetainedReceiptPromotionTests(unittest.TestCase):
         receipt.chmod(0o600)
         receipt.write_bytes(b"{}")
         self.refused("receipt_unreadable", self.verify)
+
+    def test_non_object_observation_record_is_refused_cleanly(self):
+        real = retained_promotion._read
+
+        def read(store, reference, what):
+            if what.startswith("sha256:"):
+                return []
+            return real(store, reference, what)
+
+        with mock.patch.object(retained_promotion, "_read", read):
+            self.refused("run_invalid", self.verify)
 
 
 def canonical_identity_from_bytes(content):

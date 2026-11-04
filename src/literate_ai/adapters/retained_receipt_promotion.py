@@ -320,6 +320,8 @@ def verify_retained_run(
         if target is None:
             _refuse("run_incomplete", f"{identity.uri} is not a retained record")
         value = _read(store, target, identity.uri)
+        if type(value) is not dict:
+            _refuse("run_invalid", f"{identity.uri} is not a retained observation")
         if canonical_identity(value) != identity:
             _refuse("receipt_tampered", f"{identity.uri} is not its own content")
         return value
