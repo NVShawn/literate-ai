@@ -784,6 +784,7 @@ jobs:
           python -m pytest -q -rA -o junit_logging=all
           --junitxml=cpp-native-qualification.xml
           tests/e2e/test_cpp_bazel_outputs.py::CppBazelOutputTests::test_locked_cpp_library_runs_through_complete_filesystem_runtime
+          tests/critical/test_guarded_builder.py::GuardedCppBuilderTests
       - name: Reject skipped or incomplete native qualification
         if: matrix.task == 'cpp-native'
         shell: python
@@ -796,11 +797,11 @@ jobs:
               for name in ("tests", "failures", "errors", "skipped")
           }
           print(counts)
-          expected = {"tests": 6, "failures": 0, "errors": 0, "skipped": 0}
+          expected = {"tests": 9, "failures": 0, "errors": 0, "skipped": 0}
           if counts != expected:
               raise SystemExit(
-                  "native qualification did not pass its parent test and all ten "
-                  "static/shared product subtests"
+                  "native qualification did not pass its Bazel parent, five "
+                  "product subtests, and three guarded compiler controls"
               )
       - name: Upload native qualification evidence
         if: matrix.task == 'cpp-native' && (always())

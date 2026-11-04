@@ -199,7 +199,16 @@ class GuardedCppBuilderTests(unittest.TestCase):
     @staticmethod
     def toolchain():
         try:
-            return discover_cpp_toolchain()
+            environment = None
+            if os.name == "nt":
+                # Require vendor setup to supply its own compiler variables,
+                # including on CI jobs that preconfigure a developer shell.
+                environment = {
+                    name: value
+                    for name, value in os.environ.items()
+                    if name.casefold() not in {"include", "lib", "libpath"}
+                }
+            return discover_cpp_toolchain(environment)
         except BuildError as exc:
             if exc.code != "builder.cpp_toolchain_unavailable":
                 raise
