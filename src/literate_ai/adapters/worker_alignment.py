@@ -827,18 +827,16 @@ class WorkerAligner:
                         "synced with --apply (old copy backed up)",
                     )
                 )
-        if (
-            check_model
-            and self.coding_cli
-            and self.model
-            and found.get(self.coding_cli)
-        ):
-            self._check_model(worker, report)
+        executable = found.get(self.coding_cli or "")
+        if check_model and self.coding_cli and self.model and executable:
+            self._check_model(worker, report, executable)
         if report.findings and report.status == "aligned":
             report.status = "misaligned"
         return report, found
 
-    def _check_model(self, worker: ExecutionWorker, report: WorkerReport) -> None:
+    def _check_model(
+        self, worker: ExecutionWorker, report: WorkerReport, executable: str
+    ) -> None:
         if self.coding_cli != "opencode":
             report.findings.append(
                 Finding(
@@ -852,7 +850,7 @@ class WorkerAligner:
         try:
             help_result = self._run(
                 worker,
-                _remote_command(worker, ("opencode", "run", "--help")),
+                _remote_command(worker, (executable, "run", "--help")),
                 _PROBE_TIMEOUT_SECONDS,
             )
             if help_result.returncode:
@@ -874,7 +872,7 @@ class WorkerAligner:
                 )
             )
             argv = (
-                "opencode",
+                executable,
                 "run",
                 *(("--standalone",) if standalone else ()),
                 "-m",

@@ -5,6 +5,9 @@
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
 
+- Worker alignment uses the discovered coding CLI executable for its help and
+  model checks, including declared Windows tool locations outside `PATH`.
+
 - Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
   before acquisition, preserving explicit compiler selections. C++ developer
   setup follows the selected compiler's compilation target instead of always
