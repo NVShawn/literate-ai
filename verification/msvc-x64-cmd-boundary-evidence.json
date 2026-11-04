@@ -1,0 +1,42 @@
+{
+  "schema": "literate-ai/msvc-x64-cmd-boundary-evidence@1",
+  "development_evidence_only": true,
+  "original_main": "f03f30a0654b3f6896177b5fa1ed229a61f3dbf4",
+  "original_failed_job": "https://github.com/jordanhubbard/literate-ai/actions/runs/41778360184/job/126403948002",
+  "original_failed_log_sha256": "e18aba4751b126130e0712502bdb6c6e6aba72cefa8a42c5e2f3e077948c11ce",
+  "original_cpp_sha256": "09779d54d218446ab0ecfa19dd7641012b37495377ab6481dc4e1f2f1c720e83",
+  "repair_cpp_sha256": "a236f34c28e42a31c1218d86509b92b98ab0f0a844a177adf840bce7666ce90b",
+  "native_cmd_boundary": {
+    "os_architecture": "X64",
+    "process_architecture": "AMD64",
+    "sanitized_child_environment": true,
+    "controlled_vendor_fixture_only": true,
+    "legacy_raw_vendor_arguments": "x64 -vcvars_ver 14.29",
+    "legacy_fixture_exit": 19,
+    "reconstructed_raw_vendor_arguments": "x64 -vcvars_ver=14.29",
+    "reconstructed_fixture_exit": 0,
+    "all_four_controlled_required_variables_present": true,
+    "script_sha256": "3a796e12be068181fadd1825f83391f4fbe719200f32c5f850fbd138d66625b5",
+    "stdout_sha256": "f56879dc12106b3cca6d0d210ec9a1db71612576f95d73ddb5679f85cc563228"
+  },
+  "old_function_counterfactual": {
+    "source": "f03f30a0654b3f6896177b5fa1ed229a61f3dbf4",
+    "source_substitution": "exact function AST in owned test process; source files unchanged",
+    "cases": 2,
+    "expected_x64_failures": 1,
+    "errors": 0,
+    "log_sha256": "2529dfe0322605a00ef503bdb890af19516bba1086bf09741ca7605af80c7aee"
+  },
+  "portable_controls": {
+    "argument_boundary_cases": 2,
+    "controlled_positive_host_target_pairs": 3,
+    "preserved_host_and_descendant_cases": 6,
+    "ci_policy_cases": 27,
+    "failures": 0,
+    "new_skips": 0
+  },
+  "native_msvc_compile_or_installed_prefix_qualified": false,
+  "exact_review_or_new_main_ci_complete": false,
+  "release_qualified": false,
+  "scope": "Actual native x64 CMD parsing with an owned controlled vendor fixture plus source controls. Real vendor/compiler renewal remains a hosted native CI gate; historical ARM64 evidence retains its original source and scope."
+}

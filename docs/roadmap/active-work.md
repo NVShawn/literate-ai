@@ -29323,8 +29323,34 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   the MSVC-only installer-architecture filter and preserve explicit ARM64 toolset
   selection plus installed-image proof. Other packages keep explicit ARM64
   acquisition. A successful installer exit without a native compiler remains a
-  refusal. Native framework/toolchain qualification is still open; the pinned
-  cryptography dependency currently needs a native ARM64 wheel build.
+  refusal. The pinned cryptography dependency now has a genuine native ARM64
+  wheel; broader framework/toolchain qualification remains open.
+
+- **Current next action (in progress):** Complete native C++ developer-environment
+  forwarding after the installed-compiler discovery repair. Source
+  `15c20d4e15621aa74d3cbf10871e5fa7dd392c57` passed the full local source and
+  installed-wheel gates; its fresh native ARM64 prefix passed public C++
+  preflight without another compiler installation. Actual builder initialization
+  then failed cleanly: CMD splits the three `name=value` options into six batch
+  parameters, but the wrapper forwarded only three. A native parameter
+  observation confirmed the truncation. Pass closed values and reconstruct the
+  vendor's complete `name=value` options, retain failure evidence, and require a
+  fresh exact installed-candidate compile/execution proof. Available-but-broken
+  toolchain setup must fail its
+  real-build test rather than become a skip. Preserve explicit tools, existing
+  Windows x86-64 behavior and the already installed prefixes; qualification
+  remains open.
+
+- **Retained native evidence:** An isolated non-editable candidate at source
+  `d5956efdbd5d06c514c61cfdd4196c1928a63779` reopens all 37 installed
+  distribution RECORD closures, executes its public CLI and native dependency
+  controls, and passes the public Codex/JavaScript Windows ARM64 preflight.
+  Unsupported Make refuses, and 23 existing tool files retain identical bytes
+  and metadata. The native cryptography 50.0.1 wheel has SHA-256
+  `c4252d1f1bdc31c79b201278827b2dba61bfe6a6d6df316e787eb5bf9bd84c53`.
+  These are scoped installed/native observations, not release qualification:
+  Git's ARM64 Bash launcher reports an x64 MSYS runtime, configure-only Perl was
+  x64, and the ordinary C++ environment still needs the repair above.
 
 - **Current integration:** Combine the preserved authored ARM64 realization and
   packaged template with bounded actual PE-image/runtime observations. Preserve
@@ -32914,6 +32940,10 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
 
+- **2026-11-03 scale probe repair (in progress):** The real installed receiver for the complete 114,929-entry source fixture exceeds the canonical 60-second capability cap and refuses after 60.068 seconds. Preserve that refusal and observe the remote read-only parent through actual exit before another probe. The directing user requires a finite five-minute capability/hardware budget. Remove only the repeated constructor preview immediately after the initial canonical preview and independent authority check; retain registration custody at return and full checks around describe publication, reservation, execution and evidence production. Fresh installed native capability, five-unit PACKAGE, original-byte VERIFY and corruption controls remain required; no scale or release success is claimed.
+
+- **Probe-budget source verification checkpoint:** Independent review covers the finite 300-second capability/hardware caps and the constructor's final private-custody check, with full capability-publication and execution guards retained. The complete contributor Make gate selects 2,666 cases: 2,579 pass, 87 declared platform skips, zero failures and zero known failures. The Python run takes 4,668.614 seconds; lint, formatting, compilation, host-path and canonical authority checks pass. Report SHA-256: `488a7f2a8f271a9b520a7a2335dc47929b8c505653d200631b457c477e81e612`. Real local controls cover startup beyond the old minute, earlier caller expiry/process absence, and authority/registration mutation across configured action-worker capability publication. They do not qualify the full native project preview. The original native 60.068-second refusal and eventual read-only parent exit remain preserved. Corrected installed native probes, five-unit PACKAGE, cold original-byte VERIFY and corruption controls remain pending.
+
 - **Current development status:** At source `33f1e62`, the SDK-bearing two-unit
   native FreeBSD PACKAGE and fresh original-archive VERIFY both pass independent
   controller admission. Verification retains the exact original result index
@@ -32925,9 +32955,11 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   The functional SDK blocker is resolved, and the directing user authorized the
   downstream release to proceed under its own gates independently of framework
   publication. This does not prove downstream acceptance or full issue completion.
-- **Current next action:** Renew full native regression after the separately
-  reproduced orphan-reaping repair, then complete the required real retained-tree
-  case beyond 100,000 members and all remaining installed/integrated qualification.
+- **Current next action:** Install the reviewed probe-budget candidate in fresh
+  native/controller prefixes, renew canonical receipt-policy/profile/manifest and
+  exact plan bindings, then complete the five-unit retained-tree PACKAGE beyond
+  100,000 members, cold original-byte VERIFY and required corruption controls.
+  Full integrated/native and release qualification remain separate required gates.
   Issue #235 and this 1.4 goal remain open. The earlier attempts below retain their
   historical scope and failures; they do not override this two-unit SDK result.
 
@@ -33317,6 +33349,24 @@ independent review and the complete combined gate from test one.
 
 - **Release target:** 1.4.0
 - **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
+
+- **Native-x64 follow-up (in progress):** Exact main `f03f30a0654b3f6896177b5fa1ed229a61f3dbf4`
+  [Windows shard 3](https://github.com/jordanhubbard/literate-ai/actions/runs/41778360184/job/126403948002)
+  fails all three guarded C++ build cases because vendor setup omits required
+  compiler variables. A bounded actual x64 CMD diagnostic shows the remaining
+  native-x64 wrapper forwards `x64 -vcvars_ver 14.29`; reconstructing the named
+  option from its closed numeric value preserves `x64 -vcvars_ver=14.29` and
+  satisfies the controlled vendor fixture. Preserve the failed log and the
+  separate source-335 native ARM64 evidence. The source repair and two portable
+  boundary/refusal controls pass; the exact old-function counterfactual fails
+  only its native-x64 option case. Six preserved ARM64/descendant controls and
+  27 CI-policy controls pass. Independent source/CI review approved the numeric
+  option reconstruction and the existing native C++ job's three added guarded
+  compiler cases with strict zero-skip accounting. Next: renew actual
+  unconfigured Windows guarded builds and exact CI. See the bounded
+  [development evidence](../../verification/msvc-x64-cmd-boundary-evidence.json).
+  The diagnostic is not a compiler build or release
+  qualification, and no timeout or required-variable guard is relaxed.
 
 - **Priority:** P1
 - **Owner:** C++ toolchain discovery and MSVC environment initialization

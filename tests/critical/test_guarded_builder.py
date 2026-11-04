@@ -25,6 +25,7 @@ from literate_ai.adapters.builders import (
 )
 from literate_ai.adapters.builders import cpp as cpp_builder_module
 from literate_ai.adapters.builders import python as python_builder_module
+from literate_ai.bootstrap.windows_images import observe_pe_architecture
 from literate_ai.security import (
     AuthorizationError,
     AuthorizationRevocationSet,
@@ -145,6 +146,7 @@ class GuardedPythonBuilderTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr.decode())
+
             self.assertEqual(completed.stdout.splitlines(), [b'{"value":42}'])
             before = canonical_tree_digest(artifact.artifact_path)
             (modules / "module_129.py").write_text("def broken(:\n")
@@ -197,8 +199,19 @@ class GuardedCppBuilderTests(unittest.TestCase):
     @staticmethod
     def toolchain():
         try:
-            return discover_cpp_toolchain()
+            environment = None
+            if os.name == "nt":
+                # Require vendor setup to supply its own compiler variables,
+                # including on CI jobs that preconfigure a developer shell.
+                environment = {
+                    name: value
+                    for name, value in os.environ.items()
+                    if name.casefold() not in {"include", "lib", "libpath"}
+                }
+            return discover_cpp_toolchain(environment)
         except BuildError as exc:
+            if exc.code != "builder.cpp_toolchain_unavailable":
+                raise
             raise unittest.SkipTest(str(exc)) from exc
 
     @staticmethod
@@ -276,6 +289,40 @@ class GuardedCppBuilderTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr.decode())
+
+            if (
+                os.name == "nt"
+                and Path(toolchain.command[0]).name.casefold() == "cl.exe"
+            ):
+                # This is an explicit cross-target build assertion, never native
+                # execution qualification for the other architecture. When the
+                # vendor ships the companion compiler, prove its target follows
+                # the selected command rather than its host PE image.
+                compiler = Path(toolchain.command[0])
+                target = "arm64" if compiler.parent.name.casefold() == "x64" else "x64"
+                selected = compiler.parent.parent / target / "cl.exe"
+                if selected.is_file():
+                    configured = dict(os.environ, CXX=f'"{selected}"')
+                    configured.pop("VSCMD_ARG_TGT_ARCH", None)
+                    cross = discover_cpp_toolchain(configured)
+                    request, authorization = self.request_and_authorization(
+                        source, cross
+                    )
+                    product = GuardedCppBuilder(
+                        cross, AuthorizationRevocationSet()
+                    ).build(
+                        request,
+                        authorization,
+                        source_root=source,
+                        artifact_store=root / "cross-artifacts",
+                        now=NOW + timedelta(minutes=1),
+                    )
+                    self.assertEqual(
+                        observe_pe_architecture(
+                            product.artifact_path / product.executable_file
+                        ),
+                        "arm64" if target == "arm64" else "x86_64",
+                    )
 
     def test_source_drift_during_native_compilation_is_rejected(self) -> None:
         toolchain = self.toolchain()

@@ -5,6 +5,18 @@
 - Add installed-wheel adoption coverage for retained third-party Component-shaped
   files, using real unittest, build, package and parity controls.
 
+- Native x64 MSVC setup preserves the selected toolset's complete version option
+  across CMD argument parsing, while retaining required compiler variables.
+
+- Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
+  before acquisition, preserving explicit compiler selections. C++ developer
+  setup follows the selected compiler's compilation target instead of always
+  selecting x64 libraries, and forwards complete CMD option/value pairs.
+
+- Worker capability and hardware probes allow up to five minutes within the caller
+  deadline. Retained receiver startup avoids a redundant full preview while
+  preserving registration custody and full publication and execution checks.
+
 - Windows worker probes preserve unknown NVIDIA memory as null when the device
   reports permission text, matching the POSIX observation behavior.
 

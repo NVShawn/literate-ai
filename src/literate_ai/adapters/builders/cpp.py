@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import platform
 import re
 import shlex
 import shutil
@@ -15,6 +16,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+from literate_ai.bootstrap.host_install_requirements import normalize_architecture
+from literate_ai.bootstrap.windows_images import observe_pe_architecture
+from literate_ai.bootstrap.windows_msvc import (
+    WindowsMsvcDiscoveryError,
+    discover_native_msvc_compiler,
+    selected_msvc_target,
+)
 from literate_ai.security import (
     BuildAuthorization,
     BuildAuthorizationVerifier,
@@ -339,16 +347,19 @@ def _windows_msvc_environment(
     compiler: Path,
     configured: dict[str, str],
     *,
+    requested_target: str,
     timeout_seconds: float = DEFAULT_CPP_VERSION_TIMEOUT_SECONDS,
     stdout_limit_bytes: int = DEFAULT_COMPILER_STDOUT_LIMIT_BYTES,
     stderr_limit_bytes: int = DEFAULT_COMPILER_STDERR_LIMIT_BYTES,
 ) -> tuple[tuple[str, str], ...]:
-    """Resolve the complete x64 MSVC command environment from vendor tooling."""
+    """Resolve the vendor environment for the selected compiler's actual target."""
 
     normalized = {name.casefold(): value for name, value in configured.items()}
     required = ("include", "lib", "libpath", "path")
     setup_candidates: list[Path] = []
+    developer_candidates: list[Path] = []
     for ancestor in compiler.parents:
+        developer_candidates.append(ancestor / "Common7" / "Tools" / "VsDevCmd.bat")
         setup_candidates.extend(
             (
                 ancestor / "Auxiliary" / "Build" / "vcvarsall.bat",
@@ -366,25 +377,47 @@ def _windows_msvc_environment(
         return ()
     if setup is None and all(normalized.get(name, "").strip() for name in required):
         return tuple((name.upper(), normalized[name]) for name in required)
+    try:
+        compiler_host = observe_pe_architecture(compiler)
+    except (OSError, ValueError) as exc:
+        raise BuildError(
+            "builder.cpp_msvc_environment_unavailable",
+            "MSVC compiler host image cannot be proven",
+        ) from exc
+    # A compiler's PE describes its host process, not its compilation target.
+    # Keep the established native x64 setup; other host/target pairs require
+    # explicit vendor flags rather than silently selecting x64 libraries.
+    developer_setup = compiler_host != "x86_64" or requested_target != "x86_64"
+    if developer_setup:
+        setup = next((path for path in developer_candidates if path.is_file()), None)
     system_root = normalized.get("systemroot", "C:/Windows")
     command_interpreter = Path(system_root) / "System32" / "cmd.exe"
     if setup is None or not command_interpreter.is_file():
         raise BuildError(
             "builder.cpp_msvc_environment_unavailable",
-            "MSVC was found but its x64 developer environment is unavailable",
+            "MSVC was found but its requested developer environment is unavailable",
         )
     toolset_argument = _msvc_toolset_argument(compiler)
     vcvarsall = setup.name.casefold() == "vcvarsall.bat"
-    if toolset_argument is not None and not vcvarsall:
+    if toolset_argument is not None and not vcvarsall and not developer_setup:
         raise BuildError(
             "builder.cpp_msvc_environment_unavailable",
             "versioned MSVC requires the vendor vcvarsall environment",
         )
     with tempfile.TemporaryDirectory(prefix="litai-msvc-environment-") as directory:
         wrapper = Path(directory) / "initialize.cmd"
+        wrapper_call = '@call "%~1" %~2 %~3 %~4'
+        if developer_setup:
+            # CMD splits name=value parameters; the vendor parser needs '='.
+            # Pass only closed values and reconstruct the named options here.
+            wrapper_call = '@call "%~1" -arch=%~2 -host_arch=%~3'
+            if toolset_argument is not None:
+                wrapper_call += " -vcvars_ver=%~4"
+        elif toolset_argument is not None:
+            # Native x64 vcvarsall needs the same complete named option.
+            wrapper_call = '@call "%~1" %~2 -vcvars_ver=%~3'
         wrapper.write_text(
-            '@call "%~1" %~2 %~3 >nul 2>&1\n'
-            "@if errorlevel 1 exit /b %errorlevel%\n@set\n",
+            wrapper_call + " >nul 2>&1\n@if errorlevel 1 exit /b %errorlevel%\n@set\n",
             encoding="utf-8",
             newline="\r\n",
         )
@@ -396,10 +429,25 @@ def _windows_msvc_environment(
             str(wrapper),
             str(setup.resolve()),
         ]
-        if vcvarsall:
+        if developer_setup:
+            aliases = {"x86_64": "amd64", "arm64": "arm64", "x86": "x86"}
+            if compiler_host not in aliases or requested_target not in aliases:
+                raise BuildError(
+                    "builder.cpp_msvc_environment_unavailable",
+                    "MSVC host or compilation target is unsupported",
+                )
+            command.extend(
+                (
+                    aliases[requested_target],
+                    aliases[compiler_host],
+                )
+            )
+            if toolset_argument is not None:
+                command.append(toolset_argument.partition("=")[2])
+        elif vcvarsall:
             command.append("x64")
-        if toolset_argument is not None:
-            command.append(toolset_argument)
+        if toolset_argument is not None and not developer_setup:
+            command.append(toolset_argument.partition("=")[2])
         completed = _run_bounded_process(
             command,
             cwd=None,
@@ -415,7 +463,7 @@ def _windows_msvc_environment(
         )
         raise BuildError(
             "builder.cpp_msvc_environment_unavailable",
-            "MSVC x64 developer environment initialization failed: " + detail,
+            "MSVC requested developer environment initialization failed: " + detail,
         )
     resolved: dict[str, str] = {}
     for raw_line in completed.stdout.decode("utf-8", errors="replace").splitlines():
@@ -428,7 +476,7 @@ def _windows_msvc_environment(
     if any(name not in resolved for name in required):
         raise BuildError(
             "builder.cpp_msvc_environment_unavailable",
-            "MSVC x64 developer environment omitted required compiler variables",
+            "MSVC developer environment omitted required compiler variables",
         )
     resolved = _pin_msvc_toolset_paths(resolved, compiler)
     return tuple((name.upper(), resolved[name]) for name in required)
@@ -553,6 +601,24 @@ def discover_cpp_toolchain(
         candidates = tuple((name,) for name in names)
 
     path_value = configured.get("PATH")
+    if (
+        os.name == "nt"
+        and not raw
+        and not any(
+            shutil.which(candidate[0], path=path_value) for candidate in candidates
+        )
+    ):
+        try:
+            compiler = discover_native_msvc_compiler(
+                normalize_architecture(platform.machine()), configured
+            )
+        except (OSError, WindowsMsvcDiscoveryError) as exc:
+            raise BuildError(
+                "builder.cpp_msvc_discovery_unavailable",
+                "Installed native Visual Studio compiler cannot be observed safely",
+            ) from exc
+        if compiler is not None:
+            candidates = ((str(compiler),),)
     for candidate in candidates:
         executable = shutil.which(candidate[0], path=path_value)
         if executable is None:
@@ -568,17 +634,7 @@ def discover_cpp_toolchain(
         ):
             command = (command[0], "--driver-mode=swiftc", *command[1:])
         family = _compiler_family(command[0])
-        toolchain_environment = (
-            _windows_msvc_environment(
-                Path(command[0]),
-                configured,
-                timeout_seconds=timeout_seconds,
-                stdout_limit_bytes=stdout_limit_bytes,
-                stderr_limit_bytes=stderr_limit_bytes,
-            )
-            if os.name == "nt" and family == "msvc"
-            else ()
-        )
+        toolchain_environment = ()
         sdk_selection_identity = None
         if sys.platform == "darwin" and os.name != "nt":
             toolchain_environment = _macos_sdk_environment(
@@ -613,6 +669,33 @@ def discover_cpp_toolchain(
             family=family,
             clang_cl=clang_cl,
         )
+        if os.name == "nt" and family == "msvc":
+            try:
+                requested_target = selected_msvc_target(
+                    Path(command[0]),
+                    (completed.stdout + completed.stderr).decode(
+                        "utf-8", errors="replace"
+                    ),
+                    configured,
+                )
+            except WindowsMsvcDiscoveryError as exc:
+                raise BuildError(
+                    "builder.cpp_msvc_target_unverified",
+                    "Selected MSVC compiler target is unproven or conflicting",
+                ) from exc
+            toolchain_environment = _windows_msvc_environment(
+                Path(command[0]),
+                configured,
+                requested_target=requested_target,
+                timeout_seconds=timeout_seconds,
+                stdout_limit_bytes=stdout_limit_bytes,
+                stderr_limit_bytes=stderr_limit_bytes,
+            )
+            if executable_file_digest(Path(command[0])) != executable_digest:
+                raise BuildError(
+                    "builder.cpp_toolchain_changed",
+                    "MSVC compiler changed during setup",
+                )
         if (
             sdk_selection_identity is not None
             and _sdk_selection_identity(toolchain_environment) != sdk_selection_identity

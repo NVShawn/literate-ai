@@ -295,7 +295,10 @@ def _configured_worker(config, *, owned_child=None):
         current()
         return result
 
-    current()
+    # Startup already observed the canonical preview and independent authority.
+    # Publication and execution still call the full currentness guard; close
+    # this constructor with fresh private registration and child custody.
+    registered_current()
     return ConfiguredRetainedUnitPackageWorker(
         selected.worker,
         selected.catalog_identity,
