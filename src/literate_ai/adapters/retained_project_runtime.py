@@ -291,6 +291,7 @@ def _execute_retained_project(
                 "native_sdk_owners": sdk_runtime.acquire(),
                 "native_sdk_authorize": sdk_runtime.authorize,
                 "native_sdk_record": sdk_runtime.record,
+                "native_sdk_record_many": sdk_runtime.record_many,
             }
         except (
             AuthorizationError,

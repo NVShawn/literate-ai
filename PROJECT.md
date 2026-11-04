@@ -820,3 +820,16 @@ SSH descriptor, and registers it privately. Durable request state prevents silen
 repeat allocation and preserves validated responses for registration recovery.
 Provider APIs, resource sizing translation, credential acquisition and remote
 resource deletion belong to the organization command.
+
+
+SDK command metadata retention may use one bounded operation-local batch under
+its original live SDK runtime owner. The writer freezes an ordered canonical
+metadata one record at a time before writing, limits record count by the selected SDK policy and
+frozen bytes by the declared retained input budget and existing metadata ceiling,
+and requires full currentness before and after immutable CAS writes. Private
+receiver custody and the original deadline remain current for every write;
+command authorization and revocation are checked before evidence is exposed.
+The retained command-context augmentation and every retained content identity
+remain unchanged. A refused closing check admits no partial metadata. Metadata
+outside batch eligibility uses the original guarded single-record path with a
+bounded diagnostic; it does not gain a new supported-input limit.

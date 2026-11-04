@@ -22,6 +22,10 @@
   the same typed worker selection and plan. Capability publication, reservation
   and execution still reopen current authority; no preparation is cached.
 
+- Add real-CAS contract controls for retained SDK metadata batching, overflow fallback, canonical bytes and strict currentness/custody refusal.
+
+- Batch retained SDK command metadata under the original live owner while preserving full boundary currentness and exact evidence identities.
+
 - Remote retained SDK producer and consumer grants honor the original action's
   deadline, capped at three hours, so long source verification does not outlive
   an unrelated ten-minute grant. Expiry, revocation and current-custody checks
