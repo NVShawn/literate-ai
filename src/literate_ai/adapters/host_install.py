@@ -7,6 +7,7 @@ import json
 import os
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -39,6 +40,11 @@ from literate_ai.bootstrap.host_install_requirements import (
     version_satisfies,
 )
 from literate_ai.bootstrap.windows_images import observe_pe_architecture
+from literate_ai.bootstrap.windows_msvc import (
+    WindowsMsvcDiscoveryError,
+    discover_native_msvc_compiler,
+    selected_msvc_target,
+)
 
 INSTALL_DEPENDENCIES_ENVIRONMENT = "LITAI_INSTALL_DEPENDENCIES"
 INSTALL_ACCELERATOR_ENVIRONMENT = "LITAI_INSTALL_ACCELERATOR"
@@ -437,6 +443,16 @@ def ensure_host_install_dependencies(
             + ", ".join(item.requirement.capability for item in incompatible)
             + ". Inspect the image_architecture observations; no tools were replaced.",
         )
+    if (
+        sbom.target.operating_system == "windows"
+        and configured.get("CXX", "").strip()
+        and any(item.requirement.capability == "cxx" for item in report.missing)
+    ):
+        raise HostInstallError(
+            "host-install.compiler-command-unavailable",
+            "The explicitly selected CXX command does not satisfy the selected "
+            "compiler requirement. Inspect that command; no tools were replaced.",
+        )
     consent = _installation_consent(
         configured,
         manager=sbom.package_manager.identifier,
@@ -693,8 +709,50 @@ def _observe_native_package(
         probe_candidates=requirement.probe_candidates,
         probe_arguments=requirement.probe_arguments,
     )
+    command = None
+    if requirement.capability == "cxx" and sbom.target.operating_system == "windows":
+        selected = environment.get("CXX", "").strip()
+        if selected:
+            try:
+                parsed = tuple(shlex.split(selected, posix=False))
+            except ValueError as exc:
+                raise HostInstallError(
+                    "host-install.compiler-command-invalid", "CXX is not a command"
+                ) from exc
+            first = parsed[0]
+            if len(first) >= 2 and first[0] == first[-1] and first[0] in {'"', "'"}:
+                first = first[1:-1]
+            command = (first, *parsed[1:])
+        elif (
+            _locate_candidate(
+                base.probe_candidates, environment=environment, locator=locator
+            )
+            is None
+        ):
+            try:
+                compiler = discover_native_msvc_compiler(
+                    sbom.target.architecture, environment
+                )
+            except (OSError, WindowsMsvcDiscoveryError) as exc:
+                raise HostInstallError(
+                    "host-install.native-image-unverified",
+                    "Installed Visual Studio toolset cannot be observed safely; "
+                    "no tools were replaced.",
+                ) from exc
+            if compiler is not None:
+                command = (str(compiler),)
     probe = _probe_capability(
-        base, environment=environment, runner=runner, locator=locator
+        base,
+        environment=environment,
+        runner=runner,
+        locator=locator,
+        command=command,
+        target_architecture=(
+            sbom.target.architecture
+            if requirement.capability == "cxx"
+            and sbom.target.operating_system == "windows"
+            else None
+        ),
     )
     return HostCapabilityObservation(
         base,
@@ -810,6 +868,8 @@ def _probe_capability(
     environment: Mapping[str, str],
     runner: CommandRunner,
     locator: CommandLocator,
+    command: tuple[str, ...] | None = None,
+    target_architecture: str | None = None,
 ) -> tuple[bool, str | None, Path | None]:
     if requirement.probe_kind == "current-python":
         observed = platform.python_version()
@@ -843,12 +903,18 @@ def _probe_capability(
             return False, None, None
         return True, "complete", paths[0].resolve().parent
     executable = _locate_candidate(
-        requirement.probe_candidates, environment=environment, locator=locator
+        requirement.probe_candidates if command is None else (command[0],),
+        environment=environment,
+        locator=locator,
     )
     if executable is None:
         return False, None, None
     completed = runner(
-        (str(executable), *requirement.probe_arguments),
+        (
+            str(executable),
+            *(() if command is None else command[1:]),
+            *requirement.probe_arguments,
+        ),
         check=False,
         capture_output=True,
         text=True,
@@ -856,6 +922,33 @@ def _probe_capability(
         env=dict(environment),
     )
     output = (completed.stdout + completed.stderr).strip()
+    if target_architecture is not None:
+        try:
+            observed_target = selected_msvc_target(executable, output, environment)
+        except WindowsMsvcDiscoveryError as exc:
+            raise HostInstallError(
+                "host-install.compiler-target-unverified",
+                "The selected compiler's compilation target cannot be proven; "
+                "no tools were replaced.",
+            ) from exc
+        if observed_target != target_architecture:
+            raise HostInstallError(
+                "host-install.compiler-target-mismatch",
+                "The selected compiler targets another architecture; "
+                "no tools were replaced.",
+            )
+        # cl /? writes help to stdout and its version banner to stderr. Numeric
+        # switches such as /O1 must not become the observed compiler version.
+        output = next(
+            (
+                line.strip()
+                for line in output.splitlines()
+                if line.strip().startswith(
+                    "Microsoft (R) C/C++ Optimizing Compiler Version "
+                )
+            ),
+            output,
+        )
     return (
         completed.returncode == 0
         and version_satisfies(output, requirement.version_constraint),

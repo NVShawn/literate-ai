@@ -441,8 +441,9 @@ identity permits comparison of unchanged facts. Changed routes, receiver code, f
 observations and observations older than five minutes refuse current admission.
 
 The controller caps each capability subprocess at the earlier of the action deadline
-and 60 seconds, including controller identity preparation. Native Windows evidence
-shows identity reads and process startup can exhaust the previous 30-second cap.
+and five minutes, including controller identity preparation. Native retained-tree
+receiver startup must revalidate complete source and authority before publication;
+the earlier 60-second cap refused a real source tree beyond 100,000 members.
 The outer action deadline remains authoritative even when shorter than this cap.
 Its canonical challenge carries that same shortened deadline. Probe
 stdin/stdout are bounded to 16 KiB and stderr to 4 KiB; owned descendants are terminated
