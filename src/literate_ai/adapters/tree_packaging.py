@@ -144,6 +144,11 @@ def materialize_composed_tree_package_set(
     )
     owned = directory_node(root)
     try:
+        # SDK geometry has no directory-mode field; package projection owns the
+        # canonical modes independently of the constructor's ambient umask.
+        for member in projection.members:
+            if member.kind == "directory":
+                (root / member.path).chmod(member.mode)
         verify_composed_tree_package_stage(projection, root)
         return root
     except BaseException:

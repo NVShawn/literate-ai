@@ -2,12 +2,17 @@
 
 ## Unreleased
 
+- Composed retained-tree packages apply canonical directory permissions under permissive and restrictive worker umasks. Independent verification still rejects later permission changes.
+
 - Worktree audit inputs retain bounded Git operation metadata and reject changed
   descendant bytes or directory membership; complete audit and retirement
   authority remain separate requirements.
 
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
+
+- Worker alignment uses the discovered coding CLI executable for its help and
+  model checks, including declared Windows tool locations outside `PATH`.
 
 - Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
   before acquisition, preserving explicit compiler selections. C++ developer
