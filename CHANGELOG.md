@@ -9,7 +9,9 @@
   authority remain separate requirements.
 
 - Add installed-wheel adoption coverage for retained third-party Component-shaped
-  files, using real unittest, build, package and parity controls.
+  files, using real unittest, build, package and parity controls. Exercise public
+  status with an explicitly selected local shim and preserve native/Python
+  requirements and adopted-project inputs.
 
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.

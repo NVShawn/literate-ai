@@ -32129,6 +32129,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
 
+- **2026-11-04 owned integration candidate (in progress):** Consolidate reviewed CPP argument repair, bounded worktree operation custody, canonical composed-package directory modes, GPU observation evidence, Rust adoption inventory, and installed catalog/selected-shim status coverage through ordinary histories. [Source composition](../../verification/reviewed-blocker-integration-composition.json) records every inherited scope and the two reviewed smoke-script exceptions from intermediate source `3686f30`. Independent source review passes; its active full gate remains intermediate evidence and cannot qualify this final union by relabeling. Require one fresh complete final-source qualification and exact full remote CI before main, followed by exact post-main gates. Historical installed Darwin and native observations retain their original source/artifact boundaries. The remaining native/package goals and proposed ADR 0053 stay open; this integration does not authorize publication.
+
 - **Release execution:** 1.4.0 (publication and postpublication closure)
 - **Detailed plan:** [1.4 integration](1.4-integration.md).
 - **Phase boundary:** This umbrella remains open through publication and read-back.
@@ -33434,6 +33436,20 @@ independent review and the complete combined gate from test one.
 - **Priority:** P1
 - **Owner:** Operator status and canonical host-install Flavor composition; issue 268
 - **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
+- **Installed qualification:** The complete canonical wheel gate passes on macOS
+  ARM64 at source `e6513d529fc289870c6cfc603fe38acf2063863a`. A genuine adopted
+  project explicitly replaces its Make default with the already created local
+  shim, whose canonical coordinate differs from its physical directory. Public
+  status before and after this authored setup preserves the built-in Python
+  requirement and native target realization. Each status call preserves all 569
+  fixture nodes; all 5,224 authored source inputs retain their contents and
+  recorded physical metadata throughout the gate. Actual selected host readiness is true,
+  without forcing probes or qualifying unavailable Make provenance. Adoption
+  retains its no-generation guard while status restores the operator's original
+  provider settings. Independent source and artifact review approved the
+  [source-bound installed evidence](../../verification/installed-selected-shim-status-qualification.json).
+  This does not claim onboarding automatically selects the shim, Windows
+  qualification, a new full-source regression or completed exact review/main CI.
 - **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
 - **Depends on:** none
 - **Completion prerequisites:** none
