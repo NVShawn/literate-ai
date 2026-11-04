@@ -94,6 +94,13 @@ WORKER-GPU-MEMORY-002 independently qualifies the landed permission-text memory
 serializer on its original command route; this bounded observation fix does not
 complete the broader command-worker or native package goals.
 
+RETAINED-UNIT-PACKAGE-001 permits one canonical request preparation within each
+receiver construction. The preview and worker must use the same actual typed
+selection and plan from that invocation; decoded intent cannot replace them.
+Each publication, reservation and execution boundary still reopens current
+project, source, profile, catalog, SDK policy and private registration authority.
+No preparation is cached across calls or grants execution or release permission.
+
 RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 extend Goals 1 and 4
 with hierarchical retained-tree information cards and authenticated read-only
 worker observations. Issues #279 and #280 are included in 1.4. The directing user
