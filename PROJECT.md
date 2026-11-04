@@ -90,6 +90,9 @@ CARGO-COMPAT-001 and COMMAND-WORKER-001 record the directing user's explicit
 acceptance of ADRs 0054 and 0055 for 1.4 under Goals 1, 4, 5 and 6.
 Reviewed Cargo compatibility and command-addressed remote workers remain open;
 implementation follows the prioritized FreeBSD SDK and Daemonarchy unblock.
+WORKER-GPU-MEMORY-002 independently qualifies the landed permission-text memory
+serializer on its original command route; this bounded observation fix does not
+complete the broader command-worker or native package goals.
 
 RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 extend Goals 1 and 4
 with hierarchical retained-tree information cards and authenticated read-only
