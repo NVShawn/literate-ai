@@ -33502,18 +33502,18 @@ independent review and the complete combined gate from test one.
 
 - **Release target:** none assigned; requested by Daemonarchy 1.5.1
 - **GitHub issue:** [#295](https://github.com/jordanhubbard/literate-ai/issues/295)
-- **Proposed decision:** [ADR 0060](../decisions/0060-retained-project-receipt-promotion.md); **not accepted**. Directing-user acceptance is required before this item is scheduled.
-- **Next action:** Directing user accepts, amends or rejects ADR 0060; then review draft implementation and qualify against a real retained run.
+- **Proposed decision:** [ADR 0060](../decisions/0060-retained-project-receipt-promotion.md); **accepted** by the directing user on 2026-11-04.
+- **Next action:** Merge the reviewed implementation, then qualify against a real retained run.
 
 - **Priority:** P1
 - **Owner:** Retained-project lifecycle and project test receipts
 - **Direction:** Provide a supported, verified path from a passed retained-project run to `project test-receipt update` under a custom retained-suite policy without weakening any policy check.
 - **Conclusion:** `project test-receipt promote-retained` re-verifies custody, plan, policies, evidence and counts and emits a finalized candidate.
 - **Depends on:** none
-- **Completion prerequisites:** ADR 0060 acceptance
+- **Completion prerequisites:** none
 - **Implementation:**
   - [x] Draft `promote-retained` command and verification owner with refusal tests (provisional on ADR acceptance).
-  - [ ] ADR 0060 accepted by the directing user.
+  - [x] ADR 0060 accepted by the directing user.
 - **Evidence:**
   - [x] Critical tests cover stale plan, changed inputs/policy, wrong runner, wrong suite, missing evidence kind, tampered custody and below-minimum count.
   - [ ] Qualification against a real retained run (Daemonarchy plan `sha256:2bbd12ac...f607`) is open: its custody store was not retained on the build worker.

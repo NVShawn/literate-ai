@@ -1,9 +1,8 @@
 # ADR 0060: Promote a verified retained-project run into the project test receipt
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-04
-- Acceptance: None yet. This ADR awaits explicit acceptance by the directing user; the
-  implementation in the draft pull request is provisional until then (ADR 0006).
+- Acceptance: The directing user explicitly accepted ADR 0060 on 2026-11-04 ("I acceptt ADR0060, proceed").
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.5.1 consumer request; framework release line to be chosen on acceptance
 - Roadmap: [RETAINED-RECEIPT-PROMOTE-001](../roadmap/active-work.md#retained-receipt-promote-001-promote-a-verified-retained-project-run-into-the-project-test-receipt)
