@@ -49,6 +49,10 @@
   memory when the device reports permission text. Requirements needing a known
   memory capacity still refuse; no capacity is inferred.
 
+- Add owned POSIX fault controls for retained-tree HTML source recapture, index substitution, generation custody and unpublished budget failures.
+
+- Add bounded retained-tree HTML plans and acknowledged initial offline publication. Tree freshness, recovery, per-unit joins and native/browser qualification remain open.
+
 - Bare Component runs resolve their declared demonstration inputs from the
   Component name even when selected through a project-relative path. Remote
   processes that exit nonzero retain bounded, redacted failure evidence rather
