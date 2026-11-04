@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Remote retained SDK producer and consumer grants honor the original action's
+  deadline, capped at three hours, so long source verification does not outlive
+  an unrelated ten-minute grant. Expiry, revocation and current-custody checks
+  remain enforced; local and other build-grant defaults are unchanged.
+
 - Worker alignment uses the discovered coding CLI executable for its help and
   model checks, including declared Windows tool locations outside `PATH`.
 

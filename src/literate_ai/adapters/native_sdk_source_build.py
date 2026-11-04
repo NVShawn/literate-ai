@@ -98,6 +98,7 @@ class NativeSdkSourceBuildService:
         environment: Mapping[str, str],
         host_build_acknowledged: bool = False,
         references: ReferenceIndex | None = None,
+        authorization_deadline: datetime | None = None,
     ) -> None:
         if selection not in select_native_sdk_recipes(
             snapshot, selection.component_revision
@@ -129,11 +130,22 @@ class NativeSdkSourceBuildService:
                 *baseline_swift_rules(),
             ),
         )
+        grant_options = (
+            {}
+            if authorization_deadline is None
+            else {
+                "authorization_lifetime": (
+                    security_policy.maximum_authorization_lifetime
+                ),
+                "authorization_deadline": authorization_deadline,
+            }
+        )
         self.authorizer = PolicyBuildAuthorizer(
             security_policy,
             actor,
             reason,
             yolo_acknowledged=host_build_acknowledged,
+            **grant_options,
         )
         self.verifier = LiveBuildAuthorizationVerifier(self._current_revocations)
         self.builder = NativeSdkRepositoryBuilder(
