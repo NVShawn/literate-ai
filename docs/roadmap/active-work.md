@@ -31277,6 +31277,43 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 ### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
 
+Current next action (in progress): independently review and qualify one-call
+canonical planning inside a genuine execution guard. The exact integrated
+planning/metadata candidate preserves admission checks but still performs at
+least four original-tree and four captured-tree verifications per workspace
+guard. Its source trace identifies at least 22 complete-tree checks between SDK
+input-descriptor publication and the first command; this is a static lower bound,
+not a measured live call stack. A bounded native descriptor observation confirms
+the original request remains active and has original-project source files open.
+Keep that original qualification attempt unchanged while developing the repair.
+
+The repair belongs to the existing retained runtime and observation authority.
+Derive the receiver and source-plan assertions from the immutable plan produced
+by the same fresh canonical preparation, bound to the original receiver,
+request, worker, registration, catalog, process and deadline. Every next guard
+prepares and measures a new nonce; custom callbacks keep independent source
+replanning. Preserve all direct original/captured byte verifications, tool, SDK,
+dependency, revocation, deadline and publication checks, including fresh closing
+registration/custody. Do not add a general verification cache. Test a coordinated
+change that is observed and restored before closing; closing bytes alone are
+insufficient. Never reuse observations across calls, restore an owner from JSON,
+or turn a plan value into admission.
+Require real source/profile/catalog/SDK-policy/registration mutation refusals,
+complete regression and an equivalent large native before/after comparison.
+The five-unit PACKAGE, original-byte VERIFY and negative controls remain pending;
+neither a source review nor a diagnostic observation completes those gates.
+
+Development controls pass six actual public-receiver cases on macOS, with no
+skips or failures. They preserve public execution/verification-plan equality,
+before/after publication mutation refusals, changed-then-restored source,
+profile, catalog, SDK-policy and registration refusals, independent replanning
+for cached/custom measurement callbacks, and copy/foreign-process refusal.
+An actual macOS platform observation composes with the same fresh canonical
+plan and refuses a subsequent source change. These are portable guard and local
+host-observation results, not native PACKAGE, SDK or release qualification.
+Independent source review, complete regression and installed large-tree
+comparison remain required; all implementation/evidence checkboxes stay open.
+
 The subsequent exact installed native attempt still reaches the unchanged
 3,600-second deadline before PACKAGE/LINK admission. Its correlated native
 diagnostic proves cleanup, no quarantine and canonical reservation release; the
@@ -31330,7 +31367,8 @@ measurements, not an uninstrumented release benchmark or accepted lifecycle.
 The first dependency-profile attempt refused retired inputs; its replacement
 captures a fresh verified diagnostic snapshot without repairing the retired run.
 
-Next in progress: read the wheel RECORD inventory directly in each fresh
+Earlier next action, completed by the direct-RECORD result below: read the wheel
+RECORD inventory directly in each fresh
 distribution observation, avoiding the metadata library existence prefilter.
 Every selected member still undergoes current byte verification; missing recorded
 members must refuse rather than disappear from the inventory. Keep the existing
@@ -32986,6 +33024,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   selector is still required; choosing an entry by recency is not a repair.
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
+
+- **2026-11-04 observation-guard integration (in progress):** Combine the reviewed operation-local canonical guard refinement with the green SDK/tree integration source. Preserve the SDK metadata batch and original action grant lifetime, receiver startup preparation, complete tree publication/freshness work and all current-main portable fixes. The earlier isolated guard source retained its source pin through an owned-checkout origin repair; all 60 related initialization, onboarding, parent and roadmap controls passed. Its development resume then exposed the already-reviewed composed-package directory-mode defect under permissive umask. The consolidated source includes the real directory normalization and permissive/restrictive mode controls; it does not mask the failure with a worker umask change. Preserve both failures and require a fresh whole-source gate on the new source pin before a new exact wheel. Installed native source-scale PACKAGE, original-byte cold VERIFY, output hardlink/source membership and corruption/refusal controls remain open. Historical deadline diagnostics do not confer new ownership or qualify positive cleanup.
 
 - **2026-11-04 portable permission repair (in progress):** The isolated Linux full gate at source `34fdf1f` stops after 1,566 cases (one error, 82 declared skips): composed package staging creates directories with ambient umask `0002`, yielding mode `0775` where the canonical package projection requires `0755`. A controlled unchanged-source replay reproduces the same mismatch. Normalize only the owned package staging directories to their projected modes before independent verification; exercise permissive and restrictive umasks and preserve refusal of later mode tampering. This repairs portable package construction, not the outstanding native scale/transport acceptance. Retain the original full failure; require independent source review, focused controls, fresh full regression and exact CI before qualification.
 

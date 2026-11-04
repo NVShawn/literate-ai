@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retained execution guards derive receiver and source-plan checks from the same
+  fresh canonical preparation. Each guard still measures a new nonce and keeps
+  all direct byte, dependency, SDK, tool, revocation and deadline checks. Custom
+  callbacks retain independent replanning; plan values grant no execution.
+
 - Command workers preserve normal failed RUN diagnostics with the original input artifact reference, while retaining pre-execution failures and rejecting failed build/test artifact exports.
 
 - Windows coding-agent test compilers retain configured temporary/system variables while applying MSVC overrides.

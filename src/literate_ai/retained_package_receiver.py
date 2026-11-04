@@ -7,9 +7,11 @@ Native attempt ownership is acquired before launching the execution child.
 
 import argparse
 import copy
+import json
 import os
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -44,7 +46,7 @@ from literate_ai.cli.retained_unit_execution import (
     _prepare_retained_unit_execution,
     execute_retained_unit_package_from_args,
 )
-from literate_ai.contracts import ContentIdentity
+from literate_ai.contracts import ContentIdentity, canonical_json_bytes
 from literate_ai.contracts.paths import canonical_relative_posix_path
 from literate_ai.projects import read_only_project_configuration_parses
 
@@ -237,11 +239,57 @@ def _read_registered_return_blob(config, content, output):
     current()
 
 
-def _configured_worker(config, *, owned_child=None):
-    def preview_current():
-        return execute_retained_unit_package_from_args(
-            config.args, verification_selection=config.verification_selection
+_CANONICAL_CURRENT_PLAN = object()
+
+
+@dataclass(frozen=True, slots=True, init=False, eq=False)
+class _CanonicalRetainedCurrentPlan:
+    """One fresh canonical preparation per call, never a saved admission."""
+
+    _config: object
+    _preview: bytes
+    _registered_current: object
+    _pid: int
+    _seal: object
+
+    def __init__(self, config, preview, registered_current, *, _seal=None):
+        if _seal is not _CANONICAL_CURRENT_PLAN:
+            raise TypeError("retained.receiver.private-current-plan-required")
+        for name, value in {
+            "_config": config,
+            "_preview": canonical_json_bytes(preview),
+            "_registered_current": registered_current,
+            "_pid": os.getpid(),
+            "_seal": _seal,
+        }.items():
+            object.__setattr__(self, name, value)
+
+    def __reduce__(self):
+        raise TypeError("retained.receiver.current-plan-cannot-be-transported")
+
+    def matches_worker_selection(self, identity):
+        if self._seal is not _CANONICAL_CURRENT_PLAN or self._pid != os.getpid():
+            raise ValueError("retained.receiver.current-plan-not-original")
+        return (
+            json.loads(self._preview)["request"]["worker_selection_identity"]
+            == identity.uri
         )
+
+    def __call__(self):
+        if self._seal is not _CANONICAL_CURRENT_PLAN or self._pid != os.getpid():
+            raise ValueError("retained.receiver.current-plan-not-original")
+        self._registered_current()
+        prepared = _prepare_retained_unit_execution(
+            self._config.args,
+            verification_selection=self._config.verification_selection,
+        )
+        if canonical_json_bytes(prepared.preview()) != self._preview:
+            raise ValueError("retained.receiver.authorized-intent-changed")
+        self._registered_current()
+        return prepared.planning.plan
+
+
+def _configured_worker(config, *, owned_child=None):
 
     prepared = _prepare_retained_unit_execution(
         config.args, verification_selection=config.verification_selection
@@ -268,11 +316,9 @@ def _configured_worker(config, *, owned_child=None):
             ):
                 raise ValueError("retained.receiver.source-credential-changed")
 
-    def current():
-        registered_current()
-        fresh, code = preview_current()
-        if code != 0 or fresh != preview:
-            raise ValueError("retained.receiver.authorized-intent-changed")
+    current = _CanonicalRetainedCurrentPlan(
+        config, preview, registered_current, _seal=_CANONICAL_CURRENT_PLAN
+    )
 
     def run(context):
         if owned_child is None:

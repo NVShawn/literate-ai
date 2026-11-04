@@ -117,6 +117,17 @@ Each publication, reservation and execution boundary still reopens current
 project, source, profile, catalog, SDK policy and private registration authority.
 No preparation is cached across calls or grants execution or release permission.
 
+RETAINED-OBSERVATION-PERF-001 permits the canonical receiver and source-plan
+assertions within one validation call to use the immutable plan produced by that
+same fresh canonical preparation. Bind its original receiver, request, worker,
+registration, catalog, process and deadline; prepare and measure a fresh nonce
+again on the next call. Custom callbacks retain independent source replanning.
+Keep all direct original/captured byte checks, dependency and SDK observations,
+tool/revocation checks and closing registration/custody checks. Do not cache
+successful input verification. A change that is observed and then restored must
+still refuse. The plan value cannot restore an owner from a document or grant
+execution or release permission.
+
 RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 extend Goals 1 and 4
 with hierarchical retained-tree information cards and authenticated read-only
 worker observations. Issues #279 and #280 are included in 1.4. The directing user

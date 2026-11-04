@@ -170,6 +170,70 @@ def _prepare_retained_unit_execution(
     )
 
 
+_CANONICAL_AUTHORITY_PLAN = object()
+
+
+@dataclass(frozen=True, slots=True, init=False, eq=False)
+class _CanonicalRetainedAuthorityPlan:
+    """Original CLI assertions, with reuse limited to a fresh receiver plan."""
+
+    _authority: object
+    _selected: object
+    _plan: object
+    _verification_selection: object
+    _policy: object
+    _pid: int
+    _seal: object
+
+    def __init__(self, prepared, *, _seal=None):
+        if _seal is not _CANONICAL_AUTHORITY_PLAN:
+            raise TypeError("retained.receiver.private-authority-plan-required")
+        for name, value in {
+            "_authority": prepared.context[-1],
+            "_selected": prepared.selected,
+            "_plan": prepared.planning.plan,
+            "_verification_selection": prepared.verification_selection,
+            "_policy": prepared.context[2],
+            "_pid": os.getpid(),
+            "_seal": _seal,
+        }.items():
+            object.__setattr__(self, name, value)
+
+    def __reduce__(self):
+        raise TypeError("retained.receiver.authority-plan-cannot-be-transported")
+
+    def _require_original(self):
+        if self._seal is not _CANONICAL_AUTHORITY_PLAN or self._pid != os.getpid():
+            raise ValueError("retained.receiver.authority-plan-not-original")
+        if self._verification_selection is not None:
+            self._verification_selection.require_current(self._policy)
+
+    def __call__(self):
+        self._require_original()
+        _manifest, selected, current = self._authority()
+        if _worker_selection_identity(selected) != _worker_selection_identity(
+            self._selected
+        ):
+            raise ValueError("retained.unit.execution-worker-selection-changed")
+        return current.plan
+
+    def _from_receiver_preparation(self, plan):
+        # Only the exact canonical receiver callback can supply this value. It
+        # just prepared authority and compared the complete authorized preview,
+        # including worker/catalog/parameters and verification intent. Retain the
+        # original verification owner's currentness assertion independently.
+        self._require_original()
+        if plan != self._plan:
+            raise ValueError("retained.unit.execution-authority-changed")
+        return plan
+
+    def _matches_receiver_selection(self, context):
+        self._require_original()
+        return context.matches_canonical_worker_selection(
+            _worker_selection_identity(self._selected)
+        )
+
+
 def execute_retained_unit_package_from_args(
     args, *, receiver_context=None, verification_selection=None
 ):
@@ -240,15 +304,9 @@ def execute_retained_unit_package_from_args(
     if retained_unit_tool_observations(pkg_tool, tar_tool) != observations:
         raise ValueError("retained.unit.current-native-tools-differ")
 
-    def current_authority_plan():
-        if verifying:
-            verification_selection.require_current(policy)
-        _manifest, current_worker, current = authority()
-        if _worker_selection_identity(current_worker) != _worker_selection_identity(
-            selected
-        ):
-            raise ValueError("retained.unit.execution-worker-selection-changed")
-        return current.plan
+    current_authority_plan = _CanonicalRetainedAuthorityPlan(
+        prepared, _seal=_CANONICAL_AUTHORITY_PLAN
+    )
 
     def current_plan():
         if receiver_context is not None:

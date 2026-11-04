@@ -19,6 +19,7 @@ from literate_ai.adapters.retained_project_execution import (
 from literate_ai.adapters.retained_project_platform import (
     RetainedLocalPlatform,
     RetainedReceiverPlatform,
+    _receiver_platform_current_plan,
 )
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
 from literate_ai.adapters.user_paths import resolve_user_paths
@@ -207,6 +208,10 @@ def _execute_retained_project(
             return platform.current_plan(current_plan)
         platform.require_current()
         return current_plan()
+
+    receiver_current = _receiver_platform_current_plan(platform, current_plan)
+    if receiver_current is not None:
+        current_local_plan = receiver_current
 
     directories = bind_cache_directories(
         source,

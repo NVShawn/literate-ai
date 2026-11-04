@@ -5,6 +5,7 @@ validation after it; cheap registration/ownership checks bracket that boundary.
 Custom callbacks retain the original full-currentness composition.
 """
 
+import os
 import secrets
 from dataclasses import dataclass
 
@@ -36,6 +37,8 @@ class RegisteredRetainedPackageCapabilityProbe:
     _catalog: object
     _input: bytes
     _poll_guard: object
+    _full_current: object
+    _pid: int
     _seal: object
 
     def __init__(
@@ -64,6 +67,8 @@ class RegisteredRetainedPackageCapabilityProbe:
             "_catalog": worker.catalog_identity,
             "_input": worker.execution_request_bytes,
             "_poll_guard": worker.poll_guard,
+            "_full_current": worker.require_current,
+            "_pid": os.getpid(),
             "_seal": _seal,
         }.items():
             object.__setattr__(self, name, value)
@@ -73,6 +78,7 @@ class RegisteredRetainedPackageCapabilityProbe:
     ):
         if (
             getattr(self, "_seal", None) is not _REGISTERED_PROBE
+            or self._pid != os.getpid()
             or worker is not self._worker
             or request != self._request
             or deadline != self._deadline
@@ -83,9 +89,13 @@ class RegisteredRetainedPackageCapabilityProbe:
             or worker.catalog_identity != self._catalog
             or worker.execution_request_bytes != self._input
             or worker.poll_guard is not self._poll_guard
+            or worker.require_current is not self._full_current
         ):
             raise ValueError("retained.capability.private-probe-binding-differs")
         deadline.remaining()
+
+    def __reduce__(self):
+        raise TypeError("retained.capability.probe-cannot-be-transported")
 
     def require_registered_current(self):
         self.require_binding(
@@ -101,6 +111,21 @@ class RegisteredRetainedPackageCapabilityProbe:
         self._deadline.remaining()
 
     def __call__(self):
+        measured, _plan = self.observe_current_plan()
+        return measured
+
+    def has_canonical_current_plan(self):
+        from literate_ai.retained_package_receiver import _CanonicalRetainedCurrentPlan
+
+        return (
+            getattr(self, "_seal", None) is _REGISTERED_PROBE
+            and self._pid == os.getpid()
+            and self._worker.require_current is self._full_current
+            and type(self._full_current) is _CanonicalRetainedCurrentPlan
+        )
+
+    def observe_current_plan(self):
+        """Return this invocation's measured capability and actual plan value."""
         self.require_registered_current()
         content = canonical_json_bytes(
             {
@@ -124,14 +149,23 @@ class RegisteredRetainedPackageCapabilityProbe:
         )
         # This is a fresh full check on EVERY invocation, after measurement.
         # There is no reusable "already validated" flag or observation cache.
-        self._worker.require_current()
+        current_plan = self._full_current()
         self.require_registered_current()
         if measured.capability_identity != self._capability_identity:
             raise ActionWireError(
                 "action_admission.runtime_changed",
                 "worker runtime or supported capabilities changed",
             )
-        return measured
+        # Custom callbacks retain the independent source re-planner. An ordinary
+        # returned plan value never establishes that a fresh preparation ran.
+        if not self.has_canonical_current_plan():
+            current_plan = None
+        return measured, current_plan
+
+    def matches_worker_selection(self, identity):
+        return self.has_canonical_current_plan() and (
+            self._full_current.matches_worker_selection(identity)
+        )
 
 
 def bind_retained_package_capability_probe(

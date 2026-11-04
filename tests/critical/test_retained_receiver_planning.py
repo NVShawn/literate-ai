@@ -10,7 +10,9 @@ import copy
 import hashlib
 import io
 import json
+import multiprocessing
 import os
+import pickle
 import secrets
 import sys
 import unittest
@@ -21,6 +23,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from literate_ai import action_worker
+from literate_ai import retained_package_receiver as receiver
 from literate_ai.adapters.action_capabilities import (
     CAPABILITY_REQUEST_SCHEMA,
     decode_capability_response,
@@ -29,9 +32,35 @@ from literate_ai.adapters.action_capabilities import (
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
+    decode_attested_action_response,
+    encode_action_request,
+    record_identity,
+)
+from literate_ai.adapters.action_retained_unit_package_worker import (
+    ConfiguredRetainedUnitPackageWorker,
+    retained_unit_package_action,
+)
+from literate_ai.adapters.component_lock_application import (
+    current_project_component_locks,
+)
+from literate_ai.adapters.retained_package_capability import (
+    RegisteredRetainedPackageCapabilityProbe,
 )
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
+)
+from literate_ai.adapters.retained_project_platform import (
+    RetainedReceiverPlatform,
+    _compose_receiver_current_plan,
+    _receiver_platform_current_plan,
+)
+from literate_ai.application.action_dag_scheduler import (
+    LifecycleActionDispatchRequest,
+    LifecycleActionWorker,
+)
+from literate_ai.cli.retained_unit_execution import (
+    _CANONICAL_AUTHORITY_PLAN,
+    _CanonicalRetainedAuthorityPlan,
 )
 from literate_ai.contracts import (
     ContentIdentity,
@@ -398,6 +427,387 @@ class RetainedReceiverPlanningTests(unittest.TestCase):
         )
         with self.assertRaises(ActionWireError):
             decode_capability_response(raw, challenge, receiver_code_identity())
+
+    def execute_guard_request(self, worker):
+        """Use the real public wire/receiver guards, not native execution proof."""
+        observed = self.require_capability(worker)
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=120))
+        payload = record_identity(worker.execution_request_bytes)
+        request = LifecycleActionDispatchRequest(
+            canonical_identity("actual retained planning guard fixture"),
+            retained_unit_package_action(
+                worker.retained_plan_identity, worker.worker.worker_id, payload
+            ),
+            LifecycleActionWorker(
+                worker.worker.worker_id,
+                worker.worker.identity,
+                worker.catalog_identity,
+                observed.identity,
+            ),
+            0,
+            (),
+            deadline.identity,
+            (payload,),
+        )
+        content = encode_action_request(
+            request,
+            deadline,
+            {payload: worker.execution_request_bytes},
+            capability=observed.capability_identity,
+        )
+        incoming = io.TextIOWrapper(io.BytesIO(content), encoding="utf-8")
+        output_bytes = io.BytesIO()
+        outgoing = io.TextIOWrapper(output_bytes, encoding="utf-8")
+        with (
+            patch.object(sys, "stdin", incoming),
+            patch.object(sys, "stdout", outgoing),
+            patch.object(sys, "stderr", io.StringIO()),
+            patch.dict(
+                os.environ, {"LITAI_ACTION_WORKER_IDENTITY": self.worker.identity.uri}
+            ),
+        ):
+            status = action_worker.main(
+                ["--cas", str(self.store.root), "--workspace", str(self.obj)],
+                package_worker=worker,
+            )
+        outgoing.flush()
+        self.assertEqual(status, 0, output_bytes.getvalue())
+        outcome, record, attested = decode_attested_action_response(
+            output_bytes.getvalue(), request
+        )
+        self.assertEqual(outcome.failure_code, "action_source.custody_unavailable")
+        self.assertIsNone(outcome.result_identity)
+        self.assertIsNone(record)
+        self.assertEqual(attested, observed.capability_identity)
+
+    def test_actual_transient_changes_refuse_inside_fresh_receiver_preparation(self):
+        for path in (
+            self.root / "original/asset.bin",
+            self.profile_path,
+            self.catalog,
+            self.root / "sdk-policy.json",
+            self.config_path,
+        ):
+            with self.subTest(input=path.name):
+                preview = self.public_plan()
+                worker = self.configured(preview)
+                original = path.read_bytes()
+                changed = original + (b"changed" if path.suffix == ".bin" else b" ")
+                if path == self.catalog:
+                    value = json.loads(original)
+                    value["workers"][0]["endpoint"] = "fixture@changed.invalid"
+                    changed = canonical_json_bytes(value)
+                reached = []
+                original_prepare = receiver._prepare_retained_unit_execution
+                original_registered = _Registration.require_unchanged
+
+                def prepare_changed(
+                    *args,
+                    path=path,
+                    changed=changed,
+                    reached=reached,
+                    original_prepare=original_prepare,
+                    original=original,
+                    **kwargs,
+                ):
+                    path.write_bytes(changed)
+                    reached.append("changed observed by actual authority guard")
+                    try:
+                        return original_prepare(*args, **kwargs)
+                    finally:
+                        path.write_bytes(original)
+
+                def registration_changed(
+                    config,
+                    path=path,
+                    changed=changed,
+                    reached=reached,
+                    original_registered=original_registered,
+                    original=original,
+                ):
+                    path.write_bytes(changed)
+                    reached.append("changed observed by actual authority guard")
+                    try:
+                        return original_registered(config)
+                    finally:
+                        path.write_bytes(original)
+
+                def run(
+                    context,
+                    path=path,
+                    original_prepare=original_prepare,
+                    registration_changed=registration_changed,
+                    prepare_changed=prepare_changed,
+                    reached=reached,
+                ):
+                    replanner = _compose_receiver_current_plan(
+                        context,
+                        original_prepare(
+                            _Registration(self.config_path).args
+                        ).planning.plan,
+                        lambda: (
+                            original_prepare(
+                                _Registration(self.config_path).args
+                            ).planning.plan
+                        ),
+                    )
+                    mutation = (
+                        patch.object(
+                            _Registration,
+                            "require_unchanged",
+                            registration_changed,
+                        )
+                        if path == self.config_path
+                        else patch.object(
+                            receiver,
+                            "_prepare_retained_unit_execution",
+                            side_effect=prepare_changed,
+                        )
+                    )
+                    with mutation:
+                        replanner()
+                    reached.append("unsafe result after transient source change")
+                    raise RuntimeError("unreachable successful guard")
+
+                self.execute_guard_request(replace(worker, run_retained=run))
+                self.assertEqual(
+                    reached, ["changed observed by actual authority guard"]
+                )
+                self.assertEqual(path.read_bytes(), original)
+                self.require_capability(worker)
+
+    def test_custom_measurements_keep_independent_source_replanning(self):
+        for mode in ("cached", "subclass"):
+            with self.subTest(measurement=mode):
+                worker = self.configured(self.public_plan())
+                path = self.root / "original/asset.bin"
+                original = path.read_bytes()
+                armed = []
+                reached = []
+
+                class CustomMeasurementWorker(ConfiguredRetainedUnitPackageWorker):
+                    def execute(
+                        inner,
+                        *args,
+                        mode=mode,
+                        armed=armed,
+                        path=path,
+                        original=original,
+                        reached=reached,
+                        **kwargs,
+                    ):
+                        original_measure = kwargs["measure_capability"]
+
+                        def measure():
+                            observed = original_measure()
+                            if armed:
+                                path.write_bytes(original + b"transient")
+                                reached.append("changed after canonical measurement")
+                            return observed
+
+                        class CustomProbe(RegisteredRetainedPackageCapabilityProbe):
+                            def __init__(inner):
+                                pass
+
+                            def __call__(inner):
+                                return measure()
+
+                        kwargs["measure_capability"] = (
+                            CustomProbe() if mode == "subclass" else measure
+                        )
+                        return super().execute(*args, **kwargs)
+
+                def run(
+                    context,
+                    armed=armed,
+                    reached=reached,
+                    path=path,
+                    original=original,
+                ):
+                    config = _Registration(self.config_path)
+                    plan = receiver._prepare_retained_unit_execution(
+                        config.args
+                    ).planning.plan
+                    replanner = _compose_receiver_current_plan(
+                        context,
+                        plan,
+                        lambda: (
+                            receiver._prepare_retained_unit_execution(
+                                config.args
+                            ).planning.plan
+                        ),
+                    )
+                    armed.append(True)
+                    try:
+                        replanner()
+                        reached.append("unsafe result without independent replanning")
+                    finally:
+                        path.write_bytes(original)
+                    raise RuntimeError("unreachable successful guard")
+
+                custom = CustomMeasurementWorker(
+                    worker.worker,
+                    worker.catalog_identity,
+                    worker.retained_plan_identity,
+                    worker.registration_identity,
+                    worker.execution_authorization,
+                    worker.execution_request_bytes,
+                    run,
+                    worker.require_current,
+                    poll_guard=worker.poll_guard,
+                    verification_selection=worker.verification_selection,
+                )
+                self.execute_guard_request(custom)
+                self.assertEqual(reached, ["changed after canonical measurement"])
+                self.assertEqual(path.read_bytes(), original)
+                armed.clear()
+                self.require_capability(worker)
+
+    def test_custom_authority_refusal_survives_canonical_measurement(self):
+        worker = self.configured(self.public_plan())
+        reached = []
+
+        def run(context):
+            prepared = receiver._prepare_retained_unit_execution(
+                _Registration(self.config_path).args
+            )
+
+            def refusing_authority():
+                # This independent observer can impose assertions beyond the
+                # canonical plan. Its refusal must reach the actual public wire.
+                reached.append("independent authority observed")
+                raise ValueError("retained.unit.independent-authority-refused")
+
+            replanner = _compose_receiver_current_plan(
+                context, prepared.planning.plan, refusing_authority
+            )
+            replanner()
+            reached.append("unsafe authority callback bypass")
+
+        self.execute_guard_request(replace(worker, run_retained=run))
+        self.assertEqual(reached, ["independent authority observed"])
+        self.require_capability(worker)
+
+    def test_different_authority_parameters_keep_independent_selection_check(self):
+        worker = self.configured(self.public_plan())
+        reached = []
+
+        def run(context):
+            prepared = receiver._prepare_retained_unit_execution(
+                _Registration(self.config_path).args
+            )
+            # Worker, catalog and plan stay identical. The original CLI
+            # selection carries a different parameter, so canonical reuse must
+            # fall back to its real authority/selection check and refuse.
+            differing = replace(
+                prepared,
+                selected=replace(
+                    prepared.selected, parameters=(("independent_parameter", "1"),)
+                ),
+            )
+            authority = _CanonicalRetainedAuthorityPlan(
+                differing, _seal=_CANONICAL_AUTHORITY_PLAN
+            )
+            replanner = _compose_receiver_current_plan(
+                context, prepared.planning.plan, authority
+            )
+            reached.append("independent parameter selection check")
+            replanner()
+            reached.append("unsafe parameter mismatch bypass")
+
+        self.execute_guard_request(replace(worker, run_retained=run))
+        self.assertEqual(reached, ["independent parameter selection check"])
+        self.require_capability(worker)
+
+    def test_original_plan_callbacks_refuse_copy_and_foreign_process(self):
+        worker = self.configured(self.public_plan())
+        with self.assertRaises(TypeError):
+            copy.copy(worker.require_current)
+        with self.assertRaises(TypeError):
+            pickle.dumps(worker.require_current)
+        reached = []
+
+        def run(context):
+            probe = context._measure_capability
+            with self.assertRaises(TypeError):
+                copy.copy(probe)
+            with self.assertRaises(TypeError):
+                pickle.dumps(probe)
+            reached.append("transport refused")
+            if hasattr(os, "fork"):
+                fork = multiprocessing.get_context("fork")
+                parent, child = fork.Pipe(duplex=False)
+
+                def foreign_process():
+                    refused = 0
+                    for callback in (worker.require_current, probe):
+                        try:
+                            callback()
+                        except ValueError:
+                            refused += 1
+                    child.send(refused)
+                    child.close()
+
+                process = fork.Process(target=foreign_process)
+                process.start()
+                child.close()
+                try:
+                    self.assertTrue(parent.poll(10), "foreign-process check timed out")
+                    self.assertEqual(parent.recv(), 2)
+                    process.join(10)
+                    self.assertEqual(process.exitcode, 0)
+                finally:
+                    if process.is_alive():
+                        process.terminate()
+                        process.join(10)
+                    parent.close()
+            # This portable control deliberately produces no PACKAGE result.
+            raise RuntimeError("original-process lifetime control completed")
+
+        self.execute_guard_request(replace(worker, run_retained=run))
+        self.assertEqual(reached, ["transport refused"])
+        self.require_capability(worker)
+
+    @unittest.skipUnless(sys.platform == "darwin", "fixture selects actual macOS host")
+    def test_public_receiver_plan_composes_with_actual_host_and_fresh_source(self):
+        worker = self.configured(self.public_plan())
+        path = self.root / "original/asset.bin"
+        original = path.read_bytes()
+        reached = []
+
+        def run(context):
+            config = _Registration(self.config_path)
+            prepared = receiver._prepare_retained_unit_execution(config.args)
+            plan = prepared.planning.plan
+            replanner = _compose_receiver_current_plan(
+                context,
+                plan,
+                _CanonicalRetainedAuthorityPlan(
+                    prepared, _seal=_CANONICAL_AUTHORITY_PLAN
+                ),
+            )
+            platform = RetainedReceiverPlatform(
+                context,
+                current_project_component_locks(prepared.context[0]),
+                plan,
+            )
+            current = _receiver_platform_current_plan(platform, replanner)
+            self.assertEqual(current(), plan)
+            with self.assertRaises(TypeError):
+                copy.copy(current)
+            try:
+                path.write_bytes(original + b"changed")
+                with self.assertRaises(ValueError):
+                    current()
+            finally:
+                path.write_bytes(original)
+            self.assertEqual(current(), plan)
+            reached.append("actual host plan and source-change refusal")
+            raise RuntimeError("portable physical-host guard control completed")
+
+        self.execute_guard_request(replace(worker, run_retained=run))
+        self.assertEqual(reached, ["actual host plan and source-change refusal"])
+        self.require_capability(worker)
 
     def test_public_execution_and_verification_plans_publish_same_current_intent(self):
         first = self.public_plan()
