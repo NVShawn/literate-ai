@@ -42,10 +42,20 @@ class RetainedProjectSdkRuntime:
         cache_root,
         store,
         environment,
+        receiver_context=None,
     ):
         if project.root.absolute() != Path(project.root).resolve(strict=True):
             raise ValueError("retained.sdk.direct-project-root-required")
         self.project, self.binding, self.plan = project, binding, plan
+        if receiver_context is not None:
+            from .retained_receiver_context import RetainedReceiverContext
+
+            if not isinstance(receiver_context, RetainedReceiverContext):
+                raise TypeError("retained.sdk.live-receiver-context-required")
+            receiver_context.require_custody_current()
+            if receiver_context.retained_plan_identity != plan.identity:
+                raise ValueError("retained.sdk.receiver-plan-mismatch")
+        self.receiver_context = receiver_context
         self.locks = tuple(component_locks)
         if tuple(lock.identity for lock in self.locks) != plan.component_locks:
             raise ValueError("retained.sdk.exact-lock-owner-closure-required")
@@ -65,6 +75,8 @@ class RetainedProjectSdkRuntime:
         self.require_current()
 
     def require_current(self):
+        if self.receiver_context is not None:
+            self.receiver_context.require_custody_current()
         self.binding.require_unchanged()
         if (
             canonical_identity(self.binding.trust_binding.to_dict())
@@ -74,6 +86,8 @@ class RetainedProjectSdkRuntime:
             raise AuthorizationError("retained.sdk.project-authority-changed")
         for owner in self.owners:
             owner.require_unchanged()
+        if self.receiver_context is not None:
+            self.receiver_context.require_custody_current()
 
     def current_revocations(self):
         self.require_current()
@@ -102,17 +116,28 @@ class RetainedProjectSdkRuntime:
             raise ValueError("retained.sdk.complete-selected-recipes-required")
         owners = []
         for snapshot in snapshots:
+            policy_inputs = {
+                "policy": "standard-retained-native-sdk-build@1",
+                "standard_policy": self.binding.policy.identity.uri,
+                "retained_plan": self.plan.identity.uri,
+            }
+            policy_options = {}
+            deadline = None
+            if self.receiver_context is not None:
+                self.receiver_context.require_custody_current()
+                deadline = self.receiver_context.deadline.expires_at
+                policy_inputs.update(
+                    policy="standard-retained-native-sdk-build@2",
+                    action_request=self.receiver_context.request.identity.uri,
+                    action_deadline=self.receiver_context.deadline.identity.uri,
+                    maximum_authorization_lifetime_seconds=10800,
+                )
+                policy_options["maximum_authorization_lifetime"] = timedelta(hours=3)
             acquire = NativeSdkProjectAcquisition(
                 cache_root=self.cache_root / snapshot.authority.lock.identity.digest,
                 source_intelligence_policy=self.project.definition.source_intelligence,
                 security_policy=SecurityPolicy(
-                    canonical_identity(
-                        {
-                            "policy": "standard-retained-native-sdk-build@1",
-                            "standard_policy": self.binding.policy.identity.uri,
-                            "retained_plan": self.plan.identity.uri,
-                        }
-                    ).uri
+                    canonical_identity(policy_inputs).uri, **policy_options
                 ),
                 revocations=self.current_revocations,
                 environment=self.environment,
@@ -120,6 +145,7 @@ class RetainedProjectSdkRuntime:
                 reason="Build the exact reviewed original-project SDK dependencies",
                 host_build_acknowledged=True,
                 store=self.store,
+                authorization_deadline=deadline,
             )
             owner = acquire(snapshot)
             if owner is None:
@@ -156,6 +182,12 @@ class RetainedProjectSdkRuntime:
             raise AuthorizationError("retained.sdk.command-outside-reviewed-authority")
         self._grant_sequence += 1
         now = datetime.now(UTC)
+        expires_at = now + timedelta(minutes=5)
+        if self.receiver_context is not None:
+            self.receiver_context.require_custody_current()
+            expires_at = min(
+                now + timedelta(hours=3), self.receiver_context.deadline.expires_at
+            )
         return BuildAuthorization(
             authorization_id=f"retained-sdk:{self._session_id}:{self._grant_sequence}",
             classification_digest=runtime_identity.uri,
@@ -166,7 +198,7 @@ class RetainedProjectSdkRuntime:
             profile=SecurityProfile.CONSTRAINED,
             privileges=request.requested_privileges,
             issued_at=now,
-            expires_at=now + timedelta(minutes=5),
+            expires_at=expires_at,
         )
 
     def record(self, document):

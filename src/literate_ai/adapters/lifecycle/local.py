@@ -252,6 +252,7 @@ class PolicyBuildAuthorizer:
     authorization_lifetime: timedelta = timedelta(minutes=10)
     yolo_acknowledged: bool = False
     clock: Callable[[], datetime] = lambda: datetime.now(UTC)
+    authorization_deadline: datetime | None = None
 
     def authorize(
         self,
@@ -259,13 +260,22 @@ class PolicyBuildAuthorizer:
         build_request: Mapping[str, object],
     ) -> Mapping[str, object]:
         issued_at = self.clock()
+        expires_at = issued_at + self.authorization_lifetime
+        if self.authorization_deadline is not None:
+            if (
+                not isinstance(self.authorization_deadline, datetime)
+                or self.authorization_deadline.tzinfo is None
+                or self.authorization_deadline.utcoffset() is None
+            ):
+                raise ValueError("build authorization deadline must be timezone-aware")
+            expires_at = min(expires_at, self.authorization_deadline)
         authorization = self.policy.authorize_build(
             _classification(classification),
             _build_request(build_request),
             actor=self.actor,
             reason=self.reason,
             issued_at=issued_at,
-            expires_at=issued_at + self.authorization_lifetime,
+            expires_at=expires_at,
             yolo_acknowledged=self.yolo_acknowledged,
         )
         return authorization.to_dict()
