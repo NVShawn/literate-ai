@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add installed-wheel adoption coverage for retained third-party Component-shaped
+  files, using real unittest, build, package and parity controls.
+
 - Windows worker probes preserve unknown NVIDIA memory as null when the device
   reports permission text, matching the POSIX observation behavior.
 

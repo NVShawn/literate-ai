@@ -32556,6 +32556,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   validates the wrapped project. This is source-CLI development evidence; exact
   installed and integration-CI qualification remain open.
 
+- **Installed qualification work:** Extend the canonical wheel gate with an isolated POSIX fixture using only the exact installed distribution and public onboarding CLI. A genuine Python unittest, build and package must pass baseline/parity while ignored, untracked third-party `component.json`, `component.md` and corrupt `component.lock.json` remain byte-identical under the retained implementation. Installed public validation, canonical catalog discovery and authority-graph construction must succeed without interpreting those payloads. The Windows wheel retains an explicit unsupported-fixture outcome; no installed or integrated qualification is claimed before the actual gate passes.
+
 ### [x] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
 
 - **Release target:** 1.4.0
