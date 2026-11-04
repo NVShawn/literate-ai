@@ -65,8 +65,12 @@ def html_output_path(root: Path, relative: str) -> Path:
     return target
 
 
-def read_output(target: Path) -> OutputSnapshot | None:
+def read_output(
+    target: Path, *, maximum_bytes: int = MAXIMUM_HTML_BYTES
+) -> OutputSnapshot | None:
     """Read a bounded direct file through the descriptor that was inspected."""
+    if type(maximum_bytes) is not int or not 0 < maximum_bytes <= MAXIMUM_HTML_BYTES:
+        raise ValueError("HTML publication byte limit is invalid")
     try:
         before = target.lstat()
     except FileNotFoundError:
@@ -75,7 +79,7 @@ def read_output(target: Path) -> OutputSnapshot | None:
     if (
         stat_is_link_or_reparse(before)
         or not stat.S_ISREG(before.st_mode)
-        or before.st_size > MAXIMUM_HTML_BYTES
+        or before.st_size > maximum_bytes
     ):
         raise ValueError("existing HTML output is not a bounded direct file")
     flags = os.O_RDONLY
@@ -182,17 +186,34 @@ def publish_html(
     previous: OutputSnapshot | None,
     *,
     revalidate: Callable[[], None],
-) -> None:
+    maximum_bytes: int = MAXIMUM_HTML_BYTES,
+    return_snapshot: bool = False,
+    temporary_parent: Path | None = None,
+    revalidate_staged: Callable[[Path, OutputSnapshot], None] | None = None,
+) -> OutputSnapshot | None:
     """Publish complete bytes; missing destinations use atomic no-clobber linking."""
-    if not content or len(content) > MAXIMUM_HTML_BYTES:
+    if (
+        type(maximum_bytes) is not int
+        or type(return_snapshot) is not bool
+        or (temporary_parent is not None and not isinstance(temporary_parent, Path))
+        or (revalidate_staged is not None and not callable(revalidate_staged))
+        or not 0 < maximum_bytes <= MAXIMUM_HTML_BYTES
+        or not content
+        or len(content) > maximum_bytes
+    ):
         raise ValueError("HTML output exceeds the publication byte limit")
     ensure_safe_directory(target.parent)
-    if read_output(target) != previous:
+    if read_output(target, maximum_bytes=maximum_bytes) != previous:
         raise ValueError("HTML output changed before publication")
     if previous is not None and previous.content == content:
         revalidate()
-        return
-    descriptor, name = tempfile.mkstemp(prefix=".litai-html-", dir=target.parent)
+        return previous if return_snapshot else None
+    publication_parent = target.parent if temporary_parent is None else temporary_parent
+    if temporary_parent is not None:
+        require_safe_directory(publication_parent)
+        if publication_parent.stat().st_dev != target.parent.stat().st_dev:
+            raise ValueError("HTML staging must share the publication filesystem")
+    descriptor, name = tempfile.mkstemp(prefix=".litai-html-", dir=publication_parent)
     temporary = Path(name)
     owned = os.fstat(descriptor)
     try:
@@ -203,7 +224,7 @@ def publish_html(
         # Windows may finalize write timestamps only when the writer closes.
         # Reopen through the bounded no-follow reader, retain the created file's
         # identity/mode, and compare actual bytes before trusting this snapshot.
-        written = read_output(temporary)
+        written = read_output(temporary, maximum_bytes=maximum_bytes)
         if (
             written is None
             or written.signature[:2] != (owned.st_dev, owned.st_ino)
@@ -211,9 +232,14 @@ def publish_html(
             or written.content != content
         ):
             raise ValueError("HTML temporary output changed after writing")
+        if revalidate_staged is not None:
+            revalidate_staged(temporary, written)
         revalidate()
         require_safe_directory(target.parent)
-        if read_output(target) != previous or read_output(temporary) != written:
+        if (
+            read_output(target, maximum_bytes=maximum_bytes) != previous
+            or read_output(temporary, maximum_bytes=maximum_bytes) != written
+        ):
             raise ValueError("HTML publication paths changed")
         if previous is None:
             os.link(temporary, target, follow_symlinks=False)
@@ -228,3 +254,18 @@ def publish_html(
                 temporary.unlink()
         except FileNotFoundError:
             pass
+    if return_snapshot:
+        # Bind the actual created file through its temporary descriptor identity,
+        # not just equal bytes found later at the destination. Link/unlink may
+        # change ctime; observe final clocks only after our temporary is removed.
+        published = read_output(target, maximum_bytes=maximum_bytes)
+        if (
+            published is None
+            or published.signature[:2] != (owned.st_dev, owned.st_ino)
+            or published.signature[-1] != owned.st_mode
+            or published.signature[2:4] != written.signature[2:4]
+            or published.content != content
+        ):
+            raise ValueError("HTML published output no longer names the created file")
+        return published
+    return None

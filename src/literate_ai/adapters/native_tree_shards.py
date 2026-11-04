@@ -44,6 +44,7 @@ def prepare_native_tree(
     max_descriptor_total_bytes=MAX_DESCRIPTOR_TOTAL_BYTES,
     max_index_bytes=MAX_INDEX_BYTES,
     max_metadata_memory_bytes=1024 * 1024 * 1024,
+    reserved_memory_bytes=0,
 ):
     """Pure planning: compute shards/references without CAS or host-path writes."""
     validate_native_tree_policy(
@@ -54,6 +55,16 @@ def prepare_native_tree(
         max_index_bytes,
         max_metadata_memory_bytes,
     )
+    if (
+        type(reserved_memory_bytes) is not int
+        or not 0 <= reserved_memory_bytes <= max_metadata_memory_bytes
+    ):
+        raise ValueError("tree.shards.invalid-memory-reservation")
+    if reserved_memory_bytes and (
+        reserved_memory_bytes + 16 * (max_descriptor_bytes + max_index_bytes)
+        >= max_metadata_memory_bytes
+    ):
+        raise ValueError("tree.shards.metadata-memory-policy-exceeded")
     if any(type(group) is not tuple for group in (directories, files, aliases)):
         raise TypeError("tree.shards.canonical-input-tuples-required")
     base_size = len(
@@ -121,17 +132,24 @@ def prepare_native_tree(
         ):
             flush()
             additional = size
-        groups[group].append(value)
-        shard_count += 1
-        shard_size += additional
         estimate = (
-            16
-            * (descriptor_total + shard_size + max_descriptor_bytes + max_index_bytes)
+            reserved_memory_bytes
+            + 16
+            * (
+                descriptor_total
+                + shard_size
+                + additional
+                + max_descriptor_bytes
+                + max_index_bytes
+            )
             + count * 2048
             + (len(descriptors) + 1) * 4096
         )
         if estimate > max_metadata_memory_bytes:
             raise ValueError("tree.shards.metadata-memory-policy-exceeded")
+        groups[group].append(value)
+        shard_count += 1
+        shard_size += additional
     if shard_count:
         flush()
     descriptors.sort(key=lambda item: item[0].digest)

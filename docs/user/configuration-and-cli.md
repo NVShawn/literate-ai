@@ -88,6 +88,7 @@ litai graph
 litai graph rebalance
 litai render html
 litai render dashboard
+litai render tree
 litai project validate
 litai project lifecycle rebind-standard
 litai project documentation-update
@@ -990,6 +991,17 @@ litai render dashboard --root /work \
 The command refuses missing or edited declared artifacts and projects outside
 `--root`. The output contains exact artifact identities and relative iframe paths;
 it does not run verification, rebuild projects, or start a server.
+
+`litai render tree --root /physical/tree --declaration tree-view.json` plans a
+bounded directory metadata view without writing source, output or operator state.
+Initial publication requires `--apply --ack-plan SHA256_URI`, using the exact
+`plan_identity` from a fresh plan. The declaration selects explicit finite limits
+and the nominal renderer `renderer://literate-ai/information-cards/1.0.0`; the
+installed framework supplies its measured renderer identity. Existing indices or
+generation namespaces refuse without replacement or implicit recovery. This is
+the initial publication slice of [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md):
+tree freshness, rerender, recovery, per-unit joins, and native/browser qualification
+remain required work. The existing single-file HTML verification gate is unchanged.
 
 Verify never builds. A project's build harness, toolchain, and language are the project's
 own choices, and `rebuild` is where those run; verify does not invoke, wrap, or

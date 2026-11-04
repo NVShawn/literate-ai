@@ -1,0 +1,924 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-tree-html-contracts",
+  "oneOf": [
+    {
+      "$ref": "literate-ai/retained-tree-html-limits@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-declaration@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-render-request@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-child-group@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-directory@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-page-shard@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-generation@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-renderer-binding@1"
+    },
+    {
+      "$ref": "literate-ai/initial-tree-html-output-plan@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-plan@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-plan-result@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-initial-result@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-apply-result@1"
+    }
+  ],
+  "$defs": {
+    "coordinate": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?:\\.|(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[^/\\\\\\u0000-\\u001f]+(?:/[^/\\\\\\u0000-\\u001f]+)*)$",
+      "description": "Canonical portable relative POSIX coordinate, or root dot. The contract parser additionally enforces NFC, UTF-8 byte bounds, Windows portable segments and reserved repository metadata."
+    },
+    "jsonBlob": {
+      "allOf": [
+        {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        {
+          "properties": {
+            "media_type": {
+              "const": "application/json"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8388608
+            }
+          }
+        }
+      ]
+    },
+    "indexBlob": {
+      "allOf": [
+        {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        {
+          "properties": {
+            "media_type": {
+              "const": "application/json"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2097152
+            }
+          }
+        }
+      ]
+    },
+    "htmlBlob": {
+      "allOf": [
+        {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        {
+          "properties": {
+            "media_type": {
+              "const": "text/html"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 67108864
+            }
+          }
+        }
+      ]
+    },
+    "localInteger": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integer_decimal"
+          ],
+          "properties": {
+            "integer_decimal": {
+              "type": "string",
+              "pattern": "^-?(?:0|[1-9][0-9]*)$",
+              "description": "Lossless native filesystem integer outside signed 64-bit range, emitted by the canonical local identity encoder."
+            }
+          }
+        }
+      ]
+    },
+    "localNode": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/localInteger"
+      },
+      "description": "Descriptive dev/inode/mode/uid/gid observation; never restored ownership."
+    },
+    "limits": {
+      "$id": "literate-ai/retained-tree-html-limits@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "source",
+        "max_descriptor_bytes",
+        "max_descriptor_total_bytes",
+        "max_index_bytes",
+        "max_metadata_memory_bytes",
+        "max_depth",
+        "max_children_per_group",
+        "max_groups_per_page",
+        "max_pages",
+        "max_page_bytes",
+        "max_total_generated_bytes",
+        "max_retained_generation_bytes"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-limits@1"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_entries",
+            "max_file_bytes",
+            "max_total_bytes"
+          ],
+          "properties": {
+            "max_entries": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1048576
+            },
+            "max_file_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "max_total_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            }
+          }
+        },
+        "max_descriptor_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "max_descriptor_total_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_index_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "max_metadata_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "max_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "max_children_per_group": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384
+        },
+        "max_groups_per_page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "max_pages": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "max_page_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "max_total_generated_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_retained_generation_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        }
+      },
+      "description": "Explicit finite policy. The parser also enforces page <= total generated <= retained generation bytes; estimates are not measured RSS claims."
+    },
+    "declaration": {
+      "$id": "literate-ai/retained-tree-html-declaration@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_id",
+        "source_root",
+        "output_root",
+        "limits",
+        "case_sensitive",
+        "renderer"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-declaration@1"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "source_root": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "output_root": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "limits": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/limits"
+        },
+        "case_sensitive": {
+          "type": "boolean"
+        },
+        "renderer": {
+          "const": "renderer://literate-ai/information-cards/1.0.0"
+        }
+      },
+      "description": "Operator intent only. A current framework observation must resolve the nominal renderer; no source, output, or execution ownership is granted."
+    },
+    "request": {
+      "$id": "literate-ai/retained-tree-html-render-request@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_id",
+        "source_root",
+        "output_root",
+        "limits",
+        "case_sensitive",
+        "renderer_identity",
+        "view_id",
+        "view_version"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-render-request@1"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "source_root": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "output_root": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "limits": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/limits"
+        },
+        "case_sensitive": {
+          "type": "boolean"
+        },
+        "renderer_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "view_id": {
+          "const": "information-cards"
+        },
+        "view_version": {
+          "const": "1.0.0"
+        }
+      },
+      "description": "Resolved descriptive request, not a live source or output owner."
+    },
+    "child": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinate",
+        "kind",
+        "identity",
+        "target"
+      ],
+      "properties": {
+        "coordinate": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "kind": {
+          "enum": [
+            "file",
+            "directory",
+            "symlink",
+            "hardlink"
+          ]
+        },
+        "identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          ],
+          "description": "Exact captured raw alias target, displayed as escaped text. May contain parent segments; only canonical complete-tree capture establishes alias resolution and closure."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "symlink",
+                  "hardlink"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "target": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "childGroup": {
+      "$id": "literate-ai/retained-tree-html-child-group@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "directory",
+        "ordinal",
+        "children"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-child-group@1"
+        },
+        "directory": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048575
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/child"
+          }
+        }
+      }
+    },
+    "directory": {
+      "$id": "literate-ai/retained-tree-html-directory@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "coordinate",
+        "source_identity",
+        "request_identity",
+        "child_count",
+        "page_count",
+        "groups"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-directory@1"
+        },
+        "coordinate": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "source_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "request_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "child_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "groups": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1048576,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/jsonBlob"
+          }
+        }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "directory",
+        "ordinal",
+        "directory_commitment",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "directory": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8388607
+        },
+        "directory_commitment": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/indexBlob"
+        },
+        "content": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/htmlBlob"
+        }
+      }
+    },
+    "pageShard": {
+      "$id": "literate-ai/retained-tree-html-page-shard@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_identity",
+        "ordinal",
+        "pages"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-page-shard@1"
+        },
+        "request_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8388607
+        },
+        "pages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/page"
+          }
+        }
+      }
+    },
+    "generation": {
+      "$id": "literate-ai/retained-tree-html-generation@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_identity",
+        "source_index",
+        "projection_root",
+        "root_page",
+        "root_page_path",
+        "page_shards",
+        "page_count",
+        "page_bytes",
+        "directory_count",
+        "source_member_count",
+        "metadata_bytes_before_manifest"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-generation@1"
+        },
+        "request_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_index": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/indexBlob"
+        },
+        "projection_root": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/indexBlob"
+        },
+        "root_page": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/htmlBlob"
+        },
+        "root_page_path": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "page_shards": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8388608,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/jsonBlob"
+          }
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "page_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "directory_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048577
+        },
+        "source_member_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "metadata_bytes_before_manifest": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        }
+      },
+      "description": "Canonical retained generation manifest. Staging-only metadata_record_count is deliberately not a wire field. Full CAS replay enforces record identities, ordering, counts, closure and the request policy."
+    },
+    "rendererBinding": {
+      "$id": "literate-ai/retained-tree-html-renderer-binding@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "renderer",
+        "framework_distribution_identity",
+        "schema_catalog_release",
+        "generation_schema"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-renderer-binding@1"
+        },
+        "renderer": {
+          "const": "renderer://literate-ai/information-cards/1.0.0"
+        },
+        "framework_distribution_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "schema_catalog_release": {
+          "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"
+        },
+        "generation_schema": {
+          "const": "literate-ai/retained-tree-html-generation@1"
+        }
+      },
+      "description": "Descriptive actual framework binding; the digest does not confer a renderer or filesystem capability."
+    },
+    "outputPlan": {
+      "$id": "literate-ai/initial-tree-html-output-plan@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_identity",
+        "project_node",
+        "output_node",
+        "namespace",
+        "index",
+        "namespace_absent",
+        "index_absent",
+        "generation_published"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/initial-tree-html-output-plan@1"
+        },
+        "request_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "project_node": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/localNode"
+        },
+        "output_node": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/localNode"
+        },
+        "namespace": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "index": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "namespace_absent": {
+          "const": true
+        },
+        "index_absent": {
+          "const": true
+        },
+        "generation_published": {
+          "const": false
+        }
+      },
+      "description": "Read-only first-use observation, not an output namespace owner."
+    },
+    "plan": {
+      "$id": "literate-ai/retained-tree-html-plan@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "action",
+        "root",
+        "declaration",
+        "resolved_request",
+        "renderer_identity",
+        "framework_distribution_identity",
+        "schema_catalog_release",
+        "source_node",
+        "output_plan"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-plan@1"
+        },
+        "action": {
+          "const": "initialize"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Actual absolute local operator root, validated by the native service."
+        },
+        "declaration": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/declaration"
+        },
+        "resolved_request": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/request"
+        },
+        "renderer_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "framework_distribution_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "schema_catalog_release": {
+          "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"
+        },
+        "source_node": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/localNode"
+        },
+        "output_plan": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/outputPlan"
+        }
+      },
+      "description": "Read-only observed plan. The enclosing public result carries its canonical identity separately to avoid a hash cycle. This record cannot restore live ownership."
+    },
+    "planResult": {
+      "$id": "literate-ai/retained-tree-html-plan-result@1",
+      "description": "Read-only planning outcome; neither branch grants source or publication authority. The successful identity binds the complete canonical plan body.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "status",
+            "plan",
+            "plan_identity"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-tree-html-plan-result@1"
+            },
+            "status": {
+              "const": "planned"
+            },
+            "plan": {
+              "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/plan"
+            },
+            "plan_identity": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "status",
+            "refusal"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-tree-html-plan-result@1"
+            },
+            "status": {
+              "const": "refused"
+            },
+            "refusal": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 192,
+                  "pattern": "^[A-Za-z0-9_.-]+$"
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "initialResult": {
+      "$id": "literate-ai/retained-tree-html-initial-result@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "plan_identity",
+        "request_identity",
+        "source_identity",
+        "generation_manifest",
+        "index_path",
+        "index_identity",
+        "page_count",
+        "page_bytes",
+        "published"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-initial-result@1"
+        },
+        "plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "request_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "generation_manifest": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/indexBlob"
+        },
+        "index_path": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/coordinate"
+        },
+        "index_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "page_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "published": {
+          "const": true
+        }
+      },
+      "description": "Descriptive initial publication facts from actual live owners and an index snapshot joined to the original published inode and bytes. This JSON cannot restore source or output ownership."
+    },
+    "applyResult": {
+      "$id": "literate-ai/retained-tree-html-apply-result@1",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "status",
+            "publication"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-tree-html-apply-result@1"
+            },
+            "status": {
+              "const": "published"
+            },
+            "publication": {
+              "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/initialResult"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "status",
+            "refusal"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-tree-html-apply-result@1"
+            },
+            "status": {
+              "const": "refused"
+            },
+            "refusal": {
+              "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/planResult/oneOf/1/properties/refusal"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
