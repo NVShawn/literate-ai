@@ -29318,6 +29318,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
+- **Current alignment repair:** Native Windows inventory finds the declared
+  OpenCode executable outside `PATH`, and its explicit version command succeeds.
+  The model check instead invokes the bare name, so its empty reply does not
+  establish provider availability. Use the exact inventory-selected executable
+  for both help and model requests, retaining ordinary `PATH` priority, literal
+  remote argument quoting and the current private provider selection. Prove the
+  public alignment journey and renew the actual native Windows observation;
+  do not reinstall the tool, alter global `PATH` or infer provider failure from
+  the old attempt. Full model alignment and whole-goal qualification remain open.
+
 - **Current installer correction:** Microsoft documents one shared Visual Studio
   bootstrapper that selects the native ARM64 payload on Windows ARM64. Remove
   the MSVC-only installer-architecture filter and preserve explicit ARM64 toolset
@@ -32386,7 +32396,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 - **Reviewed integration closure:** All 27 jobs at qualified `bc6ce1bd` pass, and the landed wording/tests are unchanged at observed main `1abbf13`. Independent review confirms corrected issue scope and both real-process stdout/failure controls. [Functional evidence](../../verification/retained-output-diagnostics-resolution.json); [issue outcome](https://github.com/jordanhubbard/literate-ai/issues/180#issuecomment-6581853621). Current integration and overall release qualification remain separate.
 
-### [ ] RELEASE-README-VERIFY-001 — Verify the published release against the remote default-branch README
+### [x] RELEASE-README-VERIFY-001 — Verify the published release against the remote default-branch README
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#148](https://github.com/jordanhubbard/literate-ai/issues/148)
@@ -32400,7 +32410,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Define the marker policy and visible release/asset section, preserve existing policy identities when absent, and implement bounded remote README/provider readback with digest download fallback.
   - [x] Add stale title/tag/digest/size, missing/duplicate markers, contradictory latest/current claims, unpublished-provider and prerelease controls plus actual Git-based remote-default-branch coverage.
 - **Evidence:**
-  - [ ] Pass affected release policy/publication regressions, lint/schema/documentation checks, and exact review/main CI before closing this implementation goal. The consuming 1.4 publication and final remote README readback belong to RELEASE-INTEGRATION-005; they remain mandatory release verification, not a circular prepublication prerequisite for this feature.
+  - [x] Pass affected release policy/publication regressions, lint/schema/documentation checks, and exact review/main CI before closing this implementation goal. The consuming 1.4 publication and final remote README readback belong to RELEASE-INTEGRATION-005; they remain mandatory release verification, not a circular prepublication prerequisite for this feature.
 
 - **Development evidence (2026-11-01):** The managed Make release regression slice
   passed 50 tests; focused README and schema checks passed 16. Lint, format, skill
@@ -32410,17 +32420,20 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   release qualification. Live GitHub v1.3.1 provider metadata checks the authored
   README's nine assets; at that checkpoint remote main correctly refused the
   missing new markers before the change landed. Required review/main CI and final 1.4 remote
-  readback are still pending; the goal remains open.
-- **Current live provider/default-branch evidence:** The production read-back
+  readback were still pending at that checkpoint, so the goal remained open.
+- **Prior live provider/default-branch evidence:** The production read-back
   owner passes against actual GitHub main
   `ad979c6e67f74acbc914a2c387a86b00f06ade65`, which now contains the managed
   README section. Its v1.3.1 title, tag and all nine published asset sizes and
   SHA-256 values match the provider. No GitHub transport or README bytes were
   replaced for this check. [Retained current-stable readback](../../verification/release-readme-current-stable-development.json)
-  supersedes the historical missing-marker observation above. This checks the
+  supersedes the historical missing-marker observation above. This checked the
   existing stable release, not a prepared or published 1.4 release. Exact
-  integration/main CI remains the next implementation gate; final 1.4 publication
-  and remote read-back remain consuming-release requirements.
+  integration/main CI was then the next implementation gate; the current-main
+  qualification below resolves that gate. Final 1.4 publication and remote
+  read-back remain consuming-release requirements.
+
+- **Current-main implementation qualification:** [Source-bound readback and gate evidence](../../verification/release-readme-implementation-qualification.json) reopens the production verifier at main `072d66e81eff85f58515a09d93d19528499a5ec1`, whose exact CI run 41740063437 passes. The verifier and its README controls are byte-identical to landed implementation `e75f0c798`; fresh managed checks pass all seven README controls and all seventeen release integration regressions without skips. The actual production GitHub transport reads the current remote default-branch README at the same exact main revision and matches the published v1.3.1 title, tag and all nine asset sizes/digests. Independent read-only review confirms the original feature acceptance, including named stale refusals and prerelease preservation, the public verification hook after provider checks, exact main CI and the actual stable README/provider bytes. This completes only the implementation goal: no 1.4 release is prepared, tagged or published by this audit, and RELEASE-INTEGRATION-005 still requires the final 1.4 publication and its remote README readback.
 
 ### [ ] NATIVE-PROMOTION-FLAVORS-001 — Preserve reviewed build-system defaults in native child promotion
 
@@ -33347,6 +33360,24 @@ independent review and the complete combined gate from test one.
 
 - **Release target:** 1.4.0
 - **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
+
+- **Native-x64 follow-up (in progress):** Exact main `f03f30a0654b3f6896177b5fa1ed229a61f3dbf4`
+  [Windows shard 3](https://github.com/jordanhubbard/literate-ai/actions/runs/41778360184/job/126403948002)
+  fails all three guarded C++ build cases because vendor setup omits required
+  compiler variables. A bounded actual x64 CMD diagnostic shows the remaining
+  native-x64 wrapper forwards `x64 -vcvars_ver 14.29`; reconstructing the named
+  option from its closed numeric value preserves `x64 -vcvars_ver=14.29` and
+  satisfies the controlled vendor fixture. Preserve the failed log and the
+  separate source-335 native ARM64 evidence. The source repair and two portable
+  boundary/refusal controls pass; the exact old-function counterfactual fails
+  only its native-x64 option case. Six preserved ARM64/descendant controls and
+  27 CI-policy controls pass. Independent source/CI review approved the numeric
+  option reconstruction and the existing native C++ job's three added guarded
+  compiler cases with strict zero-skip accounting. Next: renew actual
+  unconfigured Windows guarded builds and exact CI. See the bounded
+  [development evidence](../../verification/msvc-x64-cmd-boundary-evidence.json).
+  The diagnostic is not a compiler build or release
+  qualification, and no timeout or required-variable guard is relaxed.
 
 - **Priority:** P1
 - **Owner:** C++ toolchain discovery and MSVC environment initialization

@@ -413,6 +413,9 @@ def _windows_msvc_environment(
             wrapper_call = '@call "%~1" -arch=%~2 -host_arch=%~3'
             if toolset_argument is not None:
                 wrapper_call += " -vcvars_ver=%~4"
+        elif toolset_argument is not None:
+            # Native x64 vcvarsall needs the same complete named option.
+            wrapper_call = '@call "%~1" %~2 -vcvars_ver=%~3'
         wrapper.write_text(
             wrapper_call + " >nul 2>&1\n@if errorlevel 1 exit /b %errorlevel%\n@set\n",
             encoding="utf-8",
@@ -444,7 +447,7 @@ def _windows_msvc_environment(
         elif vcvarsall:
             command.append("x64")
         if toolset_argument is not None and not developer_setup:
-            command.append(toolset_argument)
+            command.append(toolset_argument.partition("=")[2])
         completed = _run_bounded_process(
             command,
             cwd=None,
