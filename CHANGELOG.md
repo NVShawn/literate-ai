@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Worktree audit inputs retain bounded Git operation metadata and reject changed
+  descendant bytes or directory membership; complete audit and retirement
+  authority remain separate requirements.
+
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
 

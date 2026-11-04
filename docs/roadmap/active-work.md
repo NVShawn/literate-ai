@@ -22406,6 +22406,21 @@ GitHub CI failure without relaxing identity checks.
   deferral. Implementing read-only discovery first under accepted ADR 0046; do not
   remove or relocate any existing checkout as part of that observation. Explicit
   user placement overrides remain authoritative for this session's task worktrees.
+- **Operation-input custody development:** The capture now retains bounded exact
+  Git operation metadata and directory membership alongside existing index,
+  ref and source observations. A retained real conflicted rebase at baseline
+  `05943703` accepts changed todo bytes under the old incomplete capture; the
+  reviewed implementation refuses the same challenge in that retained fixture.
+  The existing nonblocking descriptor-checked reader binds raw descendant bytes
+  and repeated directory membership. Nine new real-Git/refusal controls and all
+  fifty worktree audit, journal, discovery and placement cases pass with no skips.
+  Independent source review approved the exact implementation before supported
+  driver/documentation records were renewed. The [development record](../../verification/worktree-operation-input-development.json)
+  binds source and control evidence. Operation wire uses the existing metadata
+  budget; source payload accounting remains separate. This adds opaque input
+  custody only: semantic operation, activity, object-retention and migration/
+  disposition gates remain pending. Installed/full-regression and exact review/
+  main qualification remain open; no operator checkout was moved or removed.
 - **Discovery development evidence:** Twenty-three real-Git placement, discovery and
   orchestration checks pass with 21 subtests. Coverage includes independent and
   bare repositories, external/locked/detached registrations, dirty/staged/ignored
