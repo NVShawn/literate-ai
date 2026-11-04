@@ -33621,3 +33621,68 @@ independent review and the complete combined gate from test one.
   - [x] Run current serializer and hardware-compatibility regressions through the managed Make harness; independently reconstruct source-bound native observations and record exact-main CI, then reconcile the bounded issue only after all evidence passes.
 
 - **Decisive qualification:** [Exact-route evidence audit](../../verification/gpu-memory-command-route-qualification.json) reopens the retained original `worker.probe_malformed` failure and repaired native probe. Both bind command catalog `sha256:b69352f8581230c398c74abd236d1a6f8f127f0ed75892281aa5a5fc72469fff`; the repaired typed observation catalog independently reconstructs to `sha256:886303967384f0cdc227a2b0eae869aad3bfc2537fa6df94743236a0c6a0be8a`, retaining one NVIDIA device with memory null. Current contract checks accept the observed device without a VRAM minimum and refuse a positive minimum. The Linux serializer is byte-identical to landed implementation `5d785f64728f285b4bf07cbbdb4bd3e287bb576f`, an ancestor of main `072d66e81eff85f58515a09d93d19528499a5ec1`; exact-main CI 41740063437 passes. Fresh managed `make python-check` selection passes all seven worker-capability cases, including actual shell serializer inputs for permission text, unavailable, numeric and failed-query values. This audit reopens original native evidence rather than claiming a fresh native dispatch; it neither guesses physical GPU capacity nor closes COMMAND-WORKER-001, native Component/SDK/package or release qualification.
+
+### [ ] PYTHON-LIBRARY-IMPORT-001 — Preserve isolated standard-library imports in Python library qualification
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#306](https://github.com/jordanhubbard/literate-ai/issues/306)
+- **Next action:** Run full source and fresh installed/public qualification for the independently reviewed import-path repair; the four focused import/refusal controls pass.
+
+- **Priority:** high
+- **Owner:** framework core / Python library import driver
+- **Direction:** Include newly filed GitHub issue #306 in 1.4 and make ordinary Python standard-library imports work during exact-artifact execution qualification.
+- **Conclusion:** The isolated import driver replaces its entire search path, hiding the standard library. Prepend the sealed export source while retaining Python isolation and the exact artifact module-origin check. This is an ordinary correctness repair, with no receipt-policy or import-origin exemption.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Record issue #306 and the 1.4.0 release goal before implementation.
+  - [x] Retain interpreter standard-library paths when importing the exact sealed Python library.
+  - [x] Exercise a real Python library importing dataclasses, typing and __future__, and retain ambient-package and module-origin refusal coverage.
+- **Evidence:**
+  - [ ] Real isolated native Python build/test/import journey passes with standard-library dependencies.
+  - [ ] Foreign capability origins and ambient third-party-only imports remain refused.
+  - [ ] Independent source review, canonical pins, full python-check and exact installed qualification pass before completion.
+
+- **Source development evidence:** The real generated Python library first reproduced the `dataclasses` import failure. Prepending source alone then exposed an ambient-dependency admission regression in the legacy command path. The corrected legacy EXECUTE projection uses isolated, no-site, no-bytecode startup and retains the interpreter standard-library paths; managed Python profiles keep their existing launcher. All four Standard command-projection cases pass, including real build/test/import, ambient-only dependency refusal, foreign module-origin refusal and missing-symbol refusal (report SHA-256 `a4d0fed1032fcd11c811c4d30813a3a2c957a41579ed0e8a16afe07e099aea4d`). Independent source review passed. Full source and installed/public qualification remain open; this focused result does not close #306.
+
+### [ ] GIT-TOOL-CAPABILITY-001 — Align Git tool readiness with required checkout capabilities
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#305](https://github.com/jordanhubbard/literate-ai/issues/305)
+- **Next action:** Implement and qualify compatible Git/Git LFS prerequisite detection and remediation; private task upgrades alone do not close this goal.
+
+- **Priority:** high
+- **Owner:** framework core / declared host tool prerequisites
+- **Direction:** Include GitHub issue #305 in 1.4: baseline readiness must reject Git and Git LFS tools missing commands the framework actually uses.
+- **Conclusion:** Actual qualification exposed Git LFS 3.0.2 lacking ls-files --json and older Git failing the narrow command-scoped foreign-ownership trust control. Private task tool upgrades restore those jobs but do not fix reusable readiness. Preserve exact LFS content checks and narrow ownership assertions.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Record issue #305 and the 1.4.0 release goal before reusable implementation.
+  - [ ] Declare and enforce compatible Git and Git LFS capability/version requirements consistently in readiness, worker templates and remediation.
+  - [ ] Keep exact LFS object/size verification and command-scoped safe-directory trust unchanged.
+- **Evidence:**
+  - [ ] Unsupported installed tools refuse readiness with actionable remediation.
+  - [ ] Supported tools pass genuine checkout/LFS JSON and foreign-ownership controls.
+  - [ ] Independent source review, full python-check and installed worker readiness pass.
+
+- **Baseline source progress:** Both canonical and packaged-template SBOMs now require Git >=2.47,<3 and Git LFS >=3.2,<4; independent source review passed. Existing host-install controls pass all nine cases, and the unchanged native scoped-ownership module passes all twelve cases with Git 2.54. The exact minimum Git version is supported by upstream source inspection, not native qualification of 2.47. Canonical bootstrap composes and enforces these version constraints. The authored worker repair reads the same packaged baseline, checks the exact selected Git/LFS executables when repository tools are declared, and reports incompatible versions with a declared-install remedy. Public CLI controls pass all six tests, including real version-probe processes and a declared repair followed by fresh inspection. The version responders prove the probe protocol, not native qualification of the displayed tool versions. Independent review of this new alignment integration, complete source and installed-worker proof remain open; previous installed versions still perform only presence checks.
+
+### [ ] RETAINED-PYTHON-BRIDGE-001 — Consume qualified native library children from retained Python projects
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#307](https://github.com/jordanhubbard/literate-ai/issues/307)
+- **Next action:** Independently review and publish [proposed ADR 0061](../decisions/0061-retained-python-library-bridge.md), then obtain the required explicit design acceptance before implementation. FreeBSD SDK qualification remains first priority.
+
+- **Priority:** high
+- **Owner:** framework retained library bridge and sealed Python test workspace
+- **Direction:** Include newly filed issue #307 in 1.4 under the directing user authorization for new issues.
+- **Conclusion:** A retained Python consumer must import verified qualified committed-cache packages within its sealed workspace through an explicit custody-bound bridge. Inspect existing retained Cargo authority and Python receipt construction, publish a narrow proposed design, and implement after required design acceptance; FreeBSD SDK execution remains first priority.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Trace the existing retained Cargo bridge and Python sealed workspace contracts; publish a proposed Python adapter design with exact admitted source and consumer custody.
+  - [ ] Implement the accepted bridge without copying generated source into authored implementation or admitting arbitrary ambient paths.
+- **Evidence:**
+  - [ ] Exercise a real retained Python consumer with an admitted committed-cache library through full public lifecycle and exact installed qualification.
+  - [ ] Refuse cache, receipt, source, package-origin and consumer-scope drift while preserving existing Cargo and retained Python behavior.

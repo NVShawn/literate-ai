@@ -765,7 +765,7 @@ IO.puts(JSON.encode!(%{schema: "literate-ai/library-import-observation@1",
     sys.stderr.buffer.write(completed.stderr)
     raise SystemExit(completed.returncode)
 elif language == "python":
-    sys.path[:] = [str(source)]
+    sys.path.insert(0, str(source))
     for capability in surface["capabilities"]:
         module = importlib.import_module(capability["module"])
         origin = pathlib.Path(module.__file__).resolve(strict=True)
@@ -1960,6 +1960,10 @@ def _command_contract(
             manifest,
             "{artifact_root}",
         )
+        if language.target == "python" and python_profile is None:
+            # The legacy library path also needs isolated interpreter startup:
+            # retaining stdlib must not admit PYTHONPATH, cwd or site packages.
+            execute_argv = (execute_argv[0], "-I", "-S", "-B", *execute_argv[1:])
     else:
         test_argv = _runtime_command(
             language, single_file=single_file, phase=ComponentCommandPhase.TEST

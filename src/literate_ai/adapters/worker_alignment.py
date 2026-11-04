@@ -38,6 +38,10 @@ from literate_ai.adapters.ssh_transport import (
     powershell_home_path,
     powershell_literal,
 )
+from literate_ai.bootstrap.host_install_requirements import (
+    UniversalCapabilityRequirement,
+    version_satisfies,
+)
 from literate_ai.contracts.execution_dispatch import ExecutionWorker
 
 TEMPLATE_FILE = "literate.worker-template.json"
@@ -47,6 +51,7 @@ REPORT_SCHEMA = "literate-ai/worker-alignment-report@1"
 OS_FAMILIES = ("freebsd", "linux", "macos", "windows")
 _COMMAND = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _PROBE_TIMEOUT_SECONDS = 120
+_REPOSITORY_TOOL_TIMEOUT_SECONDS = 300
 _MODEL_TIMEOUT_SECONDS = 300
 _INSTALL_TIMEOUT_SECONDS = 1800
 _MODEL_PROMPT = "Reply with exactly the word: ok"
@@ -600,6 +605,7 @@ class WorkerAligner:
         coding_cli: str | None,
         model: str | None,
         cwd: Path,
+        repository_tools: tuple[UniversalCapabilityRequirement, ...] = (),
         runner_factory: Callable[
             [], BoundedRemoteProcessRunner
         ] = BoundedRemoteProcessRunner,
@@ -610,6 +616,7 @@ class WorkerAligner:
         self.coding_cli = coding_cli
         self.model = model
         self.cwd = cwd
+        self.repository_tools = repository_tools
         self.runner_factory = runner_factory
         self.clock = clock
 
@@ -627,8 +634,32 @@ class WorkerAligner:
             timeout_seconds=timeout,
         )
 
-    def _commands(self, platform: PlatformTemplate | None) -> list[str]:
+    def _repository_requirement(self, name: str, *, windows: bool):
+        return next(
+            (
+                requirement
+                for requirement in self.repository_tools
+                if any(
+                    name.casefold() == candidate.casefold()
+                    if windows
+                    else name == candidate
+                    for candidate in requirement.probe_candidates
+                )
+            ),
+            None,
+        )
+
+    def _commands(
+        self, platform: PlatformTemplate | None, *, windows: bool
+    ) -> list[str]:
         names = [] if platform is None else [item.name for item in platform.commands]
+        if any(self._repository_requirement(name, windows=windows) for name in names):
+            for requirement in self.repository_tools:
+                if not any(
+                    self._repository_requirement(name, windows=windows) == requirement
+                    for name in names
+                ):
+                    names.append(requirement.probe_candidates[0])
         if self.coding_cli and self.coding_cli not in names:
             names.append(self.coding_cli)
         return names
@@ -650,7 +681,7 @@ class WorkerAligner:
                 )
             )
         files = [item for item in self.user.files if (family or "") in item.os_families]
-        commands = self._commands(platform)
+        commands = self._commands(platform, windows=_windows(worker))
         try:
             completed = self._run(
                 worker,
@@ -727,6 +758,41 @@ class WorkerAligner:
                     ),
                 )
             )
+        for name in commands:
+            requirement = self._repository_requirement(name, windows=_windows(worker))
+            executable = found.get(name)
+            if requirement is None or not executable:
+                continue
+            try:
+                observed = self._run(
+                    worker,
+                    _remote_command(worker, (executable, *requirement.probe_arguments)),
+                    _REPOSITORY_TOOL_TIMEOUT_SECONDS,
+                )
+                compatible = observed.returncode == 0 and version_satisfies(
+                    observed.stdout.decode("utf-8", errors="replace"),
+                    requirement.version_constraint,
+                )
+            except SshTransportError:
+                compatible = False
+            if not compatible:
+                report.findings.append(
+                    Finding(
+                        "command",
+                        name,
+                        "incompatible",
+                        f"selected executable does not prove {requirement.name} "
+                        f"{requirement.version_constraint}; {requirement.reason}",
+                        "declared install runs with --apply; readiness is rechecked"
+                        if any(
+                            self._repository_requirement(item, windows=_windows(worker))
+                            == requirement
+                            for item in installs
+                        )
+                        else "install a compatible tool and rerun alignment, or "
+                        "declare its installation in worker-alignment.json",
+                    )
+                )
         if platform is not None:
             usable = [
                 (name, version)
@@ -909,10 +975,21 @@ class WorkerAligner:
         missing = {
             item.name
             for item in report.findings
-            if item.kind == "command" and item.state == "missing"
+            if item.kind == "command" and item.state in {"missing", "incompatible"}
         }
         for install in self.user.installs:
-            if install.os_family != family or install.command not in missing:
+            requirement = self._repository_requirement(
+                install.command, windows=_windows(worker)
+            )
+            needs_install = install.command in missing or (
+                requirement is not None
+                and any(
+                    self._repository_requirement(name, windows=_windows(worker))
+                    == requirement
+                    for name in missing
+                )
+            )
+            if install.os_family != family or not needs_install:
                 continue
             completed = self._run(
                 worker,

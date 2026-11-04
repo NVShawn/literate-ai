@@ -45,26 +45,26 @@
       "type": "application",
       "bom-ref": "urn:literate-ai:capability:git",
       "name": "Git",
-      "version": ">=2.30,<3",
+      "version": ">=2.47,<3",
       "properties": [
         {"name": "literate-ai:base-toolchain:capability", "value": "git"},
         {"name": "literate-ai:base-toolchain:probe-kind", "value": "command"},
         {"name": "literate-ai:base-toolchain:probe-candidates", "value": "[\"git\",\"git.exe\"]"},
         {"name": "literate-ai:base-toolchain:probe-arguments", "value": "[\"--version\"]"},
-        {"name": "literate-ai:base-toolchain:reason", "value": "Git binds source acquisition and installation to exact revisions."}
+        {"name": "literate-ai:base-toolchain:reason", "value": "Git binds source acquisition to exact revisions and supports normalized command-scoped safe.directory trust without global exceptions."}
       ]
     },
     {
       "type": "application",
       "bom-ref": "urn:literate-ai:capability:git-lfs",
       "name": "Git LFS",
-      "version": ">=3,<4",
+      "version": ">=3.2,<4",
       "properties": [
         {"name": "literate-ai:base-toolchain:capability", "value": "git-lfs"},
         {"name": "literate-ai:base-toolchain:probe-kind", "value": "command"},
         {"name": "literate-ai:base-toolchain:probe-candidates", "value": "[\"git-lfs\",\"git-lfs.exe\"]"},
         {"name": "literate-ai:base-toolchain:probe-arguments", "value": "[\"version\"]"},
-        {"name": "literate-ai:base-toolchain:reason", "value": "Git LFS materializes pointer-backed content for exact repository checkouts."}
+        {"name": "literate-ai:base-toolchain:reason", "value": "Git LFS provides ls-files --json for complete object and working-tree evidence during exact repository checkout."}
       ]
     },
     {

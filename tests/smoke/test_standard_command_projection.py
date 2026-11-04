@@ -479,7 +479,14 @@ class StandardCommandProjectionTests(unittest.TestCase):
                     break
                 parent.joinpath("__init__.py").touch()
             module.with_suffix(".py").write_text(
-                f"{capability.symbols[0]} = 7\n", encoding="utf-8"
+                "from __future__ import annotations\n"
+                "from dataclasses import dataclass\n"
+                "from typing import NamedTuple\n"
+                "@dataclass\n"
+                "class Value:\n    value: int\n"
+                "class Record(NamedTuple):\n    value: int\n"
+                f"{capability.symbols[0]} = Record(Value(7).value).value\n",
+                encoding="utf-8",
             )
             (source / "source" / "main.py").write_text(
                 "import json\n"
@@ -535,6 +542,44 @@ class StandardCommandProjectionTests(unittest.TestCase):
                 [capability.capability],
             )
             exported_module = export / "source" / Path(*capability.module.split("."))
+            # Isolation must still exclude an ambient-only dependency even
+            # though interpreter standard-library paths remain available.
+            shadow.parent.joinpath("ambient_only_dependency.py").write_text(
+                "value = 7\n", encoding="utf-8"
+            )
+            exported_module.with_suffix(".py").write_text(
+                "import ambient_only_dependency\n"
+                f"{capability.symbols[0]} = ambient_only_dependency.value\n",
+                encoding="utf-8",
+            )
+            ambient_rejected = subprocess.run(
+                argv(ComponentCommandPhase.EXECUTE),
+                capture_output=True,
+                text=True,
+                cwd=shadow.parent,
+                env=environment,
+            )
+            self.assertNotEqual(ambient_rejected.returncode, 0)
+            self.assertIn("ambient_only_dependency", ambient_rejected.stderr)
+            # A capability cannot report a standard-library file as its own
+            # origin, even when the real stdlib can be imported successfully.
+            exported_module.with_suffix(".py").write_text(
+                "import dataclasses\n"
+                "__file__ = dataclasses.__file__\n"
+                f"{capability.symbols[0]} = 7\n",
+                encoding="utf-8",
+            )
+            foreign_rejected = subprocess.run(
+                argv(ComponentCommandPhase.EXECUTE),
+                capture_output=True,
+                text=True,
+                cwd=shadow.parent,
+                env=environment,
+            )
+            self.assertNotEqual(foreign_rejected.returncode, 0)
+            self.assertIn(
+                "library import escaped the exact artifact", foreign_rejected.stderr
+            )
             exported_module.with_suffix(".py").write_text(
                 "other = 7\n", encoding="utf-8"
             )

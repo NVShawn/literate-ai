@@ -32,10 +32,15 @@ with two declared sources of expectations and reports each gap with its remediat
    exclusions, every declared file by content hash, and makes one live model call
    through the selected coding CLI on each worker. `--worker-id ID` narrows it;
    `--skip-model` skips the model call.
-2. Read every finding; each carries a remediation. `aligned: true` with exit status 0
-   is the only ready state.
+2. Read every finding; each carries a remediation. If the platform declares Git or
+   Git LFS (including their canonical Windows executable aliases), alignment checks
+   both selected tools against the framework's packaged os-base version requirements.
+   A failed or unreadable version probe is incompatible, not ready. Each repository
+   tool probe has a five-minute deadline. Model-only templates add no Git requirement.
+   `aligned: true` with exit status 0 is the only ready state.
 3. `litai worker align --all --apply` with the user's authorization. It runs only
-   declared installs for missing commands, adds missing Defender path and process
+   declared installs for missing commands or incompatible repository tools, adds
+   missing Defender path and process
    exclusions (an administrator SSH session is required; the report names each
    excluded executable), and replaces only files whose bytes differ. It backs the
    old copy up as `<file>.bak-<UTC>` and keeps secrets owner-only. It then
