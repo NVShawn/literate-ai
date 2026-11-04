@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Windows coding-agent test compilers retain configured temporary/system variables while applying MSVC overrides.
+
 - Composed retained-tree packages apply canonical directory permissions under permissive and restrictive worker umasks. Independent verification still rejects later permission changes.
 
 - Worktree audit inputs retain bounded Git operation metadata and reject changed
@@ -15,6 +17,11 @@
 
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
+
+- Remote retained SDK producer and consumer grants honor the original action's
+  deadline, capped at three hours, so long source verification does not outlive
+  an unrelated ten-minute grant. Expiry, revocation and current-custody checks
+  remain enforced; local and other build-grant defaults are unchanged.
 
 - Worker alignment uses the discovered coding CLI executable for its help and
   model checks, including declared Windows tool locations outside `PATH`.

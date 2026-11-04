@@ -5,7 +5,10 @@ import unittest
 from pathlib import Path
 
 from literate_ai.adapters.builders._process import run_bounded_process
-from literate_ai.adapters.builders.cpp import discover_cpp_toolchain
+from literate_ai.adapters.builders.cpp import (
+    _compiler_process_environment,
+    discover_cpp_toolchain,
+)
 from literate_ai.adapters.builders.python import BuildError
 
 SOURCE = r"""
@@ -55,7 +58,7 @@ def build_coding_cli(root: Path) -> Path:
     result = run_bounded_process(
         (*tool.command, *arguments),
         cwd=root,
-        environment=dict(tool.environment) or dict(os.environ),
+        environment=_compiler_process_environment(dict(os.environ), tool),
         timeout_seconds=300,
         stdout_limit_bytes=1024 * 1024,
         stderr_limit_bytes=1024 * 1024,

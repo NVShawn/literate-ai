@@ -1,0 +1,51 @@
+{
+  "schema": "literate-ai/windows-coding-fixture-environment@1",
+  "original_failed_ci": {
+    "source": "bd535fd9f5b1d47d07a11b9bd3646a6872000560",
+    "run_id": 41813420287,
+    "job_id": 126518187197,
+    "error": "MSVC D8037 during native fixture setup",
+    "passed": 819,
+    "skipped": 164,
+    "errors": 1,
+    "raw_log_sha256": "8ec890396f836e8f5430375d1d121530f7468e0a1f713f11549cfe479d10b8f5"
+  },
+  "source_bindings": {
+    "tests/support/fixtures_worker_alignment.py": "b33782cf6090f378f6737e6b2004edeb2643ff7f6672f18505f1b9974c94b80a",
+    "tests/critical/test_worker_alignment_fixture.py": "be0a0fb86cdc7a800810d984c7dbb347f7213e8d03c396dc8531cc4113776252",
+    "src/literate_ai/adapters/builders/cpp.py": "a236f34c28e42a31c1218d86509b92b98ab0f0a844a177adf840bce7666ce90b"
+  },
+  "native_compiler_counterfactual": {
+    "platform": "Windows x86_64",
+    "toolset": "14.44.35207",
+    "original_exit": 2,
+    "original_D8037": true,
+    "repaired_compile_exit": 0,
+    "repaired_program_exit": 0,
+    "compiler_sha256": "88c8344236a27a6e727e0a8edc49aaa2690bdc7a9464b9d18cc7abe70a9f1c0d",
+    "compiler_unchanged": true,
+    "cpp_literal_sha256": "28a2094e3714d91f4dfd5438aa14febc14ea31f8d53fdadce505cb60e3d185b3",
+    "verbatim_production_merger_sha256": "980345ad22f4fd4e05111e10463d0941144cad1eff282f4f8335c87ac4756aac",
+    "raw_stdout_sha256": "d9671566bf5731dbbcd9c39fed533f439665ceca9caa7aef9b6eb23992c21be1",
+    "raw_stderr_sha256": "2ce70d6c8c9ad6726c794690c8b14a2b83673648cac88edf4ff1acc50ec46348",
+    "installs_services_or_global_configuration_changed": false,
+    "scope": "Real native compiler executes exact fixture C++ literal with original versus production-merged environments; not full framework import or SDK acceptance"
+  },
+  "deterministic_controls": {
+    "mac_managed_passed": 2,
+    "windows_native_python_passed": 2,
+    "windows_native_python_skipped": 0,
+    "prior_host_specific_control_windows_failures": 1,
+    "native_raw_stdout_sha256": "d4d5042e32b5815b903e7cb9bf6cc97a4adb7a2f7d2466c41abc0c5cc836f192",
+    "scope": "Verbatim control class, fixture function and production env-merger slices on actual Windows Python; compiler boundary mocked in these unit controls only"
+  },
+  "independent_review": {
+    "fixture_source_approved": true,
+    "portable_controls_approved": true,
+    "native_compiler_evidence_independently_reopened": true
+  },
+  "whole_current_union_qualified": false,
+  "current_full_remote_ci_qualified": false,
+  "native_freebsd_qualified": false,
+  "release14_qualified": false
+}
