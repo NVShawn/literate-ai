@@ -365,7 +365,7 @@ class RetainedProjectNativeSdkInputs:
                 for execution in self.executions
             }
 
-            def record(document):
+            def augment(document):
                 if document.get("schema") in {
                     "literate-ai/native-sdk-command-execution@2",
                     "literate-ai/native-sdk-command-execution@4",
@@ -378,13 +378,47 @@ class RetainedProjectNativeSdkInputs:
                             ContentIdentity.from_dict(document["manifest_identity"])
                         ],
                     }
-                    identity = original_record(document)
-                    if identity != canonical_identity(document):
+                return document
+
+            def record(document):
+                original_document = document
+                document = augment(document)
+                identity = original_record(document)
+                if document is not original_document and identity != canonical_identity(
+                    document
+                ):
+                    raise ValueError("retained.sdk.command-context-retention-differs")
+                return identity
+
+            original_record_many = arguments.get("record_many")
+            if original_record_many is not None:
+
+                def record_many(documents, *, count):
+                    def augmented_documents():
+                        iterator = iter(documents())
+                        try:
+                            for document in iterator:
+                                yield augment(document)
+                        finally:
+                            close = getattr(iterator, "close", None)
+                            if close is not None:
+                                close()
+
+                    identities = original_record_many(augmented_documents, count=count)
+                    if type(identities) is not tuple or len(identities) != count:
                         raise ValueError(
                             "retained.sdk.command-context-retention-differs"
                         )
-                    return identity
-                return original_record(document)
+                    for identity, document in zip(
+                        identities, augmented_documents(), strict=True
+                    ):
+                        if identity != canonical_identity(document):
+                            raise ValueError(
+                                "retained.sdk.command-context-retention-differs"
+                            )
+                    return identities
+
+                arguments["record_many"] = record_many
 
             arguments["record"] = record
         with ExitStack() as stack:
