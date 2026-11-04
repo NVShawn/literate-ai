@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import contextmanager
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -22,6 +23,7 @@ from literate_ai.contracts import SourceIntelligenceMode
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.projects import PinnedInputClosureError
 from literate_ai.security import (
+    AuthorizationError,
     AuthorizationRevocationSet,
     SecurityPolicy,
 )
@@ -181,6 +183,41 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "verified"):
             service.builder.product(forged)
+
+    def test_real_sdk_build_respects_explicit_deadline_without_extending_defaults(self):
+        # Advance only the true external wall clock read at build-validation
+        # boundaries. Git capture, policy authorization, compilation, output
+        # capture and repository cache admission all use production adapters.
+        issued = datetime.now(UTC)
+        for label, deadline, age, admitted in (
+            ("default-expired", None, 11, False),
+            ("bounded-current", issued + timedelta(minutes=30), 11, True),
+            ("bounded-expired", issued + timedelta(minutes=30), 31, False),
+        ):
+            with self.subTest(label=label):
+                root = self.work / label
+                quarantine = QuarantineStore(root / "quarantine", self.fixture.store)
+                references = ReferenceIndex(root / "references", self.fixture.store)
+                service = self.service(
+                    quarantine=quarantine,
+                    references=references,
+                    authorization_deadline=deadline,
+                )
+                with patch("literate_ai.adapters.native_sdk_build.datetime") as clock:
+                    clock.now.return_value = issued + timedelta(minutes=age)
+                    if admitted:
+                        built = service.build()
+                        self.assertEqual(
+                            built.product.snapshot.source_lock_identity,
+                            self.selection.source_lock.identity,
+                        )
+                        self.assertTrue(references.path.is_file())
+                    else:
+                        with self.refuses(AuthorizationError, "authorization_expired"):
+                            service.build()
+                        self.assertFalse(references.path.exists())
+                        self.assertEqual(list(quarantine.ready_root.iterdir()), [])
+                        self.assertEqual(list(quarantine.quarantine_root.iterdir()), [])
 
     def test_source_changed_after_configure_stops_compile_and_admission(self):
         service = self.service()

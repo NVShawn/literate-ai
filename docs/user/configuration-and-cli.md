@@ -820,7 +820,11 @@ free disk, and Windows tool locations off `PATH`. Your private `worker-alignment
 (reported by `litai config paths`) declares files every worker must hold, from source
 paths you choose, with `secret: true` for credentials, and the argv that installs each
 missing command per OS family. It also checks the coding CLI and model from your
-project-scoped test configuration with one live call per worker. Inspection is
+project-scoped test configuration with one live call per worker. Both the coding
+CLI help probe and model request use the executable found by inventory, including
+declared Windows locations outside `PATH`;
+ordinary `PATH` discovery retains priority. Alignment does not change `PATH` or
+reinstall a tool merely to run that check. Inspection is
 read-only; findings carry remediations and the exit status is nonzero until every
 worker is aligned. `--apply` runs only your declared installs for missing commands
 and replaces only files whose bytes differ, after backing up the previous copy. It

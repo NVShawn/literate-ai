@@ -2,10 +2,18 @@
 
 ## Unreleased
 
+- Remote retained SDK producer and consumer grants honor the original action's
+  deadline, capped at three hours, so long source verification does not outlive
+  an unrelated ten-minute grant. Expiry, revocation and current-custody checks
+  remain enforced; local and other build-grant defaults are unchanged.
+
+- Worker alignment uses the discovered coding CLI executable for its help and
+  model checks, including declared Windows tool locations outside `PATH`.
+
 - `litai project test-receipt promote-retained` re-verifies an admitted
   retained-project run against the current project and its receipt policy and writes
   the finalized candidate that `project test-receipt update` accepts (issue #295; ADR
-  0060 proposed, not yet accepted). It executes nothing and weakens no policy check.
+  0060 accepted). It executes nothing and weakens no policy check.
 
 - Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
   before acquisition, preserving explicit compiler selections. C++ developer
