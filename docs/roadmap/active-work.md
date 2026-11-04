@@ -33402,6 +33402,15 @@ independent review and the complete combined gate from test one.
 - **Priority:** P1
 - **Owner:** Operator status and canonical host-install Flavor composition; issue 268
 - **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
+- **Installed qualification work:** Extend the owned installed-adoption fixture
+  with an explicitly authored project-default selection of its existing local
+  shim, whose canonical coordinate differs from its physical directory name.
+  Compare genuine public status before and after this setup, retain the built-in
+  Python requirement and native target realization, and prove each status call
+  leaves fixture contents and physical metadata unchanged. Record actual host
+  readiness rather than demanding success from unavailable tools. This is a
+  controlled configuration setup, not a claim that onboarding itself selects the
+  shim. No installed result is claimed before the new canonical gate passes.
 - **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
 - **Depends on:** none
 - **Completion prerequisites:** none

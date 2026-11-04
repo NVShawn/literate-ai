@@ -6,13 +6,17 @@ import hashlib
 import json
 import os
 import shlex
+import stat
 import subprocess
 import sys
+import time
+from dataclasses import replace
 from pathlib import Path
 
 from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.component_lock_planning import (
     component_catalog_manifest_paths,
+    observe_flavor_catalog,
 )
 from literate_ai.adapters.harness_inventory import (
     HARNESS_BASELINE_SCHEMA,
@@ -22,6 +26,132 @@ from literate_ai.adapters.standard_lifecycle_binding import (
     observe_installed_framework_distribution,
 )
 from literate_ai.project_authority_graph import project_authority_graph
+from literate_ai.projects import ProjectConfigurationStore, load_project
+
+
+def fixture_snapshot(project: Path) -> dict:
+    """Bounded physical/content observation of our owned fixture, excluding Git."""
+    result = {}
+    total = 0
+    deadline = time.monotonic() + 30
+    for directory, directories, filenames in os.walk(project, followlinks=False):
+        if Path(directory) == project:
+            directories[:] = [name for name in directories if name != ".git"]
+        for name in directories + filenames:
+            if len(result) >= 20_000 or time.monotonic() > deadline:
+                raise RuntimeError("installed host fixture snapshot exceeds its budget")
+            path = Path(directory) / name
+            observed = path.lstat()
+            entry = {
+                "device": observed.st_dev,
+                "inode": observed.st_ino,
+                "mode": observed.st_mode,
+                "mtime_ns": observed.st_mtime_ns,
+            }
+            if stat.S_ISLNK(observed.st_mode):
+                entry["link"] = os.readlink(path)
+            elif stat.S_ISREG(observed.st_mode):
+                total += observed.st_size
+                if observed.st_size > 64 * 1024**2 or total > 512 * 1024**2:
+                    raise RuntimeError("installed host fixture bytes exceed its budget")
+                entry.update(
+                    bytes=observed.st_size,
+                    sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                )
+            elif not stat.S_ISDIR(observed.st_mode):
+                raise RuntimeError("installed host fixture has an unsupported input")
+            result[path.relative_to(project).as_posix()] = entry
+    return result
+
+
+def selected_shim_status(project: Path, invoke) -> dict:
+    """Configure our fixture, then observe public status without writes."""
+    selector = "+flavor://legacy-adoption/build-legacy-shim"
+    shim = project / "flavors/legacy-project-shim/flavor.md"
+    definition = load_project(project)
+    matches = [
+        item
+        for item in observe_flavor_catalog(definition.roots("flavor"), boundary=project)
+        if item.definition.coordinate.uri
+        == "flavor://legacy-adoption/build-legacy-shim"
+    ]
+    if len(matches) != 1 or matches[0].path != shim:
+        raise RuntimeError(
+            "installed fixture lacks its differently named canonical shim"
+        )
+    if shim.with_name("host-toolchain.cdx.json").exists():
+        raise RuntimeError("installed local shim unexpectedly declares host probes")
+
+    def status() -> tuple[dict, dict]:
+        before = fixture_snapshot(project)
+        result = invoke("status", "--project", str(project))
+        after = fixture_snapshot(project)
+        tools = result["host"]["host_tools"]
+        if before != after:
+            raise RuntimeError("installed public status changed adopted fixture inputs")
+        if tools.get("error") or not isinstance(tools.get("ready"), bool):
+            raise RuntimeError("installed public status could not resolve host tools")
+        python = [
+            item for item in tools["capabilities"] if item["capability"] == "python"
+        ]
+        if len(python) != 1:
+            raise RuntimeError(
+                "installed status suppressed the built-in Python requirement"
+            )
+        return tools, {
+            "input_nodes": len(before),
+            "snapshot_sha256": hashlib.sha256(
+                json.dumps(before, sort_keys=True).encode()
+            ).hexdigest(),
+            "inputs_unchanged": True,
+        }
+
+    original, original_snapshot = status()
+    store = ProjectConfigurationStore(project)
+    current = store.read()
+    selectors = current.definition.default_flavor_selectors
+    if (
+        "+flavor://literate-ai/lang-python" not in selectors
+        or selectors.count("+flavor://literate-ai/build-make") != 1
+        or selector in selectors
+    ):
+        raise RuntimeError(
+            "installed fixture defaults do not match explicit status setup"
+        )
+    # Authored fixture setup, after actual adoption; no generated evidence is edited.
+    selected = tuple(
+        selector if value == "+flavor://literate-ai/build-make" else value
+        for value in selectors
+    )
+    store.update(
+        current, replace(current.definition, default_flavor_selectors=selected)
+    )
+    observed, selected_snapshot = status()
+
+    def requirements(tools):
+        return [
+            {key: item[key] for key in ("capability", "required_version", "reason")}
+            for item in tools["capabilities"]
+            if item["capability"] == "python"
+        ]
+
+    if (
+        requirements(original) != requirements(observed)
+        or original["target"] != observed["target"]
+        or original["realization_sbom"] != observed["realization_sbom"]
+    ):
+        raise RuntimeError("installed local shim changed native or Python requirements")
+    return {
+        "selected_shim": selector,
+        "physical_manifest": shim.relative_to(project).as_posix(),
+        "explicit_authored_configuration_after_adoption": True,
+        "original_status": original_snapshot,
+        "selected_status": selected_snapshot,
+        "native_target": observed["target"],
+        "python_requirements": requirements(observed),
+        "observed_host_tools_ready": observed["ready"],
+        "host_tools_error": None,
+    }
 
 
 def adoption_evidence(project: Path, initialized: dict) -> dict:
@@ -235,6 +365,7 @@ def main() -> int:
             "retained dependencies entered installed Component discovery"
         )
     graph = project_authority_graph(project).to_dict()
+    host_status = selected_shim_status(project, invoke)
     if observe_installed_framework_distribution().identity != distribution.identity:
         raise RuntimeError("installed framework changed during catalog qualification")
     print(
@@ -254,6 +385,7 @@ def main() -> int:
                 "authority_graph_sha256": hashlib.sha256(
                     json.dumps(graph, sort_keys=True).encode()
                 ).hexdigest(),
+                "selected_local_shim_host_status": host_status,
             },
             sort_keys=True,
         )
