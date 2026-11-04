@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add real-CAS contract controls for retained SDK metadata batching, overflow fallback, canonical bytes and strict currentness/custody refusal.
+
 - Batch retained SDK command metadata under the original live owner while preserving full boundary currentness and exact evidence identities.
 
 - Remote retained SDK producer and consumer grants honor the original action's
