@@ -167,6 +167,7 @@ class RetainedProjectExecutionWorkspace:
         native_sdk_owners: tuple[NativeSdkConsumerInputs, ...] | None = None,
         native_sdk_authorize=None,
         native_sdk_record=None,
+        native_sdk_record_many=None,
         allocation_owner: RetainedAllocationOwner | None = None,
         receiver_context=None,
     ) -> None:
@@ -233,10 +234,18 @@ class RetainedProjectExecutionWorkspace:
                 or component_locks is None
                 or not callable(native_sdk_authorize)
                 or not callable(native_sdk_record)
+                or (
+                    native_sdk_record_many is not None
+                    and not callable(native_sdk_record_many)
+                )
             )
         ) or (
             not sdk_selected
-            and (native_sdk_authorize is not None or native_sdk_record is not None)
+            and (
+                native_sdk_authorize is not None
+                or native_sdk_record is not None
+                or native_sdk_record_many is not None
+            )
         ):
             raise RetainedProjectExecutionError(
                 "retained.sdk.bound-graph-and-command-authority-required"
@@ -255,6 +264,7 @@ class RetainedProjectExecutionWorkspace:
         self._native_sdks = None
         self._native_sdk_authorize = native_sdk_authorize
         self._native_sdk_record = native_sdk_record
+        self._native_sdk_record_many = native_sdk_record_many
         self._secondary_views = None
         self._secondary_outputs_bound = False
         self._require_current_plan()
@@ -520,6 +530,7 @@ class RetainedProjectExecutionWorkspace:
             authorize=self._native_sdk_authorize,
             clock=lambda: datetime.now(UTC),
             record=self._native_sdk_record,
+            record_many=self._native_sdk_record_many,
             captured_runtime_context=captured_runtime_context,
         )
 

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Retained receiver construction prepares its execution request once and reuses
+  the same typed worker selection and plan. Capability publication, reservation
+  and execution still reopen current authority; no preparation is cached.
+
+- Batch retained SDK command metadata under the original live owner while preserving full boundary currentness and exact evidence identities.
+
 - Remote retained SDK producer and consumer grants honor the original action's
   deadline, capped at three hours, so long source verification does not outlive
   an unrelated ten-minute grant. Expiry, revocation and current-custody checks
