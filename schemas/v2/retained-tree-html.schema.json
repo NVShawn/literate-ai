@@ -40,6 +40,15 @@
     },
     {
       "$ref": "literate-ai/retained-tree-html-apply-result@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-freshness@1"
+    },
+    {
+      "$ref": "literate-ai/retained-tree-html-check-result@1"
+    },
+    {
+      "$ref": "literate-ai/project-tree-html@1"
     }
   ],
   "$defs": {
@@ -919,6 +928,150 @@
           }
         }
       ]
+    },
+    "freshness": {
+      "$id": "literate-ai/retained-tree-html-freshness@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "current",
+        "request_identity",
+        "renderer_identity",
+        "framework_distribution_identity",
+        "source_identity",
+        "generation_manifest",
+        "source_member_count",
+        "directory_count",
+        "page_count",
+        "page_bytes",
+        "writes_authorized"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-tree-html-freshness@1"
+        },
+        "current": {
+          "const": true
+        },
+        "request_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "renderer_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "framework_distribution_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "generation_manifest": {
+          "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/indexBlob"
+        },
+        "source_member_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "directory_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "page_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "writes_authorized": {
+          "const": false
+        }
+      },
+      "description": "Descriptive current-source and complete-output observations from an actual read-only context; no later source exclusion, recovery or publication authority."
+    },
+    "checkResult": {
+      "$id": "literate-ai/retained-tree-html-check-result@1",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "status",
+            "freshness"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-tree-html-check-result@1"
+            },
+            "status": {
+              "const": "current"
+            },
+            "freshness": {
+              "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/freshness"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "status",
+            "refusal"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/retained-tree-html-check-result@1"
+            },
+            "status": {
+              "enum": [
+                "stale",
+                "refused"
+              ]
+            },
+            "refusal": {
+              "$ref": "urn:literate-ai:schema:v2:retained-tree-html-contracts#/$defs/planResult/oneOf/1/properties/refusal"
+            }
+          }
+        }
+      ]
+    },
+    "project_views": {
+      "$id": "literate-ai/project-tree-html@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "declarations"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/project-tree-html@1"
+        },
+        "declarations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "description": "Canonical portable project-relative paths to existing versioned tree-view declarations; aliases and file-ancestor collisions refuse."
+        }
+      }
     }
   }
 }

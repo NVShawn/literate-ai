@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Published retained-tree HTML can be checked without writable caches or restored
+  publication ownership. Projects can opt into a bounded tree-declaration registry
+  and an additive freshness gate while legacy verification reports stay unchanged.
+
 - Windows worker probes preserve unknown NVIDIA memory as null when the device
   reports permission text, matching the POSIX observation behavior.
 

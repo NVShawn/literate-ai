@@ -23,7 +23,18 @@ class _ExistingGenerationCAS(FileSystemCAS):
     """Reuse canonical CAS reads; every staging write becomes exact comparison."""
 
     def __init__(self, root):
-        super().__init__(root, create=False)
+        self._existing_source = root if isinstance(root, FileSystemCAS) else None
+        if self._existing_source is None:
+            super().__init__(root, create=False)
+        else:
+            # Published generations have their own closed, read-only layout.
+            # Preserve that reader instead of assuming an operator cache exists.
+            self.root = self._existing_source.root
+
+    def get_bytes(self, reference):
+        if self._existing_source is not None:
+            return self._existing_source.get_bytes(reference)
+        return super().get_bytes(reference)
 
     def put_bytes(self, content, *, media_type="application/octet-stream"):
         reference = BlobRef(
@@ -40,7 +51,9 @@ class _ExistingGenerationCAS(FileSystemCAS):
         raise ValueError("html.tree.generation-check-cannot-write-streams")
 
 
-def verify_staged_html_tree_generation(reference, request, store):
+def verify_staged_html_tree_generation(
+    reference, request, store, *, reserved_memory_bytes=0
+):
     """Verify every declared page and metadata descendant, never adopt owners.
 
     Regenerating expected bytes through a comparison-only CAS rejects missing,
@@ -93,7 +106,10 @@ def verify_staged_html_tree_generation(reference, request, store):
         maximum_metadata_memory_bytes=limits.max_metadata_memory_bytes,
     )
     checked = stage_html_tree_generation(
-        tree, request, _ExistingGenerationCAS(store.root)
+        tree,
+        request,
+        _ExistingGenerationCAS(store),
+        reserved_memory_bytes=reserved_memory_bytes,
     )
     if checked.manifest != reference:
         raise ValueError("html.tree.generation-complete-closure-mismatch")

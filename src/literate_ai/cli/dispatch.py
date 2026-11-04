@@ -1529,8 +1529,14 @@ def _parser() -> JsonArgumentParser:
     render_tree.add_argument(
         "--declaration", required=True, help="bounded tree-view declaration JSON"
     )
-    render_tree.add_argument(
+    render_tree_actions = render_tree.add_mutually_exclusive_group()
+    render_tree_actions.add_argument(
         "--apply", action="store_true", help="publish an acknowledged initial view"
+    )
+    render_tree_actions.add_argument(
+        "--check",
+        action="store_true",
+        help="check complete existing pages and current source without writing files",
     )
     render_tree.add_argument(
         "--ack-plan", help="exact sha256 identity of the current full read-only plan"
@@ -1739,6 +1745,8 @@ def _parser() -> JsonArgumentParser:
             "run only this gate (repeatable). Default: all gates -- authority, locks, "
             "source-intelligence (always skipped when provider is none), "
             "html-observability (declared HTML currency), receipt. "
+            "A declared literate.tree-html.json also selects tree-html-observability; "
+            "that gate can be requested explicitly. "
             "Verify never builds; that is rebuild's job"
         ),
     )

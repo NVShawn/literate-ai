@@ -134,7 +134,7 @@ def observe_html_tree_generation_files(
         stage_html_tree_generation(
             tree,
             request,
-            _ExistingGenerationCAS(store.root),
+            _ExistingGenerationCAS(store),
             reserved_memory_bytes=reserved_memory_bytes,
         )
         != staged
@@ -300,7 +300,7 @@ def observe_html_tree_generation_files(
                 stage_html_tree_generation(
                     tree,
                     request,
-                    PhysicalCAS(store.root),
+                    PhysicalCAS(store),
                     reserved_memory_bytes=(
                         reserved_memory_bytes + additional_memory_bytes + maps_memory
                     ),

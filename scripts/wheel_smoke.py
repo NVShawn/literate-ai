@@ -2397,6 +2397,7 @@ def _main() -> int:
                 str(repository / "tests/support/installed_tree_html_journey.py"),
                 str(root / "tree-html-journey"),
                 standard_binding["distribution"],
+                parent_source,
                 cwd=root,
             ).stdout
         )

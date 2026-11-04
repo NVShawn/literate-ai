@@ -233,6 +233,15 @@ def _html_tree_capture_exclusions(owner, source, *, reserved_memory_bytes=0):
     saved manifests and manually constructed instances have no issuance entry.
     Complete owner checks remain required around each canonical inventory.
     """
+    from .html_tree_published_output import (
+        ReadOnlyHtmlTreeOutput,
+        _readonly_html_tree_capture_exclusions,
+    )
+
+    if type(owner) is ReadOnlyHtmlTreeOutput:
+        return _readonly_html_tree_capture_exclusions(
+            owner, source, reserved_memory_bytes=reserved_memory_bytes
+        )
     if type(owner) is not InitialHtmlTreeOutput:
         raise TypeError("html.tree.original-output-owner-required")
     selection = _CAPTURE_OWNERS.get(owner)

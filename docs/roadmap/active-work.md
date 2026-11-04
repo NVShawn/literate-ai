@@ -33431,6 +33431,17 @@ independent review and the complete combined gate from test one.
 
 - **Planning verification:** Independent source/design review by `native_transport_review` approves Proposed ADRs 0058/0059; its Markdown table finding is corrected. Canonical work recording and documentation/driver review pass. The read-only contribution sweep validates 41 goals with no invalid entries, preserving the original 39 and prior release history; overall release readiness remains false. The previous two-design, pre-integration local Make checkpoint selected 2,664 tests: 2,577 pass, 87 declared skips and zero failures in 4,261.977 seconds; lint, format and documentation checks also pass. Test-report identity: `0eb956ba4e3c3b27988e405bb049106e75ad4650e0751dbc21c12c4350964e77`. These historical results validate only that earlier two-design snapshot. The fresh consolidated main/ADRs 0056–0059 Make gate passes 2,665 selected tests: 2,578 passed, 87 declared skips and zero failures in 4,164.827 seconds (report SHA-256 `761dd0c760f8539844e562edb9649d5a6612ef4498d2b90de79903458661cdc4`). Independent final union review approves all four Proposed designs and preserves main’s exact source/test bytes and driver pin; canonical documentation/driver checks pass. Neither checkpoint claims implementation, native/browser acceptance or release qualification. The directing user explicitly accepted all four designs on 2026-11-03. Implementation and native/browser/release qualification remain open.
 
+- **Freshness implementation checkpoint:** The standalone read-only complete
+  generation/source check has independent source approval after memory precharge,
+  exact reservation and closing-lifetime repairs. The project opt-in registry and
+  additive verification gate are authored and pass two actual public CLI tests
+  (16.870 seconds in the latest focused run), covering current/stale views, malformed and escaping registry
+  paths, duplicate fields, dangling registries, complete no-write snapshots and
+  unchanged legacy report shape. These tests use only an explicit external
+  framework-installation observation seam; source capture, published output,
+  project discovery and gates are real. Final integration review, full/installed
+  gates, rerender/recovery, unit joins and native/browser acceptance remain open.
+
 - **Priority:** P1
 - **Owner:** HTML observability contracts, retained-tree projection and atomic publication
 - **Direction:** Include issue #279 in the complete 1.4 scope under directing-user authorization. Publish a top-level index and hierarchical directory/unit information cards for retained native trees.
