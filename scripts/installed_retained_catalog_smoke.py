@@ -84,13 +84,15 @@ def selected_shim_status(project: Path, invoke) -> dict:
 
     def status() -> tuple[dict, dict]:
         before = fixture_snapshot(project)
-        result = invoke("status", "--project", str(project))
+        result = invoke("status", "--project", str(project), observe_host=True)
         after = fixture_snapshot(project)
         tools = result["host"]["host_tools"]
         if before != after:
             raise RuntimeError("installed public status changed adopted fixture inputs")
         if tools.get("error") or not isinstance(tools.get("ready"), bool):
-            raise RuntimeError("installed public status could not resolve host tools")
+            raise RuntimeError(
+                f"installed public status could not resolve host tools: {tools}"
+            )
         python = [
             item for item in tools["capabilities"] if item["capability"] == "python"
         ]
@@ -249,6 +251,11 @@ def main() -> int:
         for key, value in os.environ.items()
         if key not in {"PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV"}
     }
+    operator_provider_environment = {
+        key: value
+        for key, value in environment.items()
+        if key in {"CODING_CLI", "LITAI_CODING_PROVIDER"}
+    }
     environment.update(
         BUILD_DIR=str(root / "build"),
         OBJ_DIR=str(root / "obj"),
@@ -256,10 +263,19 @@ def main() -> int:
         LITAI_CODING_PROVIDER="coding-cli",
     )
 
-    def run(*arguments: str, cwd: Path = root) -> subprocess.CompletedProcess:
+    def run(
+        *arguments: str, cwd: Path = root, environment_override: dict | None = None
+    ) -> subprocess.CompletedProcess:
         try:
             return run_with_tree_kill(
-                arguments, cwd=cwd, env=environment, timeout=300, text=True, check=True
+                arguments,
+                cwd=cwd,
+                env=environment
+                if environment_override is None
+                else environment_override,
+                timeout=300,
+                text=True,
+                check=True,
             )
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
             for name, output in (("stdout", exc.stdout), ("stderr", exc.stderr)):
@@ -274,9 +290,23 @@ def main() -> int:
                 f"in {root}: {detail[-2000:]}"
             ) from exc
 
-    def invoke(*arguments: str) -> dict:
+    def invoke(*arguments: str, observe_host: bool = False) -> dict:
+        # The adoption-only unknown-provider guard is not a real host selection.
+        # Observe the host's normal declared defaults, never force tool readiness.
+        observed_environment = {
+            key: value
+            for key, value in environment.items()
+            if key not in {"CODING_CLI", "LITAI_CODING_PROVIDER"}
+        }
+        observed_environment.update(operator_provider_environment)
         completed = run(
-            sys.executable, "-I", "-m", "literate_ai.cli", "--json", *arguments
+            sys.executable,
+            "-I",
+            "-m",
+            "literate_ai.cli",
+            "--json",
+            *arguments,
+            environment_override=observed_environment if observe_host else None,
         )
         envelope = json.loads(completed.stdout)
         if envelope.get("ok") is not True:
