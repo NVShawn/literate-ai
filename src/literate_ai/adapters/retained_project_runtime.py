@@ -285,6 +285,7 @@ def _execute_retained_project(
                 cache_root=directories.build_dir / "native-sdk-cache",
                 store=store,
                 environment=operator_environment,
+                receiver_context=receiver_context,
             )
             sdk_arguments = {
                 "native_sdk_owners": sdk_runtime.acquire(),

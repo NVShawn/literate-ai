@@ -4,6 +4,7 @@ import platform
 import shutil
 import sys
 from collections.abc import Callable, Mapping
+from datetime import datetime
 from pathlib import Path
 
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
@@ -39,6 +40,7 @@ class NativeSdkProjectAcquisition:
         reason: str,
         host_build_acknowledged: bool = False,
         store: FileSystemCAS | None = None,
+        authorization_deadline: datetime | None = None,
     ):
         if store is not None and not isinstance(store, FileSystemCAS):
             raise TypeError("SDK acquisition requires a live filesystem CAS")
@@ -51,6 +53,7 @@ class NativeSdkProjectAcquisition:
         self.reason = reason
         self.host_build_acknowledged = host_build_acknowledged
         self.store = store
+        self.authorization_deadline = authorization_deadline
         self._started = False
 
     def __call__(self, snapshot) -> NativeSdkConsumerInputs | None:
@@ -143,6 +146,7 @@ class NativeSdkProjectAcquisition:
                 reason=self.reason,
                 environment=self.environment,
                 host_build_acknowledged=True,
+                authorization_deadline=self.authorization_deadline,
             )
             for selection in selections
         )
