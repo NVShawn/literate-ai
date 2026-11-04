@@ -377,53 +377,177 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
 
 
 class OpenCodeModelProbeTests(unittest.TestCase):
-    def test_model_probe_selects_private_v2_server_and_preserves_v1(self):
-        from literate_ai.contracts import (
-            ExecutionRequirements,
-            ExecutionWorker,
-            ExecutionWorkerKind,
-        )
+    @classmethod
+    def setUpClass(cls):
+        from literate_ai.adapters.project_initialization import initialize_project
+        from literate_ai.contracts import RepositoryParentSelection
+        from tests.support.fixtures_worker_alignment import build_coding_cli
 
-        worker = ExecutionWorker(
-            "fixture",
-            ExecutionWorkerKind.SSH,
-            requirements=ExecutionRequirements(os_family="linux"),
-            endpoint="user@fixture.invalid",
-            workspace="~/litai",
+        cls.temporary = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.temporary.cleanup)
+        cls.root = Path(cls.temporary.name).resolve()
+        cls.seed = cls.root / "seed"
+        initialize_project(
+            cls.seed,
+            empty=True,
+            bootstrap_tools=False,
+            parent_selection=RepositoryParentSelection.root(),
         )
-        aligner = WorkerAligner(
-            WorkerTemplate({}),
-            UserAlignment(()),
-            coding_cli="opencode",
-            model="provider/model",
-            cwd=Path.cwd(),
+        cls.agent = cls.root / "agent"
+        cls.agent.mkdir()
+        cls.binary = build_coding_cli(cls.agent)
+
+    def test_public_align_runs_inventory_selected_agent_without_reinstall(self):
+        import io
+
+        from literate_ai.cli import main
+        from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
+
+        family = (
+            "windows"
+            if os.name == "nt"
+            else {"darwin": "macos", "freebsd": "freebsd"}.get(sys.platform, "linux")
         )
-        for standalone in (False, True):
-            with self.subTest(standalone=standalone):
-                report = worker_alignment.WorkerReport("fixture", "linux")
-                help_output = (
-                    b"  --standalone  private server\n" if standalone else b"  --pure\n"
+        powershell = shutil.which("powershell.exe") if os.name == "nt" else None
+        if os.name == "nt" and powershell is None:
+            self.skipTest("native Windows PowerShell unavailable")
+        cases = [("v1", True), ("v2", True), ("wrong", False), ("helpfail", False)]
+        if os.name == "nt":
+            cases.append(("fallback", True))
+        for number, (mode, expected) in enumerate(cases):
+            with self.subTest(mode=mode):
+                root = self.root / str(number)
+                root.mkdir()
+                project = root / "project"
+                shutil.copytree(self.seed, project)
+                on_path = root / "path agent"
+                fallback = root / "declared agent's directory"
+                on_path.mkdir()
+                fallback.mkdir()
+                for directory, protocol in (
+                    (on_path, "v2" if mode == "fallback" else mode),
+                    (fallback, "v2" if mode == "fallback" else "wrong"),
+                ):
+                    shutil.copy2(self.binary, directory / self.binary.name)
+                    (directory / "protocol.txt").write_text(protocol)
+                worker = ExecutionWorker(
+                    "fixture",
+                    ExecutionWorkerKind.SSH,
+                    requirements=ExecutionRequirements(os_family=family),
+                    endpoint="user@fixture.invalid",
+                    workspace=str(root / "workspace"),
                 )
-                responses = [
-                    SimpleNamespace(returncode=0, stdout=help_output, stderr=b""),
-                    SimpleNamespace(returncode=0, stdout=b"ok\n", stderr=b""),
+                catalog = root / "workers.json"
+                catalog.write_text(
+                    json.dumps(ExecutionWorkerCatalog((worker,)).to_dict())
+                )
+                template = root / "template.json"
+                template.write_text(
+                    json.dumps(
+                        {
+                            "schema": "literate-ai/worker-template@1",
+                            "platforms": {
+                                family: {
+                                    "commands": [
+                                        {
+                                            "name": "opencode",
+                                            "extra_paths": [str(fallback)],
+                                        }
+                                    ]
+                                    if os.name == "nt"
+                                    else ["opencode"],
+                                    "python": {
+                                        "commands": [Path(sys.executable).name],
+                                        "minimum": "3.11",
+                                    },
+                                }
+                            },
+                        }
+                    )
+                )
+                alignment = root / "alignment.json"
+                alignment.write_text(
+                    json.dumps(
+                        {"schema": "literate-ai/worker-alignment@1", "files": []}
+                    )
+                )
+                selection = root / "test.json"
+                selection.write_text(
+                    json.dumps({"coding_cli": "opencode", "model": "fixture/model"})
+                )
+                system_paths = (
+                    [str(Path(os.environ["SystemRoot"]) / "System32")]
+                    if os.name == "nt"
+                    else ["/usr/bin", "/bin"]
+                )
+                search = ([] if mode == "fallback" else [str(on_path)]) + [
+                    str(Path(sys.executable).parent),
+                    *system_paths,
                 ]
-                with patch.object(aligner, "_run", side_effect=responses) as run:
-                    aligner._check_model(worker, report)
-                    self.assertEqual(run.call_count, 2)
-                    command = run.call_args.args[1]
-                    self.assertEqual("--standalone" in command, standalone)
-                    self.assertIn("provider/model", command)
-                self.assertEqual(report.findings, [])
-        with patch.object(
-            aligner,
-            "_run",
-            return_value=SimpleNamespace(returncode=1, stdout=b"", stderr=b""),
-        ) as run:
-            report = worker_alignment.WorkerReport("fixture", "linux")
-            aligner._check_model(worker, report)
-            self.assertEqual(run.call_count, 1)
-            self.assertEqual(report.findings[0].state, "failed")
+                environment = {
+                    "PATH": os.pathsep.join(search),
+                    "LITAI_TEST_CONFIG": str(selection),
+                }
+
+                def native_route(_worker, command, *_args, **_kwargs):
+                    # Only substitute the external network hop. Inventory and
+                    # both agent invocations execute as real native processes.
+                    return (
+                        (powershell, *command.split()[1:])
+                        if os.name == "nt"
+                        else ("/bin/bash", "-c", command)
+                    )
+
+                before = {
+                    str(p): p.read_bytes()
+                    for directory in (on_path, fallback)
+                    for p in directory.iterdir()
+                }
+                previous = Path.cwd()
+                output, errors = io.StringIO(), io.StringIO()
+                try:
+                    os.chdir(project)
+                    with (
+                        patch.dict(os.environ, environment),
+                        patch.object(
+                            worker_alignment, "remote_execute_arguments", native_route
+                        ),
+                    ):
+                        status = main(
+                            (
+                                "worker",
+                                "align",
+                                "--all",
+                                "--worker-config",
+                                str(catalog),
+                                "--template",
+                                str(template),
+                                "--alignment",
+                                str(alignment),
+                            ),
+                            stdout=output,
+                            stderr=errors,
+                        )
+                finally:
+                    os.chdir(previous)
+                document = json.loads(output.getvalue() or errors.getvalue())
+                self.assertEqual(status, 0 if expected else 1, document)
+                report = document["result"]
+                self.assertEqual(report["aligned"], expected, report)
+                findings = report["workers"][0]["findings"]
+                if not expected:
+                    self.assertEqual(
+                        [(f["kind"], f["state"]) for f in findings],
+                        [("model", "failed")],
+                    )
+                self.assertEqual(
+                    before,
+                    {
+                        str(p): p.read_bytes()
+                        for directory in (on_path, fallback)
+                        for p in directory.iterdir()
+                    },
+                )
 
 
 if __name__ == "__main__":
