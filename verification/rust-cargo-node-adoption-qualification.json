@@ -1,0 +1,93 @@
+{
+  "exact_main_ci": {
+    "commit": "072d66e81eff85f58515a09d93d19528499a5ec1",
+    "conclusion": "success",
+    "run_id": 41740063437,
+    "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/41740063437"
+  },
+  "framework_source_commit": "072d66e81eff85f58515a09d93d19528499a5ec1",
+  "host_install_qualified": false,
+  "independent_review": {
+    "actual_checkout_and_both_complete_input_snapshots_corroborated": true,
+    "actual_public_plan_and_four_managed_controls_corroborated": true,
+    "approved": true,
+    "host_tools_ready_false_preserved": true,
+    "review_record_sha256": "7cb647e106cfba1aa003156ae8d533d8ae08866caf646a43a9f4ac15794ed737",
+    "reviewer": "/root/webmux_integration",
+    "scope": "Original issue203 read-only language inventory/Flavor planning acceptance only"
+  },
+  "installed_noneditable_adoption_qualified": false,
+  "managed_regressions": [
+    {
+      "log_sha256": "5797a2354f83676dce19133a417b3be4140fed9b5877c7a4846ad90c0b893b26",
+      "passed": 3,
+      "selection": "tests/smoke/test_rust_adoption_detection.py",
+      "skipped": 0
+    },
+    {
+      "log_sha256": "7882fffb9346d96885a434a06c486e61ef201a181325ce70bb557e63c2c8d2d2",
+      "passed": 1,
+      "scope": "Actual small Cargo baseline/parity and wrapper lock through source adapter with synthetic framework-origin fixture; not original-project apply or installed framework qualification",
+      "selection": "tests/smoke/test_cargo_wrapper_adoption.py",
+      "skipped": 0
+    }
+  ],
+  "observed_at": "2026-11-04T02:54:25.169776+00:00",
+  "original_project_applied_or_built": false,
+  "original_reproducer": {
+    "actual_checkout_commit_tree_and_clean_status_verified": true,
+    "commit": "f583e60b2bb086450fc9abf9d646836f77c7b3f4",
+    "lfs_smudge_disabled_during_checkout": true,
+    "recursive_submodules": 0,
+    "repository": "https://github.com/allsmog/Kuzushi",
+    "tree": "c4aa8ff586cdd66fddf3fa8b9a764e9d73f45799"
+  },
+  "original_reproducer_source_executed": false,
+  "other_adoption_cargo_sdk_package_or_release_goals_complete": false,
+  "public_command": "python -m literate_ai.cli onboard adopt PINNED_KUZUSHI --source-intelligence-provider none --default-branch main",
+  "public_plan": {
+    "blockers": [],
+    "catalog_gaps": [],
+    "elapsed_seconds": 3.6995538340415806,
+    "host_tools_ready": false,
+    "identity": "sha256:854304d632ed866a807bb5e41cbb9dbf167240e6f374195261700e63a13a5415",
+    "languages": [
+      "cpp",
+      "javascript",
+      "python",
+      "rust"
+    ],
+    "ok": true,
+    "proposed_flavors": [
+      "flavor://literate-ai/lang-rust",
+      "flavor://literate-ai/build-cargo",
+      "flavor://literate-ai/package-cargo",
+      "flavor://literate-ai/lang-cpp",
+      "flavor://literate-ai/lang-python",
+      "flavor://literate-ai/lang-javascript"
+    ],
+    "raw_stdout_sha256": "d4b5ae4ebfc03abcaae256e3d3dcb20200e81f90635db9e55bd6ef934d8a8efb",
+    "writes": false
+  },
+  "relevant_detection_function_and_other_three_files_equal_reviewed_source": true,
+  "reviewed_node_fix_commit": "2b1a9fb1c3c8d37fdd9adc06c112863e3a3b33de",
+  "schema": "literate-ai/rust-adoption-readonly-qualification@1",
+  "source_file_sha256": {
+    "src/literate_ai/adapters/harness_inventory.py": "db8b5b2a34afc9bdcf2b86a81c2074b11c761378dc99935898fc11b79f4dc8e6",
+    "src/literate_ai/adapters/project_initialization.py": "7e62a0206260fde708c066cf44742c839ab2be1b71b4f1704333a8703a775031",
+    "tests/smoke/test_cargo_wrapper_adoption.py": "b3fb5a303eb05d0057c713a309dfedd136c5a989128778bee0a1c0766492f8cb",
+    "tests/smoke/test_rust_adoption_detection.py": "8aa2c72c949e6943b0cc4a022944a00d60414cb533e1d73eb79288583077b8de"
+  },
+  "source_input_currentness": {
+    "added_removed_changed_nodes": 0,
+    "after_snapshot_sha256": "e95bd056e8a0c9d71d7417c890ff4dd02f89c9abc16e49ae296f99e410c4cde1",
+    "before_snapshot_sha256": "e95bd056e8a0c9d71d7417c890ff4dd02f89c9abc16e49ae296f99e410c4cde1",
+    "complete_node_mode_identity_mtime_content_and_link_targets_equal": true,
+    "nodes_after": 8337,
+    "nodes_before": 8337,
+    "regular_file_bytes": 54787638,
+    "regular_files": 6908,
+    "scope": "complete source worktree excluding Git administration; no submodules present"
+  },
+  "whole_harness_module_equality_or_ancestry_claimed": false
+}

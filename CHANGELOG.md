@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Worker-alignment and retained-receiver test fixtures use portable declared remote workspaces while preserving native local paths.
+
+- Windows coding-agent test compilers retain configured temporary/system variables while applying MSVC overrides.
+
+- Composed retained-tree packages apply canonical directory permissions under permissive and restrictive worker umasks. Independent verification still rejects later permission changes.
+
+- Worktree audit inputs retain bounded Git operation metadata and reject changed
+  descendant bytes or directory membership; complete audit and retirement
+  authority remain separate requirements.
+
+- Add installed-wheel adoption coverage for retained third-party Component-shaped
+  files, using real unittest, build, package and parity controls. Exercise public
+  status with an explicitly selected local shim and preserve native/Python
+  requirements and adopted-project inputs.
+
+- Native x64 MSVC setup preserves the selected toolset's complete version option
+  across CMD argument parsing, while retaining required compiler variables.
+
+- Retained receiver construction prepares its execution request once and reuses
+  the same typed worker selection and plan. Capability publication, reservation
+  and execution still reopen current authority; no preparation is cached.
+
+- Add real-CAS contract controls for retained SDK metadata batching, overflow fallback, canonical bytes and strict currentness/custody refusal.
+
+- Batch retained SDK command metadata under the original live owner while preserving full boundary currentness and exact evidence identities.
+
 - Remote retained SDK producer and consumer grants honor the original action's
   deadline, capped at three hours, so long source verification does not outlive
   an unrelated ten-minute grant. Expiry, revocation and current-custody checks
@@ -19,8 +45,13 @@
   deadline. Retained receiver startup avoids a redundant full preview while
   preserving registration custody and full publication and execution checks.
 
-- Windows worker probes preserve unknown NVIDIA memory as null when the device
-  reports permission text, matching the POSIX observation behavior.
+- POSIX and Windows worker probes preserve observed NVIDIA devices with unknown
+  memory when the device reports permission text. Requirements needing a known
+  memory capacity still refuse; no capacity is inferred.
+
+- Add owned POSIX fault controls for retained-tree HTML source recapture, index substitution, generation custody and unpublished budget failures.
+
+- Add bounded retained-tree HTML plans and acknowledged initial offline publication. Tree freshness, recovery, per-unit joins and native/browser qualification remain open.
 
 - Bare Component runs resolve their declared demonstration inputs from the
   Component name even when selected through a project-relative path. Remote

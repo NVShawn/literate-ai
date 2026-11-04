@@ -41,9 +41,9 @@ from literate_ai.adapters.retained_unit_verification import (
 )
 from literate_ai.cli.retained_project import _document
 from literate_ai.cli.retained_unit_execution import (
+    _prepare_retained_unit_execution,
     execute_retained_unit_package_from_args,
 )
-from literate_ai.cli.retained_unit_package import _project_context
 from literate_ai.contracts import ContentIdentity
 from literate_ai.contracts.paths import canonical_relative_posix_path
 from literate_ai.projects import read_only_project_configuration_parses
@@ -243,13 +243,13 @@ def _configured_worker(config, *, owned_child=None):
             config.args, verification_selection=config.verification_selection
         )
 
-    preview, status = preview_current()
-    if status != 0 or preview["authorization_identity"] != config.authorization.uri:
-        raise ValueError("retained.receiver.exact-private-authorization-required")
-    _project, _binding, _policy, _observations, _pkg, _tar, authority = (
-        _project_context(config.args)
+    prepared = _prepare_retained_unit_execution(
+        config.args, verification_selection=config.verification_selection
     )
-    _manifest, selected, planning = authority()
+    preview = prepared.preview()
+    if preview["authorization_identity"] != config.authorization.uri:
+        raise ValueError("retained.receiver.exact-private-authorization-required")
+    selected, planning = prepared.selected, prepared.planning
     if (
         not selected.worker.is_remote
         or selected.worker.identity != planning.plan.profile.worker_identity
@@ -295,7 +295,7 @@ def _configured_worker(config, *, owned_child=None):
         current()
         return result
 
-    # Startup already observed the canonical preview and independent authority.
+    # Startup uses one canonical preparation and its actual planning objects.
     # Publication and execution still call the full currentness guard; close
     # this constructor with fresh private registration and child custody.
     registered_current()

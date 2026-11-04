@@ -248,7 +248,7 @@ jobs:
           else
             printf 'changed=false\n' >> "$GITHUB_OUTPUT"
           fi
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         if: matrix.task == 'skill-evaluation'
         with:
           version: "0.12.4"
@@ -784,6 +784,7 @@ jobs:
           python -m pytest -q -rA -o junit_logging=all
           --junitxml=cpp-native-qualification.xml
           tests/e2e/test_cpp_bazel_outputs.py::CppBazelOutputTests::test_locked_cpp_library_runs_through_complete_filesystem_runtime
+          tests/critical/test_guarded_builder.py::GuardedCppBuilderTests
       - name: Reject skipped or incomplete native qualification
         if: matrix.task == 'cpp-native'
         shell: python
@@ -796,11 +797,11 @@ jobs:
               for name in ("tests", "failures", "errors", "skipped")
           }
           print(counts)
-          expected = {"tests": 6, "failures": 0, "errors": 0, "skipped": 0}
+          expected = {"tests": 9, "failures": 0, "errors": 0, "skipped": 0}
           if counts != expected:
               raise SystemExit(
-                  "native qualification did not pass its parent test and all ten "
-                  "static/shared product subtests"
+                  "native qualification did not pass its Bazel parent, five "
+                  "product subtests, and three guarded compiler controls"
               )
       - name: Upload native qualification evidence
         if: matrix.task == 'cpp-native' && (always())

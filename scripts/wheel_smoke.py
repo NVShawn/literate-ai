@@ -1879,6 +1879,32 @@ def _main() -> int:
         operator_golden_paths = assert_installed_operator_golden_paths(
             litai, root, parent_source=parent_source
         )
+        retained_catalog_discovery = {
+            "qualified": False,
+            "platform": sys.platform,
+            "reason": "public retained catalog fixture requires POSIX Make",
+        }
+        if os.name == "posix":
+            retained_catalog_discovery = json.loads(
+                run(
+                    str(python),
+                    "-I",
+                    str(repository / "scripts" / "installed_retained_catalog_smoke.py"),
+                    str(root / "retained-catalog-discovery"),
+                    standard_binding["distribution"],
+                    parent_source,
+                    cwd=root,
+                ).stdout
+            )
+            if (
+                retained_catalog_discovery.get("qualified") is not True
+                or retained_catalog_discovery.get("distribution")
+                != standard_binding["distribution"]
+            ):
+                raise RuntimeError(
+                    "installed retained catalog fixture was not qualified"
+                )
+            retained_catalog_discovery["platform"] = sys.platform
         repository_refresh = assert_installed_repository_refresh(litai, root)
         # HTML update qualification advances parent.git. The independent project
         # fixtures must keep their own immutable parent while that branch runs.
@@ -2387,6 +2413,19 @@ def _main() -> int:
         # Require HTML success before retaining any qualified HTML or wheel.
         # Future.result preserves a child failure when other fixtures pass.
         html_observability = json.loads(html_check.result().stdout)
+        # Reuse this actual installed wheel/prefix for the additive tree path;
+        # no synthetic framework observer or second wheel build qualifies it.
+        tree_html = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-B",
+                str(repository / "tests/support/installed_tree_html_journey.py"),
+                str(root / "tree-html-journey"),
+                standard_binding["distribution"],
+                cwd=root,
+            ).stdout
+        )
         if (
             run("git", "rev-parse", "HEAD", cwd=repository).stdout.strip()
             != git_revision
@@ -2449,8 +2488,10 @@ def _main() -> int:
                     ).as_posix(),
                     "parallel_checkpoint": parallel_checkpoint,
                     "operator_golden_paths": operator_golden_paths,
+                    "retained_catalog_discovery": retained_catalog_discovery,
                     "repository_refresh": repository_refresh,
                     "html_observability": html_observability,
+                    "tree_html": tree_html,
                     "skills": sorted(installed),
                     "snapshot_replication_schema": replication_schema,
                     "version_contract": version_contract,

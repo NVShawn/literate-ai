@@ -1,0 +1,151 @@
+{
+  "schema": "literate-ai/reviewed-release-blocker-composition@1",
+  "intermediate_source": "3686f3058a79a0eb718c8f939ee396f1cd6b0f84",
+  "compared_scope": [
+    "src",
+    "tests",
+    "scripts",
+    ".github",
+    "Makefile",
+    "pyproject.toml"
+  ],
+  "inherited_payloads_preserved": true,
+  "compared_payload_count": 2138,
+  "source_exceptions": {
+    "scripts/installed_retained_catalog_smoke.py": {
+      "source": "ad42f8eba015d8884cf30f6a44d8ca4c9ab666af",
+      "git_blob": "b9a4ce7ef897b6bffcc54eba51ecf8a241a07a34",
+      "git_mode": "100644",
+      "materialized_sha256": "41d9c33d1d1b9feba2a41020700595b0ec050cee4cc3ec33d9f641aeaa2e4477"
+    },
+    "scripts/wheel_smoke.py": {
+      "source": "ad42f8eba015d8884cf30f6a44d8ca4c9ab666af",
+      "git_blob": "8ee8db70012613c05f90deb55c4f17c2a14bf46d",
+      "git_mode": "100644",
+      "materialized_sha256": "66ce704ce59dafbc9c4d2b9ad1a190630106029c9f2bcb37eb0bd54976bd9188"
+    },
+    "src/literate_ai/adapters/lifecycle/local.py": {
+      "source": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+      "git_blob": "6636b7e8e66cf8092ac36416d83fb8296b8f5d0b",
+      "git_mode": "100644",
+      "materialized_sha256": "93e88ad03c24085f5636a419dd796b2a1ea35ca7c9fc777b2ec0580b2e4153fa"
+    },
+    "src/literate_ai/adapters/native_sdk_acquisition.py": {
+      "source": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+      "git_blob": "7b01a53d0682a133486335433debf0e52eae04bc",
+      "git_mode": "100644",
+      "materialized_sha256": "0afcdcb9fc23cc5297437e53088cdef7c343f3c368426ecc94d0d48e9dfbd4f9"
+    },
+    "src/literate_ai/adapters/native_sdk_source_build.py": {
+      "source": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+      "git_blob": "e2ae982411ecb069e0f211d69743894a328f281b",
+      "git_mode": "100644",
+      "materialized_sha256": "24089495854d6a2063d240127d63506b22ceadbff47569be3017989b504e9020"
+    },
+    "src/literate_ai/adapters/retained_project_runtime.py": {
+      "source": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+      "git_blob": "3667f782e95e619d83343589e606dca6167cb906",
+      "git_mode": "100644",
+      "materialized_sha256": "270e0e42d3656e3e44b234b964d659f9993bba24e25ef56dfed8d7c18f193572"
+    },
+    "src/literate_ai/adapters/retained_project_sdk_runtime.py": {
+      "source": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+      "git_blob": "b93ee55ace36a690edc85d211855ba527cb70b1f",
+      "git_mode": "100644",
+      "materialized_sha256": "9d5af7cae99b5dc8b95b32673f153fe3ab0316c7b75f57d3276e51194e64cc27"
+    },
+    "tests/e2e/test_native_sdk_source_build.py": {
+      "source": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+      "git_blob": "9756af67ed1e4d1ecaa9c81f53073b7ee89cdbc5",
+      "git_mode": "100644",
+      "materialized_sha256": "9d15cd00492ad1751b0eca60c523effccdf76fa57b258d5a55552be894d6f9d4"
+    }
+  },
+  "retained_qualification_records": {
+    "verification/gpu-memory-command-route-qualification.json": {
+      "source": "f352a799604b5e683b5038e507a742182cd6a6e2",
+      "sha256": "0ae275cdf9c2798e30879fe839874ffda989504eba963de1fdd040ce6e656662",
+      "bytes": 1899,
+      "unchanged": true
+    },
+    "verification/rust-cargo-node-adoption-qualification.json": {
+      "source": "3b2a004ad46f2ef870b72e8d8a0ce904c02d6fb9",
+      "sha256": "f338ac228d62fc938adf2433f4d2a85d273035a2e422c8a2ef6d2552d7aca116",
+      "bytes": 4295,
+      "unchanged": true
+    },
+    "verification/installed-retained-catalog-qualification.json": {
+      "source": "3b6743d5830bb1406705a1b9b861d4f81a8ea45d",
+      "sha256": "899d7bd983ab76b3a1311222f4daf023baf58a7e933c76d125a1c85cdb3b813d",
+      "bytes": 3008,
+      "unchanged": true
+    },
+    "verification/installed-selected-shim-status-qualification.json": {
+      "source": "ad42f8eba015d8884cf30f6a44d8ca4c9ab666af",
+      "sha256": "846ef3871a0e0c325bddfbe7c7ac397b54e5673e6cfb2d858cc39f5e8801eb86",
+      "bytes": 3227,
+      "unchanged": true
+    },
+    "verification/worktree-operation-input-development.json": {
+      "source": "3686f3058a79a0eb718c8f939ee396f1cd6b0f84",
+      "sha256": "6d603c8b377009552dad46c192e2cfc0a280a01fff6069d7a38b30a8f5d3c963",
+      "bytes": 2763,
+      "unchanged": true
+    }
+  },
+  "claims": {
+    "fresh_consolidated_full_qualification": false,
+    "fresh_consolidated_full_remote_ci": false,
+    "exact_main_qualification": false,
+    "release14_complete": false
+  },
+  "scope": "Reviewed code and historical evidence composition only. The separate 3686f30 and bd535fd gates are intermediate-source observations and cannot qualify this accepted-main union by relabeling. Retained installed Darwin proofs and original native observations stay bound to their recorded sources; source equality is not a new execution. Installed FreeBSD PACKAGE/cold VERIFY, broader native/package/transport goals and proposed ADR0053 remain open. The later Windows fixture correction is separately source-bound and natively corroborated; all other inherited payloads retain their original source identities.",
+  "independent_source_review": {
+    "approved": true,
+    "reviewer": "/root/webmux_integration",
+    "review_record_sha256": "26d833a3af94bde3579f1770c201d7357e44db3f22c26b773346943c88bb5818",
+    "root_corroboration": "Exact two-script delta from intermediate source and byte identity to reviewed host helper/wheel wiring",
+    "source_execution_by_reviewer": false
+  },
+  "integration_dependencies": {
+    "cpp292": "c63b41ceba5213de13a6535ebe832d5d67209fe4",
+    "worktree299": "34fdf1f3cc8156ab1ba97f48bbb445d02ea2293f",
+    "gpu286": "f352a799604b5e683b5038e507a742182cd6a6e2",
+    "rust289": "3b2a004ad46f2ef870b72e8d8a0ce904c02d6fb9",
+    "catalog293": "3b6743d5830bb1406705a1b9b861d4f81a8ea45d",
+    "host296": "ad42f8eba015d8884cf30f6a44d8ca4c9ab666af",
+    "accepted_main291": "ff08e9ba20e62e87a1a538551f21332a68b61997"
+  },
+  "accepted_main_union_review": {
+    "approved": true,
+    "reviewer": "/root/webmux_integration",
+    "review_record_sha256": "74a0e8c983d24514680cfb0dd1da5e6200bd58047550de35f0c1e080268da9c9",
+    "incoming_sdk_source": "0eca0d0dad2301014812a518262c2221a743ce1f",
+    "landed_main": "ff08e9ba20e62e87a1a538551f21332a68b61997",
+    "earlier_batch": "bd535fd9f5b1d47d07a11b9bd3646a6872000560",
+    "incoming_code_test_files": 6,
+    "other_payloads_preserved": 2131,
+    "native_freebsd_qualified": false,
+    "scope": "Closed source composition and live-receiver three-hour authorization ceiling only; original defaults, expiry, revocation, plan/source/custody/command/privilege checks retained. No source execution by reviewer. This review predates the separately reviewed fixture correction."
+  },
+  "authored_fixture_bindings": {
+    "tests/support/fixtures_worker_alignment.py": {
+      "materialized_sha256": "b33782cf6090f378f6737e6b2004edeb2643ff7f6672f18505f1b9974c94b80a",
+      "git_mode": "100644",
+      "source": "reviewed fixture correction in this candidate"
+    },
+    "tests/critical/test_worker_alignment_fixture.py": {
+      "materialized_sha256": "be0a0fb86cdc7a800810d984c7dbb347f7213e8d03c396dc8531cc4113776252",
+      "git_mode": "100644",
+      "source": "reviewed fixture correction in this candidate"
+    }
+  },
+  "fixture_environment_repair": {
+    "qualification_record": "verification/windows-coding-fixture-environment-qualification.json",
+    "fixture_sha256": "b33782cf6090f378f6737e6b2004edeb2643ff7f6672f18505f1b9974c94b80a",
+    "controls_sha256": "be0a0fb86cdc7a800810d984c7dbb347f7213e8d03c396dc8531cc4113776252",
+    "native_compiler_counterfactual_qualified": true,
+    "portable_native_windows_controls_passed": 2,
+    "whole_union_full_qualified": false
+  }
+}

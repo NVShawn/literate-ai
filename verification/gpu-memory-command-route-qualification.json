@@ -1,0 +1,33 @@
+{
+  "schema": "literate-ai/gpu-memory-observation-qualification@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/275",
+  "landed_main": "072d66e81eff85f58515a09d93d19528499a5ec1",
+  "implementation_commit": "5d785f64728f285b4bf07cbbdb4bd3e287bb576f",
+  "exact_main_ci": {
+    "run": 41740063437,
+    "conclusion": "success"
+  },
+  "source_bindings": {
+    "src/literate_ai/adapters/worker_capabilities.py": "c4a43464f5ec3dad5c96bcc8f8c0ea83a8a265d10cb153b8bb0aabf919a10c84",
+    "linux_serializer_sha256": "1b0cb15f7619dd9a0c1ad547a4f89e76571f39ed59625a22d06f9ab021bb92c4"
+  },
+  "retained_native_evidence": {
+    "failure_code": "worker.probe_malformed",
+    "failed_probe_sha256": "bb948b24bb6f2c80632c771a7afbba327268621b721d3dfd1b3b59623bcfec8a",
+    "repaired_probe_sha256": "718d68fbe745685248615c8d91e77ce1923554447bdf685afd18667eda0ba1ac",
+    "same_exact_command_catalog_identity": "sha256:b69352f8581230c398c74abd236d1a6f8f127f0ed75892281aa5a5fc72469fff",
+    "repaired_observation_catalog_identity": "sha256:886303967384f0cdc227a2b0eae869aad3bfc2537fa6df94743236a0c6a0be8a",
+    "observed_nvidia_devices": 1,
+    "observed_gpu_memory_mib": null,
+    "linux_serializer_unchanged_since_implementation": true,
+    "independently_reopened": true,
+    "fresh_native_probe_executed_in_this_audit": false
+  },
+  "current_contract_checks": {
+    "unconstrained_gpu_memory_requirement_preserves_device": true,
+    "positive_minimum_memory_refused_when_memory_unknown": true,
+    "managed_serializer_tests": 7,
+    "failures": 0
+  },
+  "scope": "Numeric-only unavailable NVIDIA memory serialization and fail-closed minimum-capacity matching. Retained native failing/repaired observations through the same original command catalog are reopened; no new native execution, invented memory, Windows connector, Component lifecycle, SDK, package or release qualification is claimed."
+}

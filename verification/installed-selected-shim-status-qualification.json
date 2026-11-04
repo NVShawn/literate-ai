@@ -1,0 +1,56 @@
+{
+  "schema": "literate-ai/installed-selected-shim-status-qualification@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/268",
+  "qualified_source": "e6513d529fc289870c6cfc603fe38acf2063863a",
+  "platform": "darwin",
+  "canonical_wheel_gate_passed": true,
+  "wheel_sha256": "2d2f254084285f9a30bf11820b3cd961a752894968f0c9ba46c1e195114bdc77",
+  "installed_distribution_identity": "sha256:c2cdd93fae26e1733d0aa167bc25d54e8c05ee75dd83d2dffe98f2946b6465a4",
+  "noneditable_installed_interpreter_isolated_from_source": true,
+  "explicit_fixture_configuration": "Replace the existing build-make project-default selector with the already adopted canonical local shim; this does not claim onboarding automatically selected the shim.",
+  "selected_status": {
+    "explicit_authored_configuration_after_adoption": true,
+    "host_tools_error": null,
+    "native_target": {
+      "accelerator": "none",
+      "architecture": "arm64",
+      "operating_system": "macos"
+    },
+    "observed_host_tools_ready": true,
+    "original_status": {
+      "input_nodes": 569,
+      "inputs_unchanged": true,
+      "snapshot_sha256": "2f5f821b2191dcc7b73b6bdf65c191378da8be111cc4c052e720d5b87446ec95"
+    },
+    "physical_manifest": "flavors/legacy-project-shim/flavor.md",
+    "python_requirements": [
+      {
+        "capability": "python",
+        "reason": "Python 3.11 or newer is the stage-zero runtime and creates isolated Literate AI environments.",
+        "required_version": ">=3.11,<4"
+      }
+    ],
+    "selected_shim": "+flavor://legacy-adoption/build-legacy-shim",
+    "selected_status": {
+      "input_nodes": 569,
+      "inputs_unchanged": true,
+      "snapshot_sha256": "68cf7a758fa0d65543bd38685c421e08720d8369d29dd013d158626b443b718f"
+    }
+  },
+  "whole_packaged_implementation_file_bindings": {
+    "src/literate_ai/adapters/operator_status.py": "38e5a9ffd02f6d65fa675ae54d48dc8716a8ad3b0eb06532c9c1eb286da41e1e",
+    "src/literate_ai/adapters/project_host_flavors.py": "8b7dcb7de53f535f71a3ebfcf6d01459888cc4092582d011842560ae99d7adac",
+    "src/literate_ai/adapters/component_lock_planning.py": "8c119d22baf3c1d34649b39bdb8103edca87a75f6baa9d5b10ca040259847f78",
+    "src/literate_ai/adapters/host_install.py": "4d0aee36bb2dc4abac13c315edc700af6fa1e65e51c807d13ccc7ea02ffafa11"
+  },
+  "qualification_helper_sha256": "41d9c33d1d1b9feba2a41020700595b0ec050cee4cc3ec33d9f641aeaa2e4477",
+  "raw_canonical_gate_log_sha256": "fea0233fd5fac90fb3b995432978ed295adcf50d472b67e84c2bcbffffd90dd5",
+  "adoption_no_generation_guard_preserved": true,
+  "status_uses_original_operator_provider_settings": true,
+  "windows_fixture_qualified": false,
+  "full_current_source_regression_qualified": false,
+  "exact_review_main_ci_complete": false,
+  "release14_qualified": false,
+  "scope": "Actual installed public adoption and status on macOS ARM64 resolve a differently named toolchain-free local Flavor, preserve Python requirements and native realization, and leave each observed fixture unchanged. Host readiness is observed, not forced; replacing the Make selection does not qualify unavailable Make provenance. Complete exact review/main CI remains required.",
+  "authored_inputs_unchanged_during_gate_count": 5224
+}

@@ -22406,6 +22406,21 @@ GitHub CI failure without relaxing identity checks.
   deferral. Implementing read-only discovery first under accepted ADR 0046; do not
   remove or relocate any existing checkout as part of that observation. Explicit
   user placement overrides remain authoritative for this session's task worktrees.
+- **Operation-input custody development:** The capture now retains bounded exact
+  Git operation metadata and directory membership alongside existing index,
+  ref and source observations. A retained real conflicted rebase at baseline
+  `05943703` accepts changed todo bytes under the old incomplete capture; the
+  reviewed implementation refuses the same challenge in that retained fixture.
+  The existing nonblocking descriptor-checked reader binds raw descendant bytes
+  and repeated directory membership. Nine new real-Git/refusal controls and all
+  fifty worktree audit, journal, discovery and placement cases pass with no skips.
+  Independent source review approved the exact implementation before supported
+  driver/documentation records were renewed. The [development record](../../verification/worktree-operation-input-development.json)
+  binds source and control evidence. Operation wire uses the existing metadata
+  budget; source payload accounting remains separate. This adds opaque input
+  custody only: semantic operation, activity, object-retention and migration/
+  disposition gates remain pending. Installed/full-regression and exact review/
+  main qualification remain open; no operator checkout was moved or removed.
 - **Discovery development evidence:** Twenty-three real-Git placement, discovery and
   orchestration checks pass with 21 subtests. Coverage includes independent and
   bare repositories, external/locked/detached registrations, dirty/staged/ignored
@@ -32114,6 +32129,12 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
 
+- **2026-11-04 current-source forward integration (in progress):** Preserve the exact `731c755` Linux validation, installed-wheel and public-export pass (2,581 passed, 100 declared skips, all 5,235 authored inputs unchanged) separately from its full platform CI result: 26 successful jobs and one failing Windows shard, where five model-probe subtests reject a native Windows path as their declared remote SSH workspace. The compiler fixture now builds; do not relabel that source as fully qualified. Collect the independently reviewed receiver-planning and SDK-metadata batches, nine real-CAS contract controls, source-equivalent current MSVC history, the accepted initial retained-tree HTML slice with six POSIX custody controls, and the reviewed setup-uv action pin. Preserve published v1 schemas and both installed catalog/host and tree journeys. Correct only the two test fixtures' declared remote workspace values to explicit home-relative coordinates; preserve native local paths, the strict worker contract, all cases and all guards. A separate native fixture proof stopped before class setup because its isolated existing-Python environment lacked framework dependencies; retain its setup failure and claim no original/corrected native result. Require final source composition review, supported authority records, fresh whole-source qualification and exact required CI before landing. Original native scale/PACKAGE/VERIFY obligations, worktree completeness/retirement and unaccepted ADR decisions remain open; no release publication is claimed.
+
+- **2026-11-04 Windows fixture correction (in progress):** Retain failed full-source Windows job `126518187197` at `bd535fd` (819 passes, 164 skips, one setup error). The native coding-agent fixture replaces the complete process environment with nonempty MSVC compiler overrides, dropping temporary/system variables; actual `cl` reports D8037. Reuse the production compiler-environment merger, preserve configured temporary/system variables and vendor override precedence, and qualify deterministic nonempty-override controls plus actual Windows compilation before a new full source/matrix run. This is a fixture repair; production compiler policy and genuine missing-tool skips remain unchanged.
+
+- **2026-11-04 owned integration candidate (in progress):** Consolidate reviewed CPP argument repair, bounded worktree operation custody, canonical composed-package directory modes, GPU observation evidence, Rust adoption inventory, and installed catalog/selected-shim status coverage through ordinary histories. [Source composition](../../verification/reviewed-blocker-integration-composition.json) records every inherited scope, the two reviewed smoke scripts and six files from accepted SDK-deadline main `ff08e9b`, relative to intermediate source `3686f30`. Independent source review passes; the separate `3686f30` and `bd535fd` gates remain intermediate evidence and cannot qualify this accepted-main union by relabeling. Require one fresh complete final-source qualification and exact full remote CI before main, followed by exact post-main gates. Historical installed Darwin and native observations retain their original source/artifact boundaries. The remaining native/package goals and proposed ADR 0053 stay open; this integration does not authorize publication.
+
 - **Release execution:** 1.4.0 (publication and postpublication closure)
 - **Detailed plan:** [1.4 integration](1.4-integration.md).
 - **Phase boundary:** This umbrella remains open through publication and read-back.
@@ -32337,7 +32358,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] Pass singleton positive, invented/duplicate/missing input, false exemption, stale authority and private-oracle controls plus unchanged v1/default-domain coverage.
   - [ ] Pass full regression, installed-wheel qualification and exact review/main CI before claiming issue 132 or dependent issue 48 complete.
 
-### [ ] RUST-ADOPTION-DETECT-001 — Detect Cargo workspaces ahead of incidental helper languages
+### [x] RUST-ADOPTION-DETECT-001 — Detect Cargo workspaces ahead of incidental helper languages
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#203](https://github.com/jordanhubbard/literate-ai/issues/203)
@@ -32349,14 +32370,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
-  - [ ] Include root Node package manifests and conventional JavaScript sources in mixed-language discovery; preserve Cargo/CMake precedence and generated/hidden-tree exclusion.
+  - [x] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
+  - [x] Include root Node package manifests and conventional JavaScript sources in mixed-language discovery; preserve Cargo/CMake precedence and generated/hidden-tree exclusion.
 - **Evidence:**
-  - [ ] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
+  - [x] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
 
 - **Development evidence:** Three new Rust inventory/plan controls pass, including read-only input preservation, helper-language reporting, hidden/generated exclusion and CMake precedence. The missing Rust marker reproduces before the fix.
-- **Remaining Node scope evidence:** The extended mixed Rust/pnpm plan reproduces missing JavaScript before the correction. Four focused plan/native Cargo controls now pass without skips, including manifest-only and source-only JavaScript discovery, CMake precedence and unchanged input bytes. Independent source review approves the correction; full regression and exact qualification remain pending.
-- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+- **Remaining Node scope evidence:** The extended mixed Rust/pnpm plan reproduces missing JavaScript before the correction. Four focused plan/native Cargo controls now pass without skips, including manifest-only and source-only JavaScript discovery, CMake precedence and unchanged input bytes. Independent source review approved the correction; full regression and exact qualification were still pending at that checkpoint.
+- **Prior next action:** finish affected regression and admission, land on green, then comment and close the issue. The current-main qualification below resolves those implementation gates; issue closure follows landed evidence and required integration checks.
+
+- **Current original-reproducer qualification:** [Exact-source public plan and controls](../../verification/rust-cargo-node-adoption-qualification.json) reopens the original public Kuzushi revision `f583e60b2bb086450fc9abf9d646836f77c7b3f4` with the framework at exact green main `072d66e81eff85f58515a09d93d19528499a5ec1`. The actual public read-only `onboard adopt` reports C++, JavaScript, Python and Rust, proposes Rust/Cargo build and packaging first plus JavaScript, and has no catalog gaps or blockers. All 8,337 input nodes, including 6,908 regular files and 54,787,638 source bytes, retain exact modes, identities, mtimes, contents and link targets; no original-project source is executed or adopted. Three fresh managed inventory controls and the actual small Cargo baseline/parity/wrapper-lock control pass without skips. The latter uses the existing synthetic framework-origin fixture and does not claim installed framework or original-project apply qualification. Independent read-only review corroborates the original acceptance, exact checkout and both complete input snapshots, public plan, current source and managed control logs. The actual plan reports host-tool readiness false; this completes only the language inventory and Flavor planning goal. Host readiness, original-project application, installed adoption, broader Cargo compatibility, SDK/package and release qualification remain open.
 
 ### [x] RETAINED-BUILD-COREQ-001 — Keep retained wrapper locks on their delegation Flavor
 
@@ -32594,6 +32617,21 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   gates, preserves the untracked dependency manifest through lift-shift and
   validates the wrapped project. This is source-CLI development evidence; exact
   installed and integration-CI qualification remain open.
+
+- **Installed qualification:** The complete canonical wheel gate passes on Darwin
+  at exact source `41b2dc9a732201bef7aa28a12306b653c66d45e1`. The actual noneditable
+  wheel CLI completes public plan/apply, a genuine Python unittest and all three
+  build/test/package baseline and parity records. Ignored, untracked third-party
+  `component.json`, `component.md` and corrupt `component.lock.json` remain
+  byte-identical under the retained implementation. Installed validation,
+  canonical discovery of ten manifests and authority-graph construction pass;
+  all 5,223 authored inputs retain their content and physical metadata.
+  [Source-bound installed evidence](../../verification/installed-retained-catalog-qualification.json)
+  binds the wheel and complete packaged implementation files. Independent review
+  approved this Darwin scope. Windows retains its explicit unsupported-fixture
+  outcome, and exact integrated review/main CI remains open. The historical full
+  regression belongs to source `8826a6c1bae060d26ecf0ff83009837489df0030`;
+  it is not relabeled as a full run of this newer union.
 
 ### [x] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
 
@@ -32950,6 +32988,15 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   selector is still required; choosing an entry by recency is not a repair.
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
+
+- **2026-11-04 portable permission repair (in progress):** The isolated Linux full gate at source `34fdf1f` stops after 1,566 cases (one error, 82 declared skips): composed package staging creates directories with ambient umask `0002`, yielding mode `0775` where the canonical package projection requires `0755`. A controlled unchanged-source replay reproduces the same mismatch. Normalize only the owned package staging directories to their projected modes before independent verification; exercise permissive and restrictive umasks and preserve refusal of later mode tampering. This repairs portable package construction, not the outstanding native scale/transport acceptance. Retain the original full failure; require independent source review, focused controls, fresh full regression and exact CI before qualification.
+
+- **2026-11-04 receiver planning refinement (in progress):** Prepare the canonical execution request and authorization once per receiver construction and retain the same actual typed worker selection and planning result within that invocation. This removes the second complete constructor plan without caching authority across calls. Full currentness checks before and after capability publication, reservation preflight, child execution and evidence production remain required. The focused public execution/verification preview and nonce-publication controls pass both methods in 29.682 seconds, including ten real source, profile, catalog, SDK-policy and registration mutation subcases before or during encoding. Project validation and original adoption use their real owners; only the external Standard distribution binding is test trust. Eight existing Component-lock controls pass in 4.060 seconds after shared-fixture extraction. Independent review, canonical pin renewal and the full contributor gate remain pending. The producer recorded the installed source-scale qualification as running at that historical checkpoint; current remote liveness is unverified and original attempts retain their recorded outcomes. No new native or release result is claimed.
+
+- **SDK batch contract-control intent:** Add focused real-CAS controls for the reviewed metadata writer without launching SDK processes: compare batch and guarded legacy canonical bytes, force overflow and require abandoned-factory closure before any write, reject short/long factories and incorrect CAS results, and preserve receiver custody and before/after currentness failures. Production behavior remains unchanged unless a concrete defect is established. These controls complement the existing real-command mutation tests; they do not qualify source-scale native PACKAGE, VERIFY, installed distributions or release readiness. Combined-source qualification remains separate.
+- **SDK batch contract-control outcome:** Nine focused controls pass with zero skips through the managed `make python-check` gate. Actual filesystem CAS bytes and identities match batch and original per-record retention; forced overflow closes the abandoned generator before any write and rechecks original per-record authority. Short/long factories, wrong returned digest/size, custody loss before the second write and full currentness failures before/after writes all refuse returned evidence; already written immutable blobs remain verifiable. Boundary guards are explicit stand-ins, with no native SDK process or admission constructed. Repository layout, lint, formatting and current driver/runner/documentation identities pass. The initial fixture-only CAS method-name typo and formatting/lint correction are retained privately; production code remains byte-identical. Existing real-command mutation controls and future combined/native acceptance remain separate.
+
+- **SDK metadata batch repair (in progress):** Source inspection of the original large-tree execution identifies eight separately guarded metadata writes per command for one selected SDK, each re-planning the complete retained source. Freeze a bounded, ordered canonical metadata batch under the same live SDK owner, bracket immutable CAS writes with full currentness, and retain receiver custody/deadline polling plus command grant/revocation checks. Preserve exact command evidence bytes, including retained @5 context, and leave single-record clients unchanged. Oversized metadata uses the original guarded path with an explicit diagnostic. Real SDK command success and source/policy/revocation/deadline mutation refusal controls, independent review and the complete contributor gate are required. Existing native attempts and all PACKAGE/VERIFY obligations remain unchanged.
 
 - **2026-11-03 scale probe repair (in progress):** The real installed receiver for the complete 114,929-entry source fixture exceeds the canonical 60-second capability cap and refuses after 60.068 seconds. Preserve that refusal and observe the remote read-only parent through actual exit before another probe. The directing user requires a finite five-minute capability/hardware budget. Remove only the repeated constructor preview immediately after the initial canonical preview and independent authority check; retain registration custody at return and full checks around describe publication, reservation, execution and evidence production. Fresh installed native capability, five-unit PACKAGE, original-byte VERIFY and corruption controls remain required; no scale or release success is claimed.
 
@@ -33361,6 +33408,24 @@ independent review and the complete combined gate from test one.
 - **Release target:** 1.4.0
 - **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
 
+- **Native-x64 follow-up (in progress):** Exact main `f03f30a0654b3f6896177b5fa1ed229a61f3dbf4`
+  [Windows shard 3](https://github.com/jordanhubbard/literate-ai/actions/runs/41778360184/job/126403948002)
+  fails all three guarded C++ build cases because vendor setup omits required
+  compiler variables. A bounded actual x64 CMD diagnostic shows the remaining
+  native-x64 wrapper forwards `x64 -vcvars_ver 14.29`; reconstructing the named
+  option from its closed numeric value preserves `x64 -vcvars_ver=14.29` and
+  satisfies the controlled vendor fixture. Preserve the failed log and the
+  separate source-335 native ARM64 evidence. The source repair and two portable
+  boundary/refusal controls pass; the exact old-function counterfactual fails
+  only its native-x64 option case. Six preserved ARM64/descendant controls and
+  27 CI-policy controls pass. Independent source/CI review approved the numeric
+  option reconstruction and the existing native C++ job's three added guarded
+  compiler cases with strict zero-skip accounting. Next: renew actual
+  unconfigured Windows guarded builds and exact CI. See the bounded
+  [development evidence](../../verification/msvc-x64-cmd-boundary-evidence.json).
+  The diagnostic is not a compiler build or release
+  qualification, and no timeout or required-variable guard is relaxed.
+
 - **Priority:** P1
 - **Owner:** C++ toolchain discovery and MSVC environment initialization
 - **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.
@@ -33382,6 +33447,20 @@ independent review and the complete combined gate from test one.
 - **Priority:** P1
 - **Owner:** Operator status and canonical host-install Flavor composition; issue 268
 - **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
+- **Installed qualification:** The complete canonical wheel gate passes on macOS
+  ARM64 at source `e6513d529fc289870c6cfc603fe38acf2063863a`. A genuine adopted
+  project explicitly replaces its Make default with the already created local
+  shim, whose canonical coordinate differs from its physical directory. Public
+  status before and after this authored setup preserves the built-in Python
+  requirement and native target realization. Each status call preserves all 569
+  fixture nodes; all 5,224 authored source inputs retain their contents and
+  recorded physical metadata throughout the gate. Actual selected host readiness is true,
+  without forcing probes or qualifying unavailable Make provenance. Adoption
+  retains its no-generation guard while status restores the operator's original
+  provider settings. Independent source and artifact review approved the
+  [source-bound installed evidence](../../verification/installed-selected-shim-status-qualification.json).
+  This does not claim onboarding automatically selects the shim, Windows
+  qualification, a new full-source regression or completed exact review/main CI.
 - **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
 - **Depends on:** none
 - **Completion prerequisites:** none
@@ -33469,10 +33548,14 @@ independent review and the complete combined gate from test one.
 
 ### [ ] RETAINED-TREE-EXPLORER-001 — Publish hierarchical retained-tree HTML information cards
 
+- **Initial publication race-control intent:** Add maintained real POSIX source/CAS/output fault controls for actual recapture edits, equal-byte foreign index substitution before and after commit, generation and excluded-namespace tampering, and a partial-CAS output-budget refusal. Use only explicit framework-measurement stand-ins and narrow ordering hooks; never manufacture installed or native SDK admission. Production code remains unchanged unless a concrete defect is established. Preserve failed provisional evidence and foreign bytes, and keep freshness/rerender/recovery/unit/browser/native-scale/full-ADR qualification open.
+- **Initial publication race-control outcome:** Six maintained controls pass with zero skips through the managed Python gate on real POSIX source, CAS and output files. An actual source recapture edit refuses without an index; equal-byte foreign index substitution before commit preserves the foreign inode/bytes, while substitution after commit refuses a valid-success result. Generation mutation after the owned move and a foreign member in the excluded namespace refuse without an index or namespace adoption. A tight output budget derived from a successful owned baseline leaves verifiable partial CAS evidence and the original owner marker without publishing an index. Only framework measurement and narrow fault-ordering boundaries are stand-ins; no installed-distribution, native SDK, browser, scale or complete-ADR admission is manufactured. Production files remain unchanged; combined-source and remaining goal qualifications stay open.
+
+
 - **Release target:** 1.4.0
 - **GitHub issue:** [#279](https://github.com/jordanhubbard/literate-ai/issues/279)
 - **Accepted decision:** [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md); explicit directing-user acceptance on 2026-11-03.
-- **Next action:** Implement the accepted hierarchical card design and its atomic publication/freshness controls; preserve the #235 prerequisite for per-unit joins. Implementation and qualification remain open.
+- **Next action (in progress):** Implement the versioned declaration and bounded directory/group/generation commitments on canonical retained-tree and shard owners, followed by generation publication and tree freshness. Keep existing single-view identities and limits unchanged. Per-unit joins and all installed/native/browser qualification remain open until their required evidence passes. The complete hierarchy retains atomic publication/freshness controls and the #235 prerequisite for per-unit joins.
 
 - **Planning verification:** Independent source/design review by `native_transport_review` approves Proposed ADRs 0058/0059; its Markdown table finding is corrected. Canonical work recording and documentation/driver review pass. The read-only contribution sweep validates 41 goals with no invalid entries, preserving the original 39 and prior release history; overall release readiness remains false. The previous two-design, pre-integration local Make checkpoint selected 2,664 tests: 2,577 pass, 87 declared skips and zero failures in 4,261.977 seconds; lint, format and documentation checks also pass. Test-report identity: `0eb956ba4e3c3b27988e405bb049106e75ad4650e0751dbc21c12c4350964e77`. These historical results validate only that earlier two-design snapshot. The fresh consolidated main/ADRs 0056–0059 Make gate passes 2,665 selected tests: 2,578 passed, 87 declared skips and zero failures in 4,164.827 seconds (report SHA-256 `761dd0c760f8539844e562edb9649d5a6612ef4498d2b90de79903458661cdc4`). Independent final union review approves all four Proposed designs and preserves main’s exact source/test bytes and driver pin; canonical documentation/driver checks pass. Neither checkpoint claims implementation, native/browser acceptance or release qualification. The directing user explicitly accepted all four designs on 2026-11-03. Implementation and native/browser/release qualification remain open.
 
@@ -33485,6 +33568,11 @@ independent review and the complete combined gate from test one.
 - **Implementation:**
   - [x] Audit existing HTML producers/declarations/limits and independently review ADR 0058; the directing user explicitly accepted the design on 2026-11-03 before new wire/schema implementation.
   - [ ] Implement complete hierarchy and provenance commitments using canonical retained tree/unit owners, no new JS dependency, scalable declarations, atomic multi-file publication and tree freshness.
+    - [ ] Add closed versioned tree declarations, explicit resource policy and bounded page/node/group/generation commitments alongside the unchanged single-view protocol.
+    - [ ] Project the complete canonical retained/sharded namespace into directory cards and deterministic large-directory groups with safe no-script navigation and truthful captured facts.
+    - [ ] Stage and verify an immutable generation; publish the separately owned index last under current output custody, preserving foreign changes and bounded recovery evidence.
+    - [ ] Reopen all page/asset commitments and the complete output namespace, then renew canonical source observations for the additive tree-freshness gate.
+    - [ ] Join actual retained-unit definitions, membership and qualified package provenance after #235; directory labels alone cannot assert Component ownership.
 - **Evidence:**
   - [ ] Installed noneditable native source/ports tree qualification, actual browser inspection, stale/tamper/partial publication and resource-bound refusals.
   - [ ] Per-unit Component-card joins after #235, independent review, full gates and exact integrated qualification.
@@ -33510,3 +33598,21 @@ independent review and the complete combined gate from test one.
 - **Evidence:**
   - [ ] Real live-worker action/stage/state and network/disk/cpu/memory observations with declared unsupported values, not invented measurements.
   - [ ] Authentication, secret/command/environment/path redaction, no-listener/no-job-mutation, volume/coalescing/cancellation controls, independent review and integrated native qualification.
+
+### [x] WORKER-GPU-MEMORY-002 — Qualify permission-text NVIDIA memory observations after command-worker integration
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#275](https://github.com/jordanhubbard/literate-ai/issues/275)
+
+- **Priority:** P1
+- **Owner:** Execution-worker capability serialization and qualification; PROJECT Goals 1 and 4
+- **Direction:** Complete issue 275 on 1.4 without guessing unavailable GPU capacity or weakening hardware requirements.
+- **Conclusion:** Audit the landed numeric-only serializer against retained failing and repaired native observations through the same content-identified command catalog. Preserve the original issue 44 closure and broader COMMAND-WORKER-001/native/release acceptance boundaries.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Verify original native failure and repaired probe share the exact command catalog identity; compare the landed serializer and required GPU-memory refusal behavior.
+- **Evidence:**
+  - [x] Run current serializer and hardware-compatibility regressions through the managed Make harness; independently reconstruct source-bound native observations and record exact-main CI, then reconcile the bounded issue only after all evidence passes.
+
+- **Decisive qualification:** [Exact-route evidence audit](../../verification/gpu-memory-command-route-qualification.json) reopens the retained original `worker.probe_malformed` failure and repaired native probe. Both bind command catalog `sha256:b69352f8581230c398c74abd236d1a6f8f127f0ed75892281aa5a5fc72469fff`; the repaired typed observation catalog independently reconstructs to `sha256:886303967384f0cdc227a2b0eae869aad3bfc2537fa6df94743236a0c6a0be8a`, retaining one NVIDIA device with memory null. Current contract checks accept the observed device without a VRAM minimum and refuse a positive minimum. The Linux serializer is byte-identical to landed implementation `5d785f64728f285b4bf07cbbdb4bd3e287bb576f`, an ancestor of main `072d66e81eff85f58515a09d93d19528499a5ec1`; exact-main CI 41740063437 passes. Fresh managed `make python-check` selection passes all seven worker-capability cases, including actual shell serializer inputs for permission text, unavailable, numeric and failed-query values. This audit reopens original native evidence rather than claiming a fresh native dispatch; it neither guesses physical GPU capacity nor closes COMMAND-WORKER-001, native Component/SDK/package or release qualification.

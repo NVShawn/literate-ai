@@ -1,0 +1,46 @@
+{
+  "schema": "literate-ai/worktree-operation-input-development@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/7",
+  "accepted_design": "docs/decisions/0046-project-scoped-worktree-lifecycle.md",
+  "source_base": "05943703c6013bdb6079403a2bd26cf3e3f9281f",
+  "implementation_snapshot_sha256": {
+    "src/literate_ai/adapters/project_worktree_audit_inputs.py": "39a037060d3d93aa0770ca69144d5e2547ae16ad306bba1e030a7ca325993891",
+    "src/literate_ai/adapters/project_worktree_operation_inputs.py": "b0fbbf171546ca85419959dfe1ee48274c5e2825a355730c0a28be43c44185c0",
+    "tests/smoke/test_worktree_operation_inputs.py": "60bd56810322d138240723bcc378b043d874dd8e61ffb536da40f651bd9cc020"
+  },
+  "old_capture_accepted_changed_todo": true,
+  "repaired_capture_refused_changed_todo": true,
+  "same_retained_real_conflicted_rebase_fixture": true,
+  "captured_operation_entries_in_development_probe": 20,
+  "source_controls": {
+    "new_cases_passed": 9,
+    "new_cases_skipped": 0,
+    "complete_worktree_slice_passed": 50,
+    "complete_worktree_slice_skipped": 0,
+    "new_cases_log_sha256": "0f20d4d408375512824f2e453260aa656a2516f1374fe7324e6419381416c449",
+    "worktree_slice_log_sha256": "e97eeec6700709b0125a149cd7f4410f589b3658904a39b269b7fdce5743d395"
+  },
+  "audit_complete": false,
+  "retirement_authorized": false,
+  "pending_checks": [
+    "working-tree-normalization",
+    "nested-repository-state",
+    "git-operation-state",
+    "git-object-retention",
+    "link-topology-ownership",
+    "process-activity",
+    "supervisor-mounts"
+  ],
+  "independent_source_review_complete": true,
+  "reviewed_tcb_record_complete": true,
+  "native_installed_qualified": false,
+  "full_current_source_regression_qualified": false,
+  "exact_review_main_ci_complete": false,
+  "release14_qualified": false,
+  "scope": "Source-development proof for bounded opaque Git operation/recovery payload and directory custody. This does not establish semantic Git-operation completeness, process idleness, object retention, migration disposition or removal authority. No operator checkout was moved or removed.",
+  "independent_review_record_sha256": "6297f973ce763c9930a28d0b9a963797f023e847045e9a6035ec55db14399d7c",
+  "reviewed_driver_identity": "sha256:0207875e7f4d3251cb5c6be5544eeb93ca2736cd71cbe4ebb7f946109f088228",
+  "retained_counterexample_record_sha256": "32673f82e4e5b70b25bd750fffcef2c5733c202846743d4a646efc538a69935d",
+  "retained_repaired_probe_record_sha256": "63d7a9a027ad6e217302070276d8f2582e690a38a6084244430c597f6b6b50cb",
+  "resource_scope": "Source payloads retain their existing maximum_total_bytes accounting; opaque Git operation wire and directory records consume the existing maximum_metadata_bytes and entry/file/time bounds."
+}

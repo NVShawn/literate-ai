@@ -1,5 +1,8 @@
 """Own fresh locked SDK producers through public retained execution and admission."""
 
+import hashlib
+import logging
+from contextlib import closing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
@@ -9,7 +12,12 @@ from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.adapters.native_sdk_recipes import select_native_sdk_recipes
 from literate_ai.adapters.retained_project_sdks import read_retained_sdk_policy
 from literate_ai.adapters.retained_sdk_authority import current_retained_sdk_snapshots
-from literate_ai.contracts import ContentIdentity, canonical_identity
+from literate_ai.contracts import (
+    ContentIdentity,
+    canonical_identity,
+    canonical_json_bytes,
+)
+from literate_ai.contracts.native_tree_shards import MAX_DESCRIPTOR_TOTAL_BYTES
 from literate_ai.contracts.retained_project_sdks import (
     RetainedProjectSdkSelectionPolicy,
 )
@@ -62,6 +70,9 @@ class RetainedProjectSdkRuntime:
         self.current_plan = current_plan
         self.cache_root, self.store = Path(cache_root), store
         self.environment = dict(environment)
+        self._metadata_byte_limit = min(
+            manifest.limits.max_total_bytes, MAX_DESCRIPTOR_TOTAL_BYTES
+        )
         self.policy = read_retained_sdk_policy(
             project.root, manifest, plan.component_locks
         )
@@ -204,3 +215,69 @@ class RetainedProjectSdkRuntime:
     def record(self, document):
         self.require_current()
         return ContentIdentity.parse_uri(self.store.put_manifest(document).identity)
+
+    @staticmethod
+    def _metadata_records(factory, count):
+        """Consume only the exact finite sequence, closing an abandoned factory."""
+        iterator = iter(factory())
+        sentinel = object()
+        try:
+            for _ in range(count):
+                document = next(iterator, sentinel)
+                if document is sentinel:
+                    raise ValueError("retained.sdk.metadata-count-differs")
+                yield document
+            if next(iterator, sentinel) is not sentinel:
+                raise ValueError("retained.sdk.metadata-count-differs")
+        finally:
+            close = getattr(iterator, "close", None)
+            if close is not None:
+                close()
+
+    def record_many(self, factory, *, count):
+        """Retain one bounded synchronous batch; partial blobs grant no admission."""
+        if (
+            not callable(factory)
+            or type(count) is not int
+            or not 1 <= count <= (4 + 4 * len(self.policy.bindings))
+        ):
+            raise ValueError("retained.sdk.bounded-metadata-factory-required")
+        frozen = []
+        size = 0
+        with closing(self._metadata_records(factory, count)) as documents:
+            for document in documents:
+                content = canonical_json_bytes(document)
+                size += len(content)
+                if size > self._metadata_byte_limit:
+                    frozen = None
+                    del content, document
+                    break
+                frozen.append(content)
+        if frozen is None:
+            logging.getLogger(__name__).warning(
+                "retained.sdk.metadata-batch-budget-exceeded: "
+                "using original per-record currentness checks"
+            )
+            # The abandoned generator and frozen bytes are gone before restarting.
+            # No batch writes have occurred; preserve the existing supported path.
+            return tuple(
+                self.record(document)
+                for document in self._metadata_records(factory, count)
+            )
+        del document
+        self.require_current()
+        identities = []
+        for content in frozen:
+            if self.receiver_context is not None:
+                self.receiver_context.require_custody_current()
+            reference = self.store.put_bytes(
+                content, media_type="application/vnd.literate-ai.manifest+json"
+            )
+            identity = ContentIdentity.parse_uri(reference.identity)
+            if identity.digest != hashlib.sha256(
+                content
+            ).hexdigest() or reference.size != len(content):
+                raise ValueError("retained.sdk.metadata-retention-differs")
+            identities.append(identity)
+        self.require_current()
+        return tuple(identities)

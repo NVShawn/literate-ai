@@ -213,6 +213,9 @@
       },
       {
         "id": "WORKER-TELEMETRY-001"
+      },
+      {
+        "id": "WORKER-GPU-MEMORY-002"
       }
     ]
   }

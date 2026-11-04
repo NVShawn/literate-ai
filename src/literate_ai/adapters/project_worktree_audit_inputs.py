@@ -23,6 +23,7 @@ from literate_ai._filesystem import (
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 
 from .project_worktree_discovery import _Observation, _registered_entry
+from .project_worktree_operation_inputs import capture_operation_inputs
 from .project_worktrees import (
     ProjectWorktreeError,
     resolve_project_worktree_location,
@@ -241,26 +242,14 @@ def _git_snapshot(root, observation, budget):
             ),
         ),
     )
-    operations = []
-    for anchor in sorted({custody.administration_directory, custody.common_directory}):
-        for name in (
-            "HEAD.lock",
-            "index.lock",
-            "packed-refs.lock",
-            "config.lock",
-            "MERGE_HEAD",
-            "CHERRY_PICK_HEAD",
-            "REVERT_HEAD",
-            "rebase-merge",
-            "rebase-apply",
-            "sequencer",
-            "BISECT_LOG",
-            "BISECT_START",
-        ):
-            if observation.remember(anchor / name):
-                operations.append({"anchor": str(anchor), "name": name})
-    budget.metadata(operations)
-    facts = {"index": index_fact, "observed_operation_markers": operations}
+    operations, operation_inputs = capture_operation_inputs(
+        custody, observation, budget
+    )
+    facts = {
+        "index": index_fact,
+        "observed_operation_markers": operations,
+        "operation_inputs": operation_inputs,
+    }
     for name, arguments in commands:
         content = observation.git(root, *arguments)
         fact = {

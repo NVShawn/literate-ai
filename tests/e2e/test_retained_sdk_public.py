@@ -5,14 +5,17 @@ import os
 import shutil
 import unittest
 from dataclasses import replace
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 from literate_ai.adapters import retained_project_execution as execution
 from literate_ai.adapters.native_sdk_acquisition import NativeSdkProjectAcquisition
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInput
+from literate_ai.adapters.retained_project_inputs import verify_retained_project_inputs
 from literate_ai.adapters.retained_project_runtime import execute_local_retained_project
 from literate_ai.adapters.retained_project_sdk_runtime import RetainedProjectSdkRuntime
 from literate_ai.contracts import canonical_identity
+from literate_ai.storage.cas import FileSystemCAS
 from tests.critical import test_retained_project_sdks as retained_fixtures
 from tests.support import fixtures_test_native_sdk_source_build as producers
 
@@ -213,3 +216,97 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
         ):
             execute_local_retained_project(*args, **kwargs)
         consumer.assert_not_called()
+
+    def _refuse_during_metadata_batch(self, change):
+        args, kwargs = self.public_runtime_arguments()
+        state = {}
+        original_plan = kwargs["current_plan"]
+
+        def current_plan():
+            verify_retained_project_inputs(self.fixture.source, self.fixture.manifest)
+            return original_plan()
+
+        kwargs["current_plan"] = current_plan
+        original_batch = RetainedProjectSdkRuntime.record_many
+        original_authorize = RetainedProjectSdkRuntime.authorize
+        original_put = FileSystemCAS.put_bytes
+
+        def authorize(session, *values):
+            grant = original_authorize(session, *values)
+            state["grant"] = grant
+            return grant
+
+        def batch(session, documents, *, count):
+            state["session"] = session
+            state["active"] = True
+            try:
+                return original_batch(session, documents, count=count)
+            finally:
+                state["active"] = False
+
+        def put_then_change(store, content, **options):
+            reference = original_put(store, content, **options)
+            if state.get("active") and "partial" not in state:
+                state["partial"] = (store, reference)
+                if change in {"source", "policy"}:
+                    path = self.fixture.source / (
+                        "src/main.txt" if change == "source" else "sdk-policy.json"
+                    )
+                    path.write_bytes(path.read_bytes() + b" ")
+                elif change == "revocation":
+                    session = state["session"]
+                    session.revocations = session.revocations.revoke(
+                        state["grant"].authorization_id,
+                        actor="fixture-operator",
+                        reason="Revoke during immutable metadata retention",
+                    )
+                else:
+                    clock.now.return_value = state["grant"].expires_at
+                    clock.now.side_effect = None
+            return reference
+
+        with (
+            patch(
+                "literate_ai.adapters.retained_sdk_authority.project_component_roots",
+                return_value=(self.sdk_fixture.recipe_fixture.component,),
+            ),
+            patch.object(RetainedProjectSdkRuntime, "record_many", batch),
+            patch.object(RetainedProjectSdkRuntime, "authorize", authorize),
+            patch.object(FileSystemCAS, "put_bytes", put_then_change),
+            patch.object(execution, "datetime") as clock,
+        ):
+            clock.now.side_effect = lambda *_: datetime.now(UTC)
+            with self.assertRaises(ValueError):
+                execute_local_retained_project(*args, **kwargs)
+        # The real native consumer completed; a real immutable CAS blob may
+        # remain, but no command observation, receipt or admission is published.
+        store, reference = state["partial"]
+        store.verify(reference)
+        diagnostics = list(
+            kwargs["cache_directories"].obj_dir.glob(
+                "retained-project-runs/*/command-diagnostics.json"
+            )
+        )
+        self.assertEqual(len(diagnostics), 1)
+        document = json.loads(diagnostics[0].read_bytes())
+        self.assertFalse(document["admission"])
+        self.assertEqual(document["command_observations"], [])
+        self.assertTrue(
+            list(
+                kwargs["cache_directories"].obj_dir.glob(
+                    "retained-project-runs/*/outputs/scale.txt"
+                )
+            )
+        )
+
+    def test_source_change_during_metadata_batch_refuses_admission(self):
+        self._refuse_during_metadata_batch("source")
+
+    def test_sdk_policy_change_during_metadata_batch_refuses_admission(self):
+        self._refuse_during_metadata_batch("policy")
+
+    def test_revocation_during_metadata_batch_refuses_admission(self):
+        self._refuse_during_metadata_batch("revocation")
+
+    def test_expiry_during_metadata_batch_refuses_admission(self):
+        self._refuse_during_metadata_batch("deadline")

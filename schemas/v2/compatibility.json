@@ -261,7 +261,20 @@
     "literate-ai/retained-unit-package-inspection@1",
     "literate-ai/retained-unit-link-proof@1",
     "literate-ai/retained-unit-package-execution-plan@1",
-    "literate-ai/retained-unit-package-execution@1"
+    "literate-ai/retained-unit-package-execution@1",
+    "literate-ai/retained-tree-html-limits@1",
+    "literate-ai/retained-tree-html-declaration@1",
+    "literate-ai/retained-tree-html-render-request@1",
+    "literate-ai/retained-tree-html-child-group@1",
+    "literate-ai/retained-tree-html-directory@1",
+    "literate-ai/retained-tree-html-page-shard@1",
+    "literate-ai/retained-tree-html-generation@1",
+    "literate-ai/retained-tree-html-renderer-binding@1",
+    "literate-ai/initial-tree-html-output-plan@1",
+    "literate-ai/retained-tree-html-plan@1",
+    "literate-ai/retained-tree-html-plan-result@1",
+    "literate-ai/retained-tree-html-initial-result@1",
+    "literate-ai/retained-tree-html-apply-result@1"
   ],
   "read_paths": [
     {

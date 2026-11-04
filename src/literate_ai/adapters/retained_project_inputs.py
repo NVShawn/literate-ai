@@ -435,6 +435,7 @@ def _inventory(
     access=None,
     observe=None,
     excluded_roots: frozenset[str] = frozenset(),
+    excluded_regular_files: frozenset[str] = frozenset(),
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     names: list[str] = []
     directories: list[str] = []
@@ -454,6 +455,14 @@ def _inventory(
             metadata = access.metadata(path)
         if observe is not None:
             observe(name, metadata)
+        if name in excluded_regular_files:
+            # This private selection comes only from independently held output
+            # custody. It never accepts a symlink or a multiply-linked index.
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+                raise RetainedProjectInputError("Retained excluded file is unsafe")
+            if access is None and path_is_link_or_reparse(path):
+                raise RetainedProjectInputError("Retained excluded file is redirected")
+            return
         if name in excluded_roots:
             # Exclusions are selected by a separate live owner. Never follow a
             # redirected excluded root; a linked-worktree .git marker is the

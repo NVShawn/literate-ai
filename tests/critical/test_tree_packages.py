@@ -246,12 +246,29 @@ class TreePackageTests(unittest.TestCase):
         projection = ComposedTreePackageProjection(
             reopen_graph().partition, 1000, 1024 * 1024
         )
-        stage = tree_packaging.materialize_composed_tree_package_set(
-            projection,
-            expected_tree_identity=tree.identity,
-            store=self.store,
-            parent=self.work,
-        )
+        for mask in (0o002, 0o077, 0o022):
+            with self.subTest(umask=oct(mask)):
+                previous_mask = os.umask(mask)
+                try:
+                    stage = tree_packaging.materialize_composed_tree_package_set(
+                        projection,
+                        expected_tree_identity=tree.identity,
+                        store=self.store,
+                        parent=self.work,
+                    )
+                finally:
+                    os.umask(previous_mask)
+                for member in projection.members:
+                    if member.kind == "directory":
+                        self.assertEqual(
+                            (stage / member.path).stat().st_mode & 0o7777,
+                            member.mode,
+                        )
+                (stage / "empty").chmod(0o700)
+                with self.assertRaisesRegex(PackagingError, "directory mode changed"):
+                    tree_packaging.verify_composed_tree_package_stage(projection, stage)
+                (stage / "empty").chmod(0o755)
+                tree_packaging.verify_composed_tree_package_stage(projection, stage)
         self.assertEqual((stage / "public/compiler").read_bytes(), b"compiler")
         self.assertEqual(
             (stage / "bin/cc").stat().st_ino, (stage / "bin/compiler").stat().st_ino
