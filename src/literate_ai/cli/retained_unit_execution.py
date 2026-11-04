@@ -6,6 +6,7 @@ owners issue fresh admission; packaging rechecks genuine SDK and LINK owners.
 
 import os
 import platform
+from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.component_lock_application import (
@@ -13,6 +14,7 @@ from literate_ai.adapters.component_lock_application import (
 )
 from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
 from literate_ai.adapters.native_tar_archives import NativeTarToolBinding
+from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
 from literate_ai.adapters.retained_project_runtime import (
     execute_local_retained_project,
     execute_receiver_retained_project,
@@ -23,18 +25,28 @@ from literate_ai.adapters.retained_project_unit_packages import (
 from literate_ai.adapters.retained_unit_link import link_retained_unit_packages
 from literate_ai.adapters.retained_unit_results import read_retained_unit_results
 from literate_ai.adapters.retained_unit_specifications import (
+    RetainedUnitSpecificationContext,
     bind_retained_unit_specifications,
 )
 from literate_ai.adapters.retained_unit_tool_observations import (
     retained_unit_tool_observations,
 )
+from literate_ai.adapters.retained_unit_verification import (
+    RetainedUnitVerificationSelection,
+)
 from literate_ai.cache_directories import (
     ensure_cache_directory,
     select_cache_directories,
 )
-from literate_ai.contracts import ExecutionWorkerKind, canonical_identity
+from literate_ai.contracts import (
+    ContentIdentity,
+    ExecutionWorkerKind,
+    canonical_identity,
+)
+from literate_ai.contracts.retained_project import RetainedProjectManifest
 
 from .execution_workers import (
+    SelectedExecutionWorker,
     admit_execution_worker_health,
     dispatch_with_worker_health_poll,
 )
@@ -54,12 +66,37 @@ def _worker_selection_identity(selected):
     )
 
 
-def execute_retained_unit_package_from_args(
+@dataclass(frozen=True, slots=True)
+class _PreparedRetainedUnitExecution:
+    """Actual invocation-local planning objects, never decoded admission grants."""
+
+    context: tuple
+    manifest: RetainedProjectManifest
+    selected: SelectedExecutionWorker
+    planning: RetainedProjectPlanningResult
+    specification_context: RetainedUnitSpecificationContext
+    verification_selection: RetainedUnitVerificationSelection | None
+    request: dict[str, object]
+    authorization: ContentIdentity
+    original_context: object
+
+    def preview(self):
+        return {
+            "schema": "literate-ai/retained-unit-package-verification-plan@1"
+            if self.verification_selection is not None
+            else EXECUTION_PLAN_SCHEMA,
+            "request": self.request,
+            "authorization_identity": self.authorization.uri,
+            "executed": False,
+            "release_authorized": False,
+        }
+
+
+def _prepare_retained_unit_execution(
     args, *, receiver_context=None, verification_selection=None
 ):
-    project, binding, policy, observations, _pkg, _tar, authority = _project_context(
-        args
-    )
+    context = _project_context(args)
+    project, binding, policy, observations, _pkg, _tar, authority = context
     manifest, selected, planning = authority()
     plan = planning.plan
     specification_context = bind_retained_unit_specifications(
@@ -120,16 +157,41 @@ def execute_retained_unit_package_from_args(
             request=request,
             specification_context=specification_context,
         )
+    return _PreparedRetainedUnitExecution(
+        context,
+        manifest,
+        selected,
+        planning,
+        specification_context,
+        verification_selection,
+        request,
+        authorization,
+        original_context,
+    )
+
+
+def execute_retained_unit_package_from_args(
+    args, *, receiver_context=None, verification_selection=None
+):
+    prepared = _prepare_retained_unit_execution(
+        args,
+        receiver_context=receiver_context,
+        verification_selection=verification_selection,
+    )
+    project, binding, policy, observations, _pkg, _tar, authority = prepared.context
+    manifest, selected, planning = (
+        prepared.manifest,
+        prepared.selected,
+        prepared.planning,
+    )
+    plan = planning.plan
+    specification_context = prepared.specification_context
+    verification_selection = prepared.verification_selection
+    verifying = verification_selection is not None
+    request, authorization = prepared.request, prepared.authorization
+    original_context = prepared.original_context
     if args.retained_unit_command in {"execution-plan", "verify-plan"}:
-        return {
-            "schema": "literate-ai/retained-unit-package-verification-plan@1"
-            if verifying
-            else EXECUTION_PLAN_SCHEMA,
-            "request": request,
-            "authorization_identity": authorization.uri,
-            "executed": False,
-            "release_authorized": False,
-        }, 0
+        return prepared.preview(), 0
     plan.require_authorization(args.authorize_retained_project)
     if args.authorize_unit_packages != authorization.uri:
         raise ValueError("retained.unit.exact-package-authorization-required")
