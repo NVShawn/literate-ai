@@ -2413,6 +2413,20 @@ def _main() -> int:
         # Require HTML success before retaining any qualified HTML or wheel.
         # Future.result preserves a child failure when other fixtures pass.
         html_observability = json.loads(html_check.result().stdout)
+        # Reuse this actual installed wheel/prefix for the additive tree path;
+        # no synthetic framework observer or second wheel build qualifies it.
+        tree_html = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-B",
+                str(repository / "tests/support/installed_tree_html_journey.py"),
+                str(root / "tree-html-journey"),
+                standard_binding["distribution"],
+                parent_source,
+                cwd=root,
+            ).stdout
+        )
         if (
             run("git", "rev-parse", "HEAD", cwd=repository).stdout.strip()
             != git_revision
@@ -2478,6 +2492,7 @@ def _main() -> int:
                     "retained_catalog_discovery": retained_catalog_discovery,
                     "repository_refresh": repository_refresh,
                     "html_observability": html_observability,
+                    "tree_html": tree_html,
                     "skills": sorted(installed),
                     "snapshot_replication_schema": replication_schema,
                     "version_contract": version_contract,

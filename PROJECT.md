@@ -1,5 +1,21 @@
 # Literate AI — Project Requirements and Completeness
 
+Under accepted ADR 0058, an explicitly selected tree declaration may be checked
+without creating source, cache, temporary payload or output files. A current
+result requires a complete actual page/metadata/index namespace observation and
+independent canonical source hashing with closing membership and link checks.
+Only the actual finite read-only output context selects its exact generated
+paths during source capture; saved output assertions grant no write, recovery,
+collection or later source-exclusion authority. Existing single-file views and
+ordinary payload-retaining SDK capture retain their contracts and defaults.
+
+Projects may opt into complete tree freshness through a closed, versioned
+`literate.tree-html.json` registry of bounded project-relative declaration paths.
+Verification holds the actual registry and declaration inputs current, then runs
+the same complete source/output check for every declared view. The new gate uses
+`project-verify@2`; projects without it preserve their existing definition,
+single-file requests, default gates and `project-verify@1` report shape.
+
 This document is the durable, root-level source of truth for what Literate AI is for
 and how complete its implementation is against that purpose. It sits above every file
 in `docs/`: a document under `docs/` may detail or justify a decision, but the goals and
@@ -93,6 +109,13 @@ implementation follows the prioritized FreeBSD SDK and Daemonarchy unblock.
 WORKER-GPU-MEMORY-002 independently qualifies the landed permission-text memory
 serializer on its original command route; this bounded observation fix does not
 complete the broader command-worker or native package goals.
+
+RETAINED-UNIT-PACKAGE-001 permits one canonical request preparation within each
+receiver construction. The preview and worker must use the same actual typed
+selection and plan from that invocation; decoded intent cannot replace them.
+Each publication, reservation and execution boundary still reopens current
+project, source, profile, catalog, SDK policy and private registration authority.
+No preparation is cached across calls or grants execution or release permission.
 
 RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 extend Goals 1 and 4
 with hierarchical retained-tree information cards and authenticated read-only
@@ -813,3 +836,16 @@ SSH descriptor, and registers it privately. Durable request state prevents silen
 repeat allocation and preserves validated responses for registration recovery.
 Provider APIs, resource sizing translation, credential acquisition and remote
 resource deletion belong to the organization command.
+
+
+SDK command metadata retention may use one bounded operation-local batch under
+its original live SDK runtime owner. The writer freezes an ordered canonical
+metadata one record at a time before writing, limits record count by the selected SDK policy and
+frozen bytes by the declared retained input budget and existing metadata ceiling,
+and requires full currentness before and after immutable CAS writes. Private
+receiver custody and the original deadline remain current for every write;
+command authorization and revocation are checked before evidence is exposed.
+The retained command-context augmentation and every retained content identity
+remain unchanged. A refused closing check admits no partial metadata. Metadata
+outside batch eligibility uses the original guarded single-record path with a
+bounded diagnostic; it does not gain a new supported-input limit.

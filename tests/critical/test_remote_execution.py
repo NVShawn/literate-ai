@@ -11,6 +11,10 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+from literate_ai.adapters.execution_dispatch import (
+    ExecutionDispatchAdapterError,
+    SshExecutionDispatcher,
+)
 from literate_ai.adapters.remote_execution import (
     RemoteExecutionError,
     _persist_artifact,
@@ -136,8 +140,11 @@ class RemoteExecutionTests(unittest.TestCase):
             staging = root / "staging"
             staging.mkdir()
             program = root / "program.py"
+            executed = root / "executed"
             program.write_text(
-                "import sys\nprint('token=hunter2')\n"
+                "import sys\n"
+                f"with open({str(executed)!r}, 'ab') as marker: marker.write(b'x')\n"
+                "print('token=hunter2')\n"
                 "sys.stderr.write('failed at /Users/worker/private/build.log\\n')\n"
                 "raise SystemExit(7)\n",
                 encoding="utf-8",
@@ -158,21 +165,38 @@ class RemoteExecutionTests(unittest.TestCase):
             def never_rebuild(**_values):
                 raise AssertionError("running an admitted artifact must not rebuild")
 
+            class ActualReceiver:
+                def __init__(self, source, workspace, output, ticket):
+                    self.source = source
+                    self.workspace = workspace
+                    self.output = output
+                    self.ticket = ticket
+
+                def execute(self, selected, incoming, *, cwd):
+                    return materialize_and_execute(
+                        selected,
+                        incoming,
+                        self.source.materialization,
+                        archive=self.source.path,
+                        workspace=self.workspace,
+                        cas_root=cas,
+                        rebuild=never_rebuild,
+                        evidence_output=self.output,
+                        cleanup_ticket=self.ticket,
+                    )
+
             with patch(
                 "literate_ai.adapters.remote_execution.probe_worker_capabilities",
                 return_value=observation(),
             ):
-                result = materialize_and_execute(
-                    worker(),
-                    run_request,
-                    captured.materialization,
-                    archive=captured.path,
-                    workspace=root / "workspace",
-                    cas_root=cas,
-                    rebuild=never_rebuild,
-                    evidence_output=bundle,
-                    cleanup_ticket=staging / "cleanup-ticket.json",
-                )
+                result = SshExecutionDispatcher(
+                    ActualReceiver(
+                        captured,
+                        root / "workspace",
+                        bundle,
+                        staging / "cleanup-ticket.json",
+                    )
+                ).dispatch(worker(), run_request, cwd=project)
             self.assertEqual(result.status, DispatchResultStatus.FAILED)
             self.assertEqual(result.exit_status, 7)
             manifest = result.evidence_manifest
@@ -202,6 +226,94 @@ class RemoteExecutionTests(unittest.TestCase):
             )
             self.assertTrue(imported)
             self.assertTrue(store.uri.startswith("sha256:"))
+            self.assertEqual(executed.read_bytes(), b"x")
+
+            # A genuine deferred receiver error before Popen has no returned
+            # artifact. Preserve its actual diagnostic rather than requiring a
+            # reference that the failed receiver could not validate.
+            pre_request = replace(run_request, entrypoint="unsupported")
+            pre_stage = root / "preexecution-staging"
+            pre_stage.mkdir()
+            pre_source = capture_source_archive(
+                project, pre_request, directory=pre_stage
+            )
+            pre_bundle = pre_stage / "remote-evidence.tar.gz"
+            with patch(
+                "literate_ai.adapters.remote_execution.probe_worker_capabilities",
+                return_value=observation(),
+            ):
+                pre_result = SshExecutionDispatcher(
+                    ActualReceiver(
+                        pre_source,
+                        root / "preexecution-workspace",
+                        pre_bundle,
+                        pre_stage / "cleanup-ticket.json",
+                    )
+                ).dispatch(worker(), pre_request, cwd=project)
+            self.assertEqual(pre_result.status, DispatchResultStatus.FAILED)
+            self.assertIsNone(pre_result.artifact_reference)
+            self.assertEqual(executed.read_bytes(), b"x")
+            pre_manifest = pre_result.evidence_manifest
+            self.assertIsNotNone(pre_manifest)
+            self.assertIsNotNone(pre_manifest.failure)
+            self.assertEqual(
+                pre_manifest.failure.code, "execution.remote_entrypoint_unsupported"
+            )
+            self.assertEqual(pre_manifest.request_identity, pre_request.identity)
+            _pre_store, pre_imported = import_remote_evidence_bundle(
+                pre_bundle,
+                pre_manifest,
+                expected_bundle_identity=pre_result.evidence_reference.identity,
+                store_root=root / "preexecution-coordinator-cas",
+            )
+            self.assertTrue(pre_imported)
+
+            # The canonical dispatcher must preserve a real nonzero product
+            # outcome and its original input artifact, not mistake it for a
+            # newly accepted build export after importing failure evidence.
+            self.assertEqual(result.artifact_reference, reference)
+
+            class ReturnedFailure:
+                def __init__(self, value):
+                    self.value = value
+
+                def execute(self, selected, incoming, *, cwd):
+                    return self.value
+
+            substituted = ContentReference(
+                "artifact-export", "cas:sha256:" + "a" * 64, identity("a")
+            )
+            wrong_run = replace(result, artifact_reference=substituted)
+            with self.assertRaises(ExecutionDispatchAdapterError) as refused:
+                SshExecutionDispatcher(ReturnedFailure(wrong_run)).dispatch(
+                    worker(), run_request, cwd=project
+                )
+            self.assertEqual(
+                refused.exception.code, "execution.dispatcher_artifact_mismatch"
+            )
+
+            for action in (
+                LifecycleDispatchAction.BUILD,
+                LifecycleDispatchAction.TEST,
+            ):
+                with self.subTest(untrusted_failed_export=action):
+                    failed_request = replace(
+                        run_request, action=action, artifact_reference=None
+                    )
+                    failed_export = replace(
+                        result,
+                        request_identity=failed_request.identity,
+                        evidence_manifest=None,
+                        evidence_reference=None,
+                    )
+                    with self.assertRaises(ExecutionDispatchAdapterError) as refused:
+                        SshExecutionDispatcher(ReturnedFailure(failed_export)).dispatch(
+                            worker(), failed_request, cwd=project
+                        )
+                    self.assertEqual(
+                        refused.exception.code,
+                        "execution.dispatcher_artifact_untrusted",
+                    )
 
     def test_control_summary_is_redacted(self) -> None:
         failure = RemoteFailureDiagnostic(

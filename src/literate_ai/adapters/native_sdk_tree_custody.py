@@ -6,6 +6,7 @@ import os
 import stat
 import tempfile
 from collections import defaultdict
+from contextlib import nullcontext
 from pathlib import Path
 
 from literate_ai._filesystem import require_safe_directory
@@ -124,6 +125,34 @@ def capture_composed_native_tree(
     max_metadata_memory_bytes=1024 * 1024 * 1024,
 ) -> ComposedNativeTree:
     """Capture larger composed geometry through the same no-follow custody owner."""
+    return _capture_composed_native_tree(
+        root,
+        store=store,
+        limits=limits,
+        case_sensitive=case_sensitive,
+        max_descriptor_bytes=max_descriptor_bytes,
+        max_descriptor_total_bytes=max_descriptor_total_bytes,
+        max_index_bytes=max_index_bytes,
+        max_metadata_memory_bytes=max_metadata_memory_bytes,
+    )
+
+
+def _capture_composed_native_tree(
+    root: Path,
+    *,
+    store: FileSystemCAS,
+    limits: RetainedProjectLimits,
+    case_sensitive: bool = False,
+    max_descriptor_bytes=MAX_DESCRIPTOR_BYTES,
+    max_descriptor_total_bytes=MAX_DESCRIPTOR_TOTAL_BYTES,
+    max_index_bytes=MAX_INDEX_BYTES,
+    max_metadata_memory_bytes=1024 * 1024 * 1024,
+    output_custody=None,
+    reserved_memory_bytes=0,
+    budget_capture=False,
+    retain_payloads=True,
+) -> ComposedNativeTree:
+    """Capture larger composed geometry through the same no-follow custody owner."""
     from literate_ai.adapters.native_tree_shards import prepare_native_tree
 
     validate_native_tree_policy(
@@ -134,8 +163,19 @@ def capture_composed_native_tree(
         max_index_bytes,
         max_metadata_memory_bytes,
     )
+    if (
+        type(reserved_memory_bytes) is not int
+        or not 0 <= reserved_memory_bytes <= max_metadata_memory_bytes
+        or type(budget_capture) is not bool
+        or type(retain_payloads) is not bool
+    ):
+        raise ValueError("tree.shards.invalid-memory-reservation")
+    budget_capture = (
+        budget_capture or output_custody is not None or bool(reserved_memory_bytes)
+    )
     baseline = 16 * (max_descriptor_bytes + max_index_bytes)
-    if baseline >= max_metadata_memory_bytes:
+    capture_memory = {"inventory": 0, "tree": 0, "pending": baseline}
+    if baseline + reserved_memory_bytes >= max_metadata_memory_bytes:
         raise ValueError("tree.shards.metadata-memory-policy-exceeded")
 
     def inventory_policy():
@@ -165,11 +205,15 @@ def capture_composed_native_tree(
             descriptor_bound += row_bound
             if descriptor_bound > max_descriptor_total_bytes:
                 raise ValueError("tree.shards.capture-descriptor-policy-exceeded")
-            if (
-                baseline + 16 * descriptor_bound + 2048 * count
-                > max_metadata_memory_bytes
-            ):
+            estimate = baseline + 16 * descriptor_bound + 2048 * count
+            retained = (
+                capture_memory["inventory"] + capture_memory["tree"]
+                if budget_capture
+                else 0
+            )
+            if reserved_memory_bytes + retained + estimate > max_metadata_memory_bytes:
                 raise ValueError("tree.shards.metadata-memory-policy-exceeded")
+            capture_memory["pending"] = estimate
 
         return observe
 
@@ -184,6 +228,11 @@ def capture_composed_native_tree(
             max_descriptor_total_bytes=max_descriptor_total_bytes,
             max_index_bytes=max_index_bytes,
             max_metadata_memory_bytes=max_metadata_memory_bytes,
+            reserved_memory_bytes=(
+                reserved_memory_bytes + capture_memory["inventory"]
+                if budget_capture
+                else 0
+            ),
         )
 
     return _capture_native_tree(
@@ -192,11 +241,16 @@ def capture_composed_native_tree(
         limits=limits,
         case_sensitive=case_sensitive,
         maximum_entries=min(
-            MAX_TREE_MEMBERS, (max_metadata_memory_bytes - baseline) // 2048
+            MAX_TREE_MEMBERS,
+            (max_metadata_memory_bytes - baseline - reserved_memory_bytes) // 2048,
         ),
         tree_factory=compose,
         inventory_policy=inventory_policy,
         preflight_geometry=True,
+        output_custody=output_custody,
+        reserved_memory_bytes=reserved_memory_bytes,
+        capture_memory=capture_memory if budget_capture else None,
+        retain_payloads=retain_payloads,
     )
 
 
@@ -210,6 +264,10 @@ def _capture_native_tree(
     tree_factory,
     inventory_policy=None,
     preflight_geometry=False,
+    output_custody=None,
+    reserved_memory_bytes=0,
+    capture_memory=None,
+    retain_payloads=True,
 ):
     """Capture physical bytes and link topology through existing input custody.
 
@@ -223,8 +281,47 @@ def _capture_native_tree(
     ):
         raise TypeError("SDK capture requires typed limits and boolean case selection")
     root = _root(Path(root))
-    if store.root.is_relative_to(root):
+    if type(retain_payloads) is not bool or (not retain_payloads and store is not None):
+        raise TypeError("hash-only tree observation requires no content store")
+    if retain_payloads and store.root.is_relative_to(root):
         raise ValueError("SDK content store must be outside the captured tree")
+    # Only the separate HTML output owner can issue this finite observation.
+    # Old SDK callers have no exclusion selection and preserve complete capture.
+    if output_custody is not None:
+        from .html_tree_output_initialization import _html_tree_capture_exclusions
+
+        excluded_roots, excluded_files, revalidate_output = (
+            _html_tree_capture_exclusions(
+                output_custody,
+                root,
+                reserved_memory_bytes=(
+                    reserved_memory_bytes
+                    + (
+                        0
+                        if capture_memory is None
+                        else (capture_memory["inventory"] + capture_memory["tree"])
+                    )
+                ),
+            )
+        )
+    else:
+        excluded_roots = excluded_files = frozenset()
+        revalidate_output = None
+
+    def revalidate_owned_output(additional_memory_bytes=0):
+        if revalidate_output is not None:
+            retained = (
+                capture_memory["inventory"] + capture_memory["tree"]
+                if capture_memory is not None
+                else 0
+            )
+            revalidate_output(
+                reserved_memory_bytes=(
+                    reserved_memory_bytes + retained + additional_memory_bytes
+                )
+            )
+
+    revalidate_owned_output()
     with _directory_access(root) as access:
 
         def top_names():
@@ -252,14 +349,21 @@ def _capture_native_tree(
         roots = top_names()
 
         def inventory():
-            return _inventory(
+            revalidate_owned_output()
+            result = _inventory(
                 root,
                 roots,
                 min(limits.max_entries, maximum_entries),
                 allow_internal_symlinks=True,
                 access=access,
                 observe=inventory_policy() if inventory_policy is not None else None,
+                excluded_roots=excluded_roots,
+                excluded_regular_files=excluded_files,
             )
+            revalidate_owned_output(
+                0 if capture_memory is None else capture_memory["pending"]
+            )
+            return result
 
         def metadata(name):
             path = root / name
@@ -269,6 +373,8 @@ def _capture_native_tree(
             return path.lstat()
 
         names, directories = inventory()
+        if capture_memory is not None:
+            capture_memory["inventory"] = capture_memory["pending"]
         before = {name: metadata(name) for name in names}
         groups = defaultdict(list)
         aliases = []
@@ -312,10 +418,13 @@ def _capture_native_tree(
                 case_sensitive,
             )
             del planned_files, planned_aliases
-        with tempfile.TemporaryDirectory(
-            prefix=".sdk-capture-", dir=store.root
-        ) as temp:
-            scratch = Path(temp) / "bytes"
+        workspace = (
+            tempfile.TemporaryDirectory(prefix=".sdk-capture-", dir=store.root)
+            if retain_payloads
+            else nullcontext(None)
+        )
+        with workspace as temp:
+            scratch = Path(temp) / "bytes" if retain_payloads else None
             for group in groups.values():
                 owner = min(group)
                 value = before[owner]
@@ -326,7 +435,10 @@ def _capture_native_tree(
                     for name in group
                 ):
                     raise ValueError("SDK hard-link group is incomplete or changed")
-                with scratch.open("xb") as output:
+                output_context = (
+                    scratch.open("xb") if retain_payloads else nullcontext(None)
+                )
+                with output_context as output:
                     size, mode, digest = _stream(
                         root,
                         owner,
@@ -337,8 +449,14 @@ def _capture_native_tree(
                         output,
                         access=access,
                     )
-                blob = store.put_file(scratch)
-                scratch.unlink()
+                if retain_payloads:
+                    blob = store.put_file(scratch)
+                    scratch.unlink()
+                else:
+                    # _stream retains its original no-follow, byte/identity and
+                    # namespace checks with a hashing-only sink. No payload or
+                    # temporary file is created for a freshness observation.
+                    blob = BlobRef(digest, size)
                 if blob.digest != digest or blob.size != size:
                     raise ValueError("SDK captured bytes changed before storage")
                 total += size
@@ -356,6 +474,9 @@ def _capture_native_tree(
             tuple(sorted(aliases, key=lambda item: item.path)),
             case_sensitive,
         )
+
+        if capture_memory is not None:
+            capture_memory["tree"] = tree.index.metadata_memory_bound
 
         def unchanged():
             # Re-enumerate the root too: fixed selected roots alone miss a new
@@ -378,7 +499,8 @@ def _capture_native_tree(
                 item.blob.digest,
             ):
                 raise ValueError("SDK file changed during capture")
-            store.verify(item.blob)
+            if retain_payloads:
+                store.verify(item.blob)
         for alias in tree.aliases:
             if (
                 alias.kind == "symlink"
@@ -387,6 +509,7 @@ def _capture_native_tree(
             ):
                 raise ValueError("SDK symbolic target changed during capture")
         unchanged()
+        revalidate_owned_output()
         return tree
 
 

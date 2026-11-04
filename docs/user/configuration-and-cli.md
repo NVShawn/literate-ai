@@ -88,6 +88,7 @@ litai graph
 litai graph rebalance
 litai render html
 litai render dashboard
+litai render tree
 litai project validate
 litai project lifecycle rebind-standard
 litai project documentation-update
@@ -994,6 +995,54 @@ litai render dashboard --root /work \
 The command refuses missing or edited declared artifacts and projects outside
 `--root`. The output contains exact artifact identities and relative iframe paths;
 it does not run verification, rebuild projects, or start a server.
+
+`litai render tree --root /physical/tree --declaration tree-view.json` plans a
+bounded directory metadata view without writing source, output or operator state.
+Initial publication requires `--apply --ack-plan SHA256_URI`, using the exact
+`plan_identity` from a fresh plan. The declaration selects explicit finite limits
+and the nominal renderer `renderer://literate-ai/information-cards/1.0.0`; the
+installed framework supplies its measured renderer identity. Existing indices or
+generation namespaces refuse without replacement or implicit recovery. This is
+the initial publication slice of [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md):
+rerender, recovery, per-unit joins, and native/browser qualification remain required
+work. The existing single-file HTML verification gate is unchanged.
+
+Use the same declaration with `--check` to reobserve an existing complete tree
+generation and its current source without writing source, output, cache or
+operator state. A current result returns exit zero; stale or unverifiable data
+returns a named refusal and nonzero exit. Checking reads the published metadata
+and page bytes directly, so it does not require the original operator cache.
+Source hashing preserves complete namespace and link checks without creating
+temporary payload files. A successful check grants no permission to rerender,
+recover, collect or replace an existing index. `--check` cannot accompany
+`--apply` or `--ack-plan`.
+
+To include tree artifacts in project verification, add `literate.tree-html.json`
+at the project root. Its declarations are the same versioned files used by
+`render tree`:
+
+```json
+{
+  "schema": "literate-ai/project-tree-html@1",
+  "declarations": ["docs/tree-view.json"]
+}
+```
+
+The registry accepts at most 128 canonical project-relative paths, with a 64 KiB
+limit on each registry/declaration file and the project's pinned-input limits
+still enforced. Duplicate, aliased or escaping paths, edited declarations and
+colliding output indices refuse. `litai verify PROJECT` automatically includes
+`tree-html-observability` when this registry exists; the gate can also be selected
+with `--gate tree-html-observability`. A dangling or invalid registry fails rather
+than silently disabling the gate. Every declared view must reopen its complete
+published output and pass fresh source observations. Verification creates no
+artifact, cache, temporary payload, publication owner or model request.
+
+Reports containing the new gate use `literate-ai/project-verify@2`, including its
+producer-owned tree freshness facts. Without the registry, the existing default
+gates and `project-verify@1` report are preserved. Selecting the new gate explicitly
+without a registry returns a skipped gate in the version 2 report. Existing
+single-file HTML declarations and their gate keep their meaning.
 
 Verify never builds. A project's build harness, toolchain, and language are the project's
 own choices, and `rebuild` is where those run; verify does not invoke, wrap, or

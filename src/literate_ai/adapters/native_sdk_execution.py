@@ -181,6 +181,7 @@ class NativeSdkExecutionInputs:
         authorize: Callable[[BuildRequest, ContentIdentity], BuildAuthorization],
         clock: Callable[[], datetime],
         record: Callable[[object], ContentIdentity],
+        record_many: Callable[..., tuple[ContentIdentity, ...]] | None = None,
         captured_runtime_context=None,
     ) -> Iterator[NativeSdkCommandScope]:
         """Authorize one complete process lifetime, including caller-owned teardown."""
@@ -316,17 +317,17 @@ class NativeSdkExecutionInputs:
         manifest = _manifest_document(
             self.revision, self.target, self.values, self.manifest.parent
         )
-        if record(manifest) != self.manifest_identity:
-            raise ValueError("SDK execution manifest retention changed its identity")
-        record(request.to_dict())
-        record(grant.to_dict())
-        for value in self.values:
-            record(value.dependencies.to_dict())
-            record(value.binding.to_dict())
-            record(value.binding.build.selection.to_dict())
-            record(value.binding.build.resolution.build_plan.to_dict())
-        evidence = record(
-            {
+
+        def metadata_documents():
+            yield manifest
+            yield request.to_dict()
+            yield grant.to_dict()
+            for value in self.values:
+                yield value.dependencies.to_dict()
+                yield value.binding.to_dict()
+                yield value.binding.build.selection.to_dict()
+                yield value.binding.build.resolution.build_plan.to_dict()
+            yield {
                 "schema": (
                     "literate-ai/native-sdk-command-execution@4"
                     if captured_runtime_context is not None
@@ -353,7 +354,39 @@ class NativeSdkExecutionInputs:
                 "dependencies": [value.dependencies.to_dict() for value in self.values],
                 "checks": [before, after],
             }
-        )
+
+        if record_many is None:
+            documents = metadata_documents()
+            if record(next(documents)) != self.manifest_identity:
+                raise ValueError(
+                    "SDK execution manifest retention changed its identity"
+                )
+            for document in documents:
+                evidence = record(document)
+        else:
+            count = 4 + 4 * len(self.values)
+            identities = record_many(metadata_documents, count=count)
+            # The retained wrapper validates the final augmented @5 document;
+            # all preceding metadata keeps its original canonical identity.
+            if (
+                type(identities) is not tuple
+                or len(identities) != count
+                or any(not isinstance(v, ContentIdentity) for v in identities)
+                or identities[0] != self.manifest_identity
+            ):
+                raise ValueError(
+                    "SDK execution metadata retention changed its identity"
+                )
+            for index, document in enumerate(metadata_documents()):
+                if index < count - 1 and identities[index] != canonical_identity(
+                    document
+                ):
+                    raise ValueError(
+                        "SDK execution metadata retention changed its identity"
+                    )
+            # Retention must not turn an expired/revoked command into evidence.
+            require_authority()
+            evidence = identities[-1]
         object.__setattr__(scope, "evidence_identity", evidence)
         completed_at = datetime.fromisoformat(after["checked_at"])
         object.__setattr__(

@@ -435,7 +435,7 @@ class OpenCodeModelProbeTests(unittest.TestCase):
                     ExecutionWorkerKind.SSH,
                     requirements=ExecutionRequirements(os_family=family),
                     endpoint="user@fixture.invalid",
-                    workspace=str(root / "workspace"),
+                    workspace="~/litai-model-probe",
                 )
                 catalog = root / "workers.json"
                 catalog.write_text(

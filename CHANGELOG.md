@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Command workers preserve normal failed RUN diagnostics with the original input artifact reference, while retaining pre-execution failures and rejecting failed build/test artifact exports.
+
 - Windows coding-agent test compilers retain configured temporary/system variables while applying MSVC overrides.
 
 - Composed retained-tree packages apply canonical directory permissions under permissive and restrictive worker umasks. Independent verification still rejects later permission changes.
@@ -17,6 +19,12 @@
 
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
+
+- Retained receiver construction prepares its execution request once and reuses
+  the same typed worker selection and plan. Capability publication, reservation
+  and execution still reopen current authority; no preparation is cached.
+
+- Batch retained SDK command metadata under the original live owner while preserving full boundary currentness and exact evidence identities.
 
 - Remote retained SDK producer and consumer grants honor the original action's
   deadline, capped at three hours, so long source verification does not outlive
@@ -38,6 +46,10 @@
 - POSIX and Windows worker probes preserve observed NVIDIA devices with unknown
   memory when the device reports permission text. Requirements needing a known
   memory capacity still refuse; no capacity is inferred.
+
+- Published retained-tree HTML can be checked without writable caches or restored
+  publication ownership. Projects can opt into a bounded tree-declaration registry
+  and an additive freshness gate while legacy verification reports stay unchanged.
 
 - Bare Component runs resolve their declared demonstration inputs from the
   Component name even when selected through a project-relative path. Remote

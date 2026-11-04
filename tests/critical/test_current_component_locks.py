@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import shutil
-import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
@@ -23,7 +22,6 @@ from literate_ai.adapters.locked_generation_authority import (
     LockedGenerationAuthorityReaderError,
     read_only_component_catalog_observations,
 )
-from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
@@ -33,9 +31,6 @@ from literate_ai.adapters.retained_project_planning import (
 )
 from literate_ai.contracts import (
     ContentIdentity,
-    ProjectDefinition,
-    RepositoryLineage,
-    RepositoryParentSelection,
     canonical_identity,
     canonical_json_bytes,
 )
@@ -46,48 +41,17 @@ from literate_ai.contracts.retained_project_tests import (
     RetainedProjectExpectedCase,
     RetainedProjectTestPolicy,
 )
-from literate_ai.projects import LoadedProject, ProjectError
+from literate_ai.projects import ProjectError
+from tests.support.fixtures_current_component_locks import (
+    initialize_current_component_lock_fixture,
+)
 from tests.support.fixtures_retained_project_sbom import retained_project_sbom_fixture
 from tests.support.fixtures_test_cli_component_locks import _run
-from tests.support.fixtures_test_component_lock_planning import _fixture
 
 
 class CurrentComponentLockTests(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name).resolve()
-        self.component, flavors = _fixture(self.root)
-        definition = json.loads(
-            (Path(__file__).resolve().parents[2] / "literate.project.json").read_bytes()
-        )
-        definition["project_id"] = "typed-lock-fixture"
-        definition["component_roots"] = ["greeting"]
-        definition["default_flavor_selectors"] = []
-        definition["test_receipt_policy"]["suite_id"] = "typed-lock-fixture"
-        definition["test_receipt_policy"]["minimum_test_count"] = 1
-        (self.root / "literate.project.json").write_text(json.dumps(definition))
-        self.project = LoadedProject(self.root, ProjectDefinition.from_dict(definition))
-        selection = RepositoryParentSelection.root()
-        FilesystemRepositoryLineageStore(self.root).replace(
-            selection, RepositoryLineage(selection, (), ()), expected_absent=True
-        )
-        status, record, error = _run(
-            [
-                "lock",
-                str(self.component),
-                "--target",
-                "host",
-                "--flavor",
-                "+python",
-                "--flavor",
-                "+macos",
-                "--flavor-root",
-                str(flavors),
-                "--json",
-            ]
-        )
-        self.assertEqual(status, 0, (record, error))
+        initialize_current_component_lock_fixture(self)
 
     def test_typed_and_identity_only_reads_bind_the_same_actual_lock(self):
         lock = current_component_lock(self.component)

@@ -318,6 +318,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
 
         return authority_graph_from_args(args), 0
     if args.command == "render":
+        if args.render_command == "tree":
+            from .render_tree import plan_tree_from_args
+
+            return plan_tree_from_args(args)
         from .render import render_dashboard_from_args, render_html_from_args
 
         return (
@@ -1512,6 +1516,31 @@ def _parser() -> JsonArgumentParser:
     render_commands = render.add_subparsers(
         dest="render_command", required=True, parser_class=JsonArgumentParser
     )
+    render_tree = render_commands.add_parser(
+        "tree",
+        help="plan a bounded directory metadata view, or apply its initial plan",
+        description=(
+            "Read-only by default. Initial publication requires --apply and the "
+            "exact current --ack-plan identity. Existing output and interrupted "
+            "namespaces refuse; rerender and recovery are not authorized here."
+        ),
+    )
+    render_tree.add_argument("--root", default=".", help="physical source project root")
+    render_tree.add_argument(
+        "--declaration", required=True, help="bounded tree-view declaration JSON"
+    )
+    render_tree_actions = render_tree.add_mutually_exclusive_group()
+    render_tree_actions.add_argument(
+        "--apply", action="store_true", help="publish an acknowledged initial view"
+    )
+    render_tree_actions.add_argument(
+        "--check",
+        action="store_true",
+        help="check complete existing pages and current source without writing files",
+    )
+    render_tree.add_argument(
+        "--ack-plan", help="exact sha256 identity of the current full read-only plan"
+    )
     render_html = render_commands.add_parser(
         "html",
         help="render one provenance-bound single-file HTML view",
@@ -1716,6 +1745,8 @@ def _parser() -> JsonArgumentParser:
             "run only this gate (repeatable). Default: all gates -- authority, locks, "
             "source-intelligence (always skipped when provider is none), "
             "html-observability (declared HTML currency), receipt. "
+            "A declared literate.tree-html.json also selects tree-html-observability; "
+            "that gate can be requested explicitly. "
             "Verify never builds; that is rebuild's job"
         ),
     )
@@ -3316,8 +3347,12 @@ def main(
     scoped_retained_cargo = command == "project.retained-cargo"
     scoped_worker_health = command == "worker.health"
     scoped_agent_entrypoints = command == "project.agent-entrypoints"
+    scoped_tree_render = command == "render.tree"
     scoped_orchestration = (
-        scoped_orchestration or scoped_worker_health or scoped_agent_entrypoints
+        scoped_orchestration
+        or scoped_worker_health
+        or scoped_agent_entrypoints
+        or scoped_tree_render
     )
     scoped_evidence = (
         command.startswith("project.")
@@ -3381,7 +3416,11 @@ def main(
                 else (
                     "worker.health_read_only_options"
                     if scoped_worker_health
-                    else "orchestration.read_only_options"
+                    else (
+                        "render.tree.scoped_options"
+                        if scoped_tree_render
+                        else "orchestration.read_only_options"
+                    )
                 ),
                 "read-only inspection does not admit MCP discovery "
                 "or debug-file output",
