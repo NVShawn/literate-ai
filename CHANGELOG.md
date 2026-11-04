@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add owned POSIX fault controls for retained-tree HTML source recapture, index substitution, generation custody and unpublished budget failures.
+
 - Windows worker probes preserve unknown NVIDIA memory as null when the device
   reports permission text, matching the POSIX observation behavior.
 

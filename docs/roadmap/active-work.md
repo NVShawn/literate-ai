@@ -33424,6 +33424,10 @@ independent review and the complete combined gate from test one.
 
 ### [ ] RETAINED-TREE-EXPLORER-001 — Publish hierarchical retained-tree HTML information cards
 
+- **Initial publication race-control intent:** Add maintained real POSIX source/CAS/output fault controls for actual recapture edits, equal-byte foreign index substitution before and after commit, generation and excluded-namespace tampering, and a partial-CAS output-budget refusal. Use only explicit framework-measurement stand-ins and narrow ordering hooks; never manufacture installed or native SDK admission. Production code remains unchanged unless a concrete defect is established. Preserve failed provisional evidence and foreign bytes, and keep freshness/rerender/recovery/unit/browser/native-scale/full-ADR qualification open.
+- **Initial publication race-control outcome:** Six maintained controls pass with zero skips through the managed Python gate on real POSIX source, CAS and output files. An actual source recapture edit refuses without an index; equal-byte foreign index substitution before commit preserves the foreign inode/bytes, while substitution after commit refuses a valid-success result. Generation mutation after the owned move and a foreign member in the excluded namespace refuse without an index or namespace adoption. A tight output budget derived from a successful owned baseline leaves verifiable partial CAS evidence and the original owner marker without publishing an index. Only framework measurement and narrow fault-ordering boundaries are stand-ins; no installed-distribution, native SDK, browser, scale or complete-ADR admission is manufactured. Production files remain unchanged; combined-source and remaining goal qualifications stay open.
+
+
 - **Release target:** 1.4.0
 - **GitHub issue:** [#279](https://github.com/jordanhubbard/literate-ai/issues/279)
 - **Accepted decision:** [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md); explicit directing-user acceptance on 2026-11-03.
