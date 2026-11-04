@@ -33465,3 +33465,21 @@ independent review and the complete combined gate from test one.
 - **Evidence:**
   - [ ] Real live-worker action/stage/state and network/disk/cpu/memory observations with declared unsupported values, not invented measurements.
   - [ ] Authentication, secret/command/environment/path redaction, no-listener/no-job-mutation, volume/coalescing/cancellation controls, independent review and integrated native qualification.
+
+### [x] WORKER-GPU-MEMORY-002 — Qualify permission-text NVIDIA memory observations after command-worker integration
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#275](https://github.com/jordanhubbard/literate-ai/issues/275)
+
+- **Priority:** P1
+- **Owner:** Execution-worker capability serialization and qualification; PROJECT Goals 1 and 4
+- **Direction:** Complete issue 275 on 1.4 without guessing unavailable GPU capacity or weakening hardware requirements.
+- **Conclusion:** Audit the landed numeric-only serializer against retained failing and repaired native observations through the same content-identified command catalog. Preserve the original issue 44 closure and broader COMMAND-WORKER-001/native/release acceptance boundaries.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Verify original native failure and repaired probe share the exact command catalog identity; compare the landed serializer and required GPU-memory refusal behavior.
+- **Evidence:**
+  - [x] Run current serializer and hardware-compatibility regressions through the managed Make harness; independently reconstruct source-bound native observations and record exact-main CI, then reconcile the bounded issue only after all evidence passes.
+
+- **Decisive qualification:** [Exact-route evidence audit](../../verification/gpu-memory-command-route-qualification.json) reopens the retained original `worker.probe_malformed` failure and repaired native probe. Both bind command catalog `sha256:b69352f8581230c398c74abd236d1a6f8f127f0ed75892281aa5a5fc72469fff`; the repaired typed observation catalog independently reconstructs to `sha256:886303967384f0cdc227a2b0eae869aad3bfc2537fa6df94743236a0c6a0be8a`, retaining one NVIDIA device with memory null. Current contract checks accept the observed device without a VRAM minimum and refuse a positive minimum. The Linux serializer is byte-identical to landed implementation `5d785f64728f285b4bf07cbbdb4bd3e287bb576f`, an ancestor of main `072d66e81eff85f58515a09d93d19528499a5ec1`; exact-main CI 41740063437 passes. Fresh managed `make python-check` selection passes all seven worker-capability cases, including actual shell serializer inputs for permission text, unavailable, numeric and failed-query values. This audit reopens original native evidence rather than claiming a fresh native dispatch; it neither guesses physical GPU capacity nor closes COMMAND-WORKER-001, native Component/SDK/package or release qualification.

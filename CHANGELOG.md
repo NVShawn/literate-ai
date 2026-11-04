@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Windows worker probes preserve unknown NVIDIA memory as null when the device
-  reports permission text, matching the POSIX observation behavior.
+- POSIX and Windows worker probes preserve observed NVIDIA devices with unknown
+  memory when the device reports permission text. Requirements needing a known
+  memory capacity still refuse; no capacity is inferred.
 
 - Bare Component runs resolve their declared demonstration inputs from the
   Component name even when selected through a project-relative path. Remote
