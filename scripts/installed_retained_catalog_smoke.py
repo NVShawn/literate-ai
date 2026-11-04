@@ -14,10 +14,90 @@ from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.component_lock_planning import (
     component_catalog_manifest_paths,
 )
+from literate_ai.adapters.harness_inventory import (
+    HARNESS_BASELINE_SCHEMA,
+    HARNESS_PARITY_SCHEMA,
+)
 from literate_ai.adapters.standard_lifecycle_binding import (
     observe_installed_framework_distribution,
 )
 from literate_ai.project_authority_graph import project_authority_graph
+
+
+def adoption_evidence(project: Path, initialized: dict) -> dict:
+    documents = {}
+    for name, schema in (
+        ("legacy-harness-baseline.json", HARNESS_BASELINE_SCHEMA),
+        ("legacy-wrapper-parity.json", HARNESS_PARITY_SCHEMA),
+        ("legacy-lift-shift.json", "literate-ai/legacy-lift-shift@1"),
+    ):
+        relative = f".literate/{name}"
+        if relative not in initialized["created"]:
+            raise RuntimeError("public adoption did not create its evidence record")
+        content = (project / relative).read_bytes()
+        if len(content) > 2 * 1024**2:
+            raise RuntimeError("retained catalog fixture evidence exceeds its bound")
+        document = json.loads(content)
+        if document.get("schema") != schema or document.get("state") != "passed":
+            raise RuntimeError("installed adoption evidence did not pass")
+        documents[name] = document
+    baseline = documents["legacy-harness-baseline.json"]
+    parity = documents["legacy-wrapper-parity.json"]
+    shifted = documents["legacy-lift-shift.json"]
+
+    def identity(document: dict) -> str:
+        # Match the exact retained harness/ADR identity format.
+        return (
+            "sha256:"
+            + hashlib.sha256(
+                json.dumps(document, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
+        )
+
+    baseline_identity = identity(baseline)
+    parity_identity = identity(parity)
+    if shifted["phase_11_parity_identity"] != parity_identity:
+        raise RuntimeError("lift-shift does not identify the saved wrapper parity")
+    adr_path = "docs/decisions/0001-legacy-project-lift-and-shift.md"
+    if shifted["adr"] != adr_path:
+        raise RuntimeError("lift-shift did not retain its expected authority record")
+    adr = (project / adr_path).read_text(encoding="utf-8")
+    if (
+        f"Baseline evidence: `{baseline_identity}`" not in adr
+        or f"Shim parity evidence: `{parity_identity}`" not in adr
+    ):
+        raise RuntimeError("lift-shift authority does not bind its saved evidence")
+    expected_tests = {
+        "state": "nonempty",
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "known_failed": 0,
+    }
+    if shifted["phase_12_parity"].get("schema") != HARNESS_PARITY_SCHEMA:
+        raise RuntimeError("lift-shift phase 12 has an unexpected parity schema")
+    for report in (baseline, parity, shifted["phase_12_parity"]):
+        if report.get("state") != "passed":
+            raise RuntimeError("installed adoption parity did not pass")
+        phases = {phase["phase"]: phase for phase in report["phases"]}
+        if not {"build", "test", "package"} <= phases.keys():
+            raise RuntimeError("installed adoption omitted a fixture phase")
+        if any(
+            phase["exit_code"] != 0 or phase["timed_out"] for phase in phases.values()
+        ):
+            raise RuntimeError("installed adoption phase failed or timed out")
+        if phases["test"]["test_collection"] != expected_tests:
+            raise RuntimeError("installed adoption did not run its real unittest")
+        if report is not baseline and any(
+            phase["parity"] is not True for phase in phases.values()
+        ):
+            raise RuntimeError("installed wrapper parity refused its source or tests")
+    return {
+        "baseline": baseline_identity,
+        "wrapper_parity": parity_identity,
+        "lift_shift": identity(shifted),
+    }
 
 
 def main() -> int:
@@ -139,12 +219,9 @@ def main() -> int:
         plan["plan_identity"],
     )
     initialized = applied.get("initialization", {})
-    if (
-        applied.get("applied") is not True
-        or initialized.get("harness_baseline", {}).get("state") != "passed"
-        or initialized.get("harness_parity", {}).get("state") != "passed"
-    ):
-        raise RuntimeError("installed adoption did not pass actual baseline and parity")
+    if applied.get("applied") is not True:
+        raise RuntimeError("installed adoption was not applied")
+    evidence = adoption_evidence(project, initialized)
     retained = project / "components/legacy-project-wrapper/implementation"
     for name, content in dependencies.items():
         if (retained / name).read_bytes() != content:
@@ -167,6 +244,7 @@ def main() -> int:
                 "distribution": distribution.identity.uri,
                 "public_adopt_applied": True,
                 "actual_unittest_baseline_and_parity": True,
+                "adoption_evidence": evidence,
                 "dependency_bytes_preserved": {
                     name: hashlib.sha256(content).hexdigest()
                     for name, content in dependencies.items()
