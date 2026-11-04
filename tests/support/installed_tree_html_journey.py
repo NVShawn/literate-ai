@@ -281,24 +281,32 @@ def main():
         )
         return source, declaration, document, state, config, environment
 
+    cli_evidence = workspace / "cli-evidence"
+    cli_evidence.mkdir(mode=0o700)
+    cli_call_count = 0
+
     def cli(case, *options, expected=0):
+        nonlocal cli_call_count
+        cli_call_count += 1
+        require(cli_call_count <= 64, "installed tree CLI call bound exceeded")
         source, declaration, _, _, _, environment = case
+        argv = (
+            sys.executable,
+            "-I",
+            "-B",
+            "-m",
+            "literate_ai.cli",
+            "--json",
+            "render",
+            "tree",
+            "--root",
+            str(source),
+            "--declaration",
+            str(declaration),
+            *options,
+        )
         completed = run_bounded_process(
-            (
-                sys.executable,
-                "-I",
-                "-B",
-                "-m",
-                "literate_ai",
-                "--json",
-                "render",
-                "tree",
-                "--root",
-                str(source),
-                "--declaration",
-                str(declaration),
-                *options,
-            ),
+            argv,
             cwd=workspace,
             environment=environment,
             timeout_seconds=180,
@@ -307,7 +315,30 @@ def main():
             error_prefix="installed-tree-html",
             terminate_descendants=True,
         )
-        require(completed.returncode == expected, "public tree CLI exit differs")
+        stem = cli_evidence / f"call-{cli_call_count:02d}"
+        for suffix, content in (
+            ("stdout", completed.stdout),
+            ("stderr", completed.stderr),
+        ):
+            with stem.with_suffix("." + suffix).open("xb") as stream:
+                stream.write(content)
+        with stem.with_suffix(".json").open("x") as stream:
+            json.dump(
+                {
+                    "argv": list(argv),
+                    "actual_exit_code": completed.returncode,
+                    "expected_exit_code": expected,
+                    "framework_distribution_identity": (
+                        framework.framework_distribution_identity.uri
+                    ),
+                },
+                stream,
+                indent=2,
+            )
+        require(
+            completed.returncode == expected,
+            f"public tree CLI exit differs; retained {stem.name} raw evidence",
+        )
         raw = completed.stdout if completed.stdout else completed.stderr
         envelope = json.loads(raw)
         require(envelope["command"] == "render.tree", "incorrect public command label")
