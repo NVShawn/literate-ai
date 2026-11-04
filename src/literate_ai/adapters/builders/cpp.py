@@ -406,9 +406,15 @@ def _windows_msvc_environment(
         )
     with tempfile.TemporaryDirectory(prefix="litai-msvc-environment-") as directory:
         wrapper = Path(directory) / "initialize.cmd"
+        wrapper_call = '@call "%~1" %~2 %~3 %~4'
+        if developer_setup:
+            # CMD splits name=value parameters; the vendor parser needs '='.
+            # Pass only closed values and reconstruct the named options here.
+            wrapper_call = '@call "%~1" -arch=%~2 -host_arch=%~3'
+            if toolset_argument is not None:
+                wrapper_call += " -vcvars_ver=%~4"
         wrapper.write_text(
-            '@call "%~1" %~2 %~3 %~4 >nul 2>&1\n'
-            "@if errorlevel 1 exit /b %errorlevel%\n@set\n",
+            wrapper_call + " >nul 2>&1\n@if errorlevel 1 exit /b %errorlevel%\n@set\n",
             encoding="utf-8",
             newline="\r\n",
         )
@@ -429,13 +435,15 @@ def _windows_msvc_environment(
                 )
             command.extend(
                 (
-                    f"-arch={aliases[requested_target]}",
-                    f"-host_arch={aliases[compiler_host]}",
+                    aliases[requested_target],
+                    aliases[compiler_host],
                 )
             )
+            if toolset_argument is not None:
+                command.append(toolset_argument.partition("=")[2])
         elif vcvarsall:
             command.append("x64")
-        if toolset_argument is not None:
+        if toolset_argument is not None and not developer_setup:
             command.append(toolset_argument)
         completed = _run_bounded_process(
             command,

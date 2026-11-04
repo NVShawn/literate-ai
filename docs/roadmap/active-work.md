@@ -29326,13 +29326,20 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   refusal. The pinned cryptography dependency now has a genuine native ARM64
   wheel; broader framework/toolchain qualification remains open.
 
-- **Current next action (in progress):** Discover an already-installed native
-  Visual Studio compiler before acquisition and select its developer environment
-  from the selected compiler's compilation target, preserving explicit tools and
-  Windows x86-64 behavior. The actual ordinary SSH C++ preflight reports an
-  unresolved `cxx` despite registered Build Tools and a previously used native
-  ARM64 compiler. Package registration is not physical tool absence, and another
-  installer invocation is not the repair.
+- **Current next action (in progress):** Complete native C++ developer-environment
+  forwarding after the installed-compiler discovery repair. Source
+  `15c20d4e15621aa74d3cbf10871e5fa7dd392c57` passed the full local source and
+  installed-wheel gates; its fresh native ARM64 prefix passed public C++
+  preflight without another compiler installation. Actual builder initialization
+  then failed cleanly: CMD splits the three `name=value` options into six batch
+  parameters, but the wrapper forwarded only three. A native parameter
+  observation confirmed the truncation. Pass closed values and reconstruct the
+  vendor's complete `name=value` options, retain failure evidence, and require a
+  fresh exact installed-candidate compile/execution proof. Available-but-broken
+  toolchain setup must fail its
+  real-build test rather than become a skip. Preserve explicit tools, existing
+  Windows x86-64 behavior and the already installed prefixes; qualification
+  remains open.
 
 - **Retained native evidence:** An isolated non-editable candidate at source
   `d5956efdbd5d06c514c61cfdd4196c1928a63779` reopens all 37 installed
@@ -32130,7 +32137,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   supply full retained-tree, two-physical-host cache/performance, compiler SDK or
   final candidate acceptance. Later integration changes still require renewal.
 
-- **Accepted designs:** The directing user explicitly accepted [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) and [ADR 0055](../decisions/0055-command-addressed-worker-reachability.md) for 1.4 on 2026-11-02. CARGO-COMPAT-001 owns #222–#226; COMMAND-WORKER-001 owns command-addressed reachability. Their implementation and qualification remain open. FreeBSD SDK qualification and the Daemonarchy unblock take priority in execution order; neither accepted design is deferred from 1.4.
+- **Accepted designs:** The directing user explicitly accepted [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) and [ADR 0055](../decisions/0055-command-addressed-worker-reachability.md) for 1.4 on 2026-11-02. CARGO-COMPAT-001 owns #222–#226; COMMAND-WORKER-001 owns command-addressed reachability. ADRs 0056–0059 were also explicitly accepted for 1.4 on 2026-11-03 ("Accept all four ADRs"); #217, ADOPT-RELOCATE-001, RETAINED-TREE-EXPLORER-001 and WORKER-TELEMETRY-001 retain their recorded implementation and evidence scope. Their implementation and qualification remain open. FreeBSD SDK qualification and the Daemonarchy unblock take priority in execution order; neither accepted design is deferred from 1.4.
 
 ### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
 
@@ -32931,6 +32938,10 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
 
+- **2026-11-03 scale probe repair (in progress):** The real installed receiver for the complete 114,929-entry source fixture exceeds the canonical 60-second capability cap and refuses after 60.068 seconds. Preserve that refusal and observe the remote read-only parent through actual exit before another probe. The directing user requires a finite five-minute capability/hardware budget. Remove only the repeated constructor preview immediately after the initial canonical preview and independent authority check; retain registration custody at return and full checks around describe publication, reservation, execution and evidence production. Fresh installed native capability, five-unit PACKAGE, original-byte VERIFY and corruption controls remain required; no scale or release success is claimed.
+
+- **Probe-budget source verification checkpoint:** Independent review covers the finite 300-second capability/hardware caps and the constructor's final private-custody check, with full capability-publication and execution guards retained. The complete contributor Make gate selects 2,666 cases: 2,579 pass, 87 declared platform skips, zero failures and zero known failures. The Python run takes 4,668.614 seconds; lint, formatting, compilation, host-path and canonical authority checks pass. Report SHA-256: `488a7f2a8f271a9b520a7a2335dc47929b8c505653d200631b457c477e81e612`. Real local controls cover startup beyond the old minute, earlier caller expiry/process absence, and authority/registration mutation across configured action-worker capability publication. They do not qualify the full native project preview. The original native 60.068-second refusal and eventual read-only parent exit remain preserved. Corrected installed native probes, five-unit PACKAGE, cold original-byte VERIFY and corruption controls remain pending.
+
 - **Current development status:** At source `33f1e62`, the SDK-bearing two-unit
   native FreeBSD PACKAGE and fresh original-archive VERIFY both pass independent
   controller admission. Verification retains the exact original result index
@@ -32942,9 +32953,11 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   The functional SDK blocker is resolved, and the directing user authorized the
   downstream release to proceed under its own gates independently of framework
   publication. This does not prove downstream acceptance or full issue completion.
-- **Current next action:** Renew full native regression after the separately
-  reproduced orphan-reaping repair, then complete the required real retained-tree
-  case beyond 100,000 members and all remaining installed/integrated qualification.
+- **Current next action:** Install the reviewed probe-budget candidate in fresh
+  native/controller prefixes, renew canonical receipt-policy/profile/manifest and
+  exact plan bindings, then complete the five-unit retained-tree PACKAGE beyond
+  100,000 members, cold original-byte VERIFY and required corruption controls.
+  Full integrated/native and release qualification remain separate required gates.
   Issue #235 and this 1.4 goal remain open. The earlier attempts below retain their
   historical scope and failures; they do not override this two-unit SDK result.
 
@@ -33372,6 +33385,7 @@ independent review and the complete combined gate from test one.
 - **Owner:** Framework core: adopted-project layout, inventory, updates, retained receipts and readmission
 - **Release target:** 1.4.0
 - **GitHub issue:** [#265](https://github.com/jordanhubbard/literate-ai/issues/265)
+- **Accepted design:** [ADR 0057](../decisions/0057-retained-implementation-layout-and-relocation.md) separates structural layout renewal from qualified lifecycle/package use and specifies descriptor-owned recovery. The directing user explicitly accepted this design on 2026-11-03; implementation and qualification remain open.
 - **Direction:** Issue #265 requests a supported retained implementation path outside the legacy wrapper, including a plain subdirectory or repository root and a chosen wrapper Component name. The directing user accepted newly filed issues for 1.4.
 - **Conclusion:** Extend PROJECT.md Goals 1, 4 and 6 with one authoritative retained-layout selection and a reviewed transactional relocation path. Preserve legacy defaults, source custody and lineage; invalidate stale receipts and require fresh qualification after movement. Edited evidence and symlink shims are not migration authority. Root placement and custom wrapper naming remain required design and acceptance scope.
 - **Depends on:** Trace current lift-and-shift path consumers; settle reviewed ownership and migration semantics; implement canonical resolution and transactional plan/apply; qualify installed journeys and rollback.
@@ -33439,3 +33453,47 @@ independent review and the complete combined gate from test one.
   - [ ] Use an actual private command-addressed POSIX worker for nonce handshake, native platform/storage observations, alignment, source upload, native Component execution and evidence download through the same route.
   - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
   - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.
+
+### [ ] RETAINED-TREE-EXPLORER-001 — Publish hierarchical retained-tree HTML information cards
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#279](https://github.com/jordanhubbard/literate-ai/issues/279)
+- **Accepted decision:** [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md); explicit directing-user acceptance on 2026-11-03.
+- **Next action:** Implement the accepted hierarchical card design and its atomic publication/freshness controls; preserve the #235 prerequisite for per-unit joins. Implementation and qualification remain open.
+
+- **Planning verification:** Independent source/design review by `native_transport_review` approves Proposed ADRs 0058/0059; its Markdown table finding is corrected. Canonical work recording and documentation/driver review pass. The read-only contribution sweep validates 41 goals with no invalid entries, preserving the original 39 and prior release history; overall release readiness remains false. The previous two-design, pre-integration local Make checkpoint selected 2,664 tests: 2,577 pass, 87 declared skips and zero failures in 4,261.977 seconds; lint, format and documentation checks also pass. Test-report identity: `0eb956ba4e3c3b27988e405bb049106e75ad4650e0751dbc21c12c4350964e77`. These historical results validate only that earlier two-design snapshot. The fresh consolidated main/ADRs 0056–0059 Make gate passes 2,665 selected tests: 2,578 passed, 87 declared skips and zero failures in 4,164.827 seconds (report SHA-256 `761dd0c760f8539844e562edb9649d5a6612ef4498d2b90de79903458661cdc4`). Independent final union review approves all four Proposed designs and preserves main’s exact source/test bytes and driver pin; canonical documentation/driver checks pass. Neither checkpoint claims implementation, native/browser acceptance or release qualification. The directing user explicitly accepted all four designs on 2026-11-03. Implementation and native/browser/release qualification remain open.
+
+- **Priority:** P1
+- **Owner:** HTML observability contracts, retained-tree projection and atomic publication
+- **Direction:** Include issue #279 in the complete 1.4 scope under directing-user authorization. Publish a top-level index and hierarchical directory/unit information cards for retained native trees.
+- **Conclusion:** Implement explicitly accepted ADR 0058. Preserve hierarchical child commitments, no-script operation, scalable declaration, multi-file atomic publication and tree freshness; independently qualify installed wheel and browser at real source and ports scale. Per-unit Component cards depend on retained unit packaging. Do not claim a source browser beyond actual displayed content.
+- **Depends on:** none
+- **Completion prerequisites:** RETAINED-UNIT-PACKAGE-001
+- **Implementation:**
+  - [x] Audit existing HTML producers/declarations/limits and independently review ADR 0058; the directing user explicitly accepted the design on 2026-11-03 before new wire/schema implementation.
+  - [ ] Implement complete hierarchy and provenance commitments using canonical retained tree/unit owners, no new JS dependency, scalable declarations, atomic multi-file publication and tree freshness.
+- **Evidence:**
+  - [ ] Installed noneditable native source/ports tree qualification, actual browser inspection, stale/tamper/partial publication and resource-bound refusals.
+  - [ ] Per-unit Component-card joins after #235, independent review, full gates and exact integrated qualification.
+
+### [ ] WORKER-TELEMETRY-001 — Expose bounded authenticated read-only worker telemetry
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#280](https://github.com/jordanhubbard/literate-ai/issues/280)
+- **Accepted decision:** [ADR 0059](../decisions/0059-authenticated-read-only-worker-telemetry.md); explicit directing-user acceptance on 2026-11-03.
+- **Next action:** Implement the accepted bounded authenticated telemetry feed and its job/source attribution controls. Implementation and installed/native qualification remain open.
+
+- **Planning verification:** Proposed ADR 0059 and this intake have independent source/design approval. The previous two-design, pre-integration checkpoint and passing fresh consolidated gate are recorded under [RETAINED-TREE-EXPLORER-001](#retained-tree-explorer-001-publish-hierarchical-retained-tree-html-information-cards). The current source audit distinguishes pressure probes and discrete action attestations from the missing telemetry feed; it claims no live telemetry or job-attribution qualification. The directing user explicitly accepted ADR 0059 on 2026-11-03; every implementation/evidence item remains open.
+
+- **Priority:** P1
+- **Owner:** Worker process/action observations, shared transport and versioned telemetry contracts
+- **Direction:** Include issue #280 in the complete 1.4 scope under directing-user authorization. Expose authenticated read-only worker action/stage/progress and network/disk/CPU/memory/state observations over existing transport.
+- **Conclusion:** Implement explicitly accepted ADR 0059 using the audited worker progress/state/pressure surfaces and authentication. Observation must be read-only and unable to affect jobs; no new listener, bounded rates/sizes with sampling/coalescing and strict secret-safe fields. Keep downstream monitor rendering in the consumer.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Document current confirmed live progress and I/O surfaces and narrow actual gaps.
+  - [ ] Review necessary versioned telemetry contract/rate/authentication design under ADR 0006 before implementation, then compose existing transport with bounded safe observations.
+- **Evidence:**
+  - [ ] Real live-worker action/stage/state and network/disk/cpu/memory observations with declared unsupported values, not invented measurements.
+  - [ ] Authentication, secret/command/environment/path redaction, no-listener/no-job-mutation, volume/coalescing/cancellation controls, independent review and integrated native qualification.

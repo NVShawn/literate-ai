@@ -201,6 +201,8 @@ class GuardedCppBuilderTests(unittest.TestCase):
         try:
             return discover_cpp_toolchain()
         except BuildError as exc:
+            if exc.code != "builder.cpp_toolchain_unavailable":
+                raise
             raise unittest.SkipTest(str(exc)) from exc
 
     @staticmethod
