@@ -6,6 +6,7 @@ import secrets
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -135,7 +136,7 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
             )
             receiver = root / "receiver.py"
             receiver.write_text(
-                "import json,sys\n"
+                "import json,sys,time\n"
                 "from pathlib import Path\n"
                 "from literate_ai.action_worker import main\n"
                 "from literate_ai.adapters.action_retained_unit_package_worker "
@@ -159,6 +160,15 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 "  try:underlying_revocation()\n"
                 "  except ValueError as exc:"
                 "raise RuntimeError('authority changed') from exc\n"
+                " if v.get('describe_barrier'):\n"
+                "  barrier=Path(v['describe_barrier'])\n"
+                "  ready=barrier.with_suffix('.ready')\n"
+                "  if not ready.exists():\n"
+                "   ready.write_text('checked')\n"
+                "   end=time.monotonic()+10\n"
+                "   while not barrier.exists():\n"
+                "    if time.monotonic()>end:raise RuntimeError('barrier expired')\n"
+                "    time.sleep(.01)\n"
                 "def run(context):\n"
                 " Path(v['touched']).write_text('entered')\n"
                 " context.require_current()\n"
@@ -216,6 +226,52 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 described.stdout, challenge, receiver_code_identity()
             )
             self.assertEqual(observed.actions, (LifecycleActionKind.PACKAGE,))
+            # A real private input change after the entry check must withhold
+            # capability bytes at the closing publication check.
+            original_settings = settings.read_bytes()
+            for changed_path in (authority, settings):
+                with self.subTest(describe_mutation=changed_path.name):
+                    barrier = root / (changed_path.name + ".release")
+                    private = json.loads(original_settings)
+                    private["describe_barrier"] = str(barrier)
+                    settings.write_text(json.dumps(private))
+                    process = subprocess.Popen(
+                        [*command, "--describe"],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        env=environment,
+                    )
+                    try:
+                        process.stdin.write(challenge)
+                        process.stdin.close()
+                        process.stdin = None
+                        end = time.monotonic() + 10
+                        while not barrier.with_suffix(".ready").exists():
+                            if process.poll() is not None or time.monotonic() >= end:
+                                self.fail(
+                                    "real receiver did not reach publication barrier"
+                                )
+                            time.sleep(0.01)
+                        changed_path.write_bytes(changed_path.read_bytes() + b" ")
+                        barrier.write_text("continue")
+                        stdout, stderr = process.communicate(timeout=15)
+                        self.assertEqual(process.returncode, 2, stderr)
+                        self.assertEqual(
+                            json.loads(stdout)["schema"],
+                            "literate-ai/action-observation-failure@1",
+                        )
+                        with self.assertRaises(ActionWireError):
+                            decode_capability_response(
+                                stdout, challenge, receiver_code_identity()
+                            )
+                        self.assertFalse(touched.exists())
+                    finally:
+                        if process.poll() is None:
+                            process.kill()
+                            process.communicate(timeout=5)
+                        authority.write_bytes(b"approved")
+                        settings.write_bytes(original_settings)
             route = LifecycleActionWorker(
                 worker.worker_id, worker.identity, identity, observed.identity
             )
