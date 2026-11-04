@@ -32301,7 +32301,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] Pass singleton positive, invented/duplicate/missing input, false exemption, stale authority and private-oracle controls plus unchanged v1/default-domain coverage.
   - [ ] Pass full regression, installed-wheel qualification and exact review/main CI before claiming issue 132 or dependent issue 48 complete.
 
-### [ ] RUST-ADOPTION-DETECT-001 — Detect Cargo workspaces ahead of incidental helper languages
+### [x] RUST-ADOPTION-DETECT-001 — Detect Cargo workspaces ahead of incidental helper languages
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#203](https://github.com/jordanhubbard/literate-ai/issues/203)
@@ -32313,14 +32313,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
-  - [ ] Include root Node package manifests and conventional JavaScript sources in mixed-language discovery; preserve Cargo/CMake precedence and generated/hidden-tree exclusion.
+  - [x] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
+  - [x] Include root Node package manifests and conventional JavaScript sources in mixed-language discovery; preserve Cargo/CMake precedence and generated/hidden-tree exclusion.
 - **Evidence:**
-  - [ ] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
+  - [x] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
 
 - **Development evidence:** Three new Rust inventory/plan controls pass, including read-only input preservation, helper-language reporting, hidden/generated exclusion and CMake precedence. The missing Rust marker reproduces before the fix.
-- **Remaining Node scope evidence:** The extended mixed Rust/pnpm plan reproduces missing JavaScript before the correction. Four focused plan/native Cargo controls now pass without skips, including manifest-only and source-only JavaScript discovery, CMake precedence and unchanged input bytes. Independent source review approves the correction; full regression and exact qualification remain pending.
-- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+- **Remaining Node scope evidence:** The extended mixed Rust/pnpm plan reproduces missing JavaScript before the correction. Four focused plan/native Cargo controls now pass without skips, including manifest-only and source-only JavaScript discovery, CMake precedence and unchanged input bytes. Independent source review approved the correction; full regression and exact qualification were still pending at that checkpoint.
+- **Prior next action:** finish affected regression and admission, land on green, then comment and close the issue. The current-main qualification below resolves those implementation gates; issue closure follows landed evidence and required integration checks.
+
+- **Current original-reproducer qualification:** [Exact-source public plan and controls](../../verification/rust-cargo-node-adoption-qualification.json) reopens the original public Kuzushi revision `f583e60b2bb086450fc9abf9d646836f77c7b3f4` with the framework at exact green main `072d66e81eff85f58515a09d93d19528499a5ec1`. The actual public read-only `onboard adopt` reports C++, JavaScript, Python and Rust, proposes Rust/Cargo build and packaging first plus JavaScript, and has no catalog gaps or blockers. All 8,337 input nodes, including 6,908 regular files and 54,787,638 source bytes, retain exact modes, identities, mtimes, contents and link targets; no original-project source is executed or adopted. Three fresh managed inventory controls and the actual small Cargo baseline/parity/wrapper-lock control pass without skips. The latter uses the existing synthetic framework-origin fixture and does not claim installed framework or original-project apply qualification. Independent read-only review corroborates the original acceptance, exact checkout and both complete input snapshots, public plan, current source and managed control logs. The actual plan reports host-tool readiness false; this completes only the language inventory and Flavor planning goal. Host readiness, original-project application, installed adoption, broader Cargo compatibility, SDK/package and release qualification remain open.
 
 ### [x] RETAINED-BUILD-COREQ-001 — Keep retained wrapper locks on their delegation Flavor
 
