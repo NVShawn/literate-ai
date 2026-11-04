@@ -33348,6 +33348,24 @@ independent review and the complete combined gate from test one.
 - **Release target:** 1.4.0
 - **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
 
+- **Native-x64 follow-up (in progress):** Exact main `f03f30a0654b3f6896177b5fa1ed229a61f3dbf4`
+  [Windows shard 3](https://github.com/jordanhubbard/literate-ai/actions/runs/41778360184/job/126403948002)
+  fails all three guarded C++ build cases because vendor setup omits required
+  compiler variables. A bounded actual x64 CMD diagnostic shows the remaining
+  native-x64 wrapper forwards `x64 -vcvars_ver 14.29`; reconstructing the named
+  option from its closed numeric value preserves `x64 -vcvars_ver=14.29` and
+  satisfies the controlled vendor fixture. Preserve the failed log and the
+  separate source-335 native ARM64 evidence. The source repair and two portable
+  boundary/refusal controls pass; the exact old-function counterfactual fails
+  only its native-x64 option case. Six preserved ARM64/descendant controls and
+  27 CI-policy controls pass. Independent source/CI review approved the numeric
+  option reconstruction and the existing native C++ job's three added guarded
+  compiler cases with strict zero-skip accounting. Next: renew actual
+  unconfigured Windows guarded builds and exact CI. See the bounded
+  [development evidence](../../verification/msvc-x64-cmd-boundary-evidence.json).
+  The diagnostic is not a compiler build or release
+  qualification, and no timeout or required-variable guard is relaxed.
+
 - **Priority:** P1
 - **Owner:** C++ toolchain discovery and MSVC environment initialization
 - **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.

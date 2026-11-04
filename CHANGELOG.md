@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Native x64 MSVC setup preserves the selected toolset's complete version option
+  across CMD argument parsing, while retaining required compiler variables.
+
 - Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
   before acquisition, preserving explicit compiler selections. C++ developer
   setup follows the selected compiler's compilation target instead of always
