@@ -32612,6 +32612,21 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   validates the wrapped project. This is source-CLI development evidence; exact
   installed and integration-CI qualification remain open.
 
+- **Installed qualification:** The complete canonical wheel gate passes on Darwin
+  at exact source `41b2dc9a732201bef7aa28a12306b653c66d45e1`. The actual noneditable
+  wheel CLI completes public plan/apply, a genuine Python unittest and all three
+  build/test/package baseline and parity records. Ignored, untracked third-party
+  `component.json`, `component.md` and corrupt `component.lock.json` remain
+  byte-identical under the retained implementation. Installed validation,
+  canonical discovery of ten manifests and authority-graph construction pass;
+  all 5,223 authored inputs retain their content and physical metadata.
+  [Source-bound installed evidence](../../verification/installed-retained-catalog-qualification.json)
+  binds the wheel and complete packaged implementation files. Independent review
+  approved this Darwin scope. Windows retains its explicit unsupported-fixture
+  outcome, and exact integrated review/main CI remains open. The historical full
+  regression belongs to source `8826a6c1bae060d26ecf0ff83009837489df0030`;
+  it is not relabeled as a full run of this newer union.
+
 ### [x] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
 
 - **Release target:** 1.4.0

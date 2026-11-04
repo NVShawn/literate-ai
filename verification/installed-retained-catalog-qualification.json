@@ -1,0 +1,47 @@
+{
+  "schema": "literate-ai/installed-retained-catalog-qualification@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/212",
+  "qualified_source": "41b2dc9a732201bef7aa28a12306b653c66d45e1",
+  "platform": "darwin",
+  "canonical_wheel_gate_passed": true,
+  "wheel_sha256": "c9c0a52d3c442074540085a261f974cd6fab776e64fba452828eae43e18bbaf7",
+  "installed_distribution_identity": "sha256:f2f3b29e87db4f746220ee8cc97bb1ec9737bf409fb4bd7a15546ccf2f282513",
+  "noneditable_installed_interpreter_isolated_from_source": true,
+  "public_plan_apply_validation_succeeded": true,
+  "real_unittest_build_package_baseline_and_parity": true,
+  "adoption_evidence": {
+    "baseline": "sha256:09c972b8b40f7157b1749ce7d600523d15fb73c58412dd818411323c99dc3692",
+    "lift_shift": "sha256:0d718457f1017605318ec2e7f639cb7e811f99b2ea5905a5d6511c80851beb0f",
+    "wrapper_parity": "sha256:02ab8d61e2afecab8097dd1244548c3ec7e549760f24fa4a4b4c58d601e4129b"
+  },
+  "preserved_ignored_untracked_payload_sha256": {
+    "node_modules/extend/component.json": "967c1d48ca6f7f06dfbb2ccedd2341019e3617a0b4b1075aaefaaead4a3cfa8e",
+    "node_modules/lock/component.lock.json": "e7d5216a9b97a015fe0c063f4f058b940156ffd216f9642486b56a5501e3aadf",
+    "node_modules/markdown/component.md": "7f942cc1697f8f94baaa48f9a7904f9b4ad70accb81935b1438b8d5bed9274e8"
+  },
+  "canonical_catalog_manifests": 10,
+  "validated_components": 10,
+  "authority_graph_constructed_sha256": "cb5645f79de1c6b1f5aa69781e43cfe9cedb4f8b9c4e528a10421b397d88f847",
+  "whole_packaged_implementation_file_bindings": {
+    "src/literate_ai/adapters/component_lock_planning.py": "8c119d22baf3c1d34649b39bdb8103edca87a75f6baa9d5b10ca040259847f78",
+    "src/literate_ai/adapters/project_validation.py": "1f801b0e7ef5759acf8dcb7e0a518f32f4141cc40d25ece1a07ba8376b8dcfa3",
+    "src/literate_ai/project_authority_graph.py": "7e2f65dee693960670b4aeef4033f7fe7e3001e8535484bb2717ee0ec991f8d3"
+  },
+  "qualification_helper_sha256": "85b2732aad2854aba3366cb18e1bef520ed684c2b3887fcbc7f58468317fdde5",
+  "raw_canonical_gate_log_sha256": "00640ad237eb08fd175ad5dcbfb75055cfcd4b0ca886fe3aa5f9cab6b147d5de",
+  "authored_inputs_unchanged_during_native_run": {
+    "files": 5223,
+    "source_after_observation_sha256": "5d201ee55e9975f87e731196d2a4db59932c52f943db1251ea2e9dc4efb8c863"
+  },
+  "historical_full_regression": {
+    "source": "8826a6c1bae060d26ecf0ff83009837489df0030",
+    "passed": 2578,
+    "declared_skips": 87,
+    "same_source_as_native_qualification": false
+  },
+  "exact_integrated_review_main_ci_complete": false,
+  "windows_fixture_qualified": false,
+  "issue268_qualified_by_this_fixture": false,
+  "release14_qualified": false,
+  "scope": "Actual installed Darwin public adoption preserves three retained dependency lookalikes and passes real lifecycle evidence, validation, canonical discovery and graph construction. This is not blanket graph absence of retained inputs, Windows fixture qualification or a substituted full exact-union CI result."
+}
