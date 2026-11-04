@@ -33402,15 +33402,20 @@ independent review and the complete combined gate from test one.
 - **Priority:** P1
 - **Owner:** Operator status and canonical host-install Flavor composition; issue 268
 - **Direction:** Accept newly filed issue 268 for 1.4 and report adopted-project host tools against the selected project-local Flavors.
-- **Installed qualification work:** Extend the owned installed-adoption fixture
-  with an explicitly authored project-default selection of its existing local
-  shim, whose canonical coordinate differs from its physical directory name.
-  Compare genuine public status before and after this setup, retain the built-in
-  Python requirement and native target realization, and prove each status call
-  leaves fixture contents and physical metadata unchanged. Record actual host
-  readiness rather than demanding success from unavailable tools. This is a
-  controlled configuration setup, not a claim that onboarding itself selects the
-  shim. No installed result is claimed before the new canonical gate passes.
+- **Installed qualification:** The complete canonical wheel gate passes on macOS
+  ARM64 at source `e6513d529fc289870c6cfc603fe38acf2063863a`. A genuine adopted
+  project explicitly replaces its Make default with the already created local
+  shim, whose canonical coordinate differs from its physical directory. Public
+  status before and after this authored setup preserves the built-in Python
+  requirement and native target realization. Each status call preserves all 569
+  fixture nodes; all 5,224 authored source inputs retain their contents and
+  recorded physical metadata throughout the gate. Actual selected host readiness is true,
+  without forcing probes or qualifying unavailable Make provenance. Adoption
+  retains its no-generation guard while status restores the operator's original
+  provider settings. Independent source and artifact review approved the
+  [source-bound installed evidence](../../verification/installed-selected-shim-status-qualification.json).
+  This does not claim onboarding automatically selects the shim, Windows
+  qualification, a new full-source regression or completed exact review/main CI.
 - **Conclusion:** Resolve selected Flavor identities through the declared project catalog, preserve native target realization and real toolchain requirements, and refuse missing, ambiguous or unsafe authority. Flavors without host toolchains add no requirements.
 - **Depends on:** none
 - **Completion prerequisites:** none
