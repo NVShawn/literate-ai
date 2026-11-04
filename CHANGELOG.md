@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Worker-alignment and retained-receiver test fixtures use portable declared remote workspaces while preserving native local paths.
+
 - Windows coding-agent test compilers retain configured temporary/system variables while applying MSVC overrides.
 
 - Composed retained-tree packages apply canonical directory permissions under permissive and restrictive worker umasks. Independent verification still rejects later permission changes.
