@@ -29318,6 +29318,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
+- **Current alignment repair:** Native Windows inventory finds the declared
+  OpenCode executable outside `PATH`, and its explicit version command succeeds.
+  The model check instead invokes the bare name, so its empty reply does not
+  establish provider availability. Use the exact inventory-selected executable
+  for both help and model requests, retaining ordinary `PATH` priority, literal
+  remote argument quoting and the current private provider selection. Prove the
+  public alignment journey and renew the actual native Windows observation;
+  do not reinstall the tool, alter global `PATH` or infer provider failure from
+  the old attempt. Full model alignment and whole-goal qualification remain open.
+
 - **Current installer correction:** Microsoft documents one shared Visual Studio
   bootstrapper that selects the native ARM64 payload on Windows ARM64. Remove
   the MSVC-only installer-architecture filter and preserve explicit ARM64 toolset
