@@ -215,6 +215,87 @@ class RetainedProjectTreeInputTests(unittest.TestCase):
             self.discover()
         self.assertEqual(outside.read_bytes(), b"compiler")
 
+    def test_verification_refuses_incomplete_groups_before_reading_payloads(self):
+        for aliases in (True, False):
+            with self.subTest(declared_aliases=aliases):
+                alias = self.source / "sdk/bin/cc"
+                if not aliases:
+                    alias.unlink()
+                manifest = self.discover()
+                self.assertEqual(
+                    any(m.hardlink_target is not None for m in manifest.members),
+                    aliases,
+                )
+                outside = self.base / f"outside-{aliases}"
+                os.link(self.source / "sdk/bin/compiler", outside)
+                with (
+                    mock.patch.object(inputs, "_stream", wraps=inputs._stream) as read,
+                    self.assertRaisesRegex(ValueError, "incomplete"),
+                ):
+                    inputs.verify_retained_project_inputs(self.source, manifest)
+                read.assert_not_called()
+                self.assertEqual(outside.read_bytes(), b"compiler")
+                outside.unlink()
+                inputs.verify_retained_project_inputs(self.source, manifest)
+
+    def test_fresh_closing_topology_refuses_late_leaf_changes_after_observation(self):
+        manifest = self.discover()
+        original = inputs._inventory
+        member = self.source / "sdk/bin/compiler"
+        directory = member.parent
+        for mutation in ("same-size-bytes", "permissions"):
+            for capture in (False, True):
+                with self.subTest(mutation=mutation, capture=capture):
+                    calls = 0
+                    mutated = False
+                    visited = set()
+
+                    def inventory(*args, mutation=mutation, visited=visited, **kwargs):
+                        nonlocal calls
+                        calls += 1
+                        if calls == 2:
+                            observer = kwargs.get("observe")
+
+                            def observe(name, metadata):
+                                nonlocal mutated
+                                if observer is not None:
+                                    observer(name, metadata)
+                                if name in ("sdk/bin/cc", "sdk/bin/compiler"):
+                                    visited.add(name)
+                                if len(visited) == 2 and not mutated:
+                                    before = inputs._stamp(directory.stat())
+                                    if mutation == "same-size-bytes":
+                                        member.write_bytes(b"COMPILER")
+                                    else:
+                                        member.chmod(0o644)
+                                    self.assertEqual(
+                                        inputs._stamp(directory.stat()), before
+                                    )
+                                    mutated = True
+
+                            kwargs["observe"] = observe
+                        return original(*args, **kwargs)
+
+                    destination = self.base / f"late-{mutation}-{capture}"
+                    with (
+                        mock.patch.object(inputs, "_inventory", side_effect=inventory),
+                        self.assertRaisesRegex(
+                            ValueError, "hard link topology changed during verification"
+                        ),
+                    ):
+                        if capture:
+                            inputs.capture_retained_project_inputs(
+                                self.source, manifest, destination
+                            )
+                        else:
+                            inputs.verify_retained_project_inputs(self.source, manifest)
+                    self.assertTrue(mutated)
+                    self.assertEqual(calls, 2)
+                    self.assertFalse(destination.exists())
+                    member.write_bytes(b"compiler")
+                    member.chmod(0o755)
+                    inputs.verify_retained_project_inputs(self.source, manifest)
+
     def test_replacement_during_discovery_refuses(self):
         original = inputs._stream
         changed = False

@@ -231,6 +231,12 @@
       },
       {
         "id": "RETAINED-RECEIPT-PROMOTE-001"
+      },
+      {
+        "id": "ADOPT-BASELINE-COMMANDS-001"
+      },
+      {
+        "id": "WHEEL-RUNTIME-ENV-001"
       }
     ]
   }

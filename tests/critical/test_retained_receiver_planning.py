@@ -428,7 +428,7 @@ class RetainedReceiverPlanningTests(unittest.TestCase):
         with self.assertRaises(ActionWireError):
             decode_capability_response(raw, challenge, receiver_code_identity())
 
-    def execute_guard_request(self, worker):
+    def execute_guard_request(self, worker, *, expect_unattested_refusal=False):
         """Use the real public wire/receiver guards, not native execution proof."""
         observed = self.require_capability(worker)
         deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=120))
@@ -478,7 +478,180 @@ class RetainedReceiverPlanningTests(unittest.TestCase):
         self.assertEqual(outcome.failure_code, "action_source.custody_unavailable")
         self.assertIsNone(outcome.result_identity)
         self.assertIsNone(record)
-        self.assertEqual(attested, observed.capability_identity)
+        if expect_unattested_refusal:
+            # Persistent source drift prevents the closing fresh capability
+            # measurement from attesting even this refusal. Require the exact
+            # correlated failure wire; unsigned success is never acceptable.
+            self.assertIsNone(attested)
+            self.assertEqual(
+                json.loads(output_bytes.getvalue()),
+                {
+                    "schema": "literate-ai/lifecycle-action-wire-response@1",
+                    "request_identity": request.identity.uri,
+                    "worker_identity": request.worker.identity.uri,
+                    "result_identity": None,
+                    "result_record": None,
+                    "failure_code": "action_source.custody_unavailable",
+                },
+            )
+        else:
+            self.assertEqual(attested, observed.capability_identity)
+
+    def test_outer_cli_guard_reopens_source_once_and_preserves_custom_measurements(
+        self,
+    ):
+        # This portable public-wire control stops before workspace creation.
+        # Native OS/tool observations are the explicit external test boundary;
+        # no FreeBSD tool execution, SDK admission or PACKAGE success is claimed.
+        for measurement in ("canonical", "custom"):
+            for changed in (False, True):
+                with self.subTest(measurement=measurement, changed=changed):
+                    self._assert_outer_cli_guard_control(measurement, changed)
+
+    def _assert_outer_cli_guard_control(self, measurement, changed):
+        from literate_ai.cli import retained_unit_execution as unit_execution
+
+        worker = self.configured(self.public_plan())
+        path = self.root / "original/asset.bin"
+        original = path.read_bytes()
+        source_stat = path.stat()
+        source_inode = (source_stat.st_dev, source_stat.st_ino)
+        armed = []
+        reads = []
+        boundaries = []
+        mutations = []
+        measurements = []
+        actual_open = os.open
+        tools = json.loads((self.root / "tools.json").read_bytes())
+
+        def observed_open(*args, **kwargs):
+            descriptor = actual_open(*args, **kwargs)
+            # Observe genuine external file opens by the actual
+            # inode, independent of planner/helper implementation.
+            if armed:
+                observed = os.fstat(descriptor)
+                if (observed.st_dev, observed.st_ino) == source_inode:
+                    reads.append("original source opened")
+            return descriptor
+
+        def native_observations(*_args):
+            boundaries.append("native tool observations")
+            armed.append(True)
+            if changed and measurement == "canonical":
+                path.write_bytes(original + b"changed before fresh guard")
+            return tools
+
+        def before_workspace(*_args, **_kwargs):
+            boundaries.append("before workspace creation")
+            raise RuntimeError("portable outer CLI guard control ended")
+
+        def run(context):
+            args = copy.copy(_Registration(self.config_path).args)
+            args.retained_unit_command = "execute"
+            args.authorize_retained_project = worker.retained_plan_identity.uri
+            args.authorize_unit_packages = worker.execution_authorization.uri
+            args.allow_host_execution = True
+            with (
+                patch.object(
+                    unit_execution,
+                    "platform",
+                    SimpleNamespace(system=lambda: "FreeBSD"),
+                ),
+                patch.object(
+                    unit_execution.FreeBsdPkgToolBinding,
+                    "discover",
+                    return_value=object(),
+                ),
+                patch.object(
+                    unit_execution.NativeTarToolBinding,
+                    "discover",
+                    return_value=object(),
+                ),
+                patch.object(
+                    unit_execution,
+                    "retained_unit_tool_observations",
+                    side_effect=native_observations,
+                ),
+                patch.object(
+                    unit_execution,
+                    "select_cache_directories",
+                    side_effect=before_workspace,
+                ),
+                patch.object(os, "open", side_effect=observed_open),
+            ):
+                unit_execution.execute_retained_unit_package_from_args(
+                    args, receiver_context=context
+                )
+            self.fail("outer CLI guard unexpectedly returned a package")
+
+        class CustomMeasurementWorker(ConfiguredRetainedUnitPackageWorker):
+            def execute(inner, *args, **kwargs):
+                actual_measure = kwargs["measure_capability"]
+
+                def measure():
+                    observed = actual_measure()
+                    if armed:
+                        measurements.append("actual measurement completed")
+                    if armed and changed and len(measurements) == 2:
+                        # The constructor and CLI bookend have each run
+                        # the custom registration guard and actual measurement.
+                        # Change bytes after the second measurement, so the
+                        # independent authority fallback must reopen/refuse.
+                        path.write_bytes(original + b"changed after measure")
+                        mutations.append("changed after fresh measurement")
+                    return observed
+
+                kwargs["measure_capability"] = measure
+                return super().execute(*args, **kwargs)
+
+        selected_worker = (
+            replace(worker, run_retained=run)
+            if measurement == "canonical"
+            else CustomMeasurementWorker(
+                worker.worker,
+                worker.catalog_identity,
+                worker.retained_plan_identity,
+                worker.registration_identity,
+                worker.execution_authorization,
+                worker.execution_request_bytes,
+                run,
+                worker.require_current,
+                poll_guard=worker.poll_guard,
+                verification_selection=worker.verification_selection,
+            )
+        )
+        try:
+            self.execute_guard_request(
+                selected_worker, expect_unattested_refusal=changed
+            )
+            self.assertEqual(
+                boundaries,
+                ["native tool observations"]
+                + ([] if changed else ["before workspace creation"]),
+            )
+            # Intact source proves the scan budget using real inode opens:
+            # two canonical scans; the unchanged custom route has two full
+            # registration guards, two measurements and an authority fallback.
+            # A changed source may be refused by its metadata before opening it;
+            # require the same budget, not completion of a refused scan.
+            read_budget = 2 if measurement == "canonical" else 5
+            if changed:
+                self.assertLessEqual(len(reads), read_budget)
+                if measurement == "custom":
+                    self.assertGreaterEqual(len(reads), 4)
+            else:
+                self.assertEqual(len(reads), read_budget)
+            self.assertEqual(len(measurements), 2 if measurement == "custom" else 0)
+            self.assertEqual(
+                mutations,
+                ["changed after fresh measurement"]
+                if changed and measurement == "custom"
+                else [],
+            )
+        finally:
+            path.write_bytes(original)
+        armed.clear()
+        self.require_capability(worker)
 
     def test_actual_transient_changes_refuse_inside_fresh_receiver_preparation(self):
         for path in (

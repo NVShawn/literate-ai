@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import os
 import shlex
@@ -187,6 +188,35 @@ class MonorepoComponentTests(unittest.TestCase):
                 {k: v for k, v in result.items() if k != "identity"}
             ).uri,
         )
+        # An empty boundary set must not become a current bundle merely by
+        # supplying coherently rehashed declarations and no receipts.
+        plan_path = self.bundle / "plan.json"
+        empty_plan = json.loads(plan_path.read_bytes())
+        empty_plan["components"] = []
+        empty_plan["selection"]["components"] = []
+        empty_plan["selection_identity"] = canonical_identity(
+            empty_plan["selection"]
+        ).uri
+        empty_plan["plan_identity"] = canonical_identity(
+            {key: value for key, value in empty_plan.items() if key != "plan_identity"}
+        ).uri
+        plan_bytes = canonical_json_bytes(empty_plan) + b"\n"
+        plan_path.write_bytes(plan_bytes)
+        manifest_path = self.bundle / "bundle.json"
+        empty_manifest = json.loads(manifest_path.read_bytes())
+        empty_manifest["components"] = []
+        empty_manifest["plan_identity"] = empty_plan["plan_identity"]
+        empty_manifest["files"] = {
+            "plan.json": "sha256:" + hashlib.sha256(plan_bytes).hexdigest()
+        }
+        manifest_path.write_bytes(canonical_json_bytes(empty_manifest) + b"\n")
+        before = self.snapshot(self.base)
+        with self.assertRaises(MonorepoAdoptionError) as refused:
+            self.check_bundle(
+                receipts={}, identity=canonical_identity(empty_manifest).uri
+            )
+        self.assertEqual(refused.exception.code, "monorepo.bundle_invalid")
+        self.assertEqual(self.snapshot(self.base), before)
 
     def test_install_reopens_complete_receipts_and_publishes_source_free_components(
         self,

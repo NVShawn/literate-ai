@@ -2325,6 +2325,31 @@ boundary-transfer state while keeping the original source beneath the legacy wra
 Source changes invalidate the reviewed identity. To use the existing single-wrapper
 conversion instead, omit `--root-plan` and review that separate plan.
 
+For a single Cargo workspace, select one root at `.` to override a baseline
+command without editing `Cargo.toml` or splitting the workspace:
+
+```json
+{
+  "schema": "literate-ai/monorepo-adoption-selection@1",
+  "components": [{
+    "name": "workspace", "root": ".",
+    "commands": [{
+      "id": "test",
+      "command": "cargo test --locked --offline -p healthy",
+      "cwd": ".", "evidence": "Cargo.toml"
+    }]
+  }],
+  "shared_sources": []
+}
+```
+
+Use the same read-only plan and acknowledged apply sequence above. A one-root
+selection also supplies the quarantined baseline and wrapper-parity commands;
+the converter does not silently run the old broad test command afterwards.
+Detected phases without an override remain required. The plan and inventory
+record the selected command and its detector predecessor. A scoped test command
+qualifies that scope only; other upstream tests remain unqualified.
+
 ### Refreshing retained source membership
 
 When upstream adds or removes files in the retained implementation, inspect:

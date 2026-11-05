@@ -31068,6 +31068,27 @@ complete; final 1.3.1 candidate and broader FreeBSD qualification remain separat
 - **Direction:** Reconcile open GitHub issue #117: repeated full distribution observation dominates installed FreeBSD preparation.
 - **Conclusion:** Investigate operation-scoped reuse and bounded revalidation while preserving exact member identity, live revocation, source and command custody; do not use process-global success caching.
 - **Depends on:** none
+- **Current action:** Derive only the opening hardlink groups and exact stamps from
+  the first complete retained-input inventory's genuine leaf observations. Preserve
+  every stream/root/descriptor check, final inventory and the independent fresh
+  hardlink topology observation strictly after that final inventory. The bounded
+  lexical LRU proposal is rejected: both full native verifications passed, but its
+  ordered baseline/candidate pair measured 54.744/55.861 seconds, showing no speed
+  improvement. The opening-only source passes 28 focused mutation, incomplete-group
+  and descriptor controls. One full native input-verification pair measures baseline
+  56.436 seconds wall / 56.432 CPU and candidate 45.758 wall / 45.755 CPU (about 18.9%
+  lower), with baseline-first filesystem-cache order uncontrolled. This is mechanism
+  timing evidence only. The fresh integrated source gate stopped after 1,575
+  passes, 87 declared skips and one new custom-observer test failure: that fixture
+  expected three source opens, but the unchanged conservative custom route performs
+  five (two full registration guards, two measurements and an independent authority
+  check). Independent baseline comparison confirmed those unchanged call paths. The
+  test-only correction passes all nine receiver controls, with no skips; its mutation
+  follows the second actual custom measurement so the independent final authority
+  check must reject it. The canonical two-read budget and every strict public refusal
+  assertion remain intact. Next qualify the integrated source, new installed
+  artifact, five-unit PACKAGE and original-byte cold VERIFY; no expired PACKAGE phase
+  or three-hour recovery is inferred from the earlier instrumented plan profile.
 - **Implementation:**
   - [ ] Measure the installed public SDK route and reduce redundant observation without weakening drift detection.
 - **Evidence:**
@@ -33793,3 +33814,62 @@ resolve the three confirmed findings or qualify the accepted design. No complete
 implementation, policy weakening, qualification or issue closure is recorded here.
 
 - **Combined source preparation (pending independent review and gate):** The current integration retains qualified HCI `f146a2d69da2cc3d6e96194ee8a98c6b7f905f69`, GPI `d597f77ad0bba0ab5aa2e18680da1c726bdd0bf0`, root Python/Git-readiness commit `dcd33ba4a31518c4508ef352770072d1869f9976`, current main `70cf6b20a152953fa01764086ef90b12e3147d94`, the complete published receipt-promotion base `09bb4ff9c59798b43360c162d1e98329a4934be0` plus its independently reviewed correction, and the exact reviewed Rust-harness delta from ancestor `072d66e81eff85f58515a09d93d19528499a5ec1`. Both installed tree and Rust journeys remain in the wheel driver. The root branch's source gate passed 2,559 tests with 131 declared skips and no failures; the direct Rust profile passed six native development cases; receipt promotion passed its real public planning and critical journey with complete source custody unchanged. These are separate exact-snapshot results, not qualification of this new union. Preserve all 47 current release-goal IDs, including the existing receipt-promotion queue item missing from its previous manifest. Canonical pin renewal, one fresh complete source gate, exact-head full platform CI, fresh installed qualification and all remaining native/consumer/browser acceptance remain required. Proposed ADR 0061 still requires directing-user design acceptance before implementation.
+
+### [ ] ADOPT-BASELINE-COMMANDS-001 — Select reviewed baseline commands for a single adoption root
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#207](https://github.com/jordanhubbard/literate-ai/issues/207)
+- **Owner:** Framework onboarding root-plan selection and baseline execution; PROJECT Goal 1
+- **Direction:** Issue #207 requests explicit baseline command selection for a Cargo workspace without editing Cargo.toml or splitting one repository into artificial Components. The issue is included in 1.4.0.
+- **Conclusion:** Extend the existing identity-bound root-plan command route to one selected root. Keep complete source ownership, real detected roots, explicit baseline acknowledgement, currentness and honest selected-command evidence; do not infer broader test coverage or invent skipped execution. Existing implicit and multi-root behavior remains supported.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Current action:** Integrate the independently reviewed single-root override and
+  nonempty bundle-reader support into the current source union, preserving all
+  unselected detected phases and their complete planned rows. The fresh focused
+  development run passed all 17 existing onboarding/root-plan, adoption, component
+  and input-read cases without skips; its public Cargo journey used the actual
+  quarantined baseline and canonical baseline/lift-shift artifacts. The coherent
+  empty-bundle refusal and concurrent-source preservation controls remain required.
+  This exact-snapshot focused result does not qualify the combined source or close
+  issue #207. Independent composition review, renewed canonical records, the fresh
+  full source gate and installed/platform qualification remain pending. Earlier
+  failed development attempts remain failure evidence.
+- **Implementation:**
+  - [ ] Support a nonempty explicitly selected root set, including a single repository root, through the existing reviewed plan and transaction.
+  - [ ] Document scoped Cargo baseline commands and unchanged stale-plan, source-ownership and execution requirements.
+- **Evidence:**
+  - [ ] Use a real public Cargo workspace adoption: the default broad test fails, the explicitly reviewed scoped test passes without manifest mutation or artificial splitting, and only selected commands are credited.
+  - [ ] Reject an empty selection, incomplete ownership, invalid or changed commands and stale acknowledgement before execution; renew focused/full/installed qualification and independent review before landing.
+
+### [ ] WHEEL-RUNTIME-ENV-001 — Isolate wheel runtime creation and installation from Python startup policy
+
+- **Priority:** P0
+- **Release target:** 1.4.0
+- **Owner:** scripts/wheel_smoke.py installed-wheel qualification
+- **Direction:** Repair the exact 1.4 core CI installed-wheel failure while retaining strict RECORD containment and genuine noneditable provenance.
+- **Conclusion:** Ambient Python bytecode and startup selectors must not cross the isolated runtime seeding, wheel build or pip installation boundaries. Use the canonical copied-runtime builder in a sanitized child, preserve package-index/proxy policy and verify real pip plus framework RECORD custody; do not weaken canonical bootstrap validation.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Current action:** Freeze the isolated seeding/build/install correction and its
+  real same-wheel safe/unsafe-cache regression for independent review before
+  runtime qualification. Keep strict canonical RECORD containment unchanged.
+- **Failure evidence:** Exact core commit `426b71ec` CI run
+  [41943200622](https://github.com/jordanhubbard/literate-ai/actions/runs/41943200622)
+  rejects recorded framework bytecode under the invoking checkout's `_build/pycache`
+  instead of the temporary installed prefix. Ubuntu 3.11/3.14 and macOS 3.11 expose
+  the same containment refusal. These failures remain unqualified.
+- **Seeding boundary:** CPython 3.14.10's
+  [venv child launcher](https://github.com/python/cpython/blob/v3.14.10/Lib/venv/__init__.py#L411-L428)
+  forwards most caller environment; its
+  [ensurepip subprocess](https://github.com/python/cpython/blob/v3.14.10/Lib/ensurepip/__init__.py#L59-L81)
+  keeps isolation only when already selected. Invoke the unchanged canonical copied
+  runtime builder in a sanitized child instead of mutating process-global state.
+- **Implementation:**
+  - [ ] Sanitize isolated child Python startup selectors consistently without process-global environment mutation.
+  - [ ] Seed copied runtimes through the existing canonical builder under the same sanitized environment.
+  - [ ] Exercise actual candidate wheel install and canonical record reopening with positive and escaping-private-cache controls.
+- **Evidence:**
+  - [ ] Preserve exact 426 CI failure, raw logs, artifact hashes and all remaining original matrix outcomes.
+  - [ ] Independent source review, meaningful actual install/reopen regression and fresh exact-head full qualification must pass before completion.

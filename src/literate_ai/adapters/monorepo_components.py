@@ -382,7 +382,7 @@ def _verified_bundle(bundle: Path, expected_identity: str) -> dict[str, Any]:
     names = manifest["components"]
     if (
         not isinstance(names, list)
-        or len(names) < 2
+        or not names
         or not all(
             isinstance(name, str)
             and name != "."

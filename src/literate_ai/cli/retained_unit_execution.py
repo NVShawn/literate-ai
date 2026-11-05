@@ -324,6 +324,9 @@ def execute_retained_unit_package_from_args(
         runtime_current_plan = _compose_receiver_current_plan(
             receiver_context, plan, current_authority_plan
         )
+        # CLI bookends use the same original composition as runtime: only a
+        # fresh, matching canonical preparation can replace another source scan.
+        current_plan = runtime_current_plan
     else:
         runtime_current_plan = current_plan
 

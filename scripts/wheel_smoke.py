@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -325,9 +326,54 @@ def _record_timing(label: str, started: float, successful: bool) -> None:
         temporary.replace(_TIMING_REPORT)
 
 
-def _create_environment(directory: Path) -> None:
+def _create_environment_command(directory: Path) -> tuple[str, ...]:
+    # Preserve the canonical copied-interpreter/libpython builder, but run it
+    # under its own clean environment: stdlib venv otherwise forwards ambient
+    # Python startup policy to ensurepip's child before our run() wrapper.
+    if os.path.lexists(directory):
+        raise RuntimeError("preserve the existing wheel runtime")
+    source = Path(_create_python_environment.__code__.co_filename).resolve(strict=True)
+    with source.open("rb") as stream:
+        source_bytes = stream.read(1024 * 1024 + 1)
+    if len(source_bytes) > 1024 * 1024:
+        raise RuntimeError("canonical environment builder exceeds its source bound")
+    loader = """
+import hashlib, sys, types
+from pathlib import Path
+source = Path(sys.argv[1])
+with source.open("rb") as stream:
+    raw = stream.read(1024 * 1024 + 1)
+if len(raw) > 1024 * 1024 or hashlib.sha256(raw).hexdigest() != sys.argv[2]:
+    raise RuntimeError("canonical environment builder source changed")
+module = types.ModuleType("_wheel_smoke_environment_builder")
+module.__file__ = str(source)
+sys.modules[module.__name__] = module
+exec(compile(raw, str(source), "exec"), module.__dict__)
+target = Path(sys.argv[3])
+if target.exists() or target.is_symlink():
+    raise RuntimeError("preserve the existing wheel runtime")
+module._create_python_environment(target)
+"""
+    return (
+        sys.executable,
+        "-I",
+        "-B",
+        "-c",
+        loader,
+        str(source),
+        hashlib.sha256(source_bytes).hexdigest(),
+        str(directory),
+    )
+
+
+def _environment_python(directory: Path) -> Path:
+    return directory / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+
+
+def _create_environment(directory: Path) -> dict[str, object]:
     with _timed("venv.create"):
-        _create_python_environment(directory)
+        run(*_create_environment_command(directory))
+        return _runtime_record_scope(_environment_python(directory), mode="seed")
 
 
 def _remotes_stripped_parent(repository: Path, destination: Path, revision: str) -> str:
@@ -351,6 +397,7 @@ _INTERPRETER_RESOLUTION_ENVIRONMENT_VARIABLES = (
     "PYTHONPATH",
     "PYTHONHOME",
     "VIRTUAL_ENV",
+    "__PYVENV_LAUNCHER__",
 )
 
 
@@ -367,18 +414,20 @@ def _runtime_directory():
 
 
 def _subprocess_environment() -> dict[str, str]:
-    """A deterministic environment: the invoking shell's color forcing and
-    interpreter-resolution variables must not leak into installed-CLI
-    subprocesses. ``PYTHONPATH=src`` from a developer session would otherwise
-    make ``observe_installed_framework_distribution`` see both the smoke-test
-    wheel and the checkout, failing ``standard_binding.distribution_ambiguous``.
+    """Keep caller Python startup policy outside the isolated wheel runtime.
+
+    In particular, an inherited bytecode-cache prefix can make pip RECORD name
+    files outside its owned environment. Package-index and proxy policy remain
+    available; build origin is supplied separately by the reviewed caller.
     """
 
     sanitized = {
         key: value
         for key, value in os.environ.items()
-        if key not in _COLOR_FORCING_ENVIRONMENT_VARIABLES
-        and key not in _INTERPRETER_RESOLUTION_ENVIRONMENT_VARIABLES
+        if (name := key.upper() if os.name == "nt" else key)
+        not in _COLOR_FORCING_ENVIRONMENT_VARIABLES
+        and name not in _INTERPRETER_RESOLUTION_ENVIRONMENT_VARIABLES
+        and not name.startswith("PYTHON")
     }
     sanitized["NO_COLOR"] = "1"
     return sanitized
@@ -417,6 +466,176 @@ def run(
                 f"{completed.returncode}:\n{detail}"
             )
         return completed
+
+
+_RUNTIME_RECORD_SCOPE = r"""
+import csv, json, site, sys, sysconfig
+from pathlib import Path
+
+mode, expected, wheel_hash = sys.argv[1:]
+if mode not in {"seed", "framework", "unsafe-seed", "unsafe-framework"}:
+    raise RuntimeError("closed installed RECORD probe mode required")
+prefix = Path(sys.prefix).resolve(strict=True)
+packages = Path(sysconfig.get_path("purelib")).resolve(strict=True)
+if not packages.is_relative_to(prefix):
+    raise RuntimeError("runtime site-packages escaped its prefix")
+infos = sorted(packages.glob("*.dist-info"))
+if not 1 <= len(infos) <= 256:
+    raise RuntimeError("bounded installed distribution inventory required")
+outside, distributions = {}, {}
+rows_seen = bytes_seen = 0
+for info in infos:
+    name = (
+        info.name.removesuffix(".dist-info").rsplit("-", 1)[0].replace("_", "-").lower()
+    )
+    with (info / "RECORD").open("rb") as stream:
+        raw = stream.read(8 * 1024**2 + 1)
+    bytes_seen += len(raw)
+    if len(raw) > 8 * 1024**2 or bytes_seen > 64 * 1024**2 or name in distributions:
+        raise RuntimeError("installed RECORD inventory exceeds its envelope")
+    distributions[name] = info
+    for row in csv.reader(raw.decode().splitlines()):
+        rows_seen += 1
+        if len(row) != 3 or not row[0] or len(row[0]) > 32768 or rows_seen > 100000:
+            raise RuntimeError("bounded installed RECORD member required")
+        located = packages.joinpath(row[0]).resolve(strict=True)
+        if not located.is_relative_to(prefix):
+            if located.suffix != ".pyc":
+                raise RuntimeError("unexpected non-bytecode escape in fixture")
+            outside[name] = outside.get(name, 0) + 1
+if "pip" not in distributions:
+    raise RuntimeError("actual seeded pip RECORD required")
+unsafe = mode.startswith("unsafe-")
+if unsafe:
+    if outside.get("pip", 0) < 1:
+        raise RuntimeError("counterexample did not reproduce escaping seeded pip")
+elif outside:
+    raise RuntimeError("installed RECORD path escaped the isolated runtime")
+if not unsafe and (
+    sys.pycache_prefix is not None
+    or sys.flags.optimize
+    or not __debug__
+    or site.ENABLE_USER_SITE
+):
+    raise RuntimeError("ambient Python startup policy entered isolated runtime")
+result = {
+    "mode": mode,
+    "records_checked": rows_seen,
+    "distributions_checked": len(infos),
+    "all_record_paths_contained": not outside,
+    "seeded_pip_record_checked": True,
+    "outside_record_counts": outside,
+}
+if mode.endswith("framework"):
+    import literate_ai
+    from literate_ai.remote_worker_bootstrap import (
+        WorkerBootstrapError,
+        installed_distribution_identity,
+    )
+
+    if not Path(literate_ai.__file__).resolve(strict=True).is_relative_to(prefix):
+        raise RuntimeError("source framework import refused")
+    info = distributions.get("literate-ai")
+    if info is None:
+        raise RuntimeError("actual candidate framework installation required")
+    direct = json.loads((info / "direct_url.json").read_bytes())
+    if direct["archive_info"].get("hashes", {}).get("sha256") != wheel_hash:
+        raise RuntimeError("candidate wheel input hash differs")
+    if unsafe:
+        if outside.get("literate-ai", 0) < 1:
+            raise RuntimeError(
+                "counterexample did not reproduce escaping framework RECORD"
+            )
+        try:
+            installed_distribution_identity(prefix)
+        except WorkerBootstrapError as error:
+            if (
+                error.code != "worker.bootstrap_install_invalid"
+                or "installed RECORD path escapes the isolated environment"
+                not in str(error)
+            ):
+                raise
+            result["canonical_escape_refused"] = True
+        else:
+            raise RuntimeError("canonical framework reader admitted escaping RECORD")
+    else:
+        identity = installed_distribution_identity(prefix)
+        if identity != expected:
+            raise RuntimeError("exact candidate framework identity changed")
+        result["framework_distribution"] = identity
+print(json.dumps(result, sort_keys=True))
+"""
+
+
+def _runtime_record_scope(
+    python: Path, *, mode: str, expected: str = "", wheel_identity: str = ""
+) -> dict[str, object]:
+    # Deliberately use the actual ordinary startup path here, not -I masking:
+    # the production child environment must itself remove inherited selectors.
+    result = json.loads(
+        run(
+            str(python),
+            "-B",
+            "-c",
+            _RUNTIME_RECORD_SCOPE,
+            mode,
+            expected,
+            wheel_identity.removeprefix("sha256:"),
+            cwd=python.parent,
+        ).stdout
+    )
+    if (
+        result.get("mode") != mode
+        or result.get("seeded_pip_record_checked") is not True
+    ):
+        raise RuntimeError("actual runtime RECORD evidence required")
+    return result
+
+
+def assert_wheel_runtime_environment(
+    root: Path, wheel: Path, python: Path, expected: str
+) -> dict[str, object]:
+    """Real same-wheel install/reopen bookends; never relax canonical readers."""
+    identity = file_identity(wheel)
+    positive = _runtime_record_scope(
+        python, mode="framework", expected=expected, wheel_identity=identity
+    )
+    # Reproduce the former boundary only inside this fresh owned counterexample.
+    # An explicit child environment avoids mutating os.environ across HTML work.
+    counterexample = root / "environment-startup-counterexample"
+    unsafe_environment = {
+        **_subprocess_environment(),
+        "PYTHONPYCACHEPREFIX": str(root / "counterexample-bytecode"),
+        "PYTHONOPTIMIZE": "1",
+    }
+    run(*_create_environment_command(counterexample), env=unsafe_environment)
+    unsafe_python = _environment_python(counterexample)
+    seed = _runtime_record_scope(unsafe_python, mode="unsafe-seed")
+    run(
+        str(unsafe_python),
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--compile",
+        "--disable-pip-version-check",
+        str(wheel),
+        cwd=root,
+        env=unsafe_environment,
+    )
+    refused = _runtime_record_scope(
+        unsafe_python,
+        mode="unsafe-framework",
+        expected=expected,
+        wheel_identity=identity,
+    )
+    if file_identity(wheel) != identity:
+        raise RuntimeError("candidate wheel changed during install regression")
+    return {
+        "isolated": positive,
+        "counterexample_seed": seed,
+        "counterexample": refused,
+    }
 
 
 def _write_canonical_json(path: Path, value: dict[str, object]) -> None:
@@ -1082,6 +1301,7 @@ def assert_lifecycle_does_not_require_project_codegraph(
             check=False,
             text=True,
             capture_output=True,
+            env=_subprocess_environment(),
         )
         payload = json.loads(missing.stderr or missing.stdout)
         error_code = payload.get("error", {}).get("code")
@@ -1284,6 +1504,7 @@ def assert_standard_project_version_check(
             check=False,
             text=True,
             capture_output=True,
+            env=_subprocess_environment(),
         )
         forged_payload = json.loads(forged.stdout or forged.stderr)
         forged_project = forged_payload.get("result", {}).get("project", {})
@@ -1608,7 +1829,7 @@ def _main() -> int:
     )
     git_revision = run("git", "rev-parse", "HEAD", cwd=repository).stdout.strip()
     build_environment = {
-        **os.environ,
+        **_subprocess_environment(),
         "LITAI_BUILD_REPOSITORY_URL": repository_url,
         "LITAI_BUILD_GIT_REVISION": git_revision,
     }
@@ -1652,7 +1873,7 @@ def _main() -> int:
             raise RuntimeError("wheel build did not produce exactly one distribution")
         tested_wheel_identity = file_identity(wheel_files[0])
         environment = root / "environment"
-        _create_environment(environment)
+        seeded_runtime = _create_environment(environment)
         scripts = environment / ("Scripts" if sys.platform == "win32" else "bin")
         python = scripts / ("python.exe" if sys.platform == "win32" else "python")
         litai = scripts / ("litai.exe" if sys.platform == "win32" else "litai")
@@ -1665,6 +1886,15 @@ def _main() -> int:
             str(wheel_files[0]),
             cwd=root,
         )
+        standard_binding = json.loads(
+            run(str(python), "-c", STANDARD_BINDING_PROBE, cwd=root).stdout
+        )
+        runtime_environment = {
+            "seeded": seeded_runtime,
+            **assert_wheel_runtime_environment(
+                root, wheel_files[0], python, standard_binding["distribution"]
+            ),
+        }
         installed_runtime_resources = json.loads(
             run(
                 str(python),
@@ -1686,9 +1916,6 @@ def _main() -> int:
         if "python" not in checkpoint_help or "gates" not in checkpoint_help:
             raise RuntimeError("installed wheel omitted the checkpoint runner contract")
         parallel_checkpoint = assert_installed_parallel_checkpoint(python, root)
-        standard_binding = json.loads(
-            run(str(python), "-c", STANDARD_BINDING_PROBE, cwd=root).stdout
-        )
         source_admission_lifecycle = json.loads(
             run(
                 str(python),
@@ -2524,6 +2751,7 @@ def _main() -> int:
                     "schema_catalog": schema_catalog["catalog_id"],
                     "published_schemas": schema_versions["published_v1"],
                     "runtime_resources": installed_runtime_resources,
+                    "runtime_environment": runtime_environment,
                     "evidence_signature_primitives": installed_evidence_signatures,
                     "schema_catalog_versions": sorted(
                         key for key in schema_versions if key.startswith("v")
