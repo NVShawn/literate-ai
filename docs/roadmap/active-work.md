@@ -33699,12 +33699,12 @@ independent review and the complete combined gate from test one.
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#306](https://github.com/jordanhubbard/literate-ai/issues/306)
-- **Next action:** Run full source and fresh installed/public qualification for the independently reviewed import-path repair; the four focused import/refusal controls pass.
+- **Next action:** Verify post-merge main CI at `be1bf57b8`, then mark this bounded goal complete and close issue #306. Keep broader draft PR #313 separate.
 
 - **Priority:** high
 - **Owner:** framework core / Python library import driver
 - **Direction:** Include newly filed GitHub issue #306 in 1.4 and make ordinary Python standard-library imports work during exact-artifact execution qualification.
-- **Conclusion:** The isolated import driver replaces its entire search path, hiding the standard library. Prepend the sealed export source while retaining Python isolation and the exact artifact module-origin check. This is an ordinary correctness repair, with no receipt-policy or import-origin exemption.
+- **Conclusion:** Main commit `328261aac` retains the isolated `-I -S -B` launch and prepends the sealed export source, preserving standard-library imports and the exact artifact module-origin check. The exact source tree in PR #318 equals post-merge main `be1bf57b8`; its noneditable installed wheel passed the real Python library command journey. Post-merge main CI remains open.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
@@ -33712,11 +33712,12 @@ independent review and the complete combined gate from test one.
   - [x] Retain interpreter standard-library paths when importing the exact sealed Python library.
   - [x] Exercise a real Python library importing dataclasses, typing and __future__, and retain ambient-package and module-origin refusal coverage.
 - **Evidence:**
-  - [ ] Real isolated native Python build/test/import journey passes with standard-library dependencies.
-  - [ ] Foreign capability origins and ambient third-party-only imports remain refused.
-  - [ ] Independent source review, canonical pins, full python-check and exact installed qualification pass before completion.
+  - [x] Real isolated native Python build/test/import journey passes with standard-library dependencies.
+  - [x] Foreign capability origins and ambient third-party-only imports remain refused.
+  - [x] Independent source review, canonical pins, full python-check and exact installed qualification passed through PRs #308 and #318.
+  - [ ] Verify post-merge main CI at `be1bf57b8` before closing issue #306.
 
-- **Source development evidence:** The real generated Python library first reproduced the `dataclasses` import failure. Prepending source alone then exposed an ambient-dependency admission regression in the legacy command path. The corrected legacy EXECUTE projection uses isolated, no-site, no-bytecode startup and retains the interpreter standard-library paths; managed Python profiles keep their existing launcher. All four Standard command-projection cases pass, including real build/test/import, ambient-only dependency refusal, foreign module-origin refusal and missing-symbol refusal (report SHA-256 `a4d0fed1032fcd11c811c4d30813a3a2c957a41579ed0e8a16afe07e099aea4d`). Independent source review passed. Full source and installed/public qualification remain open; this focused result does not close #306.
+- **Source development evidence:** The real generated Python library first reproduced the `dataclasses` import failure. Prepending source alone then exposed an ambient-dependency admission regression in the legacy command path. The corrected legacy EXECUTE projection uses isolated, no-site, no-bytecode startup and retains the interpreter standard-library paths; managed Python profiles keep their existing launcher. All four Standard command-projection cases pass, including real build/test/import, ambient-only dependency refusal, foreign module-origin refusal and missing-symbol refusal (report SHA-256 `a4d0fed1032fcd11c811c4d30813a3a2c957a41579ed0e8a16afe07e099aea4d`). Independent source review passed. The subsequent noneditable PR #318 wheel from the same source tree as current main passed this journey outside the checkout; PR #318's exact-head full CI passed at `9a73a680`. Main CI at `be1bf57b8` remains required before closing #306.
 
 ### [ ] GIT-TOOL-CAPABILITY-001 — Align Git tool readiness with required checkout capabilities
 
