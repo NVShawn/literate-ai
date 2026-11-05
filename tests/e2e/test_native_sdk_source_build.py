@@ -185,9 +185,10 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
             service.builder.product(forged)
 
     def test_real_sdk_build_respects_explicit_deadline_without_extending_defaults(self):
-        # Advance only the true external wall clock read at build-validation
-        # boundaries. Git capture, policy authorization, compilation, output
-        # capture and repository cache admission all use production adapters.
+        # Keep issuance and its immediate validation on the same external clock,
+        # then advance only the build-validation clock. Source capture can take
+        # minutes on slow workers before the real grant is actually issued.
+        # All policy, compilation, capture and admission adapters remain real.
         issued = datetime.now(UTC)
         for label, deadline, age, admitted in (
             ("default-expired", None, 11, False),
@@ -203,7 +204,14 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
                     references=references,
                     authorization_deadline=deadline,
                 )
-                with patch("literate_ai.adapters.native_sdk_build.datetime") as clock:
+                service.authorizer.clock = lambda: issued
+                with (
+                    patch(
+                        "literate_ai.adapters.native_sdk_source_build.datetime"
+                    ) as issuance_clock,
+                    patch("literate_ai.adapters.native_sdk_build.datetime") as clock,
+                ):
+                    issuance_clock.now.return_value = issued
                     clock.now.return_value = issued + timedelta(minutes=age)
                     if admitted:
                         built = service.build()

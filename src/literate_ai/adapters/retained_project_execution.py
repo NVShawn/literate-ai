@@ -446,7 +446,13 @@ class RetainedProjectExecutionWorkspace:
         return result
 
     def _require_current_plan(self) -> None:
-        if self._receiver_context is not None:
+        from literate_ai.adapters.retained_project_platform import (
+            _covers_receiver_current_plan,
+        )
+
+        if self._receiver_context is not None and not _covers_receiver_current_plan(
+            self.current_plan, self._receiver_context, self.plan
+        ):
             self._receiver_context.require_plan(self.plan)
         current = self.current_plan()
         if not isinstance(current, RetainedProjectPlan) or current != self.plan:

@@ -36,6 +36,7 @@ from literate_ai.adapters.builders import (
 from literate_ai.adapters.builders.cpp import bazel_sdk_build_options
 from literate_ai.adapters.builders.elixir import ElixirToolchain
 from literate_ai.adapters.builders.hex import HexToolchain
+from literate_ai.adapters.builders.rust import RustToolchain
 from literate_ai.adapters.cache import (
     CachedCodingCliSourceGenerator,
     FilesystemStandardAcceptedSourcePublisher,
@@ -66,6 +67,8 @@ from literate_ai.adapters.lifecycle.standard_bazel import (
 from literate_ai.adapters.lifecycle.standard_cargo import (
     StandardCargoLifecyclePorts,
     StandardCargoTarget,
+    _retain_rust_harness_compilers,
+    _RustHarnessCompilerObservations,
 )
 from literate_ai.adapters.lifecycle.standard_local import (
     LocalComponentToolBinding,
@@ -336,8 +339,21 @@ class ProjectedStandardToolchainClosure:
         default=None, repr=False, compare=False
     )
     mix_targets: tuple[StandardMixTarget, ...] = ()
+    # Original live measurements only: not a field of the serialized record or
+    # an additional v1 command permission. Rust v2 needs the compiler observation
+    # that already participates in this closure's current authority guards.
+    rust_harness_compilers: _RustHarnessCompilerObservations | None = field(
+        default=None, repr=False, compare=False
+    )
 
     def require_unchanged(self) -> None:
+        if self.rust_harness_compilers is not None:
+            if (
+                type(self.rust_harness_compilers)
+                is not _RustHarnessCompilerObservations
+            ):
+                raise TypeError("original Rust compiler observations required")
+            self.rust_harness_compilers.require_targets(self.cargo_targets)
         if self.dependency_guard is not None:
             self.dependency_guard()
         required = required_command_toolchains(
@@ -765,7 +781,7 @@ IO.puts(JSON.encode!(%{schema: "literate-ai/library-import-observation@1",
     sys.stderr.buffer.write(completed.stderr)
     raise SystemExit(completed.returncode)
 elif language == "python":
-    sys.path[:] = [str(source)]
+    sys.path.insert(0, str(source))
     for capability in surface["capabilities"]:
         module = importlib.import_module(capability["module"])
         origin = pathlib.Path(module.__file__).resolve(strict=True)
@@ -1960,6 +1976,10 @@ def _command_contract(
             manifest,
             "{artifact_root}",
         )
+        if language.target == "python" and python_profile is None:
+            # The legacy library path also needs isolated interpreter startup:
+            # retaining stdlib must not admit PYTHONPATH, cwd or site packages.
+            execute_argv = (execute_argv[0], "-I", "-S", "-B", *execute_argv[1:])
     else:
         test_argv = _runtime_command(
             language, single_file=single_file, phase=ComponentCommandPhase.TEST
@@ -2775,7 +2795,7 @@ def project_locked_standard_toolchain_closure(
         tool.require_unchanged()
     if native_sdk_inputs is not None:
         native_sdk_generation_identities(native_sdk_inputs, snapshot)
-    return project_standard_toolchain_closure(
+    closure = project_standard_toolchain_closure(
         execution_plan,
         contracts=tuple(contracts),
         tool_bindings=tuple(
@@ -2799,6 +2819,24 @@ def project_locked_standard_toolchain_closure(
         toolchain_authorities=_observed_tool_authorities(tools),
         command_phases=command_phases,
         dependency_guard=dependency_guard,
+    )
+    compiler_identities = {
+        item.language_compiler_identity.uri for item in cargo_targets if item.library
+    }
+    original_compilers = {
+        tool.identity: tool
+        for tool in tools.values()
+        if type(tool) is RustToolchain and tool.identity in compiler_identities
+    }
+    return replace(
+        closure,
+        rust_harness_compilers=(
+            _retain_rust_harness_compilers(
+                tuple(original_compilers[key] for key in sorted(original_compilers))
+            )
+            if original_compilers and set(original_compilers) == compiler_identities
+            else None
+        ),
     )
 
 
@@ -3607,6 +3645,7 @@ def assemble_standard_lifecycle_ports(
             **port_arguments,
             mix_targets=toolchain_closure.mix_targets,
             cargo_targets=toolchain_closure.cargo_targets,
+            rust_harness_compilers=toolchain_closure.rust_harness_compilers,
             mix_authorization_verifier=AuthorizationRevocationSet(),
             shared_cache=shared_cache,
         )
@@ -3614,6 +3653,7 @@ def assemble_standard_lifecycle_ports(
         ports = StandardCargoLifecyclePorts(
             **port_arguments,
             cargo_targets=toolchain_closure.cargo_targets,
+            rust_harness_compilers=toolchain_closure.rust_harness_compilers,
             shared_cache=shared_cache,
         )
     else:

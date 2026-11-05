@@ -21,6 +21,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
 )
 from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.retained_project_lifecycle import RetainedProjectPlan
 
 _LIVE_RECEIVER = object()
 
@@ -71,10 +72,28 @@ class RetainedReceiverContext:
         self._custody_guard()
         self._require_live_request()
 
+    def has_canonical_current_plan(self):
+        from literate_ai.adapters.retained_package_capability import (
+            RegisteredRetainedPackageCapabilityProbe,
+        )
+
+        return (
+            type(self._measure_capability) is RegisteredRetainedPackageCapabilityProbe
+            and self._measure_capability.has_canonical_current_plan()
+        )
+
     def require_current(self):
         self._require_live_request()
         self._registration_guard()
-        observed = self._measure_capability()
+        from literate_ai.adapters.retained_package_capability import (
+            RegisteredRetainedPackageCapabilityProbe,
+        )
+
+        current_plan = None
+        if type(self._measure_capability) is RegisteredRetainedPackageCapabilityProbe:
+            observed, current_plan = self._measure_capability.observe_current_plan()
+        else:
+            observed = self._measure_capability()
         if (
             not isinstance(observed, ActionWorkerCapabilities)
             or observed.capability_identity != self.capability_identity
@@ -83,15 +102,27 @@ class RetainedReceiverContext:
         ):
             raise ValueError("retained.receiver.capability-changed")
         self.deadline.remaining()
+        return current_plan
+
+    def matches_canonical_worker_selection(self, identity):
+        self._require_live_request()
+        return self.has_canonical_current_plan() and (
+            self._measure_capability.matches_worker_selection(identity)
+        )
 
     def require_plan(self, plan):
-        self.require_current()
+        current_plan = self.require_current()
         if (
             plan.identity != self.retained_plan_identity
             or plan.profile.worker_identity != self.worker.identity
             or plan.profile.target != self.worker.target_profile
         ):
             raise ValueError("retained.receiver.registered-plan-mismatch")
+        if current_plan is not None and (
+            not isinstance(current_plan, RetainedProjectPlan) or current_plan != plan
+        ):
+            raise ValueError("retained.receiver.observed-plan-mismatch")
+        return current_plan
 
     def close(self):
         self._open = False

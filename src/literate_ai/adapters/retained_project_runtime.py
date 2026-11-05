@@ -19,6 +19,7 @@ from literate_ai.adapters.retained_project_execution import (
 from literate_ai.adapters.retained_project_platform import (
     RetainedLocalPlatform,
     RetainedReceiverPlatform,
+    _receiver_platform_current_plan,
 )
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
 from literate_ai.adapters.user_paths import resolve_user_paths
@@ -85,6 +86,8 @@ def execute_local_retained_project(
     sdk_project=None,
     sdk_binding=None,
     consume_admission=None,
+    promotion_evidence_consumer=None,
+    promotion_evidence_policy=None,
 ):
     """Run one reviewed local plan and return its live retained admission.
 
@@ -107,6 +110,8 @@ def execute_local_retained_project(
         sdk_project=sdk_project,
         sdk_binding=sdk_binding,
         consume_admission=consume_admission,
+        promotion_evidence_consumer=promotion_evidence_consumer,
+        promotion_evidence_policy=promotion_evidence_policy,
     )
 
 
@@ -149,9 +154,24 @@ def _execute_retained_project(
     sdk_project=None,
     sdk_binding=None,
     consume_admission=None,
+    promotion_evidence_consumer=None,
+    promotion_evidence_policy=None,
     receiver_context=None,
 ):
     plan = planning.plan
+    if promotion_evidence_consumer is not None and not callable(
+        promotion_evidence_consumer
+    ):
+        raise TypeError("retained.promotion.callable-evidence-consumer-required")
+    if promotion_evidence_policy is not None:
+        from literate_ai.adapters.retained_receipt_promotion_evidence import (
+            RetainedPromotionReadPolicy,
+        )
+
+        if promotion_evidence_consumer is None:
+            raise ValueError("retained.promotion.evidence-consumer-required")
+        if type(promotion_evidence_policy) is not RetainedPromotionReadPolicy:
+            raise TypeError("retained.promotion.typed-read-policy-required")
     if consume_admission is not None and not callable(consume_admission):
         raise TypeError("retained.execution.admission-consumer-required")
     plan.require_authorization(authorization)
@@ -207,6 +227,10 @@ def _execute_retained_project(
             return platform.current_plan(current_plan)
         platform.require_current()
         return current_plan()
+
+    receiver_current = _receiver_platform_current_plan(platform, current_plan)
+    if receiver_current is not None:
+        current_local_plan = receiver_current
 
     directories = bind_cache_directories(
         source,
@@ -338,6 +362,18 @@ def _execute_retained_project(
             # sealed CAS payloads and revalidate genuine SDK/package owners.
             consume_admission(admission, workspace)
             admission.require_current()
+        if promotion_evidence_consumer is not None:
+            from literate_ai.adapters.retained_receipt_promotion_evidence import (
+                _issued_capture,
+                capture_retained_receipt_promotion_evidence,
+            )
+
+            with _issued_capture(admission, workspace) as scope:
+                reference = capture_retained_receipt_promotion_evidence(
+                    scope, policy=promotion_evidence_policy
+                )
+                promotion_evidence_consumer(reference)
+                admission.require_native_package_scope()
         return admission, workspace
     except Exception as exc:
         raise RetainedProjectExecutionError(

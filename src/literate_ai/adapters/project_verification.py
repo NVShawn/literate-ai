@@ -22,6 +22,9 @@ cannot drift from the command that owns it.
 
 from __future__ import annotations
 
+import os
+import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -57,8 +60,11 @@ class ProjectVerificationError(ValueError):
 
 
 VERIFY_SCHEMA = "literate-ai/project-verify@1"
+TREE_VERIFY_SCHEMA = "literate-ai/project-verify@2"
+TREE_HTML_GATE = "tree-html-observability"
 
 GATES = ("authority", "locks", "source-intelligence", "html-observability", "receipt")
+SUPPORTED_GATES = (*GATES[:-1], TREE_HTML_GATE, GATES[-1])
 
 PASS = "pass"
 FAIL = "fail"
@@ -70,7 +76,7 @@ class GateResult:
     gate: str
     state: str
     detail: str
-    artifacts: tuple[HtmlStalenessReport, ...] | None = None
+    artifacts: tuple[HtmlStalenessReport | Mapping[str, Any], ...] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         value: dict[str, Any] = {
@@ -79,7 +85,10 @@ class GateResult:
             "detail": self.detail,
         }
         if self.artifacts is not None:
-            value["artifacts"] = [artifact.to_dict() for artifact in self.artifacts]
+            value["artifacts"] = [
+                dict(artifact) if isinstance(artifact, Mapping) else artifact.to_dict()
+                for artifact in self.artifacts
+            ]
         return value
 
 
@@ -191,11 +200,68 @@ def _receipt(root: Path) -> GateResult:
     return GateResult("receipt", PASS, "committed test receipt is current")
 
 
+def _tree_html_observability(root: Path) -> GateResult:
+    from literate_ai._filesystem import UnsafeFilesystemPathError
+    from literate_ai.adapters.html_tree_freshness import check_published_html_tree
+    from literate_ai.adapters.html_tree_project import observe_project_tree_views
+    from literate_ai.storage import StorageError
+
+    artifacts = []
+    try:
+        project = discover_project(root)
+        if project is None:
+            return GateResult(TREE_HTML_GATE, FAIL, "project not found", ())
+        with observe_project_tree_views(project) as (views, current):
+            if not views:
+                return GateResult(
+                    TREE_HTML_GATE, SKIPPED, "no declared tree HTML artifacts", ()
+                )
+            for declaration in views:
+                artifacts.append(
+                    check_published_html_tree(
+                        project.root,
+                        declaration,
+                        require_declaration_current=current,
+                    )
+                )
+            current()
+            closing = discover_project(project.root)
+            if closing is None or closing.definition != project.definition:
+                raise ValueError("html.tree.project-declarations-changed")
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        ProjectError,
+        UnsafeFilesystemPathError,
+        StorageError,
+        RecursionError,
+    ) as exc:
+        code = getattr(exc, "code", "html.tree.project-check-unavailable")
+        if isinstance(exc, ValueError) and re.fullmatch(
+            r"(?:html\.tree|tree\.shards)\.[A-Za-z0-9_.-]{1,160}", str(exc)
+        ):
+            code = str(exc)
+        return GateResult(
+            TREE_HTML_GATE,
+            FAIL,
+            f"{code}: declared tree verification refused",
+            tuple(artifacts),
+        )
+    return GateResult(
+        TREE_HTML_GATE,
+        PASS,
+        f"{len(artifacts)} declared tree HTML artifact(s) current",
+        tuple(artifacts),
+    )
+
+
 _GATES = {
     "authority": _authority,
     "locks": _locks,
     "source-intelligence": _source_intelligence,
     "html-observability": _html_observability,
+    TREE_HTML_GATE: _tree_html_observability,
     "receipt": _receipt,
 }
 
@@ -210,27 +276,46 @@ def _observe_project_verification(
     if unknown:
         raise ProjectVerificationError(
             "cli.usage",
-            f"unknown gate {unknown[0]!r}; choose from {', '.join(GATES)}",
+            f"unknown gate {unknown[0]!r}; choose from {', '.join(SUPPORTED_GATES)}",
         )
     root = Path(root)
     try:
-        if discover_project(root) is None:
+        project = discover_project(root)
+        if project is None:
             raise ProjectVerificationError(
                 "project.not_found", f"no {PROJECT_FILENAME} found from {root}"
             )
     except ProjectError as exc:
         raise ProjectVerificationError(exc.code, exc.message) from exc
 
-    ordered = [gate for gate in GATES if gate in selected]
+    from literate_ai.contracts.html_tree_projects import PROJECT_TREE_HTML_FILENAME
+
+    registry = project.root / PROJECT_TREE_HTML_FILENAME
+    registry_present = os.path.lexists(registry) if not gates else None
+    if registry_present:
+        selected = [*selected, TREE_HTML_GATE]
+    ordered = [gate for gate in SUPPORTED_GATES if gate in selected]
     from literate_ai.diagnostics import debug_stage
 
     results = []
     for gate in ordered:
         with debug_stage("verify", gate=gate):
             results.append(_GATES[gate](root))
+    if registry_present is not None and os.path.lexists(registry) != registry_present:
+        results = [item for item in results if item.gate != TREE_HTML_GATE]
+        results.append(
+            GateResult(
+                TREE_HTML_GATE,
+                FAIL,
+                "tree declarations changed during verification",
+                (),
+            )
+        )
     failed = [item for item in results if item.state == FAIL]
     return {
-        "schema": VERIFY_SCHEMA,
+        "schema": TREE_VERIFY_SCHEMA
+        if any(item.gate == TREE_HTML_GATE for item in results)
+        else VERIFY_SCHEMA,
         "project": str(root),
         "gates": [item.to_dict() for item in results],
         "counts": {

@@ -6,6 +6,7 @@ import os
 import stat
 import tempfile
 from collections import defaultdict
+from contextlib import nullcontext
 from pathlib import Path
 
 from literate_ai._filesystem import require_safe_directory
@@ -149,6 +150,7 @@ def _capture_composed_native_tree(
     output_custody=None,
     reserved_memory_bytes=0,
     budget_capture=False,
+    retain_payloads=True,
 ) -> ComposedNativeTree:
     """Capture larger composed geometry through the same no-follow custody owner."""
     from literate_ai.adapters.native_tree_shards import prepare_native_tree
@@ -165,6 +167,7 @@ def _capture_composed_native_tree(
         type(reserved_memory_bytes) is not int
         or not 0 <= reserved_memory_bytes <= max_metadata_memory_bytes
         or type(budget_capture) is not bool
+        or type(retain_payloads) is not bool
     ):
         raise ValueError("tree.shards.invalid-memory-reservation")
     budget_capture = (
@@ -247,6 +250,7 @@ def _capture_composed_native_tree(
         output_custody=output_custody,
         reserved_memory_bytes=reserved_memory_bytes,
         capture_memory=capture_memory if budget_capture else None,
+        retain_payloads=retain_payloads,
     )
 
 
@@ -263,6 +267,7 @@ def _capture_native_tree(
     output_custody=None,
     reserved_memory_bytes=0,
     capture_memory=None,
+    retain_payloads=True,
 ):
     """Capture physical bytes and link topology through existing input custody.
 
@@ -276,7 +281,9 @@ def _capture_native_tree(
     ):
         raise TypeError("SDK capture requires typed limits and boolean case selection")
     root = _root(Path(root))
-    if store.root.is_relative_to(root):
+    if type(retain_payloads) is not bool or (not retain_payloads and store is not None):
+        raise TypeError("hash-only tree observation requires no content store")
+    if retain_payloads and store.root.is_relative_to(root):
         raise ValueError("SDK content store must be outside the captured tree")
     # Only the separate HTML output owner can issue this finite observation.
     # Old SDK callers have no exclusion selection and preserve complete capture.
@@ -411,10 +418,13 @@ def _capture_native_tree(
                 case_sensitive,
             )
             del planned_files, planned_aliases
-        with tempfile.TemporaryDirectory(
-            prefix=".sdk-capture-", dir=store.root
-        ) as temp:
-            scratch = Path(temp) / "bytes"
+        workspace = (
+            tempfile.TemporaryDirectory(prefix=".sdk-capture-", dir=store.root)
+            if retain_payloads
+            else nullcontext(None)
+        )
+        with workspace as temp:
+            scratch = Path(temp) / "bytes" if retain_payloads else None
             for group in groups.values():
                 owner = min(group)
                 value = before[owner]
@@ -425,7 +435,10 @@ def _capture_native_tree(
                     for name in group
                 ):
                     raise ValueError("SDK hard-link group is incomplete or changed")
-                with scratch.open("xb") as output:
+                output_context = (
+                    scratch.open("xb") if retain_payloads else nullcontext(None)
+                )
+                with output_context as output:
                     size, mode, digest = _stream(
                         root,
                         owner,
@@ -436,8 +449,14 @@ def _capture_native_tree(
                         output,
                         access=access,
                     )
-                blob = store.put_file(scratch)
-                scratch.unlink()
+                if retain_payloads:
+                    blob = store.put_file(scratch)
+                    scratch.unlink()
+                else:
+                    # _stream retains its original no-follow, byte/identity and
+                    # namespace checks with a hashing-only sink. No payload or
+                    # temporary file is created for a freshness observation.
+                    blob = BlobRef(digest, size)
                 if blob.digest != digest or blob.size != size:
                     raise ValueError("SDK captured bytes changed before storage")
                 total += size
@@ -480,7 +499,8 @@ def _capture_native_tree(
                 item.blob.digest,
             ):
                 raise ValueError("SDK file changed during capture")
-            store.verify(item.blob)
+            if retain_payloads:
+                store.verify(item.blob)
         for alias in tree.aliases:
             if (
                 alias.kind == "symlink"

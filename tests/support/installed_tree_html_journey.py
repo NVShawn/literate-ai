@@ -2,8 +2,9 @@
 
 Invoked by the existing wheel qualification driver with its once-installed wheel
 interpreter. Fixtures are small real files, aliases and directories. This journey
-qualifies initial metadata publication only, not browser behavior, rerender,
-recovery, native scale, or per-unit admission.
+qualifies initial metadata publication and read-only freshness through actual
+standalone and project CLIs, not browser behavior, rerender, recovery, native scale
+or per-unit admission.
 """
 
 from __future__ import annotations
@@ -285,11 +286,10 @@ def main():
     cli_evidence.mkdir(mode=0o700)
     cli_call_count = 0
 
-    def cli(case, *options, expected=0):
+    def invoke(environment, command, arguments, *, expected=0):
         nonlocal cli_call_count
         cli_call_count += 1
         require(cli_call_count <= 64, "installed tree CLI call bound exceeded")
-        source, declaration, _, _, _, environment = case
         argv = (
             sys.executable,
             "-I",
@@ -297,13 +297,7 @@ def main():
             "-m",
             "literate_ai.cli",
             "--json",
-            "render",
-            "tree",
-            "--root",
-            str(source),
-            "--declaration",
-            str(declaration),
-            *options,
+            *arguments,
         )
         completed = run_bounded_process(
             argv,
@@ -336,12 +330,13 @@ def main():
                 indent=2,
             )
         require(
-            completed.returncode == expected,
+            completed.returncode
+            in (expected if isinstance(expected, tuple) else (expected,)),
             f"public tree CLI exit differs; retained {stem.name} raw evidence",
         )
         raw = completed.stdout if completed.stdout else completed.stderr
         envelope = json.loads(raw)
-        require(envelope["command"] == "render.tree", "incorrect public command label")
+        require(envelope["command"] == command, "incorrect public command label")
         if expected == 2:
             require(
                 envelope["schema"] == "literate-ai/cli-error@1", "missing CLI refusal"
@@ -349,8 +344,28 @@ def main():
             return envelope["error"]
         require(envelope["schema"] == "literate-ai/cli-result@1", "missing CLI result")
         result = envelope["result"]
-        _validate_wire_document(result, result["schema"], code="installed-tree.schema")
+        if command != "onboard":
+            _validate_wire_document(
+                result, result["schema"], code="installed-tree.schema"
+            )
         return result
+
+    def cli(case, *options, expected=0):
+        source, declaration, _, _, _, environment = case
+        return invoke(
+            environment,
+            "render.tree",
+            (
+                "render",
+                "tree",
+                "--root",
+                str(source),
+                "--declaration",
+                str(declaration),
+                *options,
+            ),
+            expected=expected,
+        )
 
     def untouched(case, before):
         source, _, _, state, config, _ = case
@@ -444,6 +459,169 @@ def main():
         "public index digest differs",
     )
 
+    def private_snapshot(environment):
+        return {
+            key: snapshot(Path(environment[key]))
+            if Path(environment[key]).exists()
+            else None
+            for key in ("LITAI_STATE_DIR", "LITAI_CONFIG_DIR", "OBJ_DIR")
+        }
+
+    def check_unchanged(case, *, expected=0):
+        private_before = private_snapshot(case[5])
+        before = snapshot(case[0])
+        checked = cli(case, "--check", expected=expected)
+        require(snapshot(case[0]) == before, "freshness check wrote source/output")
+        require(
+            private_snapshot(case[5]) == private_before,
+            "freshness check wrote private state",
+        )
+        return checked
+
+    checked = check_unchanged(case)
+    require(checked["status"] == "current", "installed published tree not current")
+    require(checked["freshness"]["writes_authorized"] is False, "check grants writes")
+    # Actual mutations of independent source and published page bytes must refuse;
+    # restoring their original bytes does not restore a publication owner.
+    for path, code in (
+        (case[0] / "leaf&one.txt", "html.tree.source-stale"),
+        (next(generation.glob("*.html")), None),
+    ):
+        original = path.read_bytes()
+        try:
+            path.write_bytes(original + b"changed\n")
+            refused = check_unchanged(case, expected=1)
+            require(refused["status"] == "stale", "changed complete tree admitted")
+            if code is not None:
+                require(
+                    refused["refusal"]["code"] == code, "wrong stale source refusal"
+                )
+        finally:
+            path.write_bytes(original)
+    require(check_unchanged(case)["status"] == "current", "restored tree bytes differ")
+
+    # A separate real project is created through the same installed wheel and the
+    # wheel driver's already-local, stripped, exact-revision parent. Never mutate
+    # another golden-path fixture or synthesize framework/project authority.
+    require(len(sys.argv) == 4, "local exact parent source argument required")
+    project = workspace / "project"
+    project_environment = dict(case[5])
+    project_environment.update(
+        LITAI_STATE_DIR=str(workspace / "project-state"),
+        LITAI_CONFIG_DIR=str(workspace / "project-config"),
+        OBJ_DIR=str(workspace / "project-objects"),
+    )
+    create = ("onboard", "create", str(project), "--empty", "--from", sys.argv[3])
+    project_plan = invoke(project_environment, "onboard", create)
+    require(
+        project_plan["writes"] is False and not project.exists(),
+        "onboard plan mutated new project",
+    )
+    created = invoke(
+        project_environment,
+        "onboard",
+        (
+            *create,
+            "--apply",
+            "--acknowledge",
+            "--expect-plan",
+            project_plan["plan_identity"],
+        ),
+    )
+    require(
+        created["applied"] is True and (project / "literate.project.json").is_file(),
+        "real installed onboard did not initialize project",
+    )
+    source, output = project / "source", project / "view"
+    source.mkdir()
+    output.mkdir()
+    payload = source / "payload.txt"
+    payload.write_bytes(b"installed project tree\n")
+    declaration = project / "view.json"
+    declaration_document = json.loads(json.dumps(case[2]))
+    declaration_document.update(source_root="source", output_root="view")
+    declaration.write_text(json.dumps(declaration_document), encoding="utf-8")
+    project_case = (
+        project,
+        declaration,
+        declaration_document,
+        workspace / "project-state",
+        workspace / "project-config",
+        project_environment,
+    )
+    registry = project / "literate.tree-html.json"
+
+    def verify_tree(*, expected=0, gate="tree-html-observability"):
+        private_before = private_snapshot(project_environment)
+        before = snapshot(project)
+        result = invoke(
+            project_environment,
+            "verify",
+            ("verify", str(project), "--gate", gate),
+            expected=expected,
+        )
+        require(snapshot(project) == before, "project verification wrote project")
+        require(
+            private_snapshot(project_environment) == private_before,
+            "verification wrote private state",
+        )
+        return result
+
+    legacy = verify_tree(gate="html-observability")
+    require(legacy["schema"] == "literate-ai/project-verify@1", "legacy schema changed")
+    absent = verify_tree()
+    require(
+        absent["schema"] == "literate-ai/project-verify@2"
+        and absent["gates"][0]["state"] == "skipped",
+        "absent registry was adopted",
+    )
+    registry_document = {
+        "schema": "literate-ai/project-tree-html@1",
+        "declarations": ["view.json"],
+    }
+    registry.write_text(json.dumps(registry_document), encoding="utf-8")
+    project_publication_plan = cli(project_case)
+    cli(
+        project_case, "--apply", "--ack-plan", project_publication_plan["plan_identity"]
+    )
+    current = verify_tree()
+    require(
+        current["gates"][0]["state"] == "pass"
+        and len(current["gates"][0]["artifacts"]) == 1,
+        "declared view not verified",
+    )
+    for artifact in current["gates"][0]["artifacts"]:
+        _validate_wire_document(
+            artifact, artifact["schema"], code="installed-tree.artifact"
+        )
+    original = payload.read_bytes()
+    try:
+        payload.write_bytes(b"changed installed project source\n")
+        stale = verify_tree(expected=1)
+        require(
+            "html.tree.source-stale" in stale["gates"][0]["detail"],
+            "project gate failed to reject changed source",
+        )
+    finally:
+        payload.write_bytes(original)
+    require(
+        verify_tree()["gates"][0]["state"] == "pass", "restored project view differs"
+    )
+    for invalid in ("../outside.json", "missing.json"):
+        registry.write_text(
+            json.dumps({**registry_document, "declarations": [invalid]})
+        )
+        require(
+            verify_tree(expected=1)["gates"][0]["state"] == "fail",
+            "invalid declared project input admitted",
+        )
+    registry.unlink()
+    registry.symlink_to("missing-registry.json")
+    require(
+        verify_tree(expected=1)["gates"][0]["state"] == "fail",
+        "dangling registry was silently skipped",
+    )
+
     for kind in ("index", "namespace"):
         foreign = fixture("foreign-" + kind)
         path = foreign[0] / ("index.html" if kind == "index" else namespace.name)
@@ -507,7 +685,9 @@ def main():
         json.dumps(
             {
                 "qualified": True,
-                "scope": "initial-directory-metadata-only",
+                "scope": "initial-directory-metadata-and-readonly-freshness",
+                "standalone_freshness": True,
+                "project_tree_gate": True,
                 "framework_distribution": framework.framework_distribution_identity.uri,
                 "page_count": page_count,
                 "source_identity": publication["source_identity"],

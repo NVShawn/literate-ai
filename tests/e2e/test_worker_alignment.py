@@ -43,6 +43,201 @@ class LocalRunner:
 
 @unittest.skipIf(os.name == "nt" or shutil.which("bash") is None, "POSIX shell")
 class WorkerAlignmentTests(unittest.TestCase):
+    def test_public_alignment_rejects_old_repository_tools_and_rechecks_declared_repair(
+        self,
+    ):
+        """Execute real probe processes through the public CLI, replacing SSH only.
+
+        Version responders exercise the external tool protocol; they do not claim
+        native checkout qualification for the versions their output describes.
+        """
+        import io
+
+        from literate_ai.adapters.project_initialization import initialize_project
+        from literate_ai.cli import main
+        from literate_ai.contracts import RepositoryParentSelection
+        from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
+
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw).resolve()
+            project = root / "project"
+            initialize_project(
+                project,
+                empty=True,
+                bootstrap_tools=False,
+                parent_selection=RepositoryParentSelection.root(),
+            )
+            tools = root / "tools with spaces"
+            tools.mkdir()
+            for name in ("git", "git-lfs", "git.exe", "git-lfs.exe"):
+                path = tools / name
+                path.write_text(
+                    '#!/bin/sh\ncat "$0.version"\nexit "$(cat "$0.exit")"\n'
+                )
+                path.chmod(0o755)
+                (tools / (name + ".exit")).write_text("0")
+            (tools / "opencode").write_text("#!/bin/sh\nexit 99\n")
+            (tools / "opencode").chmod(0o755)
+            family = {"darwin": "macos", "freebsd": "freebsd"}.get(
+                sys.platform, "linux"
+            )
+            worker = ExecutionWorker(
+                "fixture",
+                ExecutionWorkerKind.SSH,
+                requirements=ExecutionRequirements(os_family=family),
+                endpoint="user@fixture.invalid",
+                workspace=str(root / "workspace"),
+            )
+            catalog = root / "workers.json"
+            catalog.write_text(json.dumps(ExecutionWorkerCatalog((worker,)).to_dict()))
+            template = root / "template.json"
+            template.write_text(
+                json.dumps(
+                    {
+                        "schema": "literate-ai/worker-template@1",
+                        "platforms": {
+                            family: {
+                                "commands": ["git"],
+                                "python": {
+                                    "commands": [Path(sys.executable).name],
+                                    "minimum": "3.11",
+                                },
+                            }
+                        },
+                    }
+                )
+            )
+            selection = root / "test.json"
+            selection.write_text(
+                json.dumps({"coding_cli": "opencode", "model": "fixture/model"})
+            )
+            alignment = root / "alignment.json"
+            repair = (
+                "from pathlib import Path; "
+                f"Path({str(tools / 'git.version')!r})"
+                ".write_text('git version 2.56.0'); "
+                f"Path({str(tools / 'git.exe.version')!r})"
+                ".write_text('git version 2.56.0')"
+            )
+            alignment.write_text(
+                json.dumps(
+                    {
+                        "schema": "literate-ai/worker-alignment@1",
+                        "installs": [
+                            {
+                                "command": "git",
+                                "os_family": family,
+                                "argv": [sys.executable, "-I", "-S", "-c", repair],
+                            }
+                        ],
+                    }
+                )
+            )
+            arguments = (
+                "worker",
+                "align",
+                "--all",
+                "--skip-model",
+                "--worker-config",
+                str(catalog),
+                "--template",
+                str(template),
+                "--alignment",
+                str(alignment),
+            )
+            previous = Path.cwd()
+            try:
+                os.chdir(project)
+                with (
+                    patch.dict(
+                        os.environ,
+                        {
+                            "PATH": os.pathsep.join(
+                                [
+                                    str(tools),
+                                    str(Path(sys.executable).parent),
+                                    "/usr/bin",
+                                    "/bin",
+                                ]
+                            ),
+                            "LITAI_TEST_CONFIG": str(selection),
+                        },
+                    ),
+                    patch.object(
+                        worker_alignment,
+                        "remote_execute_arguments",
+                        lambda _worker, command, *_a, **_k: (
+                            "/bin/bash",
+                            "-c",
+                            command,
+                        ),
+                    ),
+                ):
+                    for declared, git, lfs, exit_code, failed in (
+                        ("git", "git version 2.43.0", "git-lfs/3.4.1", "0", "git"),
+                        ("git", "git version 2.56.0", "git-lfs/3.1.0", "0", "git-lfs"),
+                        ("git", "git version 2.56.0", "git-lfs/3.4.1", "7", "git"),
+                        ("git", "git version 2.56.0", "unknown", "0", "git-lfs"),
+                        ("git", "git version 2.56.0", "git-lfs/3.4.1", "0", None),
+                        (
+                            "git.exe",
+                            "git version 2.43.0",
+                            "git-lfs/3.4.1",
+                            "0",
+                            "git.exe",
+                        ),
+                        (
+                            "git-lfs.exe",
+                            "git version 2.56.0",
+                            "git-lfs/3.1.0",
+                            "0",
+                            "git-lfs.exe",
+                        ),
+                        ("git.exe", "git version 2.56.0", "git-lfs/3.4.1", "0", None),
+                    ):
+                        with self.subTest(
+                            declared=declared, git=git, lfs=lfs, exit_code=exit_code
+                        ):
+                            value = json.loads(template.read_text())
+                            value["platforms"][family]["commands"] = [declared]
+                            template.write_text(json.dumps(value))
+                            for name in ("git", "git.exe"):
+                                (tools / (name + ".version")).write_text(git)
+                                (tools / (name + ".exit")).write_text(exit_code)
+                            for name in ("git-lfs", "git-lfs.exe"):
+                                (tools / (name + ".version")).write_text(lfs)
+                            before = {p.name: p.read_bytes() for p in tools.iterdir()}
+                            output, errors = io.StringIO(), io.StringIO()
+                            status = main(arguments, stdout=output, stderr=errors)
+                            result = json.loads(output.getvalue() or errors.getvalue())
+                            self.assertEqual(status, int(failed is not None), result)
+                            report = result["result"]
+                            findings = report["workers"][0]["findings"]
+                            self.assertEqual(
+                                [(f["kind"], f["name"], f["state"]) for f in findings],
+                                []
+                                if failed is None
+                                else [("command", failed, "incompatible")],
+                            )
+                            self.assertEqual(
+                                before,
+                                {p.name: p.read_bytes() for p in tools.iterdir()},
+                            )
+                    (tools / "git.exe.version").write_text("git version 2.43.0")
+                    output, errors = io.StringIO(), io.StringIO()
+                    status = main((*arguments, "--apply"), stdout=output, stderr=errors)
+                    result = json.loads(output.getvalue() or errors.getvalue())
+                    self.assertEqual(status, 0, result)
+                    self.assertTrue(result["result"]["aligned"], result)
+                    self.assertEqual(
+                        (tools / "git.exe.version").read_text(), "git version 2.56.0"
+                    )
+                    self.assertEqual(
+                        (tools / "git-lfs.version").read_text(), "git-lfs/3.4.1"
+                    )
+            finally:
+                os.chdir(previous)
+
     def test_inspect_reports_gaps_and_apply_closes_only_declared_ones(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)

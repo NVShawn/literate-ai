@@ -40,6 +40,9 @@ class NativeCliAcceptanceTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
+        if sys.platform.startswith("linux"):
+            # Real inherited setgid must not change the fixture's declared modes.
+            self.root.chmod(0o2700)
         self.path = self.root / "native.json"
         self.entrypoint = Entrypoint("run", NATIVE_CLI_ENTRYPOINT_KIND, "bin/native")
         self.specification = canonical_identity("specification")
@@ -153,6 +156,7 @@ class NativeCliAcceptanceTests(unittest.TestCase):
             "import os,pathlib,sys; "
             "source=pathlib.Path(sys.argv[1]).read_bytes(); "
             "target=pathlib.Path(sys.argv[2]); target.parent.mkdir(mode=0o755); "
+            "target.parent.chmod(0o755); "
             "target.write_bytes(source+sys.stdin.buffer.read()); target.chmod(0o640); "
             + ("pathlib.Path('rogue').write_text('undeclared'); " if rogue else "")
             + "print('done '+os.environ['NATIVE_MODE'])"

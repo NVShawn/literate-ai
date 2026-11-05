@@ -2677,6 +2677,23 @@ def _declared_oracle_schema(path: Path) -> str | None:
     return None
 
 
+def load_versioned_library_acceptance(path, component_name, *, read_bytes=None):
+    """Dispatch only an explicit version; the closed v1 reader is unchanged."""
+    from literate_ai.adapters.rust_library_acceptance import (
+        RUST_LIBRARY_SCHEMA,
+        load_rust_library_acceptance,
+    )
+
+    document = _read_document(
+        path,
+        expected_schema=(LIBRARY_SCHEMA, RUST_LIBRARY_SCHEMA),
+        read_bytes=read_bytes,
+    )
+    if document["schema"] == RUST_LIBRARY_SCHEMA:
+        return load_rust_library_acceptance(path, component_name, read_bytes=read_bytes)
+    return load_library_acceptance(path, component_name, read_bytes=read_bytes)
+
+
 def resolve_component_acceptance_oracle(
     project_root: Path, specification: str, component_lock: ComponentLock
 ) -> (
@@ -2796,8 +2813,11 @@ def resolve_component_acceptance_oracle(
     path = oracle_path(project_root, name)
     if not path.is_file():
         return None
-    if _declared_oracle_schema(path) == LIBRARY_SCHEMA:
-        return load_library_acceptance(path, name)
+    if _declared_oracle_schema(path) in {
+        LIBRARY_SCHEMA,
+        "literate-ai/library-acceptance-oracle@2",
+    }:
+        return load_versioned_library_acceptance(path, name)
     return load_lint_render_acceptance(path, name, project_root)
 
 

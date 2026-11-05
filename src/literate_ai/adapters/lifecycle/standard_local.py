@@ -8108,6 +8108,30 @@ class LocalStandardLifecyclePorts:
 
     def _accept_library(
         self,
+        component_lock,
+        custody,
+        package_plan,
+        package_result,
+        oracle,
+        root_integration_test_identity,
+        packaged_execution_identity,
+    ):
+        # The original v2 capture remains live through the actual case decision
+        # and evidence publication; neither an archive nor a returned DTO owns it.
+        with ExitStack() as contexts:
+            return self._accept_library_observed(
+                component_lock,
+                custody,
+                package_plan,
+                package_result,
+                oracle,
+                root_integration_test_identity,
+                packaged_execution_identity,
+                contexts,
+            )
+
+    def _accept_library_observed(
+        self,
         component_lock: ComponentLock,
         custody: LocalProjectPackageCustody,
         package_plan: PackagePlan,
@@ -8115,6 +8139,7 @@ class LocalStandardLifecyclePorts:
         oracle: object,
         root_integration_test_identity: ContentIdentity,
         packaged_execution_identity: ContentIdentity,
+        verifier_contexts: ExitStack,
     ) -> ContentIdentity:
         """Run one verifier-owned in-language harness against the sealed package."""
 
@@ -8196,6 +8221,28 @@ class LocalStandardLifecyclePorts:
             "cpp": ".cpp",
             "elixir": ".exs",
         }[oracle.language]
+        from literate_ai.adapters.rust_library_acceptance import RustLibraryAcceptance
+
+        rust_v2 = type(oracle) is RustLibraryAcceptance
+        rust_target = None
+        original_rust_compiler = None
+        if rust_v2:
+            rust_target = getattr(self, "cargo_targets", {}).get(
+                component_lock.root_revision.uri
+            )
+            original_compilers = getattr(self, "_rust_harness_compilers", None)
+            if (
+                rust_target is None
+                or not rust_target.library
+                or original_compilers is None
+            ):
+                raise LocalStandardLifecycleError(
+                    "original measured Rust compiler observation required"
+                )
+            # Refuse a copied/forked/missing measurement before native version
+            # probes or temporary verifier output. The selected original owner
+            # is checked again under the executor's actual child environment.
+            original_rust_compiler = original_compilers.require_compiler(rust_target)
         acceptance_toolchain = contract.library_acceptance_toolchain_identity
         assert acceptance_toolchain is not None
         binding = self.tool_bindings[acceptance_toolchain.uri]
@@ -8204,7 +8251,21 @@ class LocalStandardLifecyclePorts:
         environment.pop("PYTHONPATH", None)
         environment.pop("NODE_PATH", None)
         environment["PYTHONDONTWRITEBYTECODE"] = "1"
-        temporary = Path(tempfile.mkdtemp(prefix="litai-library-acceptance-"))
+        temporary = Path(
+            tempfile.mkdtemp(
+                prefix="litai-library-acceptance-",
+                # Native metadata must name the same physical coordinates as
+                # the held v2 input observers (macOS commonly aliases /var).
+                # Resolve the parent BEFORE exclusively creating our new child;
+                # never resolve/adopt a possibly replaced temporary child.
+                dir=Path(tempfile.gettempdir()).resolve(strict=True)
+                if rust_v2
+                else None,
+            )
+        )
+        rust_observation = None
+        if rust_v2:
+            verifier_contexts.callback(shutil.rmtree, temporary, ignore_errors=True)
         try:
             harness = temporary / f"harness{suffix}"
             harness.write_bytes(oracle.harness_content)
@@ -8248,48 +8309,113 @@ class LocalStandardLifecyclePorts:
                     cases_document,
                 )
             elif oracle.language == "rust":
-                targets = getattr(self, "cargo_targets", {})
-                target = targets.get(component_lock.root_revision.uri)
-                if target is None or not target.library:
-                    raise LocalStandardLifecycleError(
-                        "Rust library acceptance requires exact Cargo authority"
+                if rust_v2:
+                    from literate_ai.adapters.rust_library_harness_execution import (
+                        execute_rust_library_harness,
                     )
-                manifest = export.joinpath(*PurePosixPath(target.manifest).parts)
-                try:
-                    package_name = tomllib.loads(manifest.read_text(encoding="utf-8"))[
-                        "package"
-                    ]["name"]
-                except (OSError, KeyError, TypeError, tomllib.TOMLDecodeError) as exc:
-                    raise LocalStandardLifecycleError(
-                        "Rust library package manifest is invalid"
-                    ) from exc
-                (temporary / "src").mkdir()
-                harness.replace(temporary / "src/main.rs")
-                (temporary / "Cargo.toml").write_text(
-                    '[package]\nname="litai-library-acceptance"\nversion="0.0.0"\n'
-                    'edition="2021"\n[dependencies]\n'
-                    + surface.package
-                    + "={package="
-                    + json.dumps(package_name)
-                    + ",path="
-                    + json.dumps(str(manifest.parent))
-                    + "}\n",
-                    encoding="utf-8",
-                )
-                command = (
-                    *binding.command,
-                    "run",
-                    "--quiet",
-                    "--offline",
-                    "--manifest-path",
-                    str(temporary / "Cargo.toml"),
-                    "--target-dir",
-                    str(temporary / "target"),
-                    "--",
-                    str(export),
-                    surface_document,
-                    cases_document,
-                )
+
+                    target = rust_target
+                    assert target is not None and original_rust_compiler is not None
+                    compiler = LocalComponentToolBinding.from_observed_toolchain(
+                        original_rust_compiler
+                    )
+                    if target.rustc_command != compiler.command:
+                        raise LocalStandardLifecycleError(
+                            "exact Rust compiler required"
+                        )
+                    resources = getattr(custody, "native_sdk_resources", None)
+                    if resources is not None and resources.inputs:
+                        raise LocalStandardLifecycleError(
+                            "Rust v2 requires its exact verifier-owned input scopes"
+                        )
+
+                    def require_library_current():
+                        binding.require_unchanged()
+                        if local_tree_identity(custody.root) != custody.tree_identity:
+                            raise LocalStandardLifecycleError(
+                                "Rust verifier immutable package custody changed"
+                            )
+                        if oracle.identity != oracle_identity:
+                            raise LocalStandardLifecycleError(
+                                "Rust verifier oracle changed"
+                            )
+
+                    def record_rust_bytes(content):
+                        if self._evidence_recorder is not None:
+                            return self._evidence_recorder.remember_bytes(content)
+                        return ContentIdentity.parse_uri(
+                            "sha256:" + hashlib.sha256(content).hexdigest()
+                        )
+
+                    completed, rust_observation = verifier_contexts.enter_context(
+                        execute_rust_library_harness(
+                            oracle,
+                            stage=temporary,
+                            export=export,
+                            library_manifest=export.joinpath(
+                                *PurePosixPath(target.manifest).parts
+                            ),
+                            library_alias=surface.package,
+                            cargo=binding,
+                            rustc=compiler,
+                            cases_document=cases_document,
+                            surface_document=surface_document,
+                            environment=environment,
+                            require_library_current=require_library_current,
+                            record_bytes=record_rust_bytes,
+                            evidence_root=self.object_root
+                            / "rust-library-acceptance-evidence",
+                            allow_host_execution=True,
+                        )
+                    )
+                else:
+                    targets = getattr(self, "cargo_targets", {})
+                    target = targets.get(component_lock.root_revision.uri)
+                    if target is None or not target.library:
+                        raise LocalStandardLifecycleError(
+                            "Rust library acceptance requires exact Cargo authority"
+                        )
+                    manifest = export.joinpath(*PurePosixPath(target.manifest).parts)
+                    try:
+                        package_name = tomllib.loads(
+                            manifest.read_text(encoding="utf-8")
+                        )["package"]["name"]
+                    except (
+                        OSError,
+                        KeyError,
+                        TypeError,
+                        tomllib.TOMLDecodeError,
+                    ) as exc:
+                        raise LocalStandardLifecycleError(
+                            "Rust library package manifest is invalid"
+                        ) from exc
+                    (temporary / "src").mkdir()
+                    harness.replace(temporary / "src/main.rs")
+                    (temporary / "Cargo.toml").write_text(
+                        '[package]\nname="litai-library-acceptance"\nversion="0.0.0"\n'
+                        'edition="2021"\n[dependencies]\n'
+                        + surface.package
+                        + "={package="
+                        + json.dumps(package_name)
+                        + ",path="
+                        + json.dumps(str(manifest.parent))
+                        + "}\n",
+                        encoding="utf-8",
+                    )
+                    command = (
+                        *binding.command,
+                        "run",
+                        "--quiet",
+                        "--offline",
+                        "--manifest-path",
+                        str(temporary / "Cargo.toml"),
+                        "--target-dir",
+                        str(temporary / "target"),
+                        "--",
+                        str(export),
+                        surface_document,
+                        cases_document,
+                    )
             else:
                 command = (
                     *binding.command,
@@ -8319,7 +8445,9 @@ class LocalStandardLifecyclePorts:
                     cases_document,
                 )
             resources = getattr(custody, "native_sdk_resources", None)
-            if resources is not None and resources.inputs:
+            if rust_observation is not None:
+                pass
+            elif resources is not None and resources.inputs:
                 with self._packaged_sdk_command(
                     custody,
                     ComponentCommandPhase.EXECUTE,
@@ -8344,7 +8472,8 @@ class LocalStandardLifecyclePorts:
                     timeout=60,
                 )
         finally:
-            shutil.rmtree(temporary, ignore_errors=True)
+            if not rust_v2:
+                shutil.rmtree(temporary, ignore_errors=True)
         binding.require_unchanged()
         if completed.returncode != 0:
             raise LocalStandardLifecycleError(
@@ -8422,9 +8551,20 @@ class LocalStandardLifecyclePorts:
         )
         return self._record_evidence(
             {
-                "schema": "literate-ai/local-independent-library-acceptance@1"
+                "schema": "literate-ai/local-independent-library-acceptance@3"
+                if rust_observation is not None
+                else "literate-ai/local-independent-library-acceptance@1"
                 if sdk_execution is None
                 else "literate-ai/local-independent-library-acceptance@2",
+                **(
+                    {
+                        "rust_harness_execution_identity": self._record_evidence(
+                            rust_observation
+                        ).uri
+                    }
+                    if rust_observation is not None
+                    else {}
+                ),
                 **sdk_fields,
                 "package_plan_identity": package_plan.identity.uri,
                 "package_result_identity": package_result.identity.uri,

@@ -1227,7 +1227,7 @@ def project_test_receipt_from_args(args) -> dict[str, Any]:
 
         return publish_evidence_from_args(args)
 
-    if args.test_receipt_command in {"run-retained", "update", "promote-retained"}:
+    if args.test_receipt_command in {"run-retained", "update"}:
         from literate_ai.adapters.lifecycle_lock import (
             ProjectLifecycleLockError,
             project_lifecycle_lock,
@@ -1248,7 +1248,14 @@ def project_test_receipt_from_args(args) -> dict[str, Any]:
 def _project_test_receipt_from_args(args) -> dict[str, Any]:
     selected = Path(args.project)
     try:
-        project_revision_identity = adapter_project_authority_identity(selected)
+        authority_options = (
+            {"synchronize_source_intelligence": False}
+            if args.test_receipt_command == "promote-retained"
+            else {}
+        )
+        project_revision_identity = adapter_project_authority_identity(
+            selected, **authority_options
+        )
     except ProjectValidationError as exc:
         raise CliFailure(exc.code, exc.message) from exc
     try:

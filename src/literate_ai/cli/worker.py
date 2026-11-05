@@ -199,6 +199,7 @@ def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
     """Inventory and optionally align workers with every declared expectation."""
 
     import os
+    from importlib.resources import files
 
     from literate_ai.adapters.live_test_selection import try_resolve_live_test_selection
     from literate_ai.adapters.models.coding_cli import CodingCliError
@@ -208,6 +209,9 @@ def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
         WorkerAligner,
         WorkerAlignmentError,
         WorkerTemplate,
+    )
+    from literate_ai.bootstrap.host_install_requirements import (
+        parse_base_toolchain_sbom,
     )
     from literate_ai.projects import ProjectError, discover_project
 
@@ -236,6 +240,18 @@ def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
             if default_template.exists()
             else WorkerTemplate({})
         )
+        baseline = parse_base_toolchain_sbom(
+            json.loads(
+                files("literate_ai.project_template")
+                .joinpath("flavors", "os-base", "toolchain.cdx.json")
+                .read_text(encoding="utf-8")
+            )
+        )
+        repository_tools = tuple(
+            item
+            for item in baseline.capabilities
+            if item.capability in {"git", "git-lfs"}
+        )
         alignment = UserAlignment.load(
             Path(args.alignment)
             if args.alignment
@@ -252,6 +268,7 @@ def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
         UserAssetPathError,
         ExecutionDispatchAdapterError,
         CodingCliError,
+        OSError,
         ValueError,
     ) as exc:
         raise CliFailure(
@@ -264,6 +281,7 @@ def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
         coding_cli=None if selection is None else selection.coding_cli,
         model=None if selection is None else selection.model,
         cwd=project.root,
+        repository_tools=repository_tools,
     )
     report = aligner.align(workers, apply=args.apply, check_model=not args.skip_model)
     return report, 0 if report["aligned"] else 1

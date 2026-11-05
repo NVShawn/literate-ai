@@ -27,12 +27,21 @@ from .execution_workers import (
 
 def retained_project_requested(args: Any) -> bool:
     """Keep explicit, even empty, retained selectors out of generated execution."""
-    return bool(getattr(args, "retained_project_plan", False)) or any(
+    return (
+        bool(getattr(args, "retained_project_plan", False))
+        or bool(getattr(args, "retain_promotion_evidence", False))
+    ) or any(
         getattr(args, key, None) is not None
         for key in (
             "retained_project",
             "retained_project_profile",
             "authorize_retained_project",
+            "promotion_maximum_metadata_bytes",
+            "promotion_maximum_memory_bytes",
+            "promotion_maximum_document_bytes",
+            "promotion_maximum_payload_bytes",
+            "promotion_max_closure_steps",
+            "promotion_timeout_seconds",
         )
     )
 
@@ -128,6 +137,31 @@ def _current_authority_factory(project: Any, binding: Any, args: Any):
     return current_authority
 
 
+def _promotion_read_policy(args):
+    from literate_ai.adapters.retained_receipt_promotion_evidence import (
+        RetainedPromotionReadPolicy,
+    )
+
+    defaults = RetainedPromotionReadPolicy()
+    return RetainedPromotionReadPolicy(
+        **{
+            name: (
+                getattr(defaults, name)
+                if getattr(args, "promotion_" + name, None) is None
+                else getattr(args, "promotion_" + name)
+            )
+            for name in (
+                "maximum_metadata_bytes",
+                "maximum_memory_bytes",
+                "maximum_document_bytes",
+                "maximum_payload_bytes",
+                "max_closure_steps",
+                "timeout_seconds",
+            )
+        }
+    )
+
+
 def retained_project_from_args(
     project: Any, binding: Any, args: Any
 ) -> dict[str, object]:
@@ -150,6 +184,9 @@ def retained_project_from_args(
         )
         from literate_ai.storage.cas import StorageError
 
+        retain_promotion = bool(getattr(args, "retain_promotion_evidence", False))
+        promotion_references = []
+        promotion_policy = _promotion_read_policy(args) if retain_promotion else None
         health = admit_execution_worker_health(args, worker, plan.identity)
         try:
             directories = select_cache_directories(
@@ -175,6 +212,10 @@ def retained_project_from_args(
                     operator_environment=dict(os.environ),
                     sdk_project=project,
                     sdk_binding=binding,
+                    promotion_evidence_consumer=(
+                        promotion_references.append if retain_promotion else None
+                    ),
+                    promotion_evidence_policy=promotion_policy,
                 ),
             )
         except (
@@ -200,6 +241,11 @@ def retained_project_from_args(
             "release_authorized": False,
             "worker_health": health,
             "worker_health_polls": list(polls),
+            **(
+                {"promotion_evidence": promotion_references[0].to_dict()}
+                if retain_promotion
+                else {}
+            ),
         }
     except CliFailure:
         raise
@@ -236,17 +282,52 @@ def promote_retained_receipt_from_args(project: Any, binding: Any, args: Any) ->
             raise ValueError(
                 "--retained-project and --retained-project-profile are required"
             )
-        _manifest, worker, planning = _current_authority_factory(
-            project, binding, args
-        )()
+        current_authority = _current_authority_factory(project, binding, args)
+        _manifest, worker, planning = current_authority()
+        if worker.worker.is_remote:
+            raise ValueError("retained.promotion.authenticated-remote-ingress-required")
         locks = current_project_component_locks(project)
         lock_ids = tuple(sorted((lock.identity for lock in locks), key=lambda i: i.uri))
         from literate_ai.adapters.project_validation import (
             validated_project_authority_identity as adapter_identity,
         )
 
-        revision = promoted_project_revision(adapter_identity(project.root), lock_ids)
+        authority_identity = adapter_identity(
+            project.root, synchronize_source_intelligence=False
+        )
+        revision = promoted_project_revision(authority_identity, lock_ids)
+
+        def current():
+            if (
+                adapter_identity(project.root, synchronize_source_intelligence=False)
+                != authority_identity
+            ):
+                raise ValueError("retained.promotion.project-authority-changed")
+            current_manifest, current_worker, current_planning = current_authority()
+            if (
+                current_manifest != _manifest
+                or current_planning.plan != planning.plan
+                or current_worker.worker.identity != worker.worker.identity
+                or tuple(current_project_component_locks(project)) != tuple(locks)
+            ):
+                raise ValueError("retained.promotion.current-authority-differs")
+            if (
+                adapter_identity(project.root, synchronize_source_intelligence=False)
+                != authority_identity
+            ):
+                raise ValueError("retained.promotion.project-authority-changed")
+
+        current()
         store = FileSystemCAS(Path(args.custody_root), create=False)
+        from literate_ai.adapters.retained_sdk_authority import (
+            current_retained_sdk_snapshots,
+        )
+
+        sdk_snapshots = (
+            current_retained_sdk_snapshots(project, locks)
+            if any(member.role == "sdk-policy" for member in _manifest.members)
+            else ()
+        )
         verified = verify_retained_run(
             store,
             ContentIdentity.parse_uri(args.retained_receipt),
@@ -255,6 +336,12 @@ def promote_retained_receipt_from_args(project: Any, binding: Any, args: Any) ->
             planning=planning,
             component_locks=locks,
             test_receipt_policy=policy,
+            promotion_evidence_identity=ContentIdentity.parse_uri(
+                args.promotion_evidence
+            ),
+            require_current=current,
+            read_policy=_promotion_read_policy(args),
+            current_sdk_snapshots=sdk_snapshots,
             expected_plan_identity=(
                 ContentIdentity.parse_uri(args.plan) if args.plan else None
             ),
@@ -268,11 +355,19 @@ def promote_retained_receipt_from_args(project: Any, binding: Any, args: Any) ->
             receipt_policy=policy,
         )
         validate_project_test_receipt_finalized_value(
-            project, candidate, project_revision_identity=adapter_identity(project.root)
+            project,
+            candidate,
+            project_revision_identity=adapter_identity(
+                project.root, synchronize_source_intelligence=False
+            ),
         )
+        current()
         if not args.dry_run:
             write_project_test_receipt_finalized_candidate(
-                Path(args.candidate), candidate
+                Path(args.candidate),
+                candidate,
+                require_current=current,
+                external_project_root=project.root,
             )
     except CliFailure:
         raise

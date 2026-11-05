@@ -44,7 +44,12 @@ def _node(metadata):
 def _private_directory(path):
     require_safe_directory(path)
     metadata = path.lstat()
-    if metadata.st_uid != os.geteuid() or stat.S_IMODE(metadata.st_mode) != 0o700:
+    # Setgid inheritance selects the group of future children; it grants no
+    # group access. Preserve the actual full mode in the custody identity.
+    if (
+        metadata.st_uid != os.geteuid()
+        or stat.S_IMODE(metadata.st_mode) & ~stat.S_ISGID != 0o700
+    ):
         raise ValueError("html.tree.private-state-directory-required")
     return _node(metadata)
 

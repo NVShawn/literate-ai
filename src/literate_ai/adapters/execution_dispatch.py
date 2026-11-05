@@ -309,21 +309,23 @@ def _validated_result(
                 "execution.dispatcher_artifact_missing",
                 "successful lifecycle dispatches must identify their exact artifact",
             )
-        if (
-            request.action is LifecycleDispatchAction.RUN
-            and result.artifact_reference != request.artifact_reference
-        ):
-            raise ExecutionDispatchAdapterError(
-                "execution.dispatcher_artifact_mismatch",
-                "successful run dispatch must preserve its exact input artifact",
-            )
     elif (
         result.status is not DispatchResultStatus.PASSED
         and result.artifact_reference is not None
+        and request.action is not LifecycleDispatchAction.RUN
     ):
         raise ExecutionDispatchAdapterError(
             "execution.dispatcher_artifact_untrusted",
             "unsuccessful dispatches cannot publish an accepted artifact export",
+        )
+    if (
+        request.action is LifecycleDispatchAction.RUN
+        and result.artifact_reference is not None
+        and result.artifact_reference != request.artifact_reference
+    ):
+        raise ExecutionDispatchAdapterError(
+            "execution.dispatcher_artifact_mismatch",
+            "run dispatch must preserve its exact input artifact",
         )
     return result
 

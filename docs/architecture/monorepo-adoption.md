@@ -11,6 +11,19 @@ Every command specifies `id`, `command`, project-relative `cwd`, and a source-fi
 `evidence` path. Commands are operator-reviewed declarations, not qualification;
 planning never executes them. Duplicate stage IDs within a Component are invalid.
 
+A selection may contain one Component. For a single selected root, its explicit
+commands replace the corresponding detected baseline phases in the reviewed plan
+and actual conversion, including wrapper parity; all other detected phases remain.
+The selected commands and replaced detector commands remain visible in findings.
+The converter checks the quarantined bytes against the reviewed source membership
+before applying the selection. This permits scoped baseline testing of one Cargo
+workspace without inventing multiple roots or claiming coverage of unselected tests.
+If that final source check fails after quarantine, conversion refuses and retains
+the source, quarantine and partial scaffold for explicit recovery. It reports
+incomplete recovery and does not clear the root namespace, preserving concurrent
+files as well as changed quarantined inputs.
+Existing multi-root staging and receipt behavior is unchanged.
+
 Files beneath a selected root belong to that Component. Every remaining captured
 source file requires exactly one `shared_sources` assignment: `path` (a file or
 directory prefix), `owner` (Component name), and explicit `consumers` (other Component

@@ -48,8 +48,10 @@ from literate_ai.adapters.harness_workspace import (
 )
 from literate_ai.adapters.models.coding_cli import CODING_CLIS
 from literate_ai.adapters.monorepo_adoption import (
+    MonorepoAdoptionError,
     build_root_candidates,
     plan_monorepo_adoption,
+    single_root_baseline_inventory,
 )
 from literate_ai.adapters.project_validation import (
     FilesystemProjectValidationAdapter,
@@ -704,6 +706,7 @@ def plan_convert(
             submodules=list(submodules),
         )
     )
+    inventory = single_root_baseline_inventory(inventory, refinement)
     _policy, repository_default_branch = _conversion_repository_policy(
         root, default_branch
     )
@@ -2994,7 +2997,6 @@ class FilesystemProjectInitializationAdapter:
         except RoadmapDependencyError as exc:
             raise ProjectInitializationError(exc.code, exc.message) from exc
         if root_plan is not None:
-            from literate_ai.adapters.monorepo_adoption import MonorepoAdoptionError
             from literate_ai.adapters.monorepo_components import (
                 check_monorepo_retained_receipts,
                 run_component_retained_harness,
@@ -3123,6 +3125,29 @@ class FilesystemProjectInitializationAdapter:
             harness_inventory_document = inspect_harness(
                 resolved_target / str(quarantine["directory"])
             )
+            try:
+                harness_inventory_document = single_root_baseline_inventory(
+                    harness_inventory_document,
+                    (convert_readiness or {}).get("root_refinement"),
+                    current_source_root=resolved_target / str(quarantine["directory"]),
+                )
+            except (MonorepoAdoptionError, OSError) as exc:
+                # A source mismatch can accompany concurrent writes outside the
+                # quarantine. The general conversion rollback clears the root
+                # namespace, so it cannot safely recover this refusal. Retain all
+                # custody for explicit recovery instead of deleting foreign bytes.
+                raise ProjectInitializationError(
+                    getattr(exc, "code", "monorepo.source_changed"),
+                    conversion_failure_message(
+                        resolved_target,
+                        exc,
+                        recovery="incomplete",
+                        outcome=(
+                            "command selection refused; source, scaffold and "
+                            "quarantine retained; recovery incomplete"
+                        ),
+                    ),
+                ) from exc
             if harness_workspace_links:
                 harness_inventory_document["workspace_links"] = (
                     harness_workspace_link_evidence(harness_workspace_links)
@@ -3340,9 +3365,6 @@ class FilesystemProjectInitializationAdapter:
                 and monorepo_manifest is not None
                 and monorepo_staging is not None
             ):
-                from literate_ai.adapters.monorepo_adoption import (
-                    MonorepoAdoptionError,
-                )
                 from literate_ai.adapters.monorepo_components import (
                     install_monorepo_components,
                 )

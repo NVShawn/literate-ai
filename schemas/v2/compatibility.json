@@ -274,7 +274,11 @@
     "literate-ai/retained-tree-html-plan@1",
     "literate-ai/retained-tree-html-plan-result@1",
     "literate-ai/retained-tree-html-initial-result@1",
-    "literate-ai/retained-tree-html-apply-result@1"
+    "literate-ai/retained-tree-html-apply-result@1",
+    "literate-ai/retained-tree-html-freshness@1",
+    "literate-ai/retained-tree-html-check-result@1",
+    "literate-ai/project-verify@2",
+    "literate-ai/project-tree-html@1"
   ],
   "read_paths": [
     {

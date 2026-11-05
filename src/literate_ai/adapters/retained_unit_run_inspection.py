@@ -80,7 +80,9 @@ class _Reader:
     def raw(self, reference):
         self.guard()
         if not isinstance(reference, BlobRef) or reference.size > min(
-            64 * 1024**2, self.policy.max_provider_metadata_bytes
+            64 * 1024**2,
+            getattr(self.policy, "maximum_document_bytes", 64 * 1024**2),
+            self.policy.max_provider_metadata_bytes,
         ):
             raise ValueError("retained.unit.run-document-policy-exceeded")
         known_size = self.seen.get(reference.identity)
@@ -114,7 +116,7 @@ class _Reader:
         raw = self.raw(reference)
         if reference.identity not in self.documents:
             value = json.loads(raw)
-            if canonical_json_bytes(value) != raw:
+            if type(value) is not dict or canonical_json_bytes(value) != raw:
                 raise ValueError("retained.unit.canonical-run-document-required")
             self.documents[reference.identity] = value
         self.guard()
@@ -343,10 +345,56 @@ def reopen_retained_unit_run(
         )
         if observed.to_dict() != value or observed.identity.uri != identity:
             raise ValueError("retained.unit.test-assertion-differs")
+        report_path = dict(test_policy.reports).get(observed.report.action_id)
+        member = next(
+            (
+                member
+                for member in inputs.output_manifest.members
+                if member.path == report_path
+            ),
+            None,
+        )
+        if (
+            member is None
+            or member.symlink_target is not None
+            or observed.blob_identity.uri != "sha256:" + member.sha256
+        ):
+            raise ValueError("retained.unit.test-report-output-member-differs")
+        reference = BlobRef(member.sha256, member.size)
+        if reference.size > min(
+            16 * 1024**2, getattr(policy, "maximum_document_bytes", 64 * 1024**2)
+        ):
+            raise ValueError("retained.unit.test-report-document-policy-exceeded")
+
+        def unique_object(items):
+            result = {}
+            for key, item in items:
+                if key in result:
+                    raise ValueError("retained.unit.test-report-duplicate-key")
+                result[key] = item
+            return result
+
+        # Original reports follow their declared JSON protocol; whitespace and
+        # object key order need not be canonical. Read the SAME named CAS blob
+        # under the shared reader's byte/memory budget before parsing it.
+        actual_report = RetainedProjectTestReport.from_dict(
+            json.loads(reader.raw(reference), object_pairs_hook=unique_object)
+        )
+        if actual_report != observed.report:
+            raise ValueError("retained.unit.test-report-content-differs")
         reports.append(observed)
     accepted = []
-    for identity in cases:
+    for identity, case in zip(cases, expected_cases, strict=True):
         value = reader.record(identity)
+        if (
+            value["case_identity"] != case.identity.uri
+            or value["exit_code"] != case.expected_exit
+            or reader.reference(value["stdout_identity"]).size
+            != len(case.expected_stdout)
+            or reader.reference(value["stderr_identity"]).size
+            != len(case.expected_stderr)
+        ):
+            raise ValueError("retained.completion.acceptance-observation-mismatch")
         file_observation = value.get("filesystem_observation")
         files = None
         if file_observation is not None:

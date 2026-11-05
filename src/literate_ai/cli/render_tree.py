@@ -9,6 +9,7 @@ from pathlib import Path
 from literate_ai._cache_lock import CacheLockError
 from literate_ai._filesystem import UnsafeFilesystemPathError
 from literate_ai.adapters.html_tree_apply import apply_initial_html_tree
+from literate_ai.adapters.html_tree_freshness import check_published_html_tree
 from literate_ai.adapters.html_tree_render import (
     HtmlTreeRenderError,
     plan_html_tree_render,
@@ -39,13 +40,18 @@ def _constant(_value):
 def plan_tree_from_args(args):
     """Default to a read-only plan; apply only an exact fresh acknowledgement."""
     apply = bool(getattr(args, "apply", False))
+    check = bool(getattr(args, "check", False))
     schema = (
-        "literate-ai/retained-tree-html-apply-result@1"
+        "literate-ai/retained-tree-html-check-result@1"
+        if check
+        else "literate-ai/retained-tree-html-apply-result@1"
         if apply
         else "literate-ai/retained-tree-html-plan-result@1"
     )
     try:
         acknowledgement = getattr(args, "ack_plan", None)
+        if apply and check:
+            raise ValueError("html.tree.check-cannot-authorize-publication")
         if apply and acknowledgement is None:
             raise ValueError("html.tree.explicit-plan-acknowledgement-required")
         if not apply and acknowledgement is not None:
@@ -63,6 +69,14 @@ def plan_tree_from_args(args):
         declaration = HtmlTreeViewDeclaration.from_dict(
             json.loads(raw, object_pairs_hook=_pairs, parse_constant=_constant)
         )
+        if check:
+            freshness = check_published_html_tree(
+                Path(args.root),
+                declaration,
+                require_declaration_current=inputs.require_unchanged,
+            )
+            inputs.require_unchanged()
+            return {"schema": schema, "status": "current", "freshness": freshness}, 0
         if apply:
             publication = apply_initial_html_tree(
                 Path(args.root),
@@ -105,7 +119,11 @@ def plan_tree_from_args(args):
         RecursionError,
     ) as exc:
         code = (
-            "render.tree.apply_unavailable" if apply else "render.tree.plan_unavailable"
+            "render.tree.check_unavailable"
+            if check
+            else "render.tree.apply_unavailable"
+            if apply
+            else "render.tree.plan_unavailable"
         )
         detail = str(exc)
         if re.fullmatch(r"(?:html\.tree|tree\.shards)\.[A-Za-z0-9_.-]{1,160}", detail):
@@ -116,8 +134,17 @@ def plan_tree_from_args(args):
             "The declaration, source root, installed renderer or initial output "
             "coordinates could not be verified."
         )
+    stale = check and (
+        code.startswith(("html.tree.published-", "html.tree.foreign-published-"))
+        or code
+        in {
+            "html.tree.source-stale",
+            "html.tree.output-control-file-unsafe",
+            "html.tree.output-control-file-changed",
+        }
+    )
     return {
         "schema": schema,
-        "status": "refused",
+        "status": "stale" if stale else "refused",
         "refusal": {"code": code, "message": message},
     }, 1

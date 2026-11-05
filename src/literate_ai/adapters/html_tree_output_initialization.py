@@ -233,6 +233,15 @@ def _html_tree_capture_exclusions(owner, source, *, reserved_memory_bytes=0):
     saved manifests and manually constructed instances have no issuance entry.
     Complete owner checks remain required around each canonical inventory.
     """
+    from .html_tree_published_output import (
+        ReadOnlyHtmlTreeOutput,
+        _readonly_html_tree_capture_exclusions,
+    )
+
+    if type(owner) is ReadOnlyHtmlTreeOutput:
+        return _readonly_html_tree_capture_exclusions(
+            owner, source, reserved_memory_bytes=reserved_memory_bytes
+        )
     if type(owner) is not InitialHtmlTreeOutput:
         raise TypeError("html.tree.original-output-owner-required")
     selection = _CAPTURE_OWNERS.get(owner)
@@ -306,7 +315,9 @@ def initialize_html_tree_output(project_root, request, *, acknowledged_plan_iden
         if (
             namespace_node[0] != os.fstat(output_fd).st_dev
             or namespace_node[3] != os.geteuid()
-            or stat.S_IMODE(namespace_node[2]) != 0o700
+            # A private parent can pass setgid to this newly created child.
+            # Group/other permissions and other special bits remain refused.
+            or stat.S_IMODE(namespace_node[2]) & ~stat.S_ISGID != 0o700
         ):
             raise ValueError("html.tree.private-direct-output-namespace-required")
         descriptor = os.open(

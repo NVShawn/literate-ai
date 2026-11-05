@@ -278,9 +278,9 @@ def plan_monorepo_adoption(
     selection = _selection(selection_path)
     components = selection["components"]
     shared = selection["shared_sources"]
-    if not isinstance(components, list) or len(components) < 2:
+    if not isinstance(components, list) or not components:
         _fail(
-            "selection_invalid", "refinement requires at least two selected Components"
+            "selection_invalid", "refinement requires at least one selected Component"
         )
     if not isinstance(shared, list):
         _fail("selection_invalid", "shared_sources must be an explicit list")
@@ -438,3 +438,75 @@ def plan_monorepo_adoption(
         "blockers": [],
     }
     return {**plan, "plan_identity": canonical_identity(plan).uri}
+
+
+def single_root_baseline_inventory(
+    inventory: dict[str, Any],
+    refinement: dict[str, Any] | None,
+    *,
+    current_source_root: Path | None = None,
+) -> dict[str, Any]:
+    """Apply one reviewed root's command overrides without omitting other phases.
+
+    Planning supplies a freshly validated refinement. The converter also supplies
+    its quarantined source so a post-plan change cannot acquire the reviewed
+    commands or baseline authority. Multi-root conversion keeps its existing route.
+    """
+    if refinement is None or len(refinement["components"]) != 1:
+        return inventory
+    if inventory["source_scope"] != refinement["source_scope"]:
+        _fail("source_changed", "source scope changed after root command selection")
+    if (
+        current_source_root is not None
+        and _source_members(current_source_root, inventory["source_scope"]["paths"])
+        != refinement["source_members"]
+    ):
+        _fail("source_changed", "source bytes changed after root command selection")
+    component = refinement["components"][0]
+    overrides = {command["id"]: command for command in component["commands"]}
+    stages = []
+    emitted = set()
+    for stage in inventory["stages"]:
+        phase = stage["id"].split(".", 1)[0]
+        if phase not in overrides:
+            stages.append(stage)
+        elif phase not in emitted:
+            stages.append({**overrides[phase], "cost": "host-heavy"})
+            emitted.add(phase)
+    for phase, command in overrides.items():
+        if phase not in emitted:
+            stages.append({**command, "cost": "host-heavy"})
+    commands = {
+        key: value
+        for key, value in inventory["commands"].items()
+        if key.split(".", 1)[0] not in overrides
+    }
+    commands.update(overrides)
+    findings = list(inventory["findings"])
+    for phase, command in overrides.items():
+        previous = [
+            stage["command"]
+            for stage in inventory["stages"]
+            if stage["id"].split(".", 1)[0] == phase
+        ]
+        findings.append(
+            {
+                "detector_id": "baseline.reviewed-root-command",
+                "path": command["evidence"],
+                "detail": (
+                    f"Root selection {refinement['selection_identity']} selects "
+                    f"{phase}: {command['command']!r} at {command['cwd']!r}; "
+                    f"detected phase commands: {previous!r}. "
+                    "Only the selected command's coverage is qualified."
+                ),
+            }
+        )
+    from literate_ai.adapters.harness_inventory import classify_ci
+
+    return {
+        **inventory,
+        "findings": findings,
+        "commands": commands,
+        "stages": stages,
+        "ci": classify_ci(findings, commands),
+    }
