@@ -111,6 +111,11 @@ extends Goals 1, 4 and 6 with a public atomic transaction for adding an
 independently qualified native child to a qualified retained parent. Issue #315
 requires accepted design, implementation and native evidence before completion.
 
+SHADOW-001 extends Goals 1 and 4 with a separate repository that continually
+qualifies selected upstream branches and PRs, tests repairs and validates their
+export in the actual upstream layout. The directing user accepted ADR 0063;
+implementation, independent review and real Git/forge qualification remain open.
+
 CARGO-COMPAT-001 and COMMAND-WORKER-001 record the directing user's explicit
 acceptance of ADRs 0054 and 0055 for 1.4 under Goals 1, 4, 5 and 6.
 Reviewed Cargo compatibility and command-addressed remote workers remain open;
