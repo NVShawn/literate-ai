@@ -237,6 +237,15 @@
       },
       {
         "id": "WHEEL-RUNTIME-ENV-001"
+      },
+      {
+        "id": "LIBRARY-EXPORT-ORDER-001"
+      },
+      {
+        "id": "LIBRARY-IMPORT-ISOLATION-001"
+      },
+      {
+        "id": "QUALIFIED-CHILD-ADD-001"
       }
     ]
   }
