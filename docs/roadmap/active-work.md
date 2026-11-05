@@ -33897,12 +33897,13 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **GitHub issue:** [#316](https://github.com/jordanhubbard/literate-ai/issues/316)
 - **Owner:** Standard generic Python library verifier; PROJECT Goals 1 and 4
 - **Direction:** Reject undeclared Python modules supplied only by ambient PYTHONPATH while preserving standard-library and declared artifact imports.
-- **Conclusion:** The generic import driver currently inherits interpreter startup paths. Use isolated startup with site disabled and preserve exact artifact-origin and dependency checks; keep installed-wheel runtime qualification separate.
+- **Conclusion:** Main commit 328261aac already launches the generic Python library verifier with `-I -S -B`; its public command-projection regression rejects an ambient-only dependency while retaining standard-library imports and artifact-origin checks. Reconcile older draft PR #313 without regressing this boundary; keep installed-wheel runtime qualification separate.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Add a public ambient-module reproducer and isolated startup correction; qualify standard-library and artifact positives before integrating PR #313.
+- **Next action:** Preserve main's isolated generic verifier and ambient-module regression while reconciling draft PR #313, then qualify the integrated result.
 - **Implementation:**
-  - [ ] Reproduce issue #316 through the public generic import verifier, implement isolated startup, and retain a standard-library positive and ambient-dependency refusal.
+  - [x] Isolate generic Python verifier startup and add ambient-dependency refusal in main at 328261aac.
+  - [ ] Preserve the isolated launch, standard-library positive, artifact-origin check and ambient-dependency refusal in the integrated candidate.
 - **Evidence:**
   - [ ] Run managed positive and negative controls, installed wheel and supported-platform qualification, independent review, full required regression and exact-head CI.
 
