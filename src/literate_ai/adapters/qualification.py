@@ -18,7 +18,7 @@ from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.component_acceptance import (
     ComponentAcceptanceError,
     LibraryAcceptance,
-    load_library_acceptance,
+    load_versioned_library_acceptance,
     oracle_path,
     root_component_name,
 )
@@ -287,7 +287,7 @@ def _qualification_acceptance_oracle(
         return FilesystemQualificationAcceptanceOracle(profile, locked.lock)
     name = root_component_name(locked.lock)
     try:
-        oracle = load_library_acceptance(
+        oracle = load_versioned_library_acceptance(
             oracle_path(project.root, name),
             name,
             **({} if read_bytes is None else {"read_bytes": read_bytes}),

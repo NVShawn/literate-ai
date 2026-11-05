@@ -7,7 +7,14 @@
   all direct byte, dependency, SDK, tool, revocation and deadline checks. Custom
   callbacks retain independent replanning; plan values grant no execution.
 
+- Host bootstrap requires Git 2.47 or newer and Git LFS 3.2 or newer for
+  scoped ownership checks and complete JSON LFS inventories. Worker alignment
+  reports incompatible selected Git/LFS tools and rechecks declared repairs.
+
+- Python library qualification retains standard-library imports while preserving isolated startup and exact artifact-origin checks (#306).
+
 - Command workers preserve normal failed RUN diagnostics with the original input artifact reference, while retaining pre-execution failures and rejecting failed build/test artifact exports.
+- Worker-alignment and retained-receiver test fixtures use portable declared remote workspaces while preserving native local paths.
 
 - Windows coding-agent test compilers retain configured temporary/system variables while applying MSVC overrides.
 
@@ -29,6 +36,8 @@
   the same typed worker selection and plan. Capability publication, reservation
   and execution still reopen current authority; no preparation is cached.
 
+- Add real-CAS contract controls for retained SDK metadata batching, overflow fallback, canonical bytes and strict currentness/custody refusal.
+
 - Batch retained SDK command metadata under the original live owner while preserving full boundary currentness and exact evidence identities.
 
 - Remote retained SDK producer and consumer grants honor the original action's
@@ -38,6 +47,13 @@
 
 - Worker alignment uses the discovered coding CLI executable for its help and
   model checks, including declared Windows tool locations outside `PATH`.
+
+- `litai project test-receipt promote-retained` re-verifies an admitted
+  retained-project run against the current project and its receipt policy and writes
+  the finalized candidate that `project test-receipt update` accepts (issue #295; ADR
+  0060 accepted). Promotion performs no build, test, acceptance, SDK, model or
+  worker execution; trusted bounded read-only metadata helpers remain permitted.
+  The exact project policy still applies.
 
 - Windows compiler preflight finds native Visual Studio toolsets outside `PATH`
   before acquisition, preserving explicit compiler selections. C++ developer
@@ -55,6 +71,9 @@
 - Published retained-tree HTML can be checked without writable caches or restored
   publication ownership. Projects can opt into a bounded tree-declaration registry
   and an additive freshness gate while legacy verification reports stay unchanged.
+- Add owned POSIX fault controls for retained-tree HTML source recapture, index substitution, generation custody and unpublished budget failures.
+
+- Add bounded retained-tree HTML plans and acknowledged initial offline publication. Recovery, per-unit joins and native/browser qualification remain open.
 
 - Bare Component runs resolve their declared demonstration inputs from the
   Component name even when selected through a project-relative path. Remote

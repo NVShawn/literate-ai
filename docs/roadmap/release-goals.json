@@ -216,6 +216,21 @@
       },
       {
         "id": "WORKER-GPU-MEMORY-002"
+      },
+      {
+        "id": "PYTHON-LIBRARY-IMPORT-001"
+      },
+      {
+        "id": "GIT-TOOL-CAPABILITY-001"
+      },
+      {
+        "id": "RETAINED-PYTHON-BRIDGE-001"
+      },
+      {
+        "id": "RUST-HARNESS-DEPS-001"
+      },
+      {
+        "id": "RETAINED-RECEIPT-PROMOTE-001"
       }
     ]
   }

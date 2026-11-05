@@ -32167,6 +32167,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
 
+- **2026-11-04 current-source forward integration (in progress):** Preserve the exact `731c755` Linux validation, installed-wheel and public-export pass (2,581 passed, 100 declared skips, all 5,235 authored inputs unchanged) separately from its full platform CI result: 26 successful jobs and one failing Windows shard, where five model-probe subtests reject a native Windows path as their declared remote SSH workspace. The compiler fixture now builds; do not relabel that source as fully qualified. Collect the independently reviewed receiver-planning and SDK-metadata batches, nine real-CAS contract controls, source-equivalent current MSVC history, the accepted initial retained-tree HTML slice with six POSIX custody controls, and the reviewed setup-uv action pin. Preserve published v1 schemas and both installed catalog/host and tree journeys. Correct only the two test fixtures' declared remote workspace values to explicit home-relative coordinates; preserve native local paths, the strict worker contract, all cases and all guards. A separate native fixture proof stopped before class setup because its isolated existing-Python environment lacked framework dependencies; retain its setup failure and claim no original/corrected native result. Require final source composition review, supported authority records, fresh whole-source qualification and exact required CI before landing. Original native scale/PACKAGE/VERIFY obligations, worktree completeness/retirement and unaccepted ADR decisions remain open; no release publication is claimed.
+
 - **2026-11-04 Windows fixture correction (in progress):** Retain failed full-source Windows job `126518187197` at `bd535fd` (819 passes, 164 skips, one setup error). The native coding-agent fixture replaces the complete process environment with nonempty MSVC compiler overrides, dropping temporary/system variables; actual `cl` reports D8037. Reuse the production compiler-environment merger, preserve configured temporary/system variables and vendor override precedence, and qualify deterministic nonempty-override controls plus actual Windows compilation before a new full source/matrix run. This is a fixture repair; production compiler policy and genuine missing-tool skips remain unchanged.
 
 - **2026-11-04 owned integration candidate (in progress):** Consolidate reviewed CPP argument repair, bounded worktree operation custody, canonical composed-package directory modes, GPU observation evidence, Rust adoption inventory, and installed catalog/selected-shim status coverage through ordinary histories. [Source composition](../../verification/reviewed-blocker-integration-composition.json) records every inherited scope, the two reviewed smoke scripts and six files from accepted SDK-deadline main `ff08e9b`, relative to intermediate source `3686f30`. Independent source review passes; the separate `3686f30` and `bd535fd` gates remain intermediate evidence and cannot qualify this accepted-main union by relabeling. Require one fresh complete final-source qualification and exact full remote CI before main, followed by exact post-main gates. Historical installed Darwin and native observations retain their original source/artifact boundaries. The remaining native/package goals and proposed ADR 0053 stay open; this integration does not authorize publication.
@@ -33029,7 +33031,10 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 - **2026-11-04 portable permission repair (in progress):** The isolated Linux full gate at source `34fdf1f` stops after 1,566 cases (one error, 82 declared skips): composed package staging creates directories with ambient umask `0002`, yielding mode `0775` where the canonical package projection requires `0755`. A controlled unchanged-source replay reproduces the same mismatch. Normalize only the owned package staging directories to their projected modes before independent verification; exercise permissive and restrictive umasks and preserve refusal of later mode tampering. This repairs portable package construction, not the outstanding native scale/transport acceptance. Retain the original full failure; require independent source review, focused controls, fresh full regression and exact CI before qualification.
 
-- **2026-11-04 receiver planning refinement (in progress):** Prepare the canonical execution request and authorization once per receiver construction and retain the same actual typed worker selection and planning result within that invocation. This removes the second complete constructor plan without caching authority across calls. Full currentness checks before and after capability publication, reservation preflight, child execution and evidence production remain required. The focused public execution/verification preview and nonce-publication controls pass both methods in 29.682 seconds, including ten real source, profile, catalog, SDK-policy and registration mutation subcases before or during encoding. Project validation and original adoption use their real owners; only the external Standard distribution binding is test trust. Eight existing Component-lock controls pass in 4.060 seconds after shared-fixture extraction. Independent review, canonical pin renewal and the full contributor gate remain pending. The running installed source-scale qualification and its original attempts remain unchanged; no new native or release result is claimed.
+- **2026-11-04 receiver planning refinement (in progress):** Prepare the canonical execution request and authorization once per receiver construction and retain the same actual typed worker selection and planning result within that invocation. This removes the second complete constructor plan without caching authority across calls. Full currentness checks before and after capability publication, reservation preflight, child execution and evidence production remain required. The focused public execution/verification preview and nonce-publication controls pass both methods in 29.682 seconds, including ten real source, profile, catalog, SDK-policy and registration mutation subcases before or during encoding. Project validation and original adoption use their real owners; only the external Standard distribution binding is test trust. Eight existing Component-lock controls pass in 4.060 seconds after shared-fixture extraction. Independent review, canonical pin renewal and the full contributor gate remain pending. The producer recorded the installed source-scale qualification as running at that historical checkpoint; current remote liveness is unverified and original attempts retain their recorded outcomes. No new native or release result is claimed.
+
+- **SDK batch contract-control intent:** Add focused real-CAS controls for the reviewed metadata writer without launching SDK processes: compare batch and guarded legacy canonical bytes, force overflow and require abandoned-factory closure before any write, reject short/long factories and incorrect CAS results, and preserve receiver custody and before/after currentness failures. Production behavior remains unchanged unless a concrete defect is established. These controls complement the existing real-command mutation tests; they do not qualify source-scale native PACKAGE, VERIFY, installed distributions or release readiness. Combined-source qualification remains separate.
+- **SDK batch contract-control outcome:** Nine focused controls pass with zero skips through the managed `make python-check` gate. Actual filesystem CAS bytes and identities match batch and original per-record retention; forced overflow closes the abandoned generator before any write and rechecks original per-record authority. Short/long factories, wrong returned digest/size, custody loss before the second write and full currentness failures before/after writes all refuse returned evidence; already written immutable blobs remain verifiable. Boundary guards are explicit stand-ins, with no native SDK process or admission constructed. Repository layout, lint, formatting and current driver/runner/documentation identities pass. The initial fixture-only CAS method-name typo and formatting/lint correction are retained privately; production code remains byte-identical. Existing real-command mutation controls and future combined/native acceptance remain separate.
 
 - **SDK metadata batch repair (in progress):** Source inspection of the original large-tree execution identifies eight separately guarded metadata writes per command for one selected SDK, each re-planning the complete retained source. Freeze a bounded, ordered canonical metadata batch under the same live SDK owner, bracket immutable CAS writes with full currentness, and retain receiver custody/deadline polling plus command grant/revocation checks. Preserve exact command evidence bytes, including retained @5 context, and leave single-record clients unchanged. Oversized metadata uses the original guarded path with an explicit diagnostic. Real SDK command success and source/policy/revocation/deadline mutation refusal controls, independent review and the complete contributor gate are required. Existing native attempts and all PACKAGE/VERIFY obligations remain unchanged.
 
@@ -33587,10 +33592,14 @@ independent review and the complete combined gate from test one.
 
 ### [ ] RETAINED-TREE-EXPLORER-001 — Publish hierarchical retained-tree HTML information cards
 
+- **Initial publication race-control intent:** Add maintained real POSIX source/CAS/output fault controls for actual recapture edits, equal-byte foreign index substitution before and after commit, generation and excluded-namespace tampering, and a partial-CAS output-budget refusal. Use only explicit framework-measurement stand-ins and narrow ordering hooks; never manufacture installed or native SDK admission. Production code remains unchanged unless a concrete defect is established. Preserve failed provisional evidence and foreign bytes, and keep freshness/rerender/recovery/unit/browser/native-scale/full-ADR qualification open.
+- **Initial publication race-control outcome:** Six maintained controls pass with zero skips through the managed Python gate on real POSIX source, CAS and output files. An actual source recapture edit refuses without an index; equal-byte foreign index substitution before commit preserves the foreign inode/bytes, while substitution after commit refuses a valid-success result. Generation mutation after the owned move and a foreign member in the excluded namespace refuse without an index or namespace adoption. A tight output budget derived from a successful owned baseline leaves verifiable partial CAS evidence and the original owner marker without publishing an index. Only framework measurement and narrow fault-ordering boundaries are stand-ins; no installed-distribution, native SDK, browser, scale or complete-ADR admission is manufactured. Production files remain unchanged; combined-source and remaining goal qualifications stay open.
+
+
 - **Release target:** 1.4.0
 - **GitHub issue:** [#279](https://github.com/jordanhubbard/literate-ai/issues/279)
 - **Accepted decision:** [ADR 0058](../decisions/0058-hierarchical-retained-tree-information-cards.md); explicit directing-user acceptance on 2026-11-03.
-- **Next action (in progress):** Implement the versioned declaration and bounded directory/group/generation commitments on canonical retained-tree and shard owners, followed by generation publication and tree freshness. Keep existing single-view identities and limits unchanged. Per-unit joins and all installed/native/browser qualification remain open until their required evidence passes.
+- **Next action (in progress):** Implement the versioned declaration and bounded directory/group/generation commitments on canonical retained-tree and shard owners, followed by generation publication and tree freshness. Keep existing single-view identities and limits unchanged. Per-unit joins and all installed/native/browser qualification remain open until their required evidence passes. The complete hierarchy retains atomic publication/freshness controls and the #235 prerequisite for per-unit joins.
 
 - **Planning verification:** Independent source/design review by `native_transport_review` approves Proposed ADRs 0058/0059; its Markdown table finding is corrected. Canonical work recording and documentation/driver review pass. The read-only contribution sweep validates 41 goals with no invalid entries, preserving the original 39 and prior release history; overall release readiness remains false. The previous two-design, pre-integration local Make checkpoint selected 2,664 tests: 2,577 pass, 87 declared skips and zero failures in 4,261.977 seconds; lint, format and documentation checks also pass. Test-report identity: `0eb956ba4e3c3b27988e405bb049106e75ad4650e0751dbc21c12c4350964e77`. These historical results validate only that earlier two-design snapshot. The fresh consolidated main/ADRs 0056–0059 Make gate passes 2,665 selected tests: 2,578 passed, 87 declared skips and zero failures in 4,164.827 seconds (report SHA-256 `761dd0c760f8539844e562edb9649d5a6612ef4498d2b90de79903458661cdc4`). Independent final union review approves all four Proposed designs and preserves main’s exact source/test bytes and driver pin; canonical documentation/driver checks pass. Neither checkpoint claims implementation, native/browser acceptance or release qualification. The directing user explicitly accepted all four designs on 2026-11-03. Implementation and native/browser/release qualification remain open.
 
@@ -33613,11 +33622,12 @@ independent review and the complete combined gate from test one.
 - **Completion prerequisites:** RETAINED-UNIT-PACKAGE-001
 - **Implementation:**
   - [x] Audit existing HTML producers/declarations/limits and independently review ADR 0058; the directing user explicitly accepted the design on 2026-11-03 before new wire/schema implementation.
-  - [ ] Add closed versioned tree declarations, explicit resource policy and bounded page/node/group/generation commitments alongside the unchanged single-view protocol.
-  - [ ] Project the complete canonical retained/sharded namespace into directory cards and deterministic large-directory groups with safe no-script navigation and truthful captured facts.
-  - [ ] Stage and verify an immutable generation; publish the separately owned index last under current output custody, preserving foreign changes and bounded recovery evidence.
-  - [ ] Reopen all page/asset commitments and the complete output namespace, then renew canonical source observations for the additive tree-freshness gate.
-  - [ ] Join actual retained-unit definitions, membership and qualified package provenance after #235; directory labels alone cannot assert Component ownership.
+  - [ ] Implement complete hierarchy and provenance commitments using canonical retained tree/unit owners, no new JS dependency, scalable declarations, atomic multi-file publication and tree freshness.
+    - [ ] Add closed versioned tree declarations, explicit resource policy and bounded page/node/group/generation commitments alongside the unchanged single-view protocol.
+    - [ ] Project the complete canonical retained/sharded namespace into directory cards and deterministic large-directory groups with safe no-script navigation and truthful captured facts.
+    - [ ] Stage and verify an immutable generation; publish the separately owned index last under current output custody, preserving foreign changes and bounded recovery evidence.
+    - [ ] Reopen all page/asset commitments and the complete output namespace, then renew canonical source observations for the additive tree-freshness gate.
+    - [ ] Join actual retained-unit definitions, membership and qualified package provenance after #235; directory labels alone cannot assert Component ownership.
 - **Evidence:**
   - [ ] Installed noneditable native source/ports tree qualification, actual browser inspection, stale/tamper/partial publication and resource-bound refusals.
   - [ ] Per-unit Component-card joins after #235, independent review, full gates and exact integrated qualification.
@@ -33661,3 +33671,125 @@ independent review and the complete combined gate from test one.
   - [x] Run current serializer and hardware-compatibility regressions through the managed Make harness; independently reconstruct source-bound native observations and record exact-main CI, then reconcile the bounded issue only after all evidence passes.
 
 - **Decisive qualification:** [Exact-route evidence audit](../../verification/gpu-memory-command-route-qualification.json) reopens the retained original `worker.probe_malformed` failure and repaired native probe. Both bind command catalog `sha256:b69352f8581230c398c74abd236d1a6f8f127f0ed75892281aa5a5fc72469fff`; the repaired typed observation catalog independently reconstructs to `sha256:886303967384f0cdc227a2b0eae869aad3bfc2537fa6df94743236a0c6a0be8a`, retaining one NVIDIA device with memory null. Current contract checks accept the observed device without a VRAM minimum and refuse a positive minimum. The Linux serializer is byte-identical to landed implementation `5d785f64728f285b4bf07cbbdb4bd3e287bb576f`, an ancestor of main `072d66e81eff85f58515a09d93d19528499a5ec1`; exact-main CI 41740063437 passes. Fresh managed `make python-check` selection passes all seven worker-capability cases, including actual shell serializer inputs for permission text, unavailable, numeric and failed-query values. This audit reopens original native evidence rather than claiming a fresh native dispatch; it neither guesses physical GPU capacity nor closes COMMAND-WORKER-001, native Component/SDK/package or release qualification.
+
+- **2026-11-04 combined current-main/guard integration preparation (pending review):** Preserve the separately qualified HCI `f146a2d69da2cc3d6e96194ee8a98c6b7f905f69` and GPI `d597f77ad0bba0ab5aa2e18680da1c726bdd0bf0` commits and evidence while composing current main `70cf6b20a152953fa01764086ef90b12e3147d94` through normal history. Keep the complete GPI production guard source, HCI installed freshness journey, upstream real-CAS SDK batch and owned HTML publication-race controls, workflow pin renewal and blocker-composition verification record. The new test/document/workflow union still requires independent review, canonical authority checks, one fresh required full gate and exact-head platform checks. The running root Python/Git-readiness branch and its 45-goal union will be added only after its own gate and commit; neither its source nor the immutable P0 GPI artifact is changed here. Prior qualification does not qualify this combined union, native PACKAGE, browser behavior or complete issue scope.
+
+### [ ] PYTHON-LIBRARY-IMPORT-001 — Preserve isolated standard-library imports in Python library qualification
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#306](https://github.com/jordanhubbard/literate-ai/issues/306)
+- **Next action:** Run full source and fresh installed/public qualification for the independently reviewed import-path repair; the four focused import/refusal controls pass.
+
+- **Priority:** high
+- **Owner:** framework core / Python library import driver
+- **Direction:** Include newly filed GitHub issue #306 in 1.4 and make ordinary Python standard-library imports work during exact-artifact execution qualification.
+- **Conclusion:** The isolated import driver replaces its entire search path, hiding the standard library. Prepend the sealed export source while retaining Python isolation and the exact artifact module-origin check. This is an ordinary correctness repair, with no receipt-policy or import-origin exemption.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Record issue #306 and the 1.4.0 release goal before implementation.
+  - [x] Retain interpreter standard-library paths when importing the exact sealed Python library.
+  - [x] Exercise a real Python library importing dataclasses, typing and __future__, and retain ambient-package and module-origin refusal coverage.
+- **Evidence:**
+  - [ ] Real isolated native Python build/test/import journey passes with standard-library dependencies.
+  - [ ] Foreign capability origins and ambient third-party-only imports remain refused.
+  - [ ] Independent source review, canonical pins, full python-check and exact installed qualification pass before completion.
+
+- **Source development evidence:** The real generated Python library first reproduced the `dataclasses` import failure. Prepending source alone then exposed an ambient-dependency admission regression in the legacy command path. The corrected legacy EXECUTE projection uses isolated, no-site, no-bytecode startup and retains the interpreter standard-library paths; managed Python profiles keep their existing launcher. All four Standard command-projection cases pass, including real build/test/import, ambient-only dependency refusal, foreign module-origin refusal and missing-symbol refusal (report SHA-256 `a4d0fed1032fcd11c811c4d30813a3a2c957a41579ed0e8a16afe07e099aea4d`). Independent source review passed. Full source and installed/public qualification remain open; this focused result does not close #306.
+
+### [ ] GIT-TOOL-CAPABILITY-001 — Align Git tool readiness with required checkout capabilities
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#305](https://github.com/jordanhubbard/literate-ai/issues/305)
+- **Next action:** Implement and qualify compatible Git/Git LFS prerequisite detection and remediation; private task upgrades alone do not close this goal.
+
+- **Priority:** high
+- **Owner:** framework core / declared host tool prerequisites
+- **Direction:** Include GitHub issue #305 in 1.4: baseline readiness must reject Git and Git LFS tools missing commands the framework actually uses.
+- **Conclusion:** Actual qualification exposed Git LFS 3.0.2 lacking ls-files --json and older Git failing the narrow command-scoped foreign-ownership trust control. Private task tool upgrades restore those jobs but do not fix reusable readiness. Preserve exact LFS content checks and narrow ownership assertions.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Record issue #305 and the 1.4.0 release goal before reusable implementation.
+  - [ ] Declare and enforce compatible Git and Git LFS capability/version requirements consistently in readiness, worker templates and remediation.
+  - [ ] Keep exact LFS object/size verification and command-scoped safe-directory trust unchanged.
+- **Evidence:**
+  - [ ] Unsupported installed tools refuse readiness with actionable remediation.
+  - [ ] Supported tools pass genuine checkout/LFS JSON and foreign-ownership controls.
+  - [ ] Independent source review, full python-check and installed worker readiness pass.
+
+- **Baseline source progress:** Both canonical and packaged-template SBOMs now require Git >=2.47,<3 and Git LFS >=3.2,<4; independent source review passed. Existing host-install controls pass all nine cases, and the unchanged native scoped-ownership module passes all twelve cases with Git 2.54. The exact minimum Git version is supported by upstream source inspection, not native qualification of 2.47. Canonical bootstrap composes and enforces these version constraints. The authored worker repair reads the same packaged baseline, checks the exact selected Git/LFS executables when repository tools are declared, and reports incompatible versions with a declared-install remedy. Public CLI controls pass all six tests, including real version-probe processes and a declared repair followed by fresh inspection. The version responders prove the probe protocol, not native qualification of the displayed tool versions. Independent review of this new alignment integration, complete source and installed-worker proof remain open; previous installed versions still perform only presence checks.
+
+### [ ] RETAINED-PYTHON-BRIDGE-001 — Consume qualified native library children from retained Python projects
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#307](https://github.com/jordanhubbard/literate-ai/issues/307)
+- **Next action:** Independently review and publish [proposed ADR 0061](../decisions/0061-retained-python-library-bridge.md), then obtain the required explicit design acceptance before implementation. FreeBSD SDK qualification remains first priority.
+
+- **Priority:** high
+- **Owner:** framework retained library bridge and sealed Python test workspace
+- **Direction:** Include newly filed issue #307 in 1.4 under the directing user authorization for new issues.
+- **Conclusion:** A retained Python consumer must import verified qualified committed-cache packages within its sealed workspace through an explicit custody-bound bridge. Inspect existing retained Cargo authority and Python receipt construction, publish a narrow proposed design, and implement after required design acceptance; FreeBSD SDK execution remains first priority.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Trace the existing retained Cargo bridge and Python sealed workspace contracts; publish a proposed Python adapter design with exact admitted source and consumer custody.
+  - [ ] Implement the accepted bridge without copying generated source into authored implementation or admitting arbitrary ambient paths.
+- **Evidence:**
+  - [ ] Exercise a real retained Python consumer with an admitted committed-cache library through full public lifecycle and exact installed qualification.
+  - [ ] Refuse cache, receipt, source, package-origin and consumer-scope drift while preserving existing Cargo and retained Python behavior.
+
+### [ ] RUST-HARNESS-DEPS-001 — Execute reviewed offline Rust library verifier dependencies
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#217](https://github.com/jordanhubbard/literate-ai/issues/217)
+- **Accepted design:** [ADR 0056](../decisions/0056-reviewed-rust-library-harness-dependencies.md), explicitly accepted on 2026-11-03.
+- **Next action:** Run the complete source gate and fresh noneditable installed qualification after the reviewed native six-case development gate passed; verify ordinary Rustup-shim tool selection separately. FreeBSD SDK work retains execution priority.
+
+- **Priority:** P1
+- **Owner:** Framework library acceptance, native Cargo source custody and qualification capture; PROJECT goals 1, 4 and 5
+- **Direction:** Implement accepted ADR 0056 and included issue #217 without weakening independent acceptance or changing v1 behavior.
+- **Conclusion:** Add an explicit Rust-only oracle v2 binding exact reviewed registry declarations, sibling lock bytes, complete provisioned source/configuration custody, native tools and finite budgets; run offline locked resolution and actual cases, then reopen the same versioned evidence. FreeBSD SDK and Daemonarchy execution remain higher priority.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Native development evidence:** All six selected native Linux ARM64 cases passed with zero skips and zero failures in the canonical Make gate (246.817 seconds). The actual public lifecycle, offline locked Cargo inputs, own-Cargo path/fixed-Git controls and declared dependency/feature boundaries were exercised. Complete source and native Cargo/rustc identities remained unchanged. The first attempt refused an ambient ancestor Cargo configuration; the successful attempt used a new private temporary directory without changing that configuration or relaxing the production refusal. This is source development evidence, not a complete source, installed-package or release qualification. The durable private dispatch record has SHA-256 `c5a323688d7d4276bf30f2d423a6c5054b60c8cd8b774c6d00d480b80234fe2b`.
+- **Implementation:**
+  - [ ] Add typed reviewed dependency declarations and exact bounded v2 oracle loading while preserving the closed v1 field set and identities.
+  - [ ] Compose the temporary manifest from closed values and exact qualified library; reuse canonical streaming Cargo input owners and config/tool custody, observe exact resolution/features/source identities, and run offline locked native Cargo under current execution policy.
+  - [ ] Capture and reopen the versioned oracle, harness, lock, dependency/source/configuration closure, generated manifest, native tools and actual command/case results.
+- **Evidence:**
+  - [ ] Exercise the public lifecycle with a real serde_json-using verifier and provisioned offline crates, including unchanged v1 positive/refusal behavior and actual incorrect-result refusal.
+  - [ ] Refuse changed source/lock/manifest/features/registry/configuration, missing or unexpected dependencies, alias collisions, extracted-source/checksum disagreement and exact/over-budget inputs; retain actual command and output failures.
+  - [ ] Obtain independent source review, canonical driver/documentation records, complete local and exact integrated CI gates, and fresh noneditable installed/native qualification before completion.
+
+### [ ] RETAINED-RECEIPT-PROMOTE-001 — Promote a verified retained-project run into the project test receipt
+
+- **Release target:** 1.4.0
+- **Release scope:** The current included dispositions on issue #295 and PR #297 govern this framework work; the consumer release number is separate.
+- **GitHub issue:** [#295](https://github.com/jordanhubbard/literate-ai/issues/295)
+- **Draft review:** [#297](https://github.com/jordanhubbard/literate-ai/pull/297)
+- **Accepted decision:** [ADR 0060](../decisions/0060-retained-project-receipt-promotion.md); the directing user accepted the corrected design on 2026-11-04 ([acceptance](https://github.com/jordanhubbard/literate-ai/pull/297#issuecomment-6636036548)). Draft implementation and qualification remain open.
+- **Next action:** In progress: implement complete retained verification and genuine evidence capture, semantic runner binding and exact output oracles in an isolated correction branch, then obtain independent source review and real public/installed qualification.
+- **Priority:** P1
+- **Owner:** Retained-project lifecycle and project test receipts
+- **Direction:** Satisfy a custom original-source retained-suite project receipt policy from complete verified retained evidence without weakening runner, suite, inventory, output oracles, evidence semantics or existing receipt-update checks.
+- **Conclusion:** Implement a nonexecuting promotion into the existing finalized candidate boundary. Complete bounded historical reopening is required; hashes alone cannot stand in for admission. Missing historical facts may require a fresh explicitly authorized retained run with genuine live-owner evidence capture.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Historical draft command and verifier authored in PR #297 at `421ce0f70b8da21e2f0b34eb655d3766269ba67d`; provisional and known incomplete, not an implementation-acceptance claim.
+  - [x] Directing user explicitly accepted the corrected design before correction implementation ([acceptance](https://github.com/jordanhubbard/literate-ai/pull/297#issuecomment-6636036548)).
+  - [ ] Reuse complete retained completion/export/dependency verification and compare exact acceptance stdout, stderr, exit and filesystem expectations.
+  - [ ] Bind the semantic test-policy inventory and reports in the runner identity, omitting only the actual circular policy reference.
+  - [ ] Verify real historical admission evidence; capture missing facts only under the genuine live admission owner, or refuse unsupported requirements. Keep cache not-applicable bookkeeping distinct from operational cache evidence.
+  - [ ] Preserve bounded currentness/custody, dry-run no-write behavior, candidate collision safety and unchanged receipt-update policy checks.
+- **Evidence:**
+  - [ ] Real public promotion/update/currentness journey plus causal rehashed incorrect-output, inventory, missing/fabricated admission, resolved-output/dependency, cache-semantic, stale-policy and finite-resource refusals.
+  - [ ] Canonical independent source review and supported driver/document records, required full-source gate, exact clean installed distribution and relevant native controls.
+  - [ ] Genuine requesting-consumer retained-evidence policy qualification. The historical requested run's unavailable custody store is not proof; retain a complete fresh run if required.
+
+The draft's earlier critical-test claims cover its earlier subset only. They do not
+resolve the three confirmed findings or qualify the accepted design. No completed
+implementation, policy weakening, qualification or issue closure is recorded here.
+
+- **Combined source preparation (pending independent review and gate):** The current integration retains qualified HCI `f146a2d69da2cc3d6e96194ee8a98c6b7f905f69`, GPI `d597f77ad0bba0ab5aa2e18680da1c726bdd0bf0`, root Python/Git-readiness commit `dcd33ba4a31518c4508ef352770072d1869f9976`, current main `70cf6b20a152953fa01764086ef90b12e3147d94`, the complete published receipt-promotion base `09bb4ff9c59798b43360c162d1e98329a4934be0` plus its independently reviewed correction, and the exact reviewed Rust-harness delta from ancestor `072d66e81eff85f58515a09d93d19528499a5ec1`. Both installed tree and Rust journeys remain in the wheel driver. The root branch's source gate passed 2,559 tests with 131 declared skips and no failures; the direct Rust profile passed six native development cases; receipt promotion passed its real public planning and critical journey with complete source custody unchanged. These are separate exact-snapshot results, not qualification of this new union. Preserve all 47 current release-goal IDs, including the existing receipt-promotion queue item missing from its previous manifest. Canonical pin renewal, one fresh complete source gate, exact-head full platform CI, fresh installed qualification and all remaining native/consumer/browser acceptance remain required. Proposed ADR 0061 still requires directing-user design acceptance before implementation.

@@ -109,6 +109,17 @@ the locked library contract separately checks specification, public-interface,
 import-surface, language, and capability bindings. Executable Components retain the
 profile-projected portable-application oracle.
 
+Rust oracle v2 is an explicit verifier-owned extension under ADR 0056. Its current
+oracle, exact sibling lock and complete provisioned dependency/configuration inputs
+are reopened at independent acceptance; a candidate library or decoded declaration
+cannot choose that authority. Only the framework supplies the sealed library path.
+The reviewed exact registry dependencies and observed package/features/source graph
+must agree with locked offline resolution, and the native Cargo/Rust identities and
+finite source, metadata, command and output limits remain bound throughout execution.
+The versioned observation and archived qualification bind this complete dependency
+custody alongside actual case results. Existing v1 identities and refusals remain
+unchanged, and no v1 observation substitutes for the v2 proof.
+
 The measurement wire records are
 `regenerative-qualification-policy`, `clean-regeneration-evidence`, and
 `regenerative-qualification-decision`, plus the payload supplied to the trusted

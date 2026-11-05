@@ -2751,16 +2751,47 @@ def verify_qualification_library_acceptance(
     from literate_ai.adapters.native_sdk_qualification import (
         packaged_sdk_process_fields,
     )
+    from literate_ai.adapters.rust_library_acceptance import RustLibraryAcceptance
 
-    sdk_fields = packaged_sdk_process_fields(
-        reader,
-        package_plan=root.package_plan,
-        package_result=root.package_result,
-        project_build_plan_identity=root.project_build_plan_identity,
-        process=actual,
-        phase="library-acceptance",
-        library_oracle=oracle,
-    )
+    if type(oracle) is RustLibraryAcceptance:
+        from literate_ai.adapters.rust_library_harness_execution import (
+            verify_rust_harness_execution,
+        )
+
+        if type(actual) is not dict or "native_sdk_execution_identity" in actual:
+            raise QualificationCaptureError(
+                "qualification.capture.rust-harness-invalid"
+            )
+        try:
+            rust_execution = ContentIdentity.parse_uri(
+                actual["rust_harness_execution_identity"]
+            )
+            verify_rust_harness_execution(
+                reader,
+                rust_execution,
+                oracle=oracle,
+                library_alias=surface.package,
+                surface=surface,
+            )
+        except (KeyError, TypeError, ValueError, OSError, RecursionError) as exc:
+            raise QualificationCaptureError(
+                "qualification.capture.rust-harness-invalid"
+            ) from exc
+        expected.update(
+            schema="literate-ai/local-independent-library-acceptance@3",
+            rust_harness_execution_identity=rust_execution.uri,
+        )
+        sdk_fields = {}
+    else:
+        sdk_fields = packaged_sdk_process_fields(
+            reader,
+            package_plan=root.package_plan,
+            package_result=root.package_result,
+            project_build_plan_identity=root.project_build_plan_identity,
+            process=actual,
+            phase="library-acceptance",
+            library_oracle=oracle,
+        )
     if sdk_fields:
         expected.update(
             schema="literate-ai/local-independent-library-acceptance@2", **sdk_fields

@@ -219,13 +219,19 @@ class _Kernel32Windows:
         self._get_file_information.restype = wintypes.BOOL
         self._invalid_handle = wintypes.HANDLE(-1).value
 
-    def open_reparse_aware(self, path: str) -> int:
+    def open_reparse_aware(
+        self, path: str, *, share_delete: bool = True, share_write: bool = True
+    ) -> int:
         """Open ``path`` without following a trailing symlink or reparse point."""
 
+        if type(share_delete) is not bool or type(share_write) is not bool:
+            raise TypeError("native sharing selections must be boolean")
         handle = self._create_file(
             path,
             _GENERIC_READ,
-            _FILE_SHARE_READ | _FILE_SHARE_WRITE | _FILE_SHARE_DELETE,
+            _FILE_SHARE_READ
+            | (_FILE_SHARE_WRITE if share_write else 0)
+            | (_FILE_SHARE_DELETE if share_delete else 0),
             None,
             _OPEN_EXISTING,
             _FILE_FLAG_BACKUP_SEMANTICS | _FILE_FLAG_OPEN_REPARSE_POINT,

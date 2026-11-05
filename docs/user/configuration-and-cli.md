@@ -114,6 +114,7 @@ litai project retained-cargo check
 litai project retained-cargo materialize
 litai project retained-cargo admit
 litai project test-receipt run-retained
+litai project test-receipt promote-retained
 litai project test-receipt update
 litai project test-receipt check
 litai project test-receipt require-current
@@ -565,6 +566,7 @@ root-integration acceptance still remain.
 | `project agent-entrypoints [PATH]` | Audit owned coding-agent delegates against the declared onboarding skill without writes; exit 1 reports missing, stale or unsafe entries requiring reviewed authored repair. |
 | `project parent-readme [PATH] [--apply] [--browser-url REPOSITORY=URL]` | Plan or reconcile root README links to validated direct parents using the installed framework runtime; preserve authored content and require explicit browser identity for local-only parents. |
 | `spec scxml-review CHART [--trace SIDECAR ...]` | Read-only bounded structural validation and supported-subset trace replay for one exact SCXML 1.0 chart and its explicit JSON sidecars. |
+| `project test-receipt promote-retained CANDIDATE --retained-project MANIFEST --retained-project-profile PROFILE --custody-root DIR --retained-receipt IDENTITY --promotion-evidence IDENTITY [--plan IDENTITY] [--target ID] [--worker ID] [--dry-run] [--project PATH]` | Re-verify one admitted original-source retained-project run (custody, current plan, inputs, policies, SBOM, test and acceptance observations) against the project's exact `test_receipt_policy` and write a finalized candidate for `project test-receipt update`. Promotion runs no build, test, acceptance, SDK, model or worker actions; only trusted bounded read-only metadata helpers may run. Current promotion is local-only: remote/imported evidence refuses until authenticated ingress exists. Reads remain bounded by the promotion read policy. Refuses stale plans, changed inputs or policy, tampered custody, skipped tests, a policy runner that is not the runner derived from the run (the message names it), the retained-harness suite, unsupplyable evidence kinds, and too few tests. |
 | `project test-receipt run-retained CANDIDATE [--project PATH] [--evidence PATH] [--worker-id ID] [--worker-config PATH] [--timeout-seconds N] [--known-failure-report PATH] [--harness-workspace-link DESTINATION=SOURCE ...]` | Execute a qualified converted project's exact admitted harness in a disposable authored-source copy and emit one outer-finalized candidate plus external run evidence. `local` remains controller-local; every other ID must select an exact configured POSIX SSH worker. Explicit Linux, macOS and FreeBSD SSH workers preserve their native OS identity; the receiver checks that OS and any configured CPU architecture before executing commands. Admitted `uv` stages and Ninja declarations in their evidence scripts require a native optional tool provider. The current provider requires Linux with an explicit `x86_64` or `amd64` CPU architecture and supplies pinned, digest-verified binaries without changing the worker installation. Unsupported OS/architecture combinations refuse before transfer, and receivers independently reject foreign tool archives. Source-only harnesses require no optional provider. External sibling projections remain local-only in this first remote slice. |
 | `project test-receipt update CANDIDATE [--project PATH]` | Atomically replace the configured receipt with an exact passing candidate. |
 | `project test-receipt check CANDIDATE [--project PATH]` | Require the configured receipt to equal an exact tested candidate. |
@@ -581,7 +583,7 @@ root-integration acceptance still remain.
 | `generate COMPONENT --output DIR [--target NAME] [--flavor=+NAME ...] [--model MODEL]` | Generate a complete source tree from the current Component lock and asserted Flavor/model selection. |
 | `build [COMPONENT] [--target NAME] [--model MODEL] [--worker ID] [--worker-param NAME=VALUE ...] [--worker-timeout-seconds N] [--worker-health-config PATH]` | Run the current specification-led lifecycle and retain a runnable artifact bound to the exact generation target, model-scope set, and execution worker. An explicit health policy performs bounded admission before substantial work and rechecks failures. |
 | `test [COMPONENT] [--target NAME] [--model MODEL] [--worker ID] [--worker-param NAME=VALUE ...] [--worker-timeout-seconds N] [--worker-health-config PATH]` | Require the current generated tests and independent acceptance gates through the same build lifecycle and model-scope set, including optional bounded worker-health admission. |
-| `build` or `test --project PATH --retained-project MANIFEST --retained-project-profile PROFILE [--retained-project-plan] [--authorize-retained-project SHA256 --allow-host-execution] [--build-dir DIR] [--obj-dir DIR]` | Use the existing complete original-source retained lifecycle. Planning is read-only; execution preserves retained receipt/custody and does not create a generated runnable export. Profile overrides and partial Component scope refuse. |
+| `build`, `test` or `rebuild --project PATH --retained-project MANIFEST --retained-project-profile PROFILE [--retained-project-plan] [--authorize-retained-project SHA256 --allow-host-execution] [--retain-promotion-evidence] [--build-dir DIR] [--obj-dir DIR]` | Use the existing complete original-source retained lifecycle. Planning is read-only; execution preserves retained receipt/custody and does not create a generated runnable export. With `--retain-promotion-evidence`, an actual authorized run also returns the `promotion_evidence` BlobRef. Pass its digest as `sha256:DIGEST` to `promote-retained --promotion-evidence`, together with that run's `custody_root` and `retained_receipt_identity`; the evidence flag does not authorize execution. Profile overrides and partial Component scope refuse. |
 | `run [COMPONENT] [--entrypoint NAME] [--target NAME] [--worker ID] [--flavor SELECTOR ...] [ARGUMENT ...]` | Execute the selected retained entrypoint only when its target profile, worker, and immutable generation authority match the request; omission selects the first declared entrypoint. |
 | `worker health --worker-id ID --health-config PATH [--worker-config PATH] [--job-identity SHA256] [--alert-state PATH]` | Bounded storage and optional sustained CPU/memory/paging/GPU inspection with explicit unknowns, deficit alerts and proceed/hold/recheck decisions. Disk incidents automatically run the configured read-only cleanup investigation. An alert-state file only deduplicates reporting; it authorizes neither dispatch nor cleanup. |
 | `worker cleanup plan --worker-id ID --health-config PATH [--worker-config PATH]` | Re-run the bounded configured candidate scan and emit only exact proved-inactive target identities, measurements, ownership evidence and recovery cost. Planning is read-only and explicitly reports that deletion is unauthorized. |
@@ -826,8 +828,13 @@ declared Windows locations outside `PATH`;
 ordinary `PATH` discovery retains priority. Alignment does not change `PATH` or
 reinstall a tool merely to run that check. Inspection is
 read-only; findings carry remediations and the exit status is nonzero until every
-worker is aligned. `--apply` runs only your declared installs for missing commands
-and replaces only files whose bytes differ, after backing up the previous copy. It
+worker is aligned. When a platform declares Git or Git LFS, including `git.exe` or
+`git-lfs.exe`, alignment checks both tools against the packaged os-base requirements:
+Git >=2.47,<3 and Git LFS >=3.2,<4. It probes each selected executable with a five-minute
+budget; failed or unreadable versions remain incompatible. Templates that declare
+only a coding CLI do not add repository tools. `--apply` runs only your declared
+installs for missing commands or incompatible repository tools and replaces only
+files whose bytes differ, after backing up the previous copy. It
 then inspects again. Secret contents never appear in reports; only hash prefixes do.
 Align never deletes worker data; low disk points to `litai worker health` and
 `litai worker cleanup`.

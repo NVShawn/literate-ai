@@ -688,6 +688,7 @@ def _standard_rebuild_one_component(
             raise CacheDirectoryError(
                 "explicit cache directory custody belongs to a different project"
             )
+        from literate_ai.adapters.component_acceptance import ComponentAcceptanceError
         from literate_ai.projects import discover_project
         from literate_ai.security import (
             AuthorizationError,
@@ -1145,6 +1146,22 @@ def _standard_rebuild_one_component(
                 ) from exc
             except (CodingCliError, RetainedSourceError) as exc:
                 raise CliFailure(exc.code, exc.message) from exc
+            except ComponentAcceptanceError as exc:
+                # The opt-in Rust execution boundary already owns a precise
+                # bounded refusal code. Preserve it without changing legacy
+                # library acceptance's existing exception translation.
+                if not exc.code.startswith("component_acceptance.rust_harness_"):
+                    raise
+                raise CliFailure(
+                    exc.code,
+                    exc.message,
+                    message_limit=(
+                        8192
+                        if exc.code
+                        == "component_acceptance.rust_harness_native_command_failed"
+                        else CLI_ERROR_MESSAGE_CHARS
+                    ),
+                ) from exc
             except BuildError as exc:
                 raise CliFailure(exc.code, str(exc)) from exc
             except LocalStandardLifecycleError as exc:

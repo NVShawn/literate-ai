@@ -2427,6 +2427,29 @@ def _main() -> int:
                 cwd=root,
             ).stdout
         )
+        rust_harness = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-B",
+                str(repository / "tests/support/installed_rust_harness_journey.py"),
+                str(root / "rust library journey"),
+                standard_binding["distribution"],
+                cwd=root,
+            ).stdout
+        )
+        if (
+            type(rust_harness) is not dict
+            or type(rust_harness.get("qualified")) is not bool
+        ):
+            raise RuntimeError("closed installed Rust qualification cell required")
+        if rust_harness["qualified"] and (
+            rust_harness.get("framework_distribution")
+            != standard_binding["distribution"]
+            or rust_harness.get("receipt_committed") is not True
+            or rust_harness.get("synthetic_framework_observers") is not False
+        ):
+            raise RuntimeError("actual installed Rust framework and receipt required")
         if (
             run("git", "rev-parse", "HEAD", cwd=repository).stdout.strip()
             != git_revision
@@ -2493,6 +2516,7 @@ def _main() -> int:
                     "repository_refresh": repository_refresh,
                     "html_observability": html_observability,
                     "tree_html": tree_html,
+                    "rust_library_harness": rust_harness,
                     "skills": sorted(installed),
                     "snapshot_replication_schema": replication_schema,
                     "version_contract": version_contract,

@@ -9,6 +9,7 @@ import re
 import shutil
 import time
 import tomllib
+import weakref
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
@@ -17,6 +18,7 @@ from pathlib import Path, PurePosixPath
 from literate_ai._cache_lock import exclusive_cache_lock
 from literate_ai._filesystem import path_is_link_or_reparse, require_safe_directory
 from literate_ai.adapters.builders import BuildError, run_bounded_process
+from literate_ai.adapters.builders.rust import RustToolchain
 from literate_ai.adapters.compiler_cache import compiler_cache_session
 from literate_ai.adapters.dependencies import HostDependencyObservation
 from literate_ai.adapters.shared_cache_config import BoundSharedCache
@@ -118,6 +120,83 @@ class StandardCargoTarget:
         return value
 
 
+_COMPILER_ISSUER = object()
+_COMPILER_OBSERVATIONS = weakref.WeakKeyDictionary()
+
+
+class _RustHarnessCompilerObservations:
+    """Original PID-local measurements; no wire decoder or execution grant."""
+
+    __slots__ = ("__weakref__",)
+
+    def __init__(self, *, _issuer):
+        if _issuer is not _COMPILER_ISSUER:
+            raise TypeError("original Rust compiler observations required")
+
+    def _originals(self):
+        if type(self) is not _RustHarnessCompilerObservations:
+            raise LocalStandardLifecycleError(
+                "original Rust compiler observations required"
+            )
+        record = _COMPILER_OBSERVATIONS.get(self)
+        if record is None:
+            raise LocalStandardLifecycleError(
+                "original Rust compiler observations required"
+            )
+        pid, compilers = record
+        if os.getpid() != pid:
+            raise LocalStandardLifecycleError(
+                "Rust compiler observation process changed"
+            )
+        return compilers
+
+    def require_targets(self, targets):
+        expected = {
+            target.language_compiler_identity.uri: target.rustc_command
+            for target in targets
+            if target.library
+        }
+        actual = {tool.identity: tool.command for tool in self._originals()}
+        if actual != expected:
+            raise LocalStandardLifecycleError(
+                "Rust compiler observations differ from targets"
+            )
+
+    def require_compiler(self, target):
+        matches = tuple(
+            tool
+            for tool in self._originals()
+            if tool.identity == target.language_compiler_identity.uri
+            and tool.command == target.rustc_command
+        )
+        if not target.library or len(matches) != 1:
+            raise LocalStandardLifecycleError(
+                "exact original Rust compiler unavailable"
+            )
+        return matches[0]
+
+    def __copy__(self):
+        raise TypeError("Rust compiler observations cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("Rust compiler observations cannot be copied")
+
+    def __reduce__(self):
+        raise TypeError("Rust compiler observations cannot be restored")
+
+
+def _retain_rust_harness_compilers(compilers):
+    if (
+        type(compilers) is not tuple
+        or any(type(tool) is not RustToolchain for tool in compilers)
+        or len({tool.identity for tool in compilers}) != len(compilers)
+    ):
+        raise TypeError("unique original measured Rust compilers required")
+    observation = _RustHarnessCompilerObservations(_issuer=_COMPILER_ISSUER)
+    _COMPILER_OBSERVATIONS[observation] = (os.getpid(), compilers)
+    return observation
+
+
 class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
     """Local Standard ports that derive Cargo resolution after authorization."""
 
@@ -132,6 +211,7 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         ),
         tool_bindings: tuple[LocalComponentToolBinding, ...] = (),
         cargo_targets: tuple[StandardCargoTarget, ...],
+        rust_harness_compilers: _RustHarnessCompilerObservations | None = None,
         npm_targets: tuple[StandardNpmTarget, ...] = (),
         python_targets: tuple[StandardPythonTarget, ...] = (),
         python_wheelhouse: Path | None = None,
@@ -143,6 +223,10 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         shared_cache: BoundSharedCache | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
+        if rust_harness_compilers is not None:
+            if type(rust_harness_compilers) is not _RustHarnessCompilerObservations:
+                raise TypeError("original Rust compiler observations required")
+            rust_harness_compilers.require_targets(cargo_targets)
         super().__init__(
             source_trees=source_trees,
             object_root=object_root,
@@ -184,6 +268,7 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                 raise ValueError(
                     "Standard Cargo target does not match locked build authority"
                 )
+        self._rust_harness_compilers = rust_harness_compilers
 
     def _allow_missing_cargo_lock(self, plan: StandardComponentBuildPlan) -> bool:
         return plan.component_revision.uri in self.cargo_targets

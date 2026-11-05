@@ -657,6 +657,32 @@ compiles the harness as a separate offline Cargo consumer using the sealed packa
 path dependency. A stale binding, undeclared capability, missing or extra case, changed
 harness, escaped import, result mismatch, or package mutation fails closed.
 
+Rust verifiers that require ecosystem crates opt into
+`literate-ai/library-acceptance-oracle@2`; v1 never acquires extra dependencies or
+accepts the v2 fields. The verifier-owned declaration pins each registry alias,
+package, exact version and registry source, explicitly selects default features
+and named features, and binds one sibling reviewed Cargo lockfile by digest and
+length. The framework supplies the exact sealed library path and alias; declarations
+cannot substitute that library or inject Cargo manifest sections.
+
+The v2 declaration also binds finite per-owner and aggregate Cargo input quotas,
+complete provisioned source/configuration custody, the reviewed resolved package
+and feature graph, and the selected native Cargo and Rust tools. The oracle document
+retains its existing 1 MiB allowance, with at most 128 direct extra dependencies
+and 4,096 aggregate selected features; the separately bound lockfile is limited to
+16 MiB. Zero, boolean, unknown or over-ceiling limits refuse. Dependency resolution
+and compilation use offline, locked Cargo; the verifier does not fetch or install
+crates. Missing or unexpected packages, changed source/configuration/lock/manifest,
+alias collisions, feature or registry drift, and checksum/source disagreement
+refuse before acceptance. Cargo bookkeeping cannot hide source or configuration
+from the complete captured input scopes.
+
+Executed case results retain the existing product-JSON protocol. Versioned evidence for oracle v2
+additionally binds the oracle, harness, lock, source closure,
+generated manifest, exact native tools and bounded command results; historical
+qualification reopens the same version and custody. Compilation success, parsed
+JSON or a copied lockfile grants no independent verification permission.
+
 The verifier substitutes only `{port}` and `{base_url}`, starts the packaged executable
 with its locked execution command, retries readiness until the startup deadline, then
 performs the requests in order. Requests support `GET`, `POST`, `PUT`, `PATCH`, `DELETE`,
