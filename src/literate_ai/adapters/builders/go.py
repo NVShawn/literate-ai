@@ -360,6 +360,11 @@ def _go_compiled_source_files(
                 continue
             directory = package.get("Dir")
             files = package.get("GoFiles")
+            imports = package.get("Imports", [])
+            if not isinstance(imports, list) or any(
+                name in {"unsafe", "C"} for name in imports
+            ):
+                raise ValueError("Generated Go package imported unsafe or cgo")
             if (
                 not isinstance(directory, str)
                 or not isinstance(files, list)
