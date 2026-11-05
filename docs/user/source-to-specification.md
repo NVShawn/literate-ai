@@ -106,6 +106,13 @@ not to the index executable identity alone. Omit
 `--model` to use the selected CLI's configured default. Missing or expired login state
 is reported as an explicit authentication prerequisite.
 
+The inert source inventory recognizes JavaScript files with `.js`, `.mjs`, `.cjs`
+and `.jsx` extensions, and TypeScript files with `.ts`, `.mts`, `.cts` and `.tsx`
+extensions. Explicit module filenames keep their original paths and bytes.
+Sensitive, binary and generated files remain excluded; `.test` and `.spec` names
+remain tests, and `.min` names remain minified inputs. Inventory and static
+derivation never execute these files.
+
 The bundle includes the exact source inventory, attributed observations, provider-valid
 draft artifacts, a coverage map, an uncertainty ledger, skill-stage provenance, proposed
 Flavor drafts, and security metadata. Model mode additionally records runtime,
