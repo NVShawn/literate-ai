@@ -657,6 +657,73 @@ class StandardCommandProjectionTests(unittest.TestCase):
             )
             self.assertNotEqual(rejected.returncode, 0)
 
+    def test_javascript_exports_ignore_order_but_reject_changes(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node.js is unavailable")
+        surface = LibraryImportSurface(
+            "javascript",
+            "fixture_library",
+            tuple(
+                LibraryCapabilityImport(
+                    f"fixture.{name}",
+                    canonical_identity({"interface": name}),
+                    f"fixture_library/{name}",
+                    (name,),
+                )
+                for name in ("alpha", "beta")
+            ),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            export = Path(temporary) / "artifact" / "library"
+            package = export / "source" / surface.package
+            package.mkdir(parents=True)
+            for name in ("alpha", "beta"):
+                (package / f"{name}.js").write_text(
+                    f"module.exports = {{ {name}: 7 }};\n", encoding="utf-8"
+                )
+            manifest = {
+                "name": surface.package,
+                "type": "commonjs",
+                "exports": {"./beta": "./beta.js", "./alpha": "./alpha.js"},
+            }
+
+            def run():
+                (package / "package.json").write_text(
+                    json.dumps(manifest), encoding="utf-8"
+                )
+                return self._run_library_driver(
+                    _STANDARD_LIBRARY_IMPORT_DRIVER,
+                    "javascript",
+                    node,
+                    export,
+                    surface,
+                    test=False,
+                )
+
+            accepted = run()
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            self.assertEqual(
+                json.loads(accepted.stdout)["capabilities"],
+                ["fixture.alpha", "fixture.beta"],
+            )
+            manifest["exports"]["./extra"] = "./extra.js"
+            extra = run()
+            self.assertNotEqual(extra.returncode, 0)
+            self.assertIn("undeclared entries", extra.stderr)
+            del manifest["exports"]["./extra"]
+            del manifest["exports"]["./alpha"]
+            manifest["exports"]["./unexpected"] = "./alpha.js"
+            swapped = run()
+            self.assertNotEqual(swapped.returncode, 0)
+            self.assertIn("exports map differs for ./alpha", swapped.stderr)
+            del manifest["exports"]["./unexpected"]
+            manifest["exports"]["./alpha"] = "./alpha.js"
+            manifest["exports"]["./beta"] = "./wrong.js"
+            wrong = run()
+            self.assertNotEqual(wrong.returncode, 0)
+            self.assertIn("exports map differs", wrong.stderr)
+
     def test_rust_library_verifier_compiles_exact_path_consumer(self) -> None:
         cargo = shutil.which("cargo")
         if cargo is None:
