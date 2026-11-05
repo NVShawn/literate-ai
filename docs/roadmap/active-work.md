@@ -33881,14 +33881,15 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **GitHub issue:** [#314](https://github.com/jordanhubbard/literate-ai/issues/314)
 - **Owner:** Standard JavaScript library import verifier; PROJECT Goals 1 and 4
 - **Direction:** Accept an exact declared export map regardless of JSON insertion order while rejecting every missing, additional or incorrect mapping.
-- **Conclusion:** Required target and symbol checks already exist; compare exact own-key membership after them, independent of key order. Issue #314 and draft PR #313 contain a candidate, but full integration evidence remains open.
+- **Conclusion:** PR #318 merged the exact own-key comparison at main commit `be1bf57b8`. Required target, symbol, import, dependency and path-custody checks remain in place. Exact-head review CI and installed-wheel controls passed; post-merge main CI remains open.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Reconcile the candidate in draft PR #313 with current main, complete independent review and the installed/full evidence, then close the bounded issue only with the required authority.
+- **Next action:** Verify post-merge CI at `be1bf57b8`, then mark this goal complete and close issue #314. Keep draft PR #313 separate from this bounded fix.
 - **Implementation:**
-  - [ ] Integrate and independently review the exact own-key comparison and retain all import, dependency and path-custody refusals.
+  - [x] Integrate and independently review the exact own-key comparison and retain all import, dependency and path-custody refusals in PR #318.
 - **Evidence:**
-  - [ ] Run managed real-import controls, installed non-editable wheel qualification, full required regression and exact-head review/main CI before closing issue #314.
+  - [x] Run managed real-import controls, installed non-editable wheel qualification, full required regression and exact-head PR CI at `9a73a680` (run `42115849519`).
+  - [ ] Verify post-merge main CI at `be1bf57b8` before closing issue #314.
 
 ### [ ] LIBRARY-IMPORT-ISOLATION-001 — Isolate generic Python library imports from ambient dependencies
 
