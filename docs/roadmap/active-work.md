@@ -33945,3 +33945,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Mapped operation and gap behavior, code/test/environment/timeout/nondeterminism counterexamples and incomplete-green refusals pass.
   - [ ] Actual upstream-layout repair export/rebase and accepted merge-back plus rejected proposal retention pass without unearned admission.
   - [ ] Independent source review, full source and platform gates, and noneditable installed/native qualification pass at the exact head.
+
+### [ ] SOURCE-MODULE-VARIANTS-001 — Preserve JavaScript and TypeScript module source in inert conversion
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#328](https://github.com/jordanhubbard/literate-ai/issues/328)
+- **Owner:** source-to-specification inventory and static derivation; PROJECT Goals 1 and 4
+- **Direction:** Recognize `.mjs`, `.cjs`, `.jsx`, `.mts`, `.cts` and `.tsx` as language source without executing or rewriting input; preserve safety and test classifications.
+- **Conclusion:** Current main `be1bf57b8` inventories a real `.mjs` source as `other` with no language. Mixed draft PR #313 contains a candidate correction, but its unrelated changes require separate review.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Extract the bounded classification change with real static derivation and negative classification controls; qualify the current-main integration independently before closing #328.
+- **Implementation:**
+  - [ ] Admit the six module and JSX suffixes under their JavaScript or TypeScript language while preserving input paths and bytes.
+  - [ ] Preserve sensitive, binary, generated, large, minified and test precedence.
+- **Evidence:**
+  - [ ] Run managed source inventory and real inert derivation controls, including refusal to execute source.
+  - [ ] Verify independent source review, noneditable installed qualification, exact-head CI and post-merge main CI.
