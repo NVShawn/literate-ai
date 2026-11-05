@@ -1,14 +1,16 @@
 # ADR 0063: Qualify upstream branches through a separate shadow repository
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-05
+- Acceptance: The directing user explicitly accepted this design on 2026-11-05,
+  recorded in [PR #320](https://github.com/jordanhubbard/literate-ai/pull/320#issuecomment-6665728874).
+  This accepts the decision under ADR 0006; implementation and qualification remain open.
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0, per the included disposition on issue #311; an upstream
   repository's own release remains separate
-- Roadmap: SHADOW-001, to be recorded after design acceptance under
-  [ADR 0006](0006-significant-feature-request-governance.md)
+- Roadmap: [SHADOW-001](../roadmap/active-work.md#shadow-001-continuously-qualify-upstream-branches-through-a-separate-shadow-repository)
+- Governance: [ADR 0006](0006-significant-feature-request-governance.md)
 - GitHub issue: [#311](https://github.com/jordanhubbard/literate-ai/issues/311)
-- Approval: pending explicit acceptance of this proposed design
 
 ## Context
 
@@ -26,7 +28,7 @@ upstream tree remains the authority for any contribution offered upstream.
 Neither a shadow projection nor a saved result can confer current upstream
 admission by itself.
 
-## Proposed decision
+## Decision
 
 ### Own a durable shadow and explicit branch selections
 
@@ -119,9 +121,9 @@ attempt that earned it.
 
 ## Planning and acceptance
 
-Before implementation, the directing user must accept or amend this design
-under ADR 0006. Then record SHADOW-001 in the active roadmap and release-goals
-manifest with concrete implementation and evidence checklists. Qualify the
+The directing user accepted the decision under ADR 0006. SHADOW-001 now owns its
+implementation and evidence checklists in the active roadmap and release-goals
+manifest. Qualify the
 public installed CLI against real Git and forge round trips: initialization,
 multiple branches and later branch addition, upstream ref changes, PR base/head
 drift, restart/idempotence, supported and unsupported mapped operations,

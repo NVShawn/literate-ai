@@ -246,6 +246,9 @@
       },
       {
         "id": "QUALIFIED-CHILD-ADD-001"
+      },
+      {
+        "id": "SHADOW-001"
       }
     ]
   }

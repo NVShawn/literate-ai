@@ -33922,3 +33922,26 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Propose and obtain design acceptance, then implement a public plan/apply transaction with current authority, registry, child and receipt binding plus recovery.
 - **Evidence:**
   - [ ] Qualify two dependency-free children through public APIs; reject unqualified, stale, changed, unsafe and duplicate inputs; verify rollback, installed/native behavior, independent review and exact-head CI.
+
+### [ ] SHADOW-001 — Continuously qualify upstream branches through a separate shadow repository
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#311](https://github.com/jordanhubbard/literate-ai/issues/311)
+- **Accepted design:** [ADR 0063](../decisions/0063-continuous-upstream-shadow-qualification.md); the directing user accepted the proposed decision on 2026-11-05 ([acceptance record](https://github.com/jordanhubbard/literate-ai/pull/320#issuecomment-6665728874)).
+- **Owner:** framework core / shadow repository lifecycle
+- **Direction:** Provide a durable litai shadow front door for branch and PR synchronization, mapped lifecycle qualification, corrective upstream contributions and accepted or rejected reconciliation.
+- **Conclusion:** The directing user accepted ADR 0063; implement its exact upstream authority and evidence boundaries in 1.4.0 before claiming any shadow qualification.
+- **Depends on:** ADR 0063 accepted design
+- **Completion prerequisites:** none
+- **Next action:** Implement the versioned shadow registry and read-only branch/PR plan first, with exact Git and forge identities and a restart-safe synchronization transaction. Keep the mapped lifecycle, repair export and acceptance paths as later unchecked slices of this same goal.
+- **Implementation:**
+  - [ ] Add reviewed shadow creation, branch addition and synchronization with versioned registry, exact upstream refs and restart-safe journal.
+  - [ ] Map supported upstream operations into isolated lifecycle attempts and report unsupported or unbound operations as explicit gaps.
+  - [ ] Prove causal failures, test targeted repairs in shadow lanes, export into fresh upstream layout and rerun actual upstream gates.
+  - [ ] Reconcile accepted and rejected upstream outcomes without duplicate repair or lost rationale; expose read-only current status.
+- **Evidence:**
+  - [ ] Real Git and forge multi-branch, add-branch, PR base/head drift, restart and idempotence journeys pass with bounded custody.
+  - [ ] Mapped operation and gap behavior, code/test/environment/timeout/nondeterminism counterexamples and incomplete-green refusals pass.
+  - [ ] Actual upstream-layout repair export/rebase and accepted merge-back plus rejected proposal retention pass without unearned admission.
+  - [ ] Independent source review, full source and platform gates, and noneditable installed/native qualification pass at the exact head.
