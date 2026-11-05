@@ -33945,3 +33945,31 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Mapped operation and gap behavior, code/test/environment/timeout/nondeterminism counterexamples and incomplete-green refusals pass.
   - [ ] Actual upstream-layout repair export/rebase and accepted merge-back plus rejected proposal retention pass without unearned admission.
   - [ ] Independent source review, full source and platform gates, and noneditable installed/native qualification pass at the exact head.
+
+### [ ] GO-001 — Restore buildable Go runtime tests and source custody
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#324](https://github.com/jordanhubbard/literate-ai/issues/324)
+- **Review:** [#325](https://github.com/jordanhubbard/literate-ai/pull/325)
+- **Owner:** Go Flavor, generation prompt, Standard commands, and guarded Go builder
+- **Direction:** Generate a normal compiled Go runtime-test source file and keep its real assertions in the native artifact.
+- **Conclusion:** The required _test.go file cannot be imported by go build; make the local test package buildable and verify its actual compiler consumption without external packages or dependency downloads.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Align the Go specification, skill, command profile, generation prompt, template, and copied lab projects on one buildable runtime-test file.
+  - [x] Verify the guarded builder compiles and records the declared local test package under offline Go toolchain settings, refusing hidden or unsafe source.
+  - [x] Exercise the locked Standard command path and the ordinary Make build-system path.
+- **Evidence:**
+  - [x] Retain the real _test.go compiler failure, positive native build, mutation failures, missing or hidden source refusal, and external-package refusal.
+  - [x] Validate source indexing, compiler-consumed files, artifact provenance, project/template authority, and noneditable installed-wheel execution after source removal.
+  - [ ] Pass exact-head platform CI and independent source review before merging and closing issue #324.
+
+  PR #325 at `aed471d4` carries the implementation. Seven repository-managed
+  compiler controls and the locked Standard command journey pass; eight Go
+  controls pass against a noneditable installed wheel outside the checkout.
+  Root and six copied lab projects validate, and `make wheel-check` passed from
+  clean `aed471d4` with Python 3.12 selected consistently. The exact-head
+  hosted matrix and independent review remain open. A real Standard Go+Make
+  command journey compiles and runs the artifact with the native assertions.

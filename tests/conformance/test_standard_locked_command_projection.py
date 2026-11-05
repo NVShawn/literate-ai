@@ -114,6 +114,16 @@ func Run(behavior func(int) int) error {
 }
 """
 
+_GO_MAKEFILE = """GO_OFFLINE = GO111MODULE=off GOPROXY=off GOSUMDB=off
+.PHONY: all test clean
+all:
+\t$(GO_OFFLINE) $(LITAI_LANGUAGE_TOOL) build -o "$(EXPORT_PATH)" main.go
+test:
+\t$(GO_OFFLINE) $(LITAI_LANGUAGE_TOOL) run main.go --litai-test
+clean:
+\trm -f "$(EXPORT_PATH)"
+"""
+
 
 def _host_platform() -> str:
     if sys.platform == "darwin":
@@ -211,13 +221,18 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
             self.assertGreaterEqual(len(closure.dependency_observation.edges), 1)
             closure.require_unchanged()
 
-    def _assert_real_toolchain_projection(self, language: str) -> None:
+    def _assert_real_toolchain_projection(
+        self, language: str, build_system: str | None = None
+    ) -> None:
         extensions = {"javascript": "js", "rust": "rs", "cpp": "cpp", "go": "go"}
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             platform = _host_platform()
             _component, snapshot, execution = _locked_snapshot(
-                root / "authority", language=language, platform=platform
+                root / "authority",
+                language=language,
+                platform=platform,
+                build_system=build_system,
             )
             try:
                 closure = project_locked_standard_toolchain_closure(
@@ -244,6 +259,10 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
                 (source / "source/tests/litai_runtime.go").write_text(
                     _GO_RUNTIME_TEST, encoding="utf-8"
                 )
+                if build_system == "make":
+                    (source / "source/Makefile").write_text(
+                        _GO_MAKEFILE, encoding="utf-8"
+                    )
             else:
                 (source / f"source/tests/litai_test.{extension}").write_text(
                     "// Generated cases are linked or dispatched by main.\n",
@@ -310,6 +329,9 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
 
     def test_go_toolchain_compiles_and_runs_projected_artifact(self) -> None:
         self._assert_real_toolchain_projection("go")
+
+    def test_go_make_flavor_compiles_and_runs_projected_artifact(self) -> None:
+        self._assert_real_toolchain_projection("go", build_system="make")
 
 
 if __name__ == "__main__":
