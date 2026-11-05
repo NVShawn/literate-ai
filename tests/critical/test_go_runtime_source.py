@@ -246,9 +246,7 @@ class GoRuntimeSourceTests(unittest.TestCase):
 
     def test_unsafe_import_is_refused_even_when_go_can_resolve_it(self) -> None:
         main = self.source / "source/main.go"
-        main.write_text(
-            _MAIN.replace('"fmt"', '"fmt"\n_ "unsafe"'), encoding="utf-8"
-        )
+        main.write_text(_MAIN.replace('"fmt"', '"fmt"\n_ "unsafe"'), encoding="utf-8")
         with self.assertRaises(BuildError) as refusal:
             self._inventory()
         self.assertEqual(refusal.exception.code, "builder.go_source_inventory_invalid")
