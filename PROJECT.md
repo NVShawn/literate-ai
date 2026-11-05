@@ -102,6 +102,15 @@ resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integratio
 tracks every initial item, the existing release goals, native qualification and
 publication evidence. All required acceptance remains open until proven.
 
+LIBRARY-EXPORT-ORDER-001 and LIBRARY-IMPORT-ISOLATION-001 cover newly reported
+JavaScript export-map ordering and ambient Python import defects under Goals 1
+and 4. Draft PR #313 contains a candidate for the former. Main already isolates
+the generic Python verifier; preserving that protection through integration,
+independent review and installed qualification remain open. QUALIFIED-CHILD-ADD-001
+extends Goals 1, 4 and 6 with a public atomic transaction for adding an
+independently qualified native child to a qualified retained parent. Issue #315
+requires accepted design, implementation and native evidence before completion.
+
 CARGO-COMPAT-001 and COMMAND-WORKER-001 record the directing user's explicit
 acceptance of ADRs 0054 and 0055 for 1.4 under Goals 1, 4, 5 and 6.
 Reviewed Cargo compatibility and command-addressed remote workers remain open;

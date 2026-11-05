@@ -33873,3 +33873,52 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Preserve exact 426 CI failure, raw logs, artifact hashes and all remaining original matrix outcomes.
   - [ ] Independent source review, meaningful actual install/reopen regression and fresh exact-head full qualification must pass before completion.
+
+### [ ] LIBRARY-EXPORT-ORDER-001 — Verify JavaScript export maps without JSON key-order dependence
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#314](https://github.com/jordanhubbard/literate-ai/issues/314)
+- **Owner:** Standard JavaScript library import verifier; PROJECT Goals 1 and 4
+- **Direction:** Accept an exact declared export map regardless of JSON insertion order while rejecting every missing, additional or incorrect mapping.
+- **Conclusion:** Required target and symbol checks already exist; compare exact own-key membership after them, independent of key order. Issue #314 and draft PR #313 contain a candidate, but full integration evidence remains open.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Reconcile the candidate in draft PR #313 with current main, complete independent review and the installed/full evidence, then close the bounded issue only with the required authority.
+- **Implementation:**
+  - [ ] Integrate and independently review the exact own-key comparison and retain all import, dependency and path-custody refusals.
+- **Evidence:**
+  - [ ] Run managed real-import controls, installed non-editable wheel qualification, full required regression and exact-head review/main CI before closing issue #314.
+
+### [ ] LIBRARY-IMPORT-ISOLATION-001 — Isolate generic Python library imports from ambient dependencies
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#316](https://github.com/jordanhubbard/literate-ai/issues/316)
+- **Owner:** Standard generic Python library verifier; PROJECT Goals 1 and 4
+- **Direction:** Reject undeclared Python modules supplied only by ambient PYTHONPATH while preserving standard-library and declared artifact imports.
+- **Conclusion:** Main commit 328261aac already launches the generic Python library verifier with `-I -S -B`; its public command-projection regression rejects an ambient-only dependency while retaining standard-library imports and artifact-origin checks. Reconcile older draft PR #313 without regressing this boundary; keep installed-wheel runtime qualification separate.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Preserve main's isolated generic verifier and ambient-module regression while reconciling draft PR #313, then qualify the integrated result.
+- **Implementation:**
+  - [x] Isolate generic Python verifier startup and add ambient-dependency refusal in main at 328261aac.
+  - [ ] Preserve the isolated launch, standard-library positive, artifact-origin check and ambient-dependency refusal in the integrated candidate.
+- **Evidence:**
+  - [ ] Run managed positive and negative controls, installed wheel and supported-platform qualification, independent review, full required regression and exact-head CI.
+
+### [ ] QUALIFIED-CHILD-ADD-001 — Add a qualified native child to a qualified retained parent atomically
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#315](https://github.com/jordanhubbard/literate-ai/issues/315)
+- **Owner:** Native child registration and conversion authority; PROJECT Goals 1, 4 and 6
+- **Direction:** Provide a public reviewed plan/apply transaction that adds an independently qualified child while retaining the parent receipt and existing children.
+- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Define atomic registry and qualification-evidence renewal with rollback and stale-plan refusals before implementation.
+- **Depends on:** Review a design under ADR 0006 before implementation
+- **Completion prerequisites:** none
+- **Next action:** Publish a proposed ADR under ADR 0006 for the public transaction, rollback and qualification boundary; request design acceptance before implementation.
+- **Implementation:**
+  - [ ] Propose and obtain design acceptance, then implement a public plan/apply transaction with current authority, registry, child and receipt binding plus recovery.
+- **Evidence:**
+  - [ ] Qualify two dependency-free children through public APIs; reject unqualified, stale, changed, unsafe and duplicate inputs; verify rollback, installed/native behavior, independent review and exact-head CI.
