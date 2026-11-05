@@ -111,8 +111,9 @@ controls pass for all three; post-merge main CI run `42124478195` passed at
 The broader draft PR #313 needs separate reconciliation without regressions.
 QUALIFIED-CHILD-ADD-001 extends Goals 1, 4 and 6 with a public atomic
 transaction for adding an independently qualified native child to a qualified
-retained parent. Issue #315 requires accepted design, implementation and native
-evidence before completion.
+retained parent. Issue #315 requires acceptance of proposed
+[ADR 0062](docs/decisions/0062-qualified-native-child-addition.md), implementation
+and native evidence before completion.
 
 SHADOW-001 extends Goals 1 and 4 with a separate repository that continually
 qualifies selected upstream branches and PRs, tests repairs and validates their
