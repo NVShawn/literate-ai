@@ -824,7 +824,9 @@ for (const capability of surface.capabilities) {
     if (!(symbol in value)) throw Error('missing library symbol '+symbol);
   seen.push(capability.capability);
 }
-if (JSON.stringify(manifest.exports)!==JSON.stringify(expectedExports))
+const actualExportKeys=Object.keys(manifest.exports).sort();
+const expectedExportKeys=Object.keys(expectedExports).sort();
+if (JSON.stringify(actualExportKeys)!==JSON.stringify(expectedExportKeys))
   throw Error('library exports map has undeclared entries');
 process.stdout.write(JSON.stringify({schema:'literate-ai/library-import-observation@1',capabilities:seen}));
 '''
