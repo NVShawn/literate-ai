@@ -712,6 +712,13 @@ class StandardCommandProjectionTests(unittest.TestCase):
             self.assertNotEqual(extra.returncode, 0)
             self.assertIn("undeclared entries", extra.stderr)
             del manifest["exports"]["./extra"]
+            del manifest["exports"]["./alpha"]
+            manifest["exports"]["./unexpected"] = "./alpha.js"
+            swapped = run()
+            self.assertNotEqual(swapped.returncode, 0)
+            self.assertIn("exports map differs for ./alpha", swapped.stderr)
+            del manifest["exports"]["./unexpected"]
+            manifest["exports"]["./alpha"] = "./alpha.js"
             manifest["exports"]["./beta"] = "./wrong.js"
             wrong = run()
             self.assertNotEqual(wrong.returncode, 0)
