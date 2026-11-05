@@ -1566,10 +1566,14 @@ class GenerationRecipe:
                     "retains the program name at index 0 and silently shifts",
                     "every downstream field lookup. Do not read standard input.",
                     "Put the generated Go behavior-test implementation in",
-                    "`source/tests/litai_test.go` as `package tests`, import it",
-                    "unconditionally from `source/main.go` so `--litai-test` and",
-                    "`--litai-smoke` can execute it, and do not gate it behind a",
-                    "`//go:build` tag. Emit only the JSON result on standard",
+                    "`source/tests/litai_runtime.go` as `package tests`, import it",
+                    "unconditionally from `source/main.go` as the declared local",
+                    "`./tests` package, and pass the real application behavior to",
+                    "its exported test runner as a callback. The test package must",
+                    "not import `main`. `--litai-test` and `--litai-smoke` must",
+                    "execute compiled native assertions without reading the test",
+                    "manifest; do not gate the runtime source behind a `//go:build`",
+                    "tag. Emit only the JSON result on standard",
                     "output.",
                 ]
             )

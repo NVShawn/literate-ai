@@ -49,6 +49,24 @@ if __name__ == "__main__":
 """
 
 _LANGUAGE_APPLICATIONS = {
+    "go": r"""package main
+import (
+    "./tests"
+    "fmt"
+    "os"
+)
+func behavior(value int) int { return value + 1 }
+func main() {
+    mode := ""
+    if len(os.Args) > 1 { mode = os.Args[1] }
+    if mode == "--litai-test" {
+        if err := tests.Run(behavior); err != nil { panic(err) }
+        fmt.Println(`{"schema":"literate-ai/generated-test-results@1","cases":[{"case_id":"go-case","outcome":"passed"}]}`)
+    } else {
+        fmt.Println(`{"language":"go","status":"ok"}`)
+    }
+}
+""",
     "javascript": """\
 const mode = process.argv[2];
 if (mode === "--litai-test") {
@@ -87,6 +105,14 @@ int main(int argc, char** argv) {
 }
 """,
 }
+
+_GO_RUNTIME_TEST = """package tests
+import "fmt"
+func Run(behavior func(int) int) error {
+    if got := behavior(1); got != 2 { return fmt.Errorf("behavior got %d", got) }
+    return nil
+}
+"""
 
 
 def _host_platform() -> str:
@@ -186,7 +212,7 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
             closure.require_unchanged()
 
     def _assert_real_toolchain_projection(self, language: str) -> None:
-        extensions = {"javascript": "js", "rust": "rs", "cpp": "cpp"}
+        extensions = {"javascript": "js", "rust": "rs", "cpp": "cpp", "go": "go"}
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             platform = _host_platform()
@@ -214,10 +240,15 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
             (source / f"source/main.{extension}").write_text(
                 _LANGUAGE_APPLICATIONS[language], encoding="utf-8"
             )
-            (source / f"source/tests/litai_test.{extension}").write_text(
-                "// Generated cases are linked or dispatched by main.\n",
-                encoding="utf-8",
-            )
+            if language == "go":
+                (source / "source/tests/litai_runtime.go").write_text(
+                    _GO_RUNTIME_TEST, encoding="utf-8"
+                )
+            else:
+                (source / f"source/tests/litai_test.{extension}").write_text(
+                    "// Generated cases are linked or dispatched by main.\n",
+                    encoding="utf-8",
+                )
             source_identity = local_generated_source_tree_identity(source)
             objects = root / "objects"
             artifact = root / "artifact"
@@ -276,6 +307,9 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
 
     def test_cpp_toolchain_compiles_and_runs_projected_artifact(self) -> None:
         self._assert_real_toolchain_projection("cpp")
+
+    def test_go_toolchain_compiles_and_runs_projected_artifact(self) -> None:
+        self._assert_real_toolchain_projection("go")
 
 
 if __name__ == "__main__":
