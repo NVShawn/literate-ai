@@ -104,9 +104,10 @@ publication evidence. All required acceptance remains open until proven.
 
 LIBRARY-EXPORT-ORDER-001 and LIBRARY-IMPORT-ISOLATION-001 cover newly reported
 JavaScript export-map ordering and ambient Python import defects under Goals 1
-and 4. PR #318 merged the export-order fix; post-merge main CI remains open.
-Main already isolates the generic Python verifier; preserving that protection
-through integration, independent review and installed qualification remain open.
+and 4. PR #318 merged the export-order fix, and PR #308 merged the isolated
+generic Python verifier. Both have installed-wheel controls; post-merge main CI
+and roadmap closure remain open. The broader draft PR #313 needs separate
+reconciliation without regressing either fix.
 QUALIFIED-CHILD-ADD-001 extends Goals 1, 4 and 6 with a public atomic transaction for adding an
 independently qualified native child to a qualified retained parent. Issue #315
 requires accepted design, implementation and native evidence before completion.

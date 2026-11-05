@@ -33898,15 +33898,16 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **GitHub issue:** [#316](https://github.com/jordanhubbard/literate-ai/issues/316)
 - **Owner:** Standard generic Python library verifier; PROJECT Goals 1 and 4
 - **Direction:** Reject undeclared Python modules supplied only by ambient PYTHONPATH while preserving standard-library and declared artifact imports.
-- **Conclusion:** Main commit 328261aac already launches the generic Python library verifier with `-I -S -B`; its public command-projection regression rejects an ambient-only dependency while retaining standard-library imports and artifact-origin checks. Reconcile older draft PR #313 without regressing this boundary; keep installed-wheel runtime qualification separate.
+- **Conclusion:** PR #308 merged the generic Python library verifier's `-I -S -B` launch at main commit `328261aac`, with a public command-projection regression for an ambient-only dependency, standard-library import and artifact-origin check. The noneditable wheel installed from PR #318's exact source tree passed the same real command journey; PR #318's tree equals post-merge main `be1bf57b8`. Post-merge main CI remains open.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Preserve main's isolated generic verifier and ambient-module regression while reconciling draft PR #313, then qualify the integrated result.
+- **Next action:** Verify post-merge main CI at `be1bf57b8`, then mark this bounded goal complete and close issue #316. Reconcile broader draft PR #313 separately without regressing this boundary.
 - **Implementation:**
   - [x] Isolate generic Python verifier startup and add ambient-dependency refusal in main at 328261aac.
-  - [ ] Preserve the isolated launch, standard-library positive, artifact-origin check and ambient-dependency refusal in the integrated candidate.
+  - [x] Preserve the isolated launch, standard-library positive, artifact-origin check and ambient-dependency refusal through PR #318's merge at `be1bf57b8`.
 - **Evidence:**
-  - [ ] Run managed positive and negative controls, installed wheel and supported-platform qualification, independent review, full required regression and exact-head CI.
+  - [x] Run managed positive and negative controls, independent integration review, noneditable installed-wheel journey and exact-tree PR CI through PRs #308 and #318.
+  - [ ] Verify post-merge main CI at `be1bf57b8` before closing issue #316.
 
 ### [ ] QUALIFIED-CHILD-ADD-001 — Add a qualified native child to a qualified retained parent atomically
 
