@@ -117,9 +117,9 @@ func Run(behavior func(int) int) error {
 _GO_MAKEFILE = """GO_OFFLINE = GO111MODULE=off GOPROXY=off GOSUMDB=off
 .PHONY: all test clean
 all:
-\t$(GO_OFFLINE) $(LITAI_LANGUAGE_TOOL) build -o "$(EXPORT_PATH)" main.go
+\t$(GO_OFFLINE) "$(LITAI_LANGUAGE_TOOL)" build -o "$(EXPORT_PATH)" main.go
 test:
-\t$(GO_OFFLINE) $(LITAI_LANGUAGE_TOOL) run main.go --litai-test
+\t$(GO_OFFLINE) "$(LITAI_LANGUAGE_TOOL)" run main.go --litai-test
 clean:
 \trm -f "$(EXPORT_PATH)"
 """
@@ -298,7 +298,8 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
                     text=True,
                     capture_output=True,
                     check=False,
-                    timeout=60,
+                    # The isolated Go cache makes the first Windows build cold.
+                    timeout=300 if language == "go" else 60,
                 )
                 self.assertEqual(
                     outputs[phase].returncode,

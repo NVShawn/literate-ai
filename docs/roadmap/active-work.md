@@ -33973,3 +33973,10 @@ implementation, policy weakening, qualification or issue closure is recorded her
   clean `aed471d4` with Python 3.12 selected consistently. The exact-head
   hosted matrix and independent review remain open. A real Standard Go+Make
   command journey compiles and runs the artifact with the native assertions.
+  Full-platform run `42245813631` at `86a8caf4` exposed two Windows conformance
+  harness failures in tests shard 2/3: the isolated cold Go build exceeded the
+  test's 60-second process deadline and left its temporary artifact locked during
+  cleanup, and the Make fixture passed an unquoted Windows Go path through Bash.
+  The focused repair bounds Go conformance builds at five minutes and quotes the
+  fixture's language tool path; both affected real Go journeys pass locally on
+  Linux ARM64. The Windows rerun and independent review remain required.
