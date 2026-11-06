@@ -1,4 +1,8 @@
-# Literate AI symposium
+# Literate AI 1.3.1 conference archive
+
+This is the event kit prepared for the 1.3.1 release and AI Unprompted session.
+For current commands and 1.4 development status, start at the repository's
+root `README.md` and [getting-started guide](../user/getting-started.md).
 
 Readable specifications are the starting point. Reviewable plans, selected targets,
 independent acceptance and retained evidence make the work accountable.

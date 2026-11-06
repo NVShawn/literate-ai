@@ -1,34 +1,18 @@
 # Literate AI
 
-## Welcome, Unprompted AI attendees!
+Literate AI connects readable software specifications to code, builds, tests and
+evidence. Components describe responsibilities, Flavors choose how to realize
+them, and locks and receipts record exactly what was selected and checked.
 
-Welcome to Jordan Hubbard’s Literate AI session. We’re glad you’re here—welcome
-aboard! Literate AI connects readable software specifications to code, builds,
-tests and evidence. Your coding assistant helps write the implementation;
-Components describe responsibilities, Flavors choose how to realize them, and
-locks and receipts record exactly what was selected and checked.
+**Start here:** [Install and get started](docs/user/getting-started.md) ·
+[User guide](docs/user/README.md) ·
+[Current features and release posture](docs/user/current-features.md) ·
+[Visual labs](labs/README.md).
 
-**Starting from zero? You will need:**
-
-- A **Mac, Linux computer, or Windows 11 machine**; an ordinary laptop is enough.
-  Use WSL 2 for the Linux command examples on Windows. No local NVIDIA GPU is needed.
-- A **modern browser and terminal**, **Python 3.11+**, **Git/Git LFS**, and
-  **Node.js 20+** and **GNU Make** for the JavaScript labs.
-- The **OpenRouter.ai API key in your session email**, plus internet access for
-  installation and model calls. Keep the key out of your repository.
-- **One coding assistant:** use OpenCode or Claude Code with the emailed
-  OpenRouter key. Literate AI also supports Codex CLI and Cursor Agent; those
-  adapters have separate credential/configuration requirements. See the setup guide
-  before choosing them for this session.
-- **Literate AI 1.3.1 and the lab kit**. Follow the
-  [step-by-step attendee setup](docs/conference/attendee-setup.md), then start the
-  [labs](labs/README.md). The completed browser previews can be opened offline.
-
-The **Windows test matrix is temporarily suspended for 1.3.1 because of resource
-availability**, with the release owner’s approval. It **returns in the next
-release**; 1.3.1 does not claim Windows qualification. Linux/macOS and the other
-release gates remain required. [Recorded exception](verification/1.3.1-windows-qualification-exception.json).
-
+The latest published release is **1.3.1**. The `main` branch develops **1.4.0**;
+its unfinished features and qualification are tracked in the
+[active work queue](docs/roadmap/active-work.md). Use the published release for
+the supported download and the development documentation to inspect upcoming work.
 
 <!-- litai-latest-release:begin -->
 ## Latest release
@@ -49,13 +33,10 @@ release gates remain required. [Recorded exception](verification/1.3.1-windows-q
 <!-- litai-latest-release:end -->
 
 For v1.3.1, Linux and macOS passed the complete native release gate. Its Windows
-matrix was suspended under the recorded exception above.
+matrix was suspended under the
+[recorded exception](verification/1.3.1-windows-qualification-exception.json);
+this is a historical qualification limit of that release.
 [Publication and fresh-download verification](verification/1.3.1-release-publication.json).
-
-**[Conference website and attendee materials](https://jordanhubbard.github.io/literate-ai/)** ·
-[Browser slides](https://jordanhubbard.github.io/literate-ai/docs/presentations/literate-ai-evolution-conference/index.html) ·
-[Offline conference kit](https://jordanhubbard.github.io/literate-ai/downloads/literate-ai-conference-kit.zip) ·
-[Browsable documentation](https://jordanhubbard.github.io/literate-ai/docs/README.html)
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
@@ -69,7 +50,12 @@ source is disposable. Writing production code from a spec is still arriving in
 waves as models improve — the harness that proves when a tree is valid is the
 durable talent.
 
-## Watch the onboarding video
+## 1.3.1 onboarding film and conference archive
+
+The following film, slides and conference materials were produced for 1.3.1.
+They remain available as that release's history while 1.4 introductions and
+collateral are prepared. Use the [getting-started guide](docs/user/getting-started.md)
+for current commands.
 
 **[Eight Hours to Make Coffee — watch the 12:04 animated onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)**
 
@@ -87,8 +73,12 @@ limits; the eight-hour story is an anecdote, not a benchmark.
 · [Approval and exact hashes](verification/onboarding-1.3.1-approval.json)
 · [Leave timestamped feedback](https://github.com/jordanhubbard/literate-ai/issues)
 
-Use the [getting-started guide](docs/user/getting-started.md)
-for current commands. If your browser downloads the MP4, open it in your video player.
+If your browser downloads the MP4, open it in your video player.
+
+[Conference website and attendee materials](https://jordanhubbard.github.io/literate-ai/) ·
+[Browser slides](https://jordanhubbard.github.io/literate-ai/docs/presentations/literate-ai-evolution-conference/index.html) ·
+[Offline conference kit](https://jordanhubbard.github.io/literate-ai/downloads/literate-ai-conference-kit.zip) ·
+[Browsable documentation](https://jordanhubbard.github.io/literate-ai/docs/README.html)
 
 ## Why Literate AI?
 
@@ -115,10 +105,10 @@ and
 [narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk).
 The authoring package is
 [`docs/presentations/literate-ai-manager-overview/`](docs/presentations/literate-ai-manager-overview/).
-For the patch-release scope, evidence status, release history, and current ETA, use the
-[editable 1.3.1 release briefing](docs/presentations/literate-ai-1.3.1-release-briefing/README.md).
-For the conference story of how Literate AI evolved from readable intent to executable
-evidence, use the [evolution deck](docs/presentations/literate-ai-evolution-conference/README.md).
+The [1.3.1 release briefing](docs/presentations/literate-ai-1.3.1-release-briefing/README.md)
+and [conference evolution deck](docs/presentations/literate-ai-evolution-conference/README.md)
+are historical presentations. The 1.4 release introduction will be linked after
+its source and rendered slides pass the release collateral review.
 
 ## Adopt, then rebuild
 

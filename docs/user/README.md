@@ -60,8 +60,8 @@ Start with [Getting started](getting-started.md) for a runnable tour, then use
 below are task-specific follow-ons.
 
 Use [current features and release posture](current-features.md) when you need the
-version-aware answer: `main` is the 1.4.0 development line, 1.3.0 is the latest
-published release, and 1.3.1 has its own patch-release gates. The
+version-aware answer: `main` is the 1.4.0 development line, and 1.3.1 is the latest
+published release with its own historical qualification record. The
 [visual labs](https://github.com/jordanhubbard/literate-ai/blob/main/labs) provide the shortest playful route from one Component to a
 multimedia Component DAG.
 
