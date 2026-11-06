@@ -57,9 +57,9 @@ They remain available as that release's history while 1.4 introductions and
 collateral are prepared. Use the [getting-started guide](docs/user/getting-started.md)
 for current commands.
 
-**[Eight Hours to Make Coffee — watch the 12:04 animated onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)**
+**[Eight Hours to Make Coffee — watch the 12:04 animated onboarding film](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4)**
 
-[![Watch Sam and LitAI in Eight Hours to Make Coffee](media/courses/eight-hours-to-make-coffee/poster.png)](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)
+[![Watch Sam and LitAI in Eight Hours to Make Coffee](media/courses/eight-hours-to-make-coffee/poster.png)](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4)
 
 Sam wants an eight-hour CI run to be the first useful result because it leaves time
 for coffee, laundry and the garage. LitAI keeps the rigor while moving useful feedback
