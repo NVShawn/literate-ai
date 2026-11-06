@@ -1,9 +1,10 @@
 # Documentation
 
 **[Browse the documentation website](https://jordanhubbard.github.io/literate-ai/docs/README.html)**
-or open the [conference attendee hub](conference/README.md) for slides, the film,
-interactive labs and an offline download pack. The [presenter guide](conference/presenter-guide.md)
-includes a two-hour running order.
+or [get started](user/getting-started.md) with the current development guide.
+`main` develops 1.4.0; 1.3.1 is the latest published release. Check
+[current features and release posture](user/current-features.md) before using a
+development-only command with the published wheel.
 
 - [Coding CLI release plugins](user/coding-cli-plugins.md)
 - [1.1 SDLC audit and graded concept assessment](roadmap/1.1-sdlc-audit.md)
@@ -29,19 +30,18 @@ For a presentation-length introduction, use the editable
 thesis, lifecycle, evidence model, source-promotion path, cost controls, and enterprise
 agent-system boundary for a technically sophisticated new audience.
 
-The [Literate AI 1.3.1 release briefing](presentations/literate-ai-1.3.1-release-briefing/README.md)
-summarizes the patch scope, core concepts, lessons from the first release onward,
-release-goal policy, current evidence, ETA, and publication path.
-
-The [Literate AI evolution conference deck](presentations/literate-ai-evolution-conference/README.md)
-connects the project's goals, release-by-release evolution, current 1.4.0 development
-surface, deliberate limits, and the visual lab progression.
-
 For the current manager and engineering narrative, use the reproducible
 [manager and engineering overview package](presentations/literate-ai-manager-overview/README.md).
 Maintained presentations and documents are modeled inside the Component system; read
 [documentation artifacts as Components](architecture/documentation-artifacts.md) for the
 document-pair capability, its ecosystem Flavors, and the terminal-Component rule.
+
+The [1.3.1 release briefing](presentations/literate-ai-1.3.1-release-briefing/README.md),
+[AI Unprompted conference deck](presentations/literate-ai-evolution-conference/README.md),
+and [conference attendee kit](conference/README.md) are historical material. The
+[presenter guide](conference/presenter-guide.md) records that event's running order.
+The 1.4 release introduction and slides will be linked after they pass the
+[release collateral review](roadmap/1.4-release-collateral.md).
 
 For the complete test story, read [the three test boundaries](user/framework-flow.md#three-test-artifacts-three-jobs),
 [clean major rebuilds](user/models-and-generation.md#clean-major-rebuilds), and
