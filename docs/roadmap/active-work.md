@@ -33910,6 +33910,27 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] Run managed positive and negative controls, independent integration review, noneditable installed-wheel journey and exact-tree PR CI through PRs #308 and #318.
   - [x] Verify post-merge main CI at `be1bf57b8` (run `42124478195`) before closing issue #316.
 
+### [ ] LIBRARY-IMPORT-COMMAND-001 — Fit complete library import authority in bounded verifier commands
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#330](https://github.com/jordanhubbard/literate-ai/issues/330)
+- **Owner:** Standard library command projection; PROJECT Goals 1 and 4
+- **Direction:** Project every declared library import mapping and the complete typed surface identity within the finite verifier command, without dropping a capability or weakening import, export, dependency, path or artifact custody checks.
+- **Conclusion:** Current main refuses a valid 51-capability library before checking its package because the repeated typed authority records exceed the 4,096-character command limit. Draft PR #313 has a candidate but conflicts with newer main code; extract only this bounded repair.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Implement the focused projection, qualify a real large library through the installed command path, then obtain independent review and exact-head platform CI before merging and closing #330.
+- **Implementation:**
+  - [ ] Retain every capability, module and symbol mapping and bind the complete surface identity; preserve the finite oversized refusal.
+  - [ ] Preserve newer main's Python import isolation, Rust harness compiler authority and other lifecycle guards while extracting the candidate from PR #313.
+- **Evidence:**
+  - [ ] Reproduce current-main failure and pass complete 51-capability, interface-change and oversized controls.
+  - [ ] Run real import positive and negative checks, managed regressions and a noneditable installed-wheel journey.
+  - [ ] Obtain independent source review, canonical pins and full exact-head supported-platform CI.
+
+- **Source development evidence:** The 51-capability fixture on main `dbe7eeb4b` raises `standard_command.library_import_surface_oversized` before package verification. This is an import-command projection failure, not evidence that the library's own tests fail.
+
 ### [ ] QUALIFIED-CHILD-ADD-001 — Add a qualified native child to a qualified retained parent atomically
 
 - **Priority:** P1

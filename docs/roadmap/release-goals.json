@@ -245,6 +245,9 @@
         "id": "LIBRARY-IMPORT-ISOLATION-001"
       },
       {
+        "id": "LIBRARY-IMPORT-COMMAND-001"
+      },
+      {
         "id": "QUALIFIED-CHILD-ADD-001"
       },
       {
