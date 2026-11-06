@@ -83,6 +83,9 @@ jobs:
               status=$?
               trap - 0
               set +e
+              if [ -n "${scoped_git_config:-}" ]; then
+                rm -f "$scoped_git_config"
+              fi
               mkdir -p qualification-results
               printf '%s\n' "$status" > qualification-results/guest-exit-code.txt
               collector_status=1
@@ -123,7 +126,15 @@ jobs:
             cp .github/qualifications/native_sdk/*.py "$work/harness/"
             cp qualification-wheel/* "$work/wheel/"
             tar -xf "$work/wheel/test-source.tar" -C "$work/test-source"
-            git -c safe.directory="$source_checkout" -c safe.directory="$source_checkout/.git" clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
+            # upload-pack is a child Git process. On Git 2.43, -c safe.directory
+            # does not reach that child; a disposable config scoped to this clone
+            # carries only the exact source and its .git directory.
+            scoped_git_config=$(mktemp "$work/tmp/litai-git-trust.XXXXXXXX")
+            git config --file "$scoped_git_config" --add safe.directory "$source_checkout"
+            git config --file "$scoped_git_config" --add safe.directory "$source_checkout/.git"
+            GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL="$scoped_git_config" git clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
+            rm -f "$scoped_git_config"
+            scoped_git_config=
             "$qualification_python" -m venv /home/litai-qual/venv
             /home/litai-qual/venv/bin/python -I -c 'import sqlite3; connection = sqlite3.connect(":memory:"); assert connection.execute("SELECT 1").fetchone() == (1,); connection.close()'
             /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl

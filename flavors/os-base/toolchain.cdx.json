@@ -45,13 +45,13 @@
       "type": "application",
       "bom-ref": "urn:literate-ai:capability:git",
       "name": "Git",
-      "version": ">=2.47,<3",
+      "version": ">=2.43,<3",
       "properties": [
         {"name": "literate-ai:base-toolchain:capability", "value": "git"},
         {"name": "literate-ai:base-toolchain:probe-kind", "value": "command"},
         {"name": "literate-ai:base-toolchain:probe-candidates", "value": "[\"git\",\"git.exe\"]"},
         {"name": "literate-ai:base-toolchain:probe-arguments", "value": "[\"--version\"]"},
-        {"name": "literate-ai:base-toolchain:reason", "value": "Git binds source acquisition to exact revisions and supports normalized command-scoped safe.directory trust without global exceptions."}
+        {"name": "literate-ai:base-toolchain:reason", "value": "Git binds source acquisition to exact revisions and supports exact process-scoped safe.directory trust in child Git operations without operator-global exceptions."}
       ]
     },
     {
