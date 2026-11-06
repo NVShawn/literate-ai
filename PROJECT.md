@@ -45,6 +45,8 @@ disposable output. The framework's own goals are:
    Semantic Versioning: each published release has an immutable version tag on
    its `release/<major>.<minor>.x` branch, selecting the exact qualified commit.
    A package version or copied source snapshot alone is not a published release.
+   Current user documentation, introductions and release collateral are reviewed
+   and qualified with that same source revision, including video and slides.
 2. Let a human-readable Component/Flavor/skill/workflow/routing specification fully
    determine generated application behavior, independent of which coding CLI or model
    performs the generation. This arrives in waves as models improve; it is not the
@@ -101,15 +103,20 @@ RELEASE-INTEGRATION-005 executes the user-requested complete outstanding PR/issu
 resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integration.md)
 tracks every initial item, the existing release goals, native qualification and
 publication evidence. All required acceptance remains open until proven.
+RELEASE-COLLATERAL-001 makes the complete 1.4 documentation and media refresh a
+blocking release goal and adds the same review to the standard release workflow.
 
-LIBRARY-EXPORT-ORDER-001 and LIBRARY-IMPORT-ISOLATION-001 cover newly reported
-JavaScript export-map ordering and ambient Python import defects under Goals 1
-and 4. Draft PR #313 contains a candidate for the former. Main already isolates
-the generic Python verifier; preserving that protection through integration,
-independent review and installed qualification remain open. QUALIFIED-CHILD-ADD-001
-extends Goals 1, 4 and 6 with a public atomic transaction for adding an
-independently qualified native child to a qualified retained parent. Issue #315
-requires accepted design, implementation and native evidence before completion.
+LIBRARY-EXPORT-ORDER-001, LIBRARY-IMPORT-ISOLATION-001 and
+PYTHON-LIBRARY-IMPORT-001 cover JavaScript export-map ordering, ambient Python
+imports and standard-library imports under Goals 1 and 4. PR #318 merged the
+export-order fix; PR #308 merged both Python verifier repairs. Installed-wheel
+controls pass for all three; post-merge main CI run `42124478195` passed at
+`be1bf57b8`. Roadmap closure is recorded in this PR.
+The broader draft PR #313 needs separate reconciliation without regressions.
+QUALIFIED-CHILD-ADD-001 extends Goals 1, 4 and 6 with a public atomic
+transaction for adding an independently qualified native child to a qualified
+retained parent. Issue #315 requires accepted design, implementation and native
+evidence before completion.
 
 SHADOW-001 extends Goals 1 and 4 with a separate repository that continually
 qualifies selected upstream branches and PRs, tests repairs and validates their
