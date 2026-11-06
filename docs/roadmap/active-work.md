@@ -33962,7 +33962,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Plan:** [1.4 release documentation and collateral refresh](1.4-release-collateral.md)
 - **Next action:** On the final 1.4 candidate, finish the per-surface inventory and replace current 1.3.1 or AI Unprompted introductions, media and slides with reviewed 1.4 material before release preparation.
 - **Implementation:**
-  - [x] Add the reusable release-project checklist gate and the 1.4 inventory covering release notes, root and user READMEs, getting-started and introduction pages, tutorials, video scripts and rendered media, captions, slides, speaker notes, download pages and linked collateral.
+  - [x] Add the reusable release-project checklist gate and the 1.4 inventory covering release notes, root and user READMEs, getting-started and introduction pages, tutorials, video scripts and rendered media, captions, slides, speaker notes, download pages and linked collateral. Keep the generated-project release skill byte-identical to the framework catalog copy (#340).
   - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
 - **Evidence:**
   - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.
