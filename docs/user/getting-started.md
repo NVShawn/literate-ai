@@ -6,7 +6,7 @@ from an installed release wheel, checks the host, and follows one reviewed onboa
 plan into either a new project or an adopted source tree.
 
 The checked-out `main` branch is currently developing 1.4.0, while the latest published
-wheel is 1.3.0 and 1.3.1 is a separate patch program. See
+wheel is 1.3.1. See
 [current features and release posture](current-features.md) before assuming a command
 or qualification described from `main` is already present in the published wheel.
 
