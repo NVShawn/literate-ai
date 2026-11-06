@@ -2,7 +2,7 @@
 
 This page is the version-aware map of Literate AI's operator-visible features.
 The source tree on `main` is the **1.4.0 development line**. The latest published
-release is **1.3.0**, and **1.3.1** is a separately governed patch program. A feature
+release is **1.3.1**. A feature
 described as *current development* below may therefore be newer than the latest wheel.
 Use the [release page](https://github.com/jordanhubbard/literate-ai/releases/latest)
 for published artifacts and the [active queue](../roadmap/active-work.md) for unfinished
@@ -32,9 +32,8 @@ native package and platform qualification, repository succession, and exact inst
 or public-path acceptance. These are real implementation programs, but their unchecked
 acceptance items are not release claims.
 
-The 1.3.1 patch line remains separate. Its release-goal manifest owns the patch's
-documentation, performance, retained-source, Windows, packaging, and release-evidence
-closure. Work on `main` does not silently satisfy those patch gates.
+The 1.3.1 patch line has its own published release record and historical goal
+manifest. Work on `main` does not retroactively change that release's qualification.
 
 ## Deliberate boundaries
 

@@ -57,14 +57,29 @@ fastest-turnaround path; do not wait on hosted CI that the record makes optional
    `gcloud config set account ACCOUNT`; never select an account for them. Publish
    both stable resource IDs, export both back, verify them, and retain the exact
    release-bound receipt before `litai release plan`.
-3. Prepare only after the plan is accepted. Review the diff, finish truthful
-   human-authored notes, validate, and commit on the selected line. Before
+3. Before preparation, inventory every current user-facing surface on the selected
+   release line: release notes and changelog, root and user READMEs, introductions,
+   getting-started and installation guides, tutorials and examples, website/download
+   copy, videos and scripts, captions, slide decks and speaker notes, and other linked
+   collateral. Refresh each from the final candidate's actual behavior and release
+   status; regenerate rendered media and presentations from reviewed sources. Treat
+   these files as release source: review their claims, commands, links and version
+   references in the same change and qualification cycle as code. Replace prior-release
+   or event-specific framing on current surfaces; keep historical material only when
+   clearly labeled and linked as history. Do not relabel an old recording or deck as a
+   new release artifact. Require a reviewable inventory with a disposition and exact
+   validation evidence for every surface before marking this gate complete. Prepare
+   only after the plan is accepted and this refresh is complete. Review the diff,
+   finish truthful human-authored notes, validate, and commit on the selected line. Before
    prepare can complete, follow `skills/agent/package-artifacts/SKILL.md`
    (`litai package`) for every Component tagged with a package Flavor.
 4. `litai release check PLAN` from the exact clean prepared commit on the
    named release line. On gate failure follow `evidence/SKILL.md`. A repaired
    checkpoint completion exits 2 after clearing repair state; repeat the same check and
-   continue only when a fresh evaluation from gate one exits 0.
+   continue only when a fresh evaluation from gate one exits 0. On that same prepared
+   revision, verify documentation rendering, media and presentation output, captions,
+   installation examples and public links against the inventory; stale current-release
+   claims or missing collateral block publication even if the software gate passes.
 5. Run the contribution sweep again, requiring ready state. `litai release publish
    PREPARED --authorize-external-write` only after check
    produces a current prepared-release identity. Then follow
