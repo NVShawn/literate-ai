@@ -3,6 +3,21 @@
 Roadmap prerequisites and implicit release ordering must form an acyclic graph;
 see [completion dependencies and the 1.3.1 incident](roadmap-dependencies.md).
 
+## User documentation and collateral in the release source
+
+The release candidate includes its current user-facing documentation and collateral.
+Before preparation, inventory and review release notes, READMEs, introductions,
+installation and upgrade guides, examples, instructional videos and captions,
+slides and speaker notes, website/download copy, and linked assets against the
+candidate's actual behavior. Refresh rendered media and decks from reviewed
+sources; validate their claims, commands and links on the same prepared revision
+as the software. Stale current-release or event-specific introductions block a
+release even when code tests pass. Prior releases and events may remain only as
+clearly labeled history. The `skills/agent/release-project/SKILL.md` workflow
+owns the full checklist; the [1.4 inventory](../roadmap/1.4-release-collateral.md)
+tracks this release's unfinished refresh. The published latest-release README
+entry changes only after provider readback, as described below.
+
 Local release gates own their subprocess tree. Interruption or timeout terminates
 and reaps that tree before returning control, for both streamed and captured
 output. The gate retains its transcripts and failure, and unfinished descendant
