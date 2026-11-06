@@ -33920,16 +33920,16 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Conclusion:** Current main refuses a valid 51-capability library before checking its package because the repeated typed authority records exceed the 4,096-character command limit. Draft PR #313 has a candidate but conflicts with newer main code; extract only this bounded repair.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Implement the focused projection, qualify a real large library through the installed command path, then obtain independent review and exact-head platform CI before merging and closing #330.
+- **Next action:** Qualify the focused projection through a noneditable installed wheel, then obtain independent review and exact-head platform CI before merging and closing #330.
 - **Implementation:**
-  - [ ] Retain every capability, module and symbol mapping and bind the complete surface identity; preserve the finite oversized refusal.
-  - [ ] Preserve newer main's Python import isolation, Rust harness compiler authority and other lifecycle guards while extracting the candidate from PR #313.
+  - [x] Retain every capability, module and symbol mapping and bind the complete surface identity; preserve the finite oversized refusal.
+  - [x] Preserve newer main's Python import isolation, Rust harness compiler authority and other lifecycle guards while extracting only the projection from PR #313.
 - **Evidence:**
-  - [ ] Reproduce current-main failure and pass complete 51-capability, interface-change and oversized controls.
+  - [x] Reproduce current-main failure and pass complete 51-capability, interface-change and oversized controls.
   - [ ] Run real import positive and negative checks, managed regressions and a noneditable installed-wheel journey.
   - [ ] Obtain independent source review, canonical pins and full exact-head supported-platform CI.
 
-- **Source development evidence:** The 51-capability fixture on main `dbe7eeb4b` raises `standard_command.library_import_surface_oversized` before package verification. This is an import-command projection failure, not evidence that the library's own tests fail.
+- **Source development evidence:** The 51-capability fixture on main `dbe7eeb4b` raises `standard_command.library_import_surface_oversized` before package verification. The focused projection passes four managed import-command controls, including a real 51-module JavaScript package with missing, wrong, extra, dependency and escaped-target refusals; five existing Standard command-projection smoke controls pass across Python, JavaScript and Rust. Ruff lint and format checks pass. The reviewed lifecycle-driver pin is `sha256:2e4a0c67e49629db37789e746f96d8443c062d0450fa6a502df2ad74a3e01e1c`. This is an import-command projection failure, not evidence that the library's own tests fail.
 
 ### [ ] QUALIFIED-CHILD-ADD-001 — Add a qualified native child to a qualified retained parent atomically
 
