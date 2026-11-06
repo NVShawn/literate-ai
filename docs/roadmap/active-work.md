@@ -33695,16 +33695,16 @@ independent review and the complete combined gate from test one.
 
 - **2026-11-04 combined current-main/guard integration preparation (pending review):** Preserve the separately qualified HCI `f146a2d69da2cc3d6e96194ee8a98c6b7f905f69` and GPI `d597f77ad0bba0ab5aa2e18680da1c726bdd0bf0` commits and evidence while composing current main `70cf6b20a152953fa01764086ef90b12e3147d94` through normal history. Keep the complete GPI production guard source, HCI installed freshness journey, upstream real-CAS SDK batch and owned HTML publication-race controls, workflow pin renewal and blocker-composition verification record. The new test/document/workflow union still requires independent review, canonical authority checks, one fresh required full gate and exact-head platform checks. The running root Python/Git-readiness branch and its 45-goal union will be added only after its own gate and commit; neither its source nor the immutable P0 GPI artifact is changed here. Prior qualification does not qualify this combined union, native PACKAGE, browser behavior or complete issue scope.
 
-### [ ] PYTHON-LIBRARY-IMPORT-001 — Preserve isolated standard-library imports in Python library qualification
+### [x] PYTHON-LIBRARY-IMPORT-001 — Preserve isolated standard-library imports in Python library qualification
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#306](https://github.com/jordanhubbard/literate-ai/issues/306)
-- **Next action:** Run full source and fresh installed/public qualification for the independently reviewed import-path repair; the four focused import/refusal controls pass.
+- **Next action:** Close issue #306 after this roadmap change merges. Keep broader draft PR #313 separate.
 
 - **Priority:** high
 - **Owner:** framework core / Python library import driver
 - **Direction:** Include newly filed GitHub issue #306 in 1.4 and make ordinary Python standard-library imports work during exact-artifact execution qualification.
-- **Conclusion:** The isolated import driver replaces its entire search path, hiding the standard library. Prepend the sealed export source while retaining Python isolation and the exact artifact module-origin check. This is an ordinary correctness repair, with no receipt-policy or import-origin exemption.
+- **Conclusion:** Main commit `328261aac` retains the isolated `-I -S -B` launch and prepends the sealed export source, preserving standard-library imports and the exact artifact module-origin check. The exact source tree in PR #318 equals post-merge main `be1bf57b8`; its noneditable installed wheel passed the real Python library command journey. Post-merge main CI run `42124478195` passed at `be1bf57b8`.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
@@ -33712,11 +33712,12 @@ independent review and the complete combined gate from test one.
   - [x] Retain interpreter standard-library paths when importing the exact sealed Python library.
   - [x] Exercise a real Python library importing dataclasses, typing and __future__, and retain ambient-package and module-origin refusal coverage.
 - **Evidence:**
-  - [ ] Real isolated native Python build/test/import journey passes with standard-library dependencies.
-  - [ ] Foreign capability origins and ambient third-party-only imports remain refused.
-  - [ ] Independent source review, canonical pins, full python-check and exact installed qualification pass before completion.
+  - [x] Real isolated native Python build/test/import journey passes with standard-library dependencies.
+  - [x] Foreign capability origins and ambient third-party-only imports remain refused.
+  - [x] Independent source review, canonical pins, full python-check and exact installed qualification passed through PRs #308 and #318.
+  - [x] Verify post-merge main CI at `be1bf57b8` (run `42124478195`) before closing issue #306.
 
-- **Source development evidence:** The real generated Python library first reproduced the `dataclasses` import failure. Prepending source alone then exposed an ambient-dependency admission regression in the legacy command path. The corrected legacy EXECUTE projection uses isolated, no-site, no-bytecode startup and retains the interpreter standard-library paths; managed Python profiles keep their existing launcher. All four Standard command-projection cases pass, including real build/test/import, ambient-only dependency refusal, foreign module-origin refusal and missing-symbol refusal (report SHA-256 `a4d0fed1032fcd11c811c4d30813a3a2c957a41579ed0e8a16afe07e099aea4d`). Independent source review passed. Full source and installed/public qualification remain open; this focused result does not close #306.
+- **Source development evidence:** The real generated Python library first reproduced the `dataclasses` import failure. Prepending source alone then exposed an ambient-dependency admission regression in the legacy command path. The corrected legacy EXECUTE projection uses isolated, no-site, no-bytecode startup and retains the interpreter standard-library paths; managed Python profiles keep their existing launcher. All four Standard command-projection cases pass, including real build/test/import, ambient-only dependency refusal, foreign module-origin refusal and missing-symbol refusal (report SHA-256 `a4d0fed1032fcd11c811c4d30813a3a2c957a41579ed0e8a16afe07e099aea4d`). Independent source review passed. The subsequent noneditable PR #318 wheel from the same source tree as current main passed this journey outside the checkout; PR #318's exact-head full CI passed at `9a73a680`. Post-merge main CI run `42124478195` passed at `be1bf57b8`.
 
 ### [ ] GIT-TOOL-CAPABILITY-001 — Align Git tool readiness with required checkout capabilities
 
@@ -33874,38 +33875,40 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Preserve exact 426 CI failure, raw logs, artifact hashes and all remaining original matrix outcomes.
   - [ ] Independent source review, meaningful actual install/reopen regression and fresh exact-head full qualification must pass before completion.
 
-### [ ] LIBRARY-EXPORT-ORDER-001 — Verify JavaScript export maps without JSON key-order dependence
+### [x] LIBRARY-EXPORT-ORDER-001 — Verify JavaScript export maps without JSON key-order dependence
 
 - **Priority:** P1
 - **Release target:** 1.4.0
 - **GitHub issue:** [#314](https://github.com/jordanhubbard/literate-ai/issues/314)
 - **Owner:** Standard JavaScript library import verifier; PROJECT Goals 1 and 4
 - **Direction:** Accept an exact declared export map regardless of JSON insertion order while rejecting every missing, additional or incorrect mapping.
-- **Conclusion:** Required target and symbol checks already exist; compare exact own-key membership after them, independent of key order. Issue #314 and draft PR #313 contain a candidate, but full integration evidence remains open.
+- **Conclusion:** PR #318 merged the exact own-key comparison at main commit `be1bf57b8`. Required target, symbol, import, dependency and path-custody checks remain in place. Exact-head review CI, installed-wheel controls and post-merge main CI run `42124478195` passed.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Reconcile the candidate in draft PR #313 with current main, complete independent review and the installed/full evidence, then close the bounded issue only with the required authority.
+- **Next action:** Close issue #314 after this roadmap change merges. Keep draft PR #313 separate from this bounded fix.
 - **Implementation:**
-  - [ ] Integrate and independently review the exact own-key comparison and retain all import, dependency and path-custody refusals.
+  - [x] Integrate and independently review the exact own-key comparison and retain all import, dependency and path-custody refusals in PR #318.
 - **Evidence:**
-  - [ ] Run managed real-import controls, installed non-editable wheel qualification, full required regression and exact-head review/main CI before closing issue #314.
+  - [x] Run managed real-import controls, installed non-editable wheel qualification, full required regression and exact-head PR CI at `9a73a680` (run `42115849519`).
+  - [x] Verify post-merge main CI at `be1bf57b8` (run `42124478195`) before closing issue #314.
 
-### [ ] LIBRARY-IMPORT-ISOLATION-001 — Isolate generic Python library imports from ambient dependencies
+### [x] LIBRARY-IMPORT-ISOLATION-001 — Isolate generic Python library imports from ambient dependencies
 
 - **Priority:** P1
 - **Release target:** 1.4.0
 - **GitHub issue:** [#316](https://github.com/jordanhubbard/literate-ai/issues/316)
 - **Owner:** Standard generic Python library verifier; PROJECT Goals 1 and 4
 - **Direction:** Reject undeclared Python modules supplied only by ambient PYTHONPATH while preserving standard-library and declared artifact imports.
-- **Conclusion:** Main commit 328261aac already launches the generic Python library verifier with `-I -S -B`; its public command-projection regression rejects an ambient-only dependency while retaining standard-library imports and artifact-origin checks. Reconcile older draft PR #313 without regressing this boundary; keep installed-wheel runtime qualification separate.
+- **Conclusion:** PR #308 merged the generic Python library verifier's `-I -S -B` launch at main commit `328261aac`, with a public command-projection regression for an ambient-only dependency, standard-library import and artifact-origin check. The noneditable wheel installed from PR #318's exact source tree passed the same real command journey; PR #318's tree equals post-merge main `be1bf57b8`. Post-merge main CI run `42124478195` passed at `be1bf57b8`.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Preserve main's isolated generic verifier and ambient-module regression while reconciling draft PR #313, then qualify the integrated result.
+- **Next action:** Close issue #316 after this roadmap change merges. Reconcile broader draft PR #313 separately without regressing this boundary.
 - **Implementation:**
   - [x] Isolate generic Python verifier startup and add ambient-dependency refusal in main at 328261aac.
-  - [ ] Preserve the isolated launch, standard-library positive, artifact-origin check and ambient-dependency refusal in the integrated candidate.
+  - [x] Preserve the isolated launch, standard-library positive, artifact-origin check and ambient-dependency refusal through PR #318's merge at `be1bf57b8`.
 - **Evidence:**
-  - [ ] Run managed positive and negative controls, installed wheel and supported-platform qualification, independent review, full required regression and exact-head CI.
+  - [x] Run managed positive and negative controls, independent integration review, noneditable installed-wheel journey and exact-tree PR CI through PRs #308 and #318.
+  - [x] Verify post-merge main CI at `be1bf57b8` (run `42124478195`) before closing issue #316.
 
 ### [ ] QUALIFIED-CHILD-ADD-001 — Add a qualified native child to a qualified retained parent atomically
 
