@@ -10,7 +10,7 @@ wheel is 1.3.1. See
 [current features and release posture](current-features.md) before assuming a command
 or qualification described from `main` is already present in the published wheel.
 
-Prefer to watch first? The 12:04 animated onboarding film,
+Prefer to watch first? The 12:04 animated onboarding film produced for 1.3.1,
 [Eight Hours to Make Coffee](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4), explains how reviewed plans, selected targets, aligned workers and independent evidence provide useful feedback before required CI. Its source-backed project case studies retain explicit native and adoption limits. The
 [instructional courses](../courses/README.md) break the same ground into short lessons:
 [your first greenfield project](../courses/01-greenfield-first-project/01-greenfield-first-project.mp4),
