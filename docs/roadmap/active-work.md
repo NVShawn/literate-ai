@@ -32212,6 +32212,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI. All four reviews are merged; exact head 228c121c passes CI 41282538479 and lands through PR 237 at 48b1e312. Later adoption fixes land through PR 238 at ad979c6e after exact-head CI 41288058754. These are integration results, not release qualification.
   - [ ] Reproduce or audit each issue, implement its owning fix or reviewed resolution, record decisive evidence, and comment and close only after the resolution lands.
   - [ ] Complete all declared 1.4.0 roadmap goals and native platform qualification using aligned workers; retain prior failed evidence.
+  - [ ] Complete [RELEASE-COLLATERAL-001](#release-collateral-001-refresh-all-user-facing-documentation-and-collateral-for-each-release): refresh every current user-facing document, video, slide and linked asset against the final 1.4 candidate before preparation.
   - [ ] Regenerate, inspect and publish the declared terminal document pair, then plan, prepare, check, publish and verify 1.4.0 through repository commands.
 - **Evidence:**
   - [ ] Require an empty unresolved tracker/review set, current contribution dispositions, complete release goals and reviewed branch/worktree provenance.
@@ -33948,3 +33949,20 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Mapped operation and gap behavior, code/test/environment/timeout/nondeterminism counterexamples and incomplete-green refusals pass.
   - [ ] Actual upstream-layout repair export/rebase and accepted merge-back plus rejected proposal retention pass without unearned admission.
   - [ ] Independent source review, full source and platform gates, and noneditable installed/native qualification pass at the exact head.
+
+### [ ] RELEASE-COLLATERAL-001 — Refresh all user-facing documentation and collateral for each release
+
+- **Priority:** P0
+- **Owner:** release-project skill, 1.4 release collateral and user documentation
+- **Direction:** Make a complete release-specific refresh of README, release notes, introductions, instructional video, slides and other user-facing collateral a standard release checklist obligation; replace 1.3.1 and AI Unprompted framing in current 1.4 surfaces.
+- **Conclusion:** Require a source-revision-bound inventory and editorial review of every current user-facing surface before release preparation, with regenerated media and presentation artifacts, checked links and claims, and explicit archival treatment for historical 1.3.1 or conference material. Preserve truthful published 1.3.1 history until 1.4 is published; do not relabel old artifacts as new.
+- **Depends on:** final 1.4 feature and release scope
+- **Completion prerequisites:** none
+- **Release target:** 1.4.0
+- **Plan:** [1.4 release documentation and collateral refresh](1.4-release-collateral.md)
+- **Next action:** On the final 1.4 candidate, finish the per-surface inventory and replace current 1.3.1 or AI Unprompted introductions, media and slides with reviewed 1.4 material before release preparation.
+- **Implementation:**
+  - [x] Add the reusable release-project checklist gate and the 1.4 inventory covering release notes, root and user READMEs, getting-started and introduction pages, tutorials, video scripts and rendered media, captions, slides, speaker notes, download pages and linked collateral.
+  - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
+- **Evidence:**
+  - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.

@@ -45,6 +45,8 @@ disposable output. The framework's own goals are:
    Semantic Versioning: each published release has an immutable version tag on
    its `release/<major>.<minor>.x` branch, selecting the exact qualified commit.
    A package version or copied source snapshot alone is not a published release.
+   Current user documentation, introductions and release collateral are reviewed
+   and qualified with that same source revision, including video and slides.
 2. Let a human-readable Component/Flavor/skill/workflow/routing specification fully
    determine generated application behavior, independent of which coding CLI or model
    performs the generation. This arrives in waves as models improve; it is not the
@@ -101,6 +103,8 @@ RELEASE-INTEGRATION-005 executes the user-requested complete outstanding PR/issu
 resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integration.md)
 tracks every initial item, the existing release goals, native qualification and
 publication evidence. All required acceptance remains open until proven.
+RELEASE-COLLATERAL-001 makes the complete 1.4 documentation and media refresh a
+blocking release goal and adds the same review to the standard release workflow.
 
 LIBRARY-EXPORT-ORDER-001, LIBRARY-IMPORT-ISOLATION-001 and
 PYTHON-LIBRARY-IMPORT-001 cover JavaScript export-map ordering, ambient Python
