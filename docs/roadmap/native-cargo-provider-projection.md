@@ -135,3 +135,25 @@ refusals and unchanged operator configuration. This recovers that source check
 without changing global trust; it does not repair the reusable readiness gap#305.
 The full Python request remains pending on the reviewed successor. The failed
 Git2.43 full run and unchanged-baseline reproduction remain retained.
+
+
+## Independent import working-directory correction intent
+
+The later complete source request at `cb50ad43` selects 2,756 tests and records
+2,519 passed, one failed, 104 skipped and 132 unexecuted. Its exact source and
+tools remained unchanged and all owned process groups and temporary files
+retired. The earlier adopted-Cargo journey passes in this request; the new
+failure is the independent Rust library import smoke case. It creates a fresh
+consumer manifest but invokes Cargo from the framework checkout, allowing an
+unrelated ancestor Cargo configuration to select an unconfigured cache backend.
+The TEST driver already enters the exact export; private HOME and CARGO_HOME do
+not prevent Cargo's working-directory ancestor lookup.
+
+Run IMPORT from its actual fresh consumer directory, keeping its exact manifest,
+target directory, offline mode and capability/import checks. A portable native
+regression must put a hostile wrapper in a synthetic caller ancestor, use an
+independent consumer temporary root and show the original driver triggers it
+while the corrected driver does not. This requires no operator configuration
+changes or blanket config suppression. The original failed full request stays
+historical; neither the targeted repair nor its fixture proves whole Standard
+lifecycle, independent graph acceptance or retained consumption.
