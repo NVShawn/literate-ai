@@ -9,8 +9,10 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 from literate_ai.adapters.directory_artifacts import DirectoryExportFile as File
 from literate_ai.adapters.lifecycle.native_cargo_projection import (
@@ -18,6 +20,9 @@ from literate_ai.adapters.lifecycle.native_cargo_projection import (
 )
 from literate_ai.adapters.lifecycle.native_cargo_projection import (
     project_native_cargo_graph as project,
+)
+from literate_ai.adapters.lifecycle.native_cargo_projection import (
+    validate_native_cargo_metadata,
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.contracts.native_cargo_provider_graph import (
@@ -105,6 +110,30 @@ class NativeCargoProjectionTests(unittest.TestCase):
         )
         self.original = manifest("consumer")
 
+    def sealed_alpha(self):
+        edge = Edge(
+            self.alpha.node.component_revision,
+            self.beta.node.component_revision,
+            "beta",
+        )
+        graph = Graph(self.alpha.node.component_revision, (self.beta.node,), (edge,))
+        projected, additions = project(
+            graph=graph,
+            root_manifest=self.alpha.original_manifest,
+            root_manifest_path=self.alpha.manifest,
+            sources=(self.beta,),
+        )
+        files = (
+            tuple(
+                replace(row, content=projected)
+                if row.path == self.alpha.manifest
+                else row
+                for row in self.alpha.files
+            )
+            + additions
+        )
+        return replace(self.alpha, files=files)
+
     def projection(self, **changes):
         args = dict(
             graph=self.graph,
@@ -176,6 +205,55 @@ class NativeCargoProjectionTests(unittest.TestCase):
         with self.assertRaisesRegex(NativeCargoProviderGraphError, "manifest_path"):
             replace(self.beta, manifest="../source/Cargo.toml")
 
+    def test_reprojection_discards_nested_graph_without_duplicate_nominal_package(self):
+        sealed = self.sealed_alpha()
+        self.assertGreater(len(sealed.files), len(self.alpha.files))
+        original = self.projection()
+        self.assertEqual(original, self.projection(sources=(sealed, self.beta)))
+        for file in sealed.files:
+            if file.path.endswith("original-manifest.toml"):
+                changed = tuple(
+                    replace(row, content=row.content + b"\n")
+                    if row.path == file.path
+                    else row
+                    for row in sealed.files
+                )
+                with self.assertRaisesRegex(
+                    NativeCargoProviderGraphError, "original_manifest_identity"
+                ):
+                    replace(sealed, files=changed)
+        broken = tuple(
+            row for row in sealed.files if not row.path.endswith("projection.json")
+        )
+        with self.assertRaisesRegex(
+            NativeCargoProviderGraphError, "projection_record_missing"
+        ):
+            replace(sealed, files=broken)
+
+    def test_casefold_build_script_and_reserved_namespace_refused(self):
+        for path in ("source/build.rs", "source/Build.rs", "source/BUILD.RS"):
+            with self.assertRaisesRegex(NativeCargoProviderGraphError, "build_script"):
+                replace(self.beta, files=self.beta.files + (File(path, b"", 0o644),))
+        for path in (".LITERATE/native-cargo/other", ".literate/NATIVE-CARGO/other"):
+            with self.assertRaisesRegex(
+                NativeCargoProviderGraphError, "reserved_namespace_alias"
+            ):
+                replace(self.beta, files=self.beta.files + (File(path, b"", 0o644),))
+
+    def test_returned_manifest_and_archive_overhead_are_inside_output_bound(self):
+        rewritten, files = self.projection()
+        bytes_of_additions = sum(len(row.content) for row in files)
+        bytes_with_root = bytes_of_additions + len(rewritten)
+        self.assertGreater(bytes_with_root, bytes_of_additions)
+        with patch(
+            "literate_ai.adapters.lifecycle.native_cargo_projection.MAX_PROJECTION_BYTES",
+            bytes_with_root - 1,
+        ):
+            with self.assertRaisesRegex(
+                NativeCargoProviderGraphError, "projection_bound"
+            ):
+                self.projection()
+
     def test_dependency_free_projection_preserves_exact_manifest_bytes(self):
         self.assertEqual(
             project(
@@ -194,7 +272,7 @@ class NativeCargoProjectionTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("cargo"), "native Cargo tool unavailable")
     def test_real_cargo_shared_nominal_type_and_clean_relocated_run(self):
-        projected, files = self.projection()
+        projected, files = self.projection(sources=(self.sealed_alpha(), self.beta))
         with tempfile.TemporaryDirectory(
             prefix="native-cargo-projection-"
         ) as temporary:
@@ -252,7 +330,36 @@ class NativeCargoProjectionTests(unittest.TestCase):
                 timeout=30,
                 check=True,
             )
-            packages = json.loads(metadata.stdout)["packages"]
+            document = json.loads(metadata.stdout)
+
+            def validate(value):
+                return validate_native_cargo_metadata(
+                    graph=self.graph,
+                    root_manifest=self.original,
+                    root_manifest_path="source/Cargo.toml",
+                    sources=(self.sealed_alpha(), self.beta),
+                    projection_root=original,
+                    metadata=value,
+                )
+
+            self.assertEqual(
+                validate(document)["graph_identity"], self.graph.identity.uri
+            )
+            for mutate in (
+                lambda value: value["packages"].append(value["packages"][0]),
+                lambda value: value["resolve"].update({"root": "wrong"}),
+                lambda value: value["packages"][0].update(
+                    {"manifest_path": "/ambient/Cargo.toml"}
+                ),
+                lambda value: next(
+                    row for row in value["resolve"]["nodes"] if row["deps"]
+                ).update({"deps": []}),
+            ):
+                changed = deepcopy(document)
+                mutate(changed)
+                with self.assertRaises(NativeCargoProviderGraphError):
+                    validate(changed)
+            packages = document["packages"]
             self.assertEqual(
                 sorted(row["name"] for row in packages), ["alpha", "beta", "consumer"]
             )
