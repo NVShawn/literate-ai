@@ -395,3 +395,50 @@ records exactly those two changed trusted files; its implementation identity is
 `sha256:5b5becd3f83532dde8a3a324afe58f593db108d0afe7bf3ba556253e7c752dd0`.
 This records source review, not a fresh full Python or installed-public result.
 The earlier failed attempt remains source-bound to the old wheel.
+
+## Installed public v2 graph successor qualification
+
+Exact source `c9f45485001b624e655922aeabbf42150df3027f` builds a fresh
+noneditable wheel inside the admitted disposable RAM workspace. Wheel SHA-256
+is `cc75d5f7282c280bd74a0921d42645376a106186ee8d3983664ba33de7ba1b91`
+(4,260,935 bytes); its independently reobserved installed framework identity is
+`sha256:93cd8632b605726ffecfcd6e81695db755c511868aa7dccdf91142121aedd5d3`.
+Two fresh public beta/alpha/gamma projects pass all eighteen actual public CLI
+calls, eight committed-receipt rebuilds and 54 reported case executions, including
+repeated provider tests. This is not 54 unique tests. Both actual v2 gamma
+acceptances retain current CAS evidence and execute the three independent cases
+for zero, 37 and the maximum unsigned 32-bit value. Their closed native metadata
+has exactly the independently authored four packages, versions, features and four
+dependency edges, with one physical shared beta provider per project.
+
+The oracle retains its authored expected material coordinates and graph; it does
+not copy observed Cargo metadata into expectations. Current reissued exact export
+identities are joined to the v2 export while all material bindings and edges must
+remain unchanged. All 5,294 support-source inputs independently match exact Git
+blobs: 5,292 byte-identical files and two declared CRLF representations, with no
+unexplained differences. Tools and operator Cargo configuration remain unchanged.
+All five owned phases exit zero with successful child cleanup. Duration is
+432.389 seconds; this is an observation, not a benchmark.
+
+Independent readback reserializes all eight sealed subjects and checks their
+exact BlobRefs. All 14,582 archived records rehash. The original RAM root, unit,
+cgroup and controller instance are independently absent. Raw archive SHA-256 is
+`dda55ae0b16757bcc34b696b30a085a51a9327ab4e7463cc3aeb732a0662b7d3`;
+request identity is
+`f1ad6ee13cf64e8706dfbd78d8636672ca54ab646c2acd82bb4f00daf8f33724`.
+
+Both antecedents stay failed: D exposes the original moving-path authority cycle;
+E completes one actual v2 acceptance before an outer fixture variable shadows
+its expected framework identity and falsely refuses the unchanged identity.
+An actual parsed-wrapper control reproduces that E failure and proves the
+two-identifier F correction still refuses real framework drift. E's raw archive
+`65789a947a9b15892a6ed2fe487c6010ee9966c0f977045a3769a5ee60fb49a0`
+and its independent retirement remain preserved. No earlier result is rebound.
+
+The complete successor Python source gate is running separately on native macOS,
+after all seventeen targeted current-source preparation controls pass with zero
+skips and unchanged source/tools. This public-v2 result does not perform
+independent qualification-archive replay or the real retained consumer
+plan/materialize/admit transaction. Those gates remain open, as do model-backed
+generation and whole ADR0040 certification. Keep the contribution draft; no
+upstream default-branch merge or downstream framework pin change is implied.
