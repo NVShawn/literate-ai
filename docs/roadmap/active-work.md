@@ -33919,10 +33919,10 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **GitHub issue:** [#315](https://github.com/jordanhubbard/literate-ai/issues/315)
 - **Owner:** Native child registration and conversion authority; PROJECT Goals 1, 4 and 6
 - **Direction:** Provide a public reviewed plan/apply transaction that adds an independently qualified child while retaining the parent receipt and existing children.
-- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Define atomic registry and qualification-evidence renewal with rollback and stale-plan refusals before implementation.
-- **Depends on:** Review a design under ADR 0006 before implementation
+- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Accepted ADR 0062 defines a public recoverable registry and qualification-evidence transaction. The directing user explicitly accepted the design on 2026-11-07; implementation and qualification remain open.
+- **Depends on:** Accepted [ADR 0062](../decisions/0062-qualified-native-child-addition.md); reuse current qualification and transaction authority
 - **Completion prerequisites:** none
-- **Next action:** Publish a proposed ADR under ADR 0006 for the public transaction, rollback and qualification boundary; request design acceptance before implementation.
+- **Next action:** Implement the accepted public addition transaction with current qualification readers, exact stale-plan refusal and recoverable registry/evidence publication.
 - **Implementation:**
   - [ ] Propose and obtain design acceptance, then implement a public plan/apply transaction with current authority, registry, child and receipt binding plus recovery.
 - **Evidence:**
