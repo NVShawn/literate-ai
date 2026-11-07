@@ -33982,6 +33982,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Conclusion:** Windows GetSystemTimes supplies bounded content-free utilization; retain configured admission thresholds and fail closed on API/counter/processor-group uncertainty. Keep local and standalone SSH receiver behavior consistent, without host-policy mutation or new dependencies.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Add a bounded System32-only native Windows counter adapter and share equivalent local/remote sampling semantics; preserve unsupported multi-group and unavailable-counter states.
+  - [x] Add a bounded System32-only native Windows counter adapter and share equivalent local/remote sampling semantics; preserve unsupported multi-group and unavailable-counter states.
 - **Evidence:**
   - [ ] Deterministic adapter/error/counter/group controls, native read-only Windows smoke and the declared Python check gate; preserve existing pressure-policy refusal semantics.
+
+- **Bounded qualification:** Source `3448c061` passes all seven deterministic controls, strict whole-tree lint and formatting. The exact standalone module SHA-256 `fef1cb6b1f690dfa71dc93f004d7289066c390215d1ea25311361fd5113cdcd8` also executes three read-only native windows on Windows/Python 3.12.10: measured 795, 614 and 976 basis points, with process retirement independently checked. The initial command-line transport refused before Python because it exceeded the Windows command budget; unchanged source passed through fixed executable stdin transport. This is counter-provider qualification, not a benchmark or whole-resource admission result. The complete declared Python suite remains in progress. Documentation dependency/audit and all 22 tooling controls pass; rendering refuses the host's unavailable browser sandbox, without weakening sandbox policy.
