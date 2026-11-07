@@ -7,6 +7,11 @@
 
 - Independent Rust library import verification runs Cargo from its fresh consumer
   directory, so an unrelated caller Cargo configuration cannot select its wrapper.
+- Source promotion exposes explicit `authorized-policy` reviews and a separate
+  operator acceptance opt-in while preserving human-only defaults and signed
+  source/graph/authority binding. These choices grant intent review, not host
+  execution or regenerative qualification.
+
 
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,
