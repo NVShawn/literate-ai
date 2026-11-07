@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Independent Rust library import verification runs Cargo from its fresh consumer
+  directory, so an unrelated caller Cargo configuration cannot select its wrapper.
+
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,
   slides and linked assets must be refreshed and reviewed with the release source

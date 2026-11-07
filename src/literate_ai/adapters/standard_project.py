@@ -863,7 +863,7 @@ elif language == "rust":
         completed = subprocess.run([*tool, "check", "--quiet", "--offline",
                                     "--manifest-path", str(temporary / "Cargo.toml"),
                                     "--target-dir", str(temporary / "target")],
-                                   capture_output=True)
+                                   cwd=temporary, capture_output=True)
         sys.stderr.buffer.write(completed.stderr)
         if completed.returncode:
             raise SystemExit(completed.returncode)

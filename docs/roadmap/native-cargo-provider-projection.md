@@ -157,3 +157,17 @@ while the corrected driver does not. This requires no operator configuration
 changes or blanket config suppression. The original failed full request stays
 historical; neither the targeted repair nor its fixture proves whole Standard
 lifecycle, independent graph acceptance or retained consumption.
+
+
+The targeted correction now passes all six Standard command projection cases in
+canonical `make python-check` (Linux x86-64, native Cargo/rustc1.99.0, no skips,
+10.456 seconds). A compiled portable wrapper proves that synthetic caller
+configuration is active; the unchanged IMPORT driver invokes that wrapper and
+fails with exit86. After setting only Cargo's working directory to the actual
+consumer root, the verifier succeeds, reports the exact capability, never invokes
+the hostile wrapper, and leaves the synthetic caller configuration and admitted
+library source unchanged. The regression uses independent caller and consumer
+temporary roots, without disabling configuration globally. Full source and
+whole lifecycle/independent graph/retained qualification are still pending.
+
+Causal negative log SHA-256: `27dcdcb8b8ffd4efa50a1f9f343d95828b208764b63f4bacaaf7f80cd18f3422`; focused positive log SHA-256: `1e26882a0ccdfc17287568fb2b7c81301b5846b8f3511f1fbb16cae3faab5cf0`.
