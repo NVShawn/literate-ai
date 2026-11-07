@@ -34075,6 +34075,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 ### [ ] WORKER-CPU-001 — Measure bounded native Windows CPU pressure
 
+- **Release target:** 1.4.0
+
 - **Current 1.4 consolidation:** Preserve PR #351's reviewed implementation and original native evidence through normal merge with PR #353's qualified fix batch. Add the included CPU goal to the 1.4 manifest, which previously omitted it. A new Windows-only acceptance control uses both the actual local collector and the actual standalone receiver, checks measured samples and required-CPU policy on a single processor-group host, and discloses that the receiver uses a local child in place of SSH transport. Its actual native Windows result is recorded below; Linux/macOS skips do not supply that evidence. Existing thresholds and the explicit multi-group limitation remain unchanged.
 - **Native Windows consolidation evidence:** Exact `f159e2d41f7130612bdbb90d58731fa4eb000940`, CI run `42408103227`, completed Windows shard 3, artifact `13588893820`: the JUnit record names the actual native local/standalone-receiver required-CPU case, which passes in 0.503 seconds with no skip. All seven deterministic CPU controls also pass. The artifact's provider metadata independently binds the run and head; aggregate job success alone is not used as per-case evidence. The receiver's SSH transport is replaced by a real local Windows child. Remaining shard/full-platform, installed-wheel and integrated-main gates remain open.
 - **Native installed Windows acceptance passed:** Exact `97e71a233`, CI run `42411067487`, completed Windows wheel job `128519427209`, artifact `13590603036`: the canonical noneditable wheel smoke passes, including the actual native local-collector/standalone-receiver case with no skip and both module origins verified inside the installed environment. The receiver uses a real local child in place of SSH transport. [Sanitized provider/artifact record](../../verification/worker-cpu-windows-installed-native.json) binds the independently rehashed 4,246,420-byte wheel (`sha256:08a147ff9b1b966c00052fabc21a2bc087b5a53b02e911122d4e2e3288341e03`) and installed framework identity. This closes the native installed-CPU acceptance blocker; separate-host SSH transport, independent review, consolidated exact-head qualification and post-merge gates remain open.
@@ -34122,4 +34124,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reproduce public PyPI failure and compatible older-floor download, then qualify complete native-target closure, rejection of newer floors/foreign architectures, focused regression and required integration gates.
 
-- **Shared 1.4 staging qualification (in progress):** Normal history combines PR #353's Go/import/inventory/Git fixes, PR #354's CPU source and installed acceptance hook, current contributor PR #351 history, PR #355's initial publication journal and PR #357's compatible-floor bootstrap fix. Every original release goal is preserved, including the independently added CPU and wheelhouse goals: 60 current 1.4 goals remain in scope. Run one complete local suite and the full remote matrix on this combined candidate before landing; earlier individual results remain source-bound. Initial HTML recovery/rerender and all other unchecked goals remain unfinished.
+- **Shared 1.4 staging qualification (in progress):** Normal history combines PR #353's Go/import/inventory/Git fixes, PR #354's CPU source and installed acceptance hook, current contributor PR #351 history, PR #355's initial publication journal and PR #357's compatible-floor bootstrap fix. Exact software source `c5dc8f25a` passes the complete Linux gate (2,758 selected; 2,639 passed; 119 skipped; zero failed) with all 596 groups independently reconciled, and its canonical installed-wheel checks pass. All 60 original goals remain retained. The scope audit then identifies the CPU item's missing exact release target; restore `1.4.0` and include newly reported #358 under its active contribution claim, bringing the current manifest to 61 goals. These metadata-only changes do not relabel the earlier source-bound software results. Require current scope/documentation validation and the full remote matrix at the corrected candidate before landing; independent review, post-merge main, full HTML recovery/rerender and all other unchecked goals remain open.
+
+### [ ] REVIEW-AUTHORITY-CLI-001 — Expose truthful policy review authority with explicit acceptance opt-in
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#358](https://github.com/jordanhubbard/literate-ai/issues/358)
+- **Active contribution claim:** [NVShawn's explicit implementation claim](https://github.com/jordanhubbard/literate-ai/issues/358#issuecomment-6713835521). No human-labeled review has been signed or accepted for the automated fixture. Preserve this work separately from native-Cargo provider qualification and the qualified-child publication mechanism.
+
+- **Priority:** P1
+- **Owner:** Specification review and source-acceptance CLI; existing review authority and promotion policy contracts
+- **Direction:** Include issue #358 in 1.4 qualification: preserve the human-only default while allowing an explicitly selected authorized-policy reviewer and a separate operator acceptance opt-in.
+- **Conclusion:** The core contracts already distinguish human and authorized-policy review, but the public CLI hardcodes human authority. Correct the existing CLI boundary without inventing human review or allowing a review to authorize its own acceptance. NVShawn has an explicit active implementation claim; coordinate the isolated contribution rather than duplicate it.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
+- **Evidence:**
+  - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
