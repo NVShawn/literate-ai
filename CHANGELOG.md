@@ -2,10 +2,14 @@
 
 ## Unreleased
 
+- Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
+
 - Go applications compile their native behavior tests from `source/tests/litai_runtime.go`; the guarded builder binds the actual offline compiler-consumed source graph (#324).
 - Inert conversion recognizes JavaScript/TypeScript module and JSX suffixes while preserving sensitive, binary, generated, large, minified and test precedence (#328).
 - Large library import commands retain every declared mapping and bind the complete typed surface identity within the finite argument limit (#330).
 - Repository checkout checks Git LFS JSON-inventory support before configuring a remote. FreeBSD SDK staging propagates exact source-only Git trust to the clone child through a disposable config (#305).
+
+- Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
 
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,
