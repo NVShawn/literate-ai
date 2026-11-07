@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Initial tree HTML publication retains bounded private transaction records before output mutation and through index commit, preserving interrupted attempts and foreign journal changes (#279). Recovery and rerender remain unfinished.
+
 - Go applications compile their native behavior tests from `source/tests/litai_runtime.go`; the guarded builder binds the actual offline compiler-consumed source graph (#324).
 - Inert conversion recognizes JavaScript/TypeScript module and JSX suffixes while preserving sensitive, binary, generated, large, minified and test precedence (#328).
 - Large library import commands retain every declared mapping and bind the complete typed surface identity within the finite argument limit (#330).

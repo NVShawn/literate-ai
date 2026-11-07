@@ -251,7 +251,14 @@ def _html_tree_capture_exclusions(owner, source, *, reserved_memory_bytes=0):
 
 
 @contextmanager
-def initialize_html_tree_output(project_root, request, *, acknowledged_plan_identity):
+def initialize_html_tree_output(
+    project_root,
+    request,
+    *,
+    acknowledged_plan_identity,
+    reserved_external_memory_bytes=0,
+    reserved_external_storage_bytes=0,
+):
     """Apply explicitly acknowledged first-use intent, preserving interruptions.
 
     The caller owns the lifecycle lock and operator authorization. A matching plan
@@ -263,6 +270,14 @@ def initialize_html_tree_output(project_root, request, *, acknowledged_plan_iden
     """
     if os.name != "posix":
         raise ValueError("html.tree.native-output-initialization-unsupported")
+    if not isinstance(request, HtmlTreeRenderRequest):
+        raise TypeError("html.tree.typed-output-request-required")
+    for value, limit in (
+        (reserved_external_memory_bytes, request.limits.max_metadata_memory_bytes),
+        (reserved_external_storage_bytes, request.limits.max_retained_generation_bytes),
+    ):
+        if type(value) is not int or not 0 <= value < limit:
+            raise ValueError("html.tree.external-state-reservation-invalid")
     plan = plan_initial_html_tree_output(project_root, request)
     if canonical_identity(plan) != acknowledged_plan_identity:
         raise ValueError("html.tree.output-plan-acknowledgement-mismatch")
@@ -284,7 +299,11 @@ def initialize_html_tree_output(project_root, request, *, acknowledged_plan_iden
             "recovery_is_not_live_ownership": True,
         }
     )
-    if len(owner) > min(4096, request.limits.max_retained_generation_bytes):
+    if (
+        len(owner) > 4096
+        or len(owner) + reserved_external_storage_bytes
+        > request.limits.max_retained_generation_bytes
+    ):
         raise ValueError("html.tree.initial-output-storage-policy-exceeded")
     process = os.getpid()
     active = True
@@ -347,6 +366,7 @@ def initialize_html_tree_output(project_root, request, *, acknowledged_plan_iden
             # generation observer is subsequently used for file currentness.
             return (
                 65536
+                + reserved_external_memory_bytes
                 + (0 if provisional is None else provisional.retained_memory_bytes)
                 + (0 if generation is None else generation.retained_memory_bytes)
             )
@@ -478,6 +498,7 @@ def initialize_html_tree_output(project_root, request, *, acknowledged_plan_iden
             # index before allowing the first generation byte to be written.
             reserved = (
                 len(owner)
+                + reserved_external_storage_bytes
                 + 4096
                 + staged.page_bytes
                 + staged.metadata_bytes
