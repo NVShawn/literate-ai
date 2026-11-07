@@ -33975,6 +33975,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 - **Completion prerequisites:** none
 - **Claim:** NVShawn is implementing this item; upstream assignee permissions are unavailable, so the issue records an explicit active claim. No upstream main merge or release is authorized by this contribution.
+- **Current-main reconciliation intent:** Merge upstream `32411a81` through ordinary history, preserving its documentation-only changes and the exact `0cf600f7` source qualification. Resolve the documentation-marker conflict through the supported review recorder, then run current authority, roadmap and relevant documentation checks. No runtime/test behavior changed on upstream main since the qualified base, so do not repeat the passing full Python suite solely for this documentation successor. Keep the contribution draft and preserve the original failures, installed/native lifecycle limits and unchanged downstream package pin.
 
 - **Priority:** P1
 - **Owner:** Framework worker-health native CPU provider
