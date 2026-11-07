@@ -9,6 +9,14 @@ paths during source capture; saved output assertions grant no write, recovery,
 collection or later source-exclusion authority. Existing single-file views and
 ordinary payload-retaining SDK capture retain their contracts and defaults.
 
+Initial tree publication retains a bounded private transaction journal outside
+source and output, with intent durable before the first output mutation and
+exclusive hash-linked phase records. Journal memory and storage consume the
+declared budgets. Interrupted attempts and foreign changes remain intact. These
+records describe one attempt; they do not restore output ownership or authorize
+recovery, cleanup, source exclusion or consumer acceptance. Complete recovery and
+rerender remain unfinished under RETAINED-TREE-EXPLORER-001.
+
 Projects may opt into complete tree freshness through a closed, versioned
 `literate.tree-html.json` registry of bounded project-relative declaration paths.
 Verification holds the actual registry and declaration inputs current, then runs
