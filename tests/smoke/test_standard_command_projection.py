@@ -724,6 +724,125 @@ class StandardCommandProjectionTests(unittest.TestCase):
             self.assertNotEqual(wrong.returncode, 0)
             self.assertIn("exports map differs", wrong.stderr)
 
+    def test_rust_import_ignores_unrelated_caller_cargo_configuration(self) -> None:
+        cargo = shutil.which("cargo")
+        rustc = shutil.which("rustc")
+        if cargo is None or rustc is None:
+            self.skipTest("native Cargo/rustc is unavailable")
+        surface = LibraryImportSurface(
+            "rust",
+            "fixture_library",
+            (
+                LibraryCapabilityImport(
+                    "fixture.logic",
+                    canonical_identity({"interface": "rust-consumer-cwd"}),
+                    "fixture_library::logic",
+                    ("value",),
+                ),
+            ),
+        )
+        with (
+            tempfile.TemporaryDirectory(prefix="litai-caller-") as caller_raw,
+            tempfile.TemporaryDirectory(prefix="litai-consumer-") as consumer_raw,
+        ):
+            caller = Path(caller_raw)
+            consumer = Path(consumer_raw)
+            work = caller / "work"
+            work.mkdir()
+            marker = caller / "wrapper-used"
+            wrapper = caller / (
+                "caller-tripwire.exe" if os.name == "nt" else "caller-tripwire"
+            )
+            wrapper_source = caller / "tripwire.rs"
+            wrapper_source.write_text(
+                'fn main() { let path = std::env::var_os("LITAI_TEST_CARGO_TRIPWIRE")'
+                '.expect("fixture marker"); std::fs::write(path, b"called")'
+                '.expect("fixture write"); std::process::exit(86); }\n',
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    rustc,
+                    "--crate-name",
+                    "caller_tripwire",
+                    str(wrapper_source),
+                    "-o",
+                    str(wrapper),
+                ],
+                capture_output=True,
+                check=True,
+                timeout=60,
+            )
+            config = caller / ".cargo/config.toml"
+            config.parent.mkdir()
+            config_text = "[build]\nrustc-wrapper = " + json.dumps(str(wrapper)) + "\n"
+            config.write_text(config_text, encoding="utf-8")
+            export = consumer / "artifact/library"
+            package = export / "source"
+            (package / "src").mkdir(parents=True)
+            manifest = package / "Cargo.toml"
+            manifest.write_text(
+                '[package]\nname="fixture-library"\nversion="0.0.0"\nedition="2021"\n',
+                encoding="utf-8",
+            )
+            library = package / "src/lib.rs"
+            library.write_text(
+                "pub mod logic { pub fn value() -> u8 { 7 } }\n", encoding="utf-8"
+            )
+            admitted_source = {path: path.read_bytes() for path in (manifest, library)}
+            cargo_home = consumer / "cargo-home"
+            cargo_home.mkdir()
+            environment = dict(os.environ)
+            environment.update(
+                CARGO_HOME=str(cargo_home),
+                TMPDIR=str(consumer),
+                TMP=str(consumer),
+                TEMP=str(consumer),
+                LITAI_TEST_CARGO_TRIPWIRE=str(marker),
+            )
+            # The fixture chooses its hostile wrapper through Cargo configuration.
+            # Do not let an operator's wrapper environment mask that tripwire.
+            environment.pop("RUSTC_WRAPPER", None)
+            environment.pop("RUSTC_WORKSPACE_WRAPPER", None)
+            hostile = subprocess.run(
+                [cargo, "check", "--offline", "--manifest-path", str(manifest)],
+                cwd=work,
+                env=environment,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            self.assertNotEqual(hostile.returncode, 0)
+            self.assertEqual(marker.read_bytes(), b"called")
+            marker.unlink()
+            imported = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    _STANDARD_LIBRARY_IMPORT_DRIVER,
+                    "rust",
+                    json.dumps([cargo]),
+                    _encoded_library_import_surface(surface),
+                    str(export),
+                    "source/Cargo.toml",
+                    str(export.parent),
+                ],
+                cwd=work,
+                env=environment,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            self.assertEqual(imported.returncode, 0, imported.stderr)
+            self.assertEqual(
+                json.loads(imported.stdout)["capabilities"], ["fixture.logic"]
+            )
+            self.assertFalse(marker.exists(), "unrelated caller wrapper was invoked")
+            self.assertEqual(config.read_text(encoding="utf-8"), config_text)
+            self.assertEqual(
+                {path: path.read_bytes() for path in admitted_source}, admitted_source
+            )
+
     def test_rust_library_verifier_compiles_exact_path_consumer(self) -> None:
         cargo = shutil.which("cargo")
         if cargo is None:
