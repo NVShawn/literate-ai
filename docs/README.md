@@ -30,8 +30,9 @@ For a presentation-length introduction, use the editable
 thesis, lifecycle, evidence model, source-promotion path, cost controls, and enterprise
 agent-system boundary for a technically sophisticated new audience.
 
-For the current manager and engineering narrative, use the reproducible
+For the existing 1.2.0 manager and engineering narrative, use the reproducible
 [manager and engineering overview package](presentations/literate-ai-manager-overview/README.md).
+The 1.4 document pair will be regenerated and reviewed against the final candidate.
 Maintained presentations and documents are modeled inside the Component system; read
 [documentation artifacts as Components](architecture/documentation-artifacts.md) for the
 document-pair capability, its ecosystem Flavors, and the terminal-Component rule.

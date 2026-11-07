@@ -1,8 +1,11 @@
 # Manager and engineering overview
 
-This is the reproducible authoring package for the current manager and engineering
-document pair: a `presentation` member (Google Slides deck) and a `narrative` member
-(Google Doc), per `component://literate-ai/literate-ai-overview`'s declared realization.
+This is the reproducible authoring package for the published 1.3.0 manager and
+engineering document pair: a `presentation` member (Google Slides deck) and a
+`narrative` member (Google Doc), per
+`component://literate-ai/literate-ai-overview`'s declared realization. It is a
+historical edition; the 1.4 document pair requires regeneration and review from
+the final 1.4 candidate.
 
 **1.3.0 edition.** This package carries the verified local 1.3.0 edition:
 reviewed original-source first binding, target-bound Python source projection,
@@ -15,7 +18,7 @@ Published presentation: [Literate-AI — Application Foundry Vision](https://doc
 
 Published narrative: [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
 
-Start with the [current deliverables](current-deliverables.md), then read
+Start with the [1.3.0 deliverables](current-deliverables.md), then read
 the [deck specification](deck-specification.md),
 [narrative specification](narrative-specification.md), [source notes](source-notes.md),
 and [QA ledger](qa-ledger.md). The local [regeneration skill](SKILL.md) describes the
@@ -43,7 +46,7 @@ per-project strict/loose patch authority, mandatory `Literate-AI-Release` pull-r
 classification, safe marker-based branch collection, continuous contribution
 disposition, document-pair preflight, and the implemented 0.9 multi-entrypoint,
 durable-service, host-path, and native-install boundaries plus release closure. The
-current edition also carries the implemented doctor/status/onboard operator front door,
+1.3.0 edition also carries the implemented doctor/status/onboard operator front door,
 explicit brownfield authority stages, native SDK and compiled-library custody, retained
 source lifecycle progress, exact worker-routing/remote-receipt slices, bounded action-DAG
 scheduling, shared-cache authority, real local Debian packages, native CLI and gRPC
