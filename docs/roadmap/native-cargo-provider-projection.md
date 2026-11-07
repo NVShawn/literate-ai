@@ -372,3 +372,16 @@ Binder report SHA-256: `72d895a59b763b84f28e623773661cf3543758944757fc21289fb15b
 These focused controls do not qualify a fresh installed v2 lifecycle, replay an
 archive, admit a retained consumer, or rebind the earlier full Python result.
 Those gates remain pending on the actual successor.
+
+
+## Current-parent integration before fresh v2 qualification
+
+Normally merge actual parent main `576296d4` before constructing the fresh wheel.
+Its delta from `32411a81` owns accepted child-addition/revision designs, Git/LFS
+checkout readiness and installed-wheel status checks, with no native-Cargo
+production overlap. Preserve their source and roadmap obligations alongside the
+stable-coordinate correction. Resolve shared authority-review markers using the
+supported recorder after reviewing the composed source, never by choosing a
+parent's old computed identity or relabeling its prior full-suite result. Fresh
+public v2, full-source successor, independent replay and retained admission remain
+pending.
