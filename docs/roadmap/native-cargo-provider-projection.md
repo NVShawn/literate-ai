@@ -116,3 +116,22 @@ Native graph identity includes the consumer revision, so native workspaces are
 conservatively partitioned by that revision. The dependency-free Cargo cache
 continues to reuse intermediates across consumer changes. This checkpoint makes
 no native cross-revision build-time claim.
+
+
+## Reviewed source authority
+
+The Standard/native Cargo input, projection, provider-lock, cache and managed-SBOM
+integration has independent source review. The only production-source delta from
+`03398121` through `501335bb` corrects the cache comment; its Python AST is unchanged.
+The declared lifecycle-driver review pin is now current at
+`sha256:ceb64ae66ff1c95a348d891f734a8d44297971534486484cb40d81df4111354d`;
+documentation authority and the unchanged test-runner review are current too.
+Canonical whole-tree lint and formatting pass (1,891 formatted Python files).
+These reviews authorize no independent library acceptance or execution claim.
+
+A separate Ubuntu worker with distribution Git2.53.0 passes the exact foreign-owned
+staging control: one real unittest, no skips, with source-only and unrelated-path
+refusals and unchanged operator configuration. This recovers that source check
+without changing global trust; it does not repair the reusable readiness gap#305.
+The full Python request remains pending on the reviewed successor. The failed
+Git2.43 full run and unchanged-baseline reproduction remain retained.
