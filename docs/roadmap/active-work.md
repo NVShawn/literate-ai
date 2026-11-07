@@ -33967,3 +33967,20 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
 - **Evidence:**
   - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.
+### [ ] SOURCE-MODULE-VARIANTS-001 — Preserve JavaScript and TypeScript module source in inert conversion
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#328](https://github.com/jordanhubbard/literate-ai/issues/328)
+- **Owner:** source-to-specification inventory and static derivation; PROJECT Goals 1 and 4
+- **Direction:** Recognize `.mjs`, `.cjs`, `.jsx`, `.mts`, `.cts` and `.tsx` as language source without executing or rewriting input; preserve safety and test classifications.
+- **Conclusion:** Current main `be1bf57b8` inventories a real `.mjs` source as `other` with no language. Mixed draft PR #313 contains a candidate correction, but its unrelated changes require separate review.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Qualify the current-main integration at its exact head, complete independent source review, then land and verify main before closing #328.
+- **Implementation:**
+  - [x] Admit the six module and JSX suffixes under their JavaScript or TypeScript language while preserving input paths and bytes. PR #329 at `b49c8652` exercises all six through an installed noneditable wheel outside this checkout.
+  - [x] Preserve sensitive, binary, generated, large, minified and test precedence. Repository-managed conversion custody and negative inventory controls pass at `b49c8652`.
+- **Evidence:**
+  - [x] Run managed source inventory and real inert derivation controls, including refusal to execute source. The exact wheel from `b49c8652` classified and derived all six variants with original bytes unchanged; local Linux ARM64 wheel check and full-platform run 42245817943 passed.
+  - [ ] Verify independent source review, noneditable installed qualification, exact-head CI and post-merge main CI.
