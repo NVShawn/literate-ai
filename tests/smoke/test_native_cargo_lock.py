@@ -126,7 +126,23 @@ version = "1.0.0"
             },
         )
         # Component versions are authored identities, not Cargo package versions.
-        self.assertEqual(self.managed.components[0].version in {"8.0.0", "9.0.0"}, True)
+        source, _ = build_cyclonedx_bom(
+            managed_graph=self.managed,
+            lifecycle=CycloneDxLifecycle.SOURCE,
+        )
+        resolved, _ = build_cyclonedx_bom(
+            managed_graph=self.managed,
+            lifecycle=CycloneDxLifecycle.RESOLVED,
+            source_bom=source,
+            additional_components=components,
+            additional_edges=edges,
+        )
+        document = json.loads(resolved)
+        inventory = [document["metadata"]["component"], *document["components"]]
+        self.assertEqual(
+            {row["bom-ref"]: row["version"] for row in inventory},
+            {self.root_ref: "9.0.0", self.alpha_ref: "8.0.0", self.beta_ref: "8.0.0"},
+        )
 
     def test_default_profile_and_wrong_manifest_selector_still_refuse(self):
         with self.assertRaises(DependencyObservationError):
