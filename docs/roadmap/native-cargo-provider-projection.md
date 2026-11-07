@@ -88,13 +88,31 @@ path, removes the original export and compiles/runs an independent consumer of
 the same nominal beta type. The generated source is a test-owned fixture, not a
 new model generation. This is builder integration and ordinary relocated-consumer
 coverage; it is not whole Standard lifecycle, independent verifier acceptance,
-or retained-product import qualification. Full Python and skill-admission gates
-remain outstanding. Cargo checks log SHA-256: `4514b1365244e99a8ca068e226da43b8c64b714f677dd4f1c2916314254ebdf5`.
+or retained-product import qualification. The full Python gate remains incomplete: its first failing baseline control
+stops further execution, as recorded below. Cargo checks log SHA-256: `4514b1365244e99a8ca068e226da43b8c64b714f677dd4f1c2916314254ebdf5`.
 
 Cargo generation guidance now distinguishes generator-authored registry intent
 from the framework-owned native edges and preserves the prohibition on invented
 paths and copied nominal types. Root and initialized-template skill bytes match.
 The generic Codex skill validator rejects the canonical framework's additional
-frontmatter fields; those fields remain intact, and the framework-specific skill
-admission check is still required. No downstream installation or runtime pin
+frontmatter fields; those fields remain intact. The declared pinned framework
+skill evaluator passes all six static checks for the root, Cargo and initialized
+template skills. No downstream installation or runtime pin
 changed.
+
+
+## Full gate and cache-identity limits
+
+The canonical full Python request selects 2,756 tests. Fail-fast reporting records
+797 passed, one failed and 40 skipped; the remaining selection did not run. The
+failure is the foreign-owned framework staging clone control: Git 2.43 refuses
+the exact source `.git` path despite the workflow command-scoped trust settings.
+An isolated unchanged `64415762` baseline reproduces the same failure. This is
+not a passing full gate; no global Git trust or test suppression was applied.
+Whole Standard lifecycle, both independent verifier paths and retained-product
+consumption remain outstanding.
+
+Native graph identity includes the consumer revision, so native workspaces are
+conservatively partitioned by that revision. The dependency-free Cargo cache
+continues to reuse intermediates across consumer changes. This checkpoint makes
+no native cross-revision build-time claim.
