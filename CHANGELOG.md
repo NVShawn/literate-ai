@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Native Cargo provider projection uses stable sealed-material paths across execution
+  reauthorization while retaining exact export provenance and ambiguity refusal.
+
 - Independent Rust library import verification runs Cargo from its fresh consumer
   directory, so an unrelated caller Cargo configuration cannot select its wrapper.
 

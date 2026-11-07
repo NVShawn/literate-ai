@@ -98,3 +98,24 @@ class NativeCargoInputsTests(unittest.TestCase):
             self.bind(
                 manifest_paths={self.artifact.component_revision.uri: "../Cargo.toml"}
             )
+
+    def test_same_revision_different_source_or_abi_is_not_a_coordinate_winner(self):
+        wrong = canonical_identity({"conflicting": "qualified-material"})
+        for field, refusal in (
+            ("source_tree_identity", "duplicate_provider"),
+            ("abi_identity", "export_contract"),
+        ):
+            with self.subTest(field=field):
+                changed = replace(self.artifact, **{field: wrong})
+                with self.assertRaisesRegex(NativeCargoProviderGraphError, refusal):
+                    self.bind(
+                        providers=(self.artifact, changed),
+                        available_exports={
+                            **self.ports._exports_by_identity,
+                            changed.identity.uri: changed,
+                        },
+                        current_bindings=(
+                            self.binding,
+                            replace(self.binding, artifact_identity=changed.identity),
+                        ),
+                    )

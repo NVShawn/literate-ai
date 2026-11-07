@@ -66,6 +66,28 @@ class NativeCargoProviderNode:
             "version": self.version,
         }
 
+    @property
+    def projection_identity(self) -> ContentIdentity:
+        """Locate the same sealed material across execution authorizations.
+
+        The full export remains part of the exact graph/provenance. Directory
+        coordinates must not depend on its execution-context authorization:
+        independently authored verifier authority can itself change that export.
+        Current blob/contract admission and duplicate-revision refusal still
+        belong to their existing owners; this value grants neither.
+        """
+        return canonical_identity(
+            {
+                "schema": "literate-ai/native-cargo-provider-coordinate@1",
+                "component_revision": self.component_revision.uri,
+                "import_surface_identity": self.import_surface_identity.uri,
+                "source_tree_identity": self.source_tree_identity.uri,
+                "original_manifest_identity": self.original_manifest_identity.uri,
+                "package": self.package,
+                "version": self.version,
+            }
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class NativeCargoProviderEdge:
