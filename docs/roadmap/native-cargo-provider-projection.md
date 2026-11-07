@@ -181,3 +181,84 @@ Independent source review approves the `64bc08fd` working-directory correction
 and causal regression; subsequent scheduling prose preserves identical
 production bytes. Review record SHA-256:
 `f9afba297d14b149e8221bd0ad5a16ee3cdd64b5571f8e80f803949b8ccb9058`.
+
+
+## Current-main successor source qualification
+
+The ordinary merge `d31e8f095603d659ddf659d87eb66a11cccb8850` includes upstream
+`32411a812e27b29495f9bb6d8f3e02073950941b`. Its reconciliation changes only root
+Markdown and records the supported documentation review; all production, test,
+tool and configuration blobs remain identical to the reviewed `8ca49bdc`
+contribution. Independent source-preservation review SHA-256:
+`62c436c4ede3c70ae800c2a8292f911bfbc3738a81d81461496478346af39555`.
+
+The canonical managed `make python-check`, with two workers on native macOS,
+passes at exact `d31e8f09`: 2,757 selected, 2,628 executed/passed, 129 skipped,
+zero failed and zero known-failed. The complete request takes 3,304.660 seconds;
+this is one observed duration, not a benchmark. The native Rust/Cargo1.97.1,
+Git2.56 and sccache0.19 profile is explicit. The earlier native targeted request
+also passes the actual foreign-owned Git control plus seven Rust import,
+shared-provider, relocated-type and cache controls without skips.
+
+All 5,291 tracked input representations independently match that Git commit
+(5,289 byte-identical and two declared CMD CRLF conversions); before/after source
+and native tool hashes remain equal and the checkout is clean. All four bounded
+phases exit0 with owned-group cleanup. The exact controller instance and private
+temporary root are independently absent; operator Cargo configuration remains
+unchanged. Structured report SHA-256:
+`9d17db626c9c85d4b8cb630ed6350371680063b4fd960b3338c6011e0bf2b562`;
+retained raw archive SHA-256:
+`5c4e576638fa09228e9f38c20c8bd34acbb57ff74d41064a77f6a39c0c113a5b`.
+The failed `cb50ad43` and earlier Git2.43 requests remain preserved; this new
+source-bound result does not rewrite them or complete the lifecycle below.
+
+## Actual installed-public single-library baseline
+
+The canonical wheel-smoke clean-source projection, provenance environment and
+copied-runtime constructor produce one private noneditable wheel at the same
+`d31e8f09` source. Wheel SHA-256:
+`f829ac36fb3cdfa0ac5e2e5cdfa409aff5056e0b34ecd118154a7eea220a1940`;
+installed distribution:
+`sha256:156feb91b2c0d1a241cea36cc461d08cd1cf431bb8c2d080039db2b607102174`.
+No global installation or downstream framework pin changes.
+
+The unchanged `tests/support/installed_rust_harness_journey.py` actually runs
+with isolated installed Python. It verifies exact installed authority, rejects
+source-framework imports, uses real initialization observers and runs the public
+lock, documentation-review and rebuild commands. Its controlled external coding
+CLI supplies source from the actual generation request; no framework result,
+qualification or receipt observer is replaced. The independent v2 serde oracle
+and committed receipt pass, with actual library package blob
+`5a06deff0c59dd800c83ede600bd2edbd5b9d5235115946dbc6fd2704f97aaa0`
+and receipt `a7087926c88abfb94da202e9fbfed3523f96dd81194484920f158783d2904f7e`.
+This is a single-library model-free baseline, not the required native provider
+closure, real model generation, whole wheel-smoke report or retained admission.
+
+The native job and all five bounded phases pass in 123.706 seconds. Its outer
+wrapper subsequently fails a terminal metadata assertion: a live cgroup equality
+guard precedes normal `RemainAfterExit` handling. A separate tiny actual unit
+reproduces the same-invocation exit0 transition to an empty terminal cgroup.
+The original wrapper remains failed; its missing terminal manager observation
+is not reconstructed from that control. A forward terminal-only guard correction
+is separately unexecuted and does not rebind the old native result.
+
+Independent readback verifies all tracked source representations, exact wheel
+origin/installed identity, receipt, oracle and package blob, unchanged tools,
+operator Cargo config and provisioned crate archives, and all 1,272 retained raw
+archive members. The resource unit, cgroup and controller instance are absent;
+the exact owned RAM workspace is retired after proof collection. Final measured
+workspace allocation is 544,747,520 bytes (544,755,712 bytes including the final
+result at retirement), within the declared RAM-only profile;
+the separate disk-backed full-build hold remains unchanged. Native/public raw
+archive SHA-256:
+`17773a52bdf15acb70346e3188566d24b657e2f3e829f4eb5eabd12f80096304`;
+independent readback SHA-256:
+`adc41d42f56618dc04d3e509bef66bcf2bce817804b09045f2242b8e4668b040`.
+
+Next, author the actual public beta/Event, alpha/read and direct-plus-transitive
+consumer contracts and disclose controlled external source generation. Qualify
+two clean lifecycle roots, both existing independent graph verifier paths, sealed
+relocation and the real retained consumer plan/materialize/admit boundary. A
+symbol-only oracle, passed builder fixture or copied standalone Cargo consumer
+cannot replace those remaining gates. The contribution remains draft; no upstream
+main merge, release or downstream framework rebind is claimed.
