@@ -119,6 +119,11 @@ retained parent. The directing user accepted
 [ADR 0062](docs/decisions/0062-qualified-native-child-addition.md) on 2026-11-07.
 Issue #315 still requires implementation and native evidence before completion.
 
+QUALIFIED-CHILD-REVISION-001 extends Goals 1, 4 and 6 under issue #350.
+The directing user accepted [ADR 0066](docs/decisions/0066-qualified-native-child-revision.md)
+on 2026-11-07 for 1.4.0. Public revision planning, acknowledged apply,
+recoverable evidence publication and installed consumer qualification remain open.
+
 SHADOW-001 extends Goals 1 and 4 with a separate repository that continually
 qualifies selected upstream branches and PRs, tests repairs and validates their
 export in the actual upstream layout. The directing user accepted ADR 0063;

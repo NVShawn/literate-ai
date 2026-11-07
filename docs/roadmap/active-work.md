@@ -33967,3 +33967,22 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
 - **Evidence:**
   - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.
+
+### [ ] QUALIFIED-CHILD-REVISION-001 — Revise a qualified native child through a recoverable public transaction
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#350](https://github.com/jordanhubbard/literate-ai/issues/350)
+- **Accepted design:** [ADR 0066](../decisions/0066-qualified-native-child-revision.md), explicitly accepted by the directing user on 2026-11-07 ("Accept both designs").
+
+- **Priority:** P1
+- **Owner:** Native child registry, qualification and retained parent lifecycle; PROJECT Goals 1, 4 and 6
+- **Direction:** Complete included issue #350 in 1.4.0. The directing user explicitly accepted ADRs 0062 and 0066 on 2026-11-07.
+- **Conclusion:** Implement accepted ADR 0066: independently qualify a distinct physical v2 with the same logical identity, bind both children and the complete parent, publish registry and renewed policy-supported evidence recoverably, and retain separate consumer acceptance.
+- **Depends on:** Accepted ADR 0066 and shared qualification/transaction authority from ADR 0062
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Expose read-only revision planning, acknowledged apply, status and recovery using current canonical evidence readers and exact drift refusal.
+  - [ ] Preserve both child trees and unaffected children; reserve publication inputs and refuse incomplete or foreign recovery state.
+- **Evidence:**
+  - [ ] Use installed public CLI for a real v1/v2 plus unchanged sibling journey, prove actual consumer v2 behavior and fresh application acceptance.
+  - [ ] Qualify stale inputs, unsigned/unqualified/wrong-target/unsafe/duplicate candidates, exact rollback, interruption and foreign-file preservation; require independent review and full exact-head native/platform gates.
