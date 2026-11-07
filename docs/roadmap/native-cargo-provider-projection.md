@@ -39,3 +39,9 @@ Implementation remains in progress. No dependency projection, independent native
 ## Graph-value development checkpoint
 
 The new finite graph contract passes eight focused cases through canonical `make python-check` with a session-managed environment. They cover a shared diamond, dependency-free input, missing/disconnected nodes, direct/disconnected cycles, changed identity materials, normalized package/alias collisions, canonical ordering/bounds and closed wire decoding. Ruff formatting and lint pass. Log SHA-256: `b9a259e3bb1317990dd73f0a1e7ea7bf6b2c27c51ba477181279499ab478e5f8`. These are graph-value controls; no filesystem/package admission, Cargo execution, full Python gate or complete dependency-projection acceptance is claimed.
+
+## Byte-projection development checkpoint
+
+The pure projector reconstructs one shared provider directory from immutable package-file values, injects only graph-declared edges into disposable manifest bytes, preserves the original manifest and emits a portable graph record. It refuses conflicting declarations, ambient dependency paths, source build scripts and mismatched node/manifest inputs. Sixteen focused graph/projection cases pass through canonical `make python-check`, with zero skips, including an actual ordinary Cargo diamond build and a second clean build after relocation and removal of the original fixture. The runtime uses Rust 1.99.0 and no registry dependency. Log SHA-256: `392ea49b4d4de3252d7ab4fa08585c38d461856431eb647ec8376f8a613fc2b6`.
+
+The projector does not admit qualification or authorize execution. Standard adapter binding, sealed-provider reprojection, exact native graph metadata/SBOM validation, both independent verifier paths and retained-consumer integration remain unfinished. This ordinary Cargo control does not supersede the recorded failing Standard lifecycle.
