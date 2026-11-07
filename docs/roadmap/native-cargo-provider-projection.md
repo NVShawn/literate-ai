@@ -123,9 +123,9 @@ no native cross-revision build-time claim.
 The Standard/native Cargo input, projection, provider-lock, cache and managed-SBOM
 integration has independent source review. The only production-source delta from
 `03398121` through `501335bb` corrects the cache comment; its Python AST is unchanged.
-The declared lifecycle-driver review pin is now current at
+At the reviewed `cb50ad43` checkpoint, the declared lifecycle-driver review pin was
 `sha256:ceb64ae66ff1c95a348d891f734a8d44297971534486484cb40d81df4111354d`;
-documentation authority and the unchanged test-runner review are current too.
+its documentation authority and unchanged test-runner review were current too.
 Canonical whole-tree lint and formatting pass (1,891 formatted Python files).
 These reviews authorize no independent library acceptance or execution claim.
 
@@ -171,3 +171,13 @@ temporary roots, without disabling configuration globally. Full source and
 whole lifecycle/independent graph/retained qualification are still pending.
 
 Causal negative log SHA-256: `27dcdcb8b8ffd4efa50a1f9f343d95828b208764b63f4bacaaf7f80cd18f3422`; focused positive log SHA-256: `1e26882a0ccdfc17287568fb2b7c81301b5846b8f3511f1fbb16cae3faab5cf0`.
+
+The supported driver review records the inspected one-file working-directory
+correction at `sha256:478797847c72055e48f14c09032607d84ac420aeb263c7283b8d57c29abf78de`.
+Whole-tree lint/format, roadmap dependency validation and unchanged runner review
+pass; full source/lifecycle/independent graph/retained qualification remains open.
+
+Independent source review approves the `64bc08fd` working-directory correction
+and causal regression; subsequent scheduling prose preserves identical
+production bytes. Review record SHA-256:
+`f9afba297d14b149e8221bd0ad5a16ee3cdd64b5571f8e80f803949b8ccb9058`.
