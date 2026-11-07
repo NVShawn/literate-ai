@@ -80,6 +80,35 @@ if missing or not guard.is_file():
 print(json.dumps({"guard": True, "project_template": list(required)}, sort_keys=True))
 """
 
+INSTALLED_WORKER_CPU_PROBE = """
+import json
+import runpy
+import sys
+import unittest
+from pathlib import Path
+from literate_ai import worker_pressure_probe
+from literate_ai.adapters import worker_pressure
+
+prefix = Path(sys.prefix).resolve(strict=True)
+for module in (worker_pressure_probe, worker_pressure):
+    if not Path(module.__file__).resolve(strict=True).is_relative_to(prefix):
+        raise RuntimeError("worker pressure probe did not load the installed wheel")
+case = "test_native_windows_local_and_receiver_cpu_satisfy_required_policy"
+loaded = runpy.run_path(sys.argv[1])
+suite = unittest.TestSuite([loaded["WindowsCpuTests"](case)])
+result = unittest.TextTestRunner(verbosity=2).run(suite)
+if result.testsRun != 1 or not result.wasSuccessful():
+    raise RuntimeError("installed native worker CPU acceptance failed")
+print(json.dumps({
+    "case": case,
+    "platform": sys.platform,
+    "status": "skipped" if result.skipped else "passed",
+    "skip_reasons": [reason for _test, reason in result.skipped],
+    "installed_module_origins_verified": True,
+    "receiver_transport": "local-child",
+}))
+"""
+
 INSTALLED_EVIDENCE_SIGNATURE_PROBE = """
 import json
 import tempfile
@@ -1969,6 +1998,16 @@ def _main() -> int:
         installed_evidence_signatures = json.loads(
             run(str(python), "-c", INSTALLED_EVIDENCE_SIGNATURE_PROBE, cwd=root).stdout
         )
+        installed_worker_cpu = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-c",
+                INSTALLED_WORKER_CPU_PROBE,
+                str(repository / "tests/e2e/test_worker_pressure_windows_cpu.py"),
+                cwd=root,
+            ).stdout
+        )
         checkpoint_help = run(
             str(python),
             "-m",
@@ -2816,6 +2855,7 @@ def _main() -> int:
                     "runtime_resources": installed_runtime_resources,
                     "runtime_environment": runtime_environment,
                     "evidence_signature_primitives": installed_evidence_signatures,
+                    "worker_cpu": installed_worker_cpu,
                     "schema_catalog_versions": sorted(
                         key for key in schema_versions if key.startswith("v")
                     ),
