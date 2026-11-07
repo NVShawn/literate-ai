@@ -1,13 +1,13 @@
 # ADR 0066: Revise a Qualified Native Child Without Reusing Its Evidence
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-06
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0, per the included disposition on issue #350
-- Roadmap: pending design acceptance under ADR 0006
+- Roadmap: QUALIFIED-CHILD-REVISION-001 in docs/roadmap/active-work.md
 - GitHub issue: [#350](https://github.com/jordanhubbard/literate-ai/issues/350)
 - Governance: [ADR 0006](0006-significant-feature-request-governance.md)
-- Approval: pending explicit review and acceptance of this design
+- Approval: directing user explicitly accepted this design on 2026-11-07 ("Accept both designs", ADRs 0062 and 0066)
 
 ## Context
 
@@ -23,13 +23,13 @@ authorize changed intent. Issue #350 records these public refusals on a passing
 parent. A private registry edit would discard the evidence boundary that makes the
 parent's current qualification meaningful.
 
-Proposed ADR 0062 ([PR #319](https://github.com/jordanhubbard/literate-ai/pull/319)),
-if accepted, adds a different qualified child. It does not change the registered
+Accepted ADR 0062 ([PR #319](https://github.com/jordanhubbard/literate-ai/pull/319)),
+also accepted by the directing user on 2026-11-07, adds a different qualified child. It does not change the registered
 child's identity or intent.
 The existing Standard rebind and unqualified replacement operations also remain
 separate. This decision proposes a revision of one already-qualified child.
 
-## Proposed decision
+## Decision
 
 ### Qualify a new physical revision independently
 
@@ -131,5 +131,5 @@ their own contracts.
    and release authorization remain separate from the registry transaction.
 
 These are acceptance criteria for a future implementation, not evidence that
-this proposal has met them. ADR 0006 requires explicit design acceptance before
-implementation or a roadmap execution item begins.
+this proposal has met them. The directing user accepted this design under ADR 0006; implementation and every
+acceptance criterion above remain required.
