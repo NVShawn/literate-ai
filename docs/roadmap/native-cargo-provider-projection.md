@@ -351,3 +351,24 @@ all child groups; the unit, cgroup, controller and exact RAM root are independen
 absent. All 6,821 archived records rehash; failed raw archive SHA-256 is
 `2bd980c40e55f0d712d78637afd05cef0b4a3f5cd2412c58635c0cb5ee5cb5ed`.
 This is a retained failed qualification, not a new pass.
+
+
+## Stable-coordinate focused controls
+
+The causal original-source control fails when only a provider's execution-context
+export identity changes: physical provider locations move. The successor derives
+locations from the explicit sealed material coordinate above, while graph records
+still carry the changed exact export identity. Four pure coordinate/provenance
+controls pass through canonical `make python-check`, with zero skips. Changed
+source/import material changes the coordinate; duplicate-revision conflicting
+material refuses. Five exact binder controls also pass, including same-revision
+different-source refusal and incompatible ABI rejection. Target/ABI and exact
+qualified-blob admission remain at the existing current-contract boundary; a
+coordinate is never a substitute for it.
+
+Original-source causal report SHA-256: `f007d6931a9512bd0841b00dc0d01240b7e3a74b92089cb61b3f56e8b20c33b2`.
+Fixed coordinate report SHA-256: `c26b4e46036499afc72ddab49381b1314aeab4f5f21964fa2c0de68a0625722b`.
+Binder report SHA-256: `72d895a59b763b84f28e623773661cf3543758944757fc21289fb15b020fc5f9`.
+These focused controls do not qualify a fresh installed v2 lifecycle, replay an
+archive, admit a retained consumer, or rebind the earlier full Python result.
+Those gates remain pending on the actual successor.

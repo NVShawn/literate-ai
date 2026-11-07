@@ -14,6 +14,9 @@
 - Repository checkout checks Git LFS JSON-inventory support before configuring a remote. FreeBSD SDK staging propagates exact source-only Git trust to the clone child through a disposable config (#305).
 
 - Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
+- Native Cargo provider projection uses stable sealed-material paths across execution
+  reauthorization while retaining exact export provenance and ambiguity refusal.
+
 - Independent Rust library import verification runs Cargo from its fresh consumer
   directory, so an unrelated caller Cargo configuration cannot select its wrapper.
 

@@ -340,7 +340,7 @@ def project_native_cargo_graph(*, graph, root_manifest, root_manifest_path, sour
     directories = {
         node.component_revision: _RESERVED
         + "/providers/"
-        + node.artifact_identity.digest
+        + node.projection_identity.digest
         for node in graph.nodes
     }
     manifests = {
@@ -476,7 +476,7 @@ def validate_native_cargo_metadata(
             projection_root
             / _RESERVED
             / "providers"
-            / node.artifact_identity.digest
+            / node.projection_identity.digest
             / source.manifest,
         )
     _require(
