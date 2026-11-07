@@ -34164,3 +34164,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Local qualification:** The complete current framework gate selects 2,773 tests: 2,685 pass and 88 retain their declared skips (four-worker run, 1,883.191 seconds). All 15 focused identity-migration E2E controls pass, as do the 603-test smoke gate (600 pass, three skips), lint/format and repository/documentation/driver/runner/skill checks. Earlier documentation-inventory refusals and an eight-worker ancestor-device identity refusal remain retained; the unchanged 24-case retained-runtime module and the complete fresh four-worker gate both pass afterward. No admission guard was relaxed. Installed-wheel/exported-HEAD proof, protected exact-head CI and main landing remain pending.
 
 - **Windows history observer correction:** Native Python 3.12 reads the same immutable file with equal device/file IDs, size, modification time and canonical content, but descriptor `ctime` differs from pathname `ctime`. The history reader now checks before/after stability separately for each observer and uses the existing conversion-store native identity binding, retaining timestamp-change refusal. A deterministic cross-observer regression and the two-rename native control exercise this path. All 16 focused tests pass on macOS; fresh native Windows, whole Python and installed-wheel gates remain required after the correction.
+
+### [ ] NATIVE-CARGO-001 — Project qualified Rust library provider graphs into Cargo builds
+
+- **GitHub issue:** [#345](https://github.com/jordanhubbard/literate-ai/issues/345)
+- **Detailed contract:** [Native Cargo provider projection](native-cargo-provider-projection.md)
+- **Completion prerequisites:** none
+- **Priority:** P1
+- **Owner:** Standard Cargo lifecycle, Rust generation and portable native library packages; PROJECT goals 4 and 5
+- **Direction:** Issue #345: a declared native Rust library edge must materialize the exact qualified provider crate without copying nominal types or mutating admitted source.
+- **Conclusion:** Bind provider revision, export, package/import identity and transitive graph in a disposable projection and sealed relocatable package. Registry-only generation currently leaves consumer imports unresolved; environment paths alone are insufficient.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Author the provider graph/projection contract and preserve dependency-free behavior.
+  - [ ] Implement qualified graph admission, disposable Cargo projection and generation guidance without in-place sealed-source edits.
+  - [ ] Retain identity-bound lock, metadata, SBOM and portable package graph for independent acceptance and retained consumption.
+- **Evidence:**
+  - [ ] Exercise real two-library and shared-nominal-type consumer builds, clean regeneration, sealed relocation and model-free consumption.
+  - [ ] Refuse missing, substituted, duplicate, cyclic, escaping or modified providers; run the canonical project Python gate and required PR checks.
