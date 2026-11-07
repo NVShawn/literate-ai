@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
+
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,
   slides and linked assets must be refreshed and reviewed with the release source

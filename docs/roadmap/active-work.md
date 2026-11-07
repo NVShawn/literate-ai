@@ -33966,3 +33966,22 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
 - **Evidence:**
   - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.
+
+### [ ] WORKER-CPU-001 — Measure bounded native Windows CPU pressure
+
+<a id="worker-cpu-001"></a>
+
+**GitHub issue:** [#348](https://github.com/jordanhubbard/literate-ai/issues/348)
+
+- **Completion prerequisites:** none
+- **Claim:** NVShawn is implementing this item; upstream assignee permissions are unavailable, so the issue records an explicit active claim. No upstream main merge or release is authorized by this contribution.
+
+- **Priority:** P1
+- **Owner:** Framework worker-health native CPU provider
+- **Direction:** Use native Windows CPU observations when required pressure evidence would otherwise be unsupported.
+- **Conclusion:** Windows GetSystemTimes supplies bounded content-free utilization; retain configured admission thresholds and fail closed on API/counter/processor-group uncertainty. Keep local and standalone SSH receiver behavior consistent, without host-policy mutation or new dependencies.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add a bounded System32-only native Windows counter adapter and share equivalent local/remote sampling semantics; preserve unsupported multi-group and unavailable-counter states.
+- **Evidence:**
+  - [ ] Deterministic adapter/error/counter/group controls, native read-only Windows smoke and the declared Python check gate; preserve existing pressure-policy refusal semantics.
