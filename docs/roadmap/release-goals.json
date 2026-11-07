@@ -267,6 +267,9 @@
       },
       {
         "id": "WORKER-CPU-001"
+      },
+      {
+        "id": "WORKER-WHEELHOUSE-GLIBC-001"
       }
     ]
   }

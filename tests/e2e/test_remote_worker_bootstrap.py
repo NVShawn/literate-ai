@@ -41,6 +41,7 @@ def _wheel(
     corrupt_record: bool = False,
     reverse_members: bool = False,
     requires_dist: tuple[str, ...] = (),
+    tag: str = "py3-none-any",
 ) -> str:
     dist_info = f"{name.replace('-', '_')}-0.3.0.dist-info"
     entries = {
@@ -55,7 +56,7 @@ def _wheel(
             ).encode()
         ),
         f"{dist_info}/WHEEL": (
-            b"Wheel-Version: 1.0\nRoot-Is-Purelib: false\nTag: py3-none-any\n"
+            f"Wheel-Version: 1.0\nRoot-Is-Purelib: false\nTag: {tag}\n".encode()
         ),
     }
     if startup_path:
@@ -332,6 +333,117 @@ class RunWithTreeKillTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GlibcWheelhouseTests(unittest.TestCase):
+    """Real offline resolver selection with synthetic metadata, not native ABI proof."""
+
+    def test_newer_glibc_target_selects_compatible_native_and_legacy_wheels(self):
+        from literate_ai.remote_worker_bootstrap import export_worker_wheelhouse
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source = root / "native"
+            source.mkdir()
+            candidates = (
+                "cp312-cp312-manylinux_2_28_x86_64",
+                "cp312-cp312-manylinux_2_34_x86_64",
+                "cp312-cp312-manylinux_2_40_x86_64",
+                "cp312-cp312-manylinux_2_34_aarch64",
+            )
+            for tag in candidates:
+                _wheel(
+                    source / f"native_dep-0.3.0-{tag}.whl", name="native-dep", tag=tag
+                )
+            legacy = "cp312-cp312-manylinux2014_x86_64"
+            _wheel(
+                source / f"legacy_dep-0.3.0-{legacy}.whl", name="legacy-dep", tag=legacy
+            )
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(
+                framework,
+                requires_dist=("native-dep==0.3.0", "legacy-dep==0.3.0"),
+            )
+            manifest, identity = export_worker_wheelhouse(
+                framework,
+                root / "export",
+                framework_distribution_identity="sha256:" + "4" * 64,
+                platform="manylinux_2_39_x86_64",
+                python_version="3.12",
+                implementation="cp",
+                abi="cp312",
+                wheel_directory=source,
+            )
+            value, _identity, _framework = verify_worker_wheelhouse(
+                manifest.parent, manifest, identity, require_host_compatible=False
+            )
+            self.assertEqual(value["target"]["platform"], "manylinux_2_39_x86_64")
+            self.assertEqual(
+                {entry["filename"] for entry in value["wheels"]},
+                {
+                    framework.name,
+                    "native_dep-0.3.0-cp312-cp312-manylinux_2_34_x86_64.whl",
+                    f"legacy_dep-0.3.0-{legacy}.whl",
+                },
+            )
+
+    def test_newer_floor_and_foreign_architecture_do_not_supply_a_dependency(self):
+        from literate_ai.remote_worker_bootstrap import export_worker_wheelhouse
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source = root / "native"
+            source.mkdir()
+            for tag in (
+                "cp312-cp312-manylinux_2_40_x86_64",
+                "cp312-cp312-manylinux_2_34_aarch64",
+            ):
+                _wheel(
+                    source / f"native_dep-0.3.0-{tag}.whl", name="native-dep", tag=tag
+                )
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(framework, requires_dist=("native-dep==0.3.0",))
+            with self.assertRaises(WorkerBootstrapError) as caught:
+                export_worker_wheelhouse(
+                    framework,
+                    root / "export",
+                    framework_distribution_identity="sha256:" + "4" * 64,
+                    platform="manylinux_2_39_x86_64",
+                    python_version="3.12",
+                    implementation="cp",
+                    abi="cp312",
+                    wheel_directory=source,
+                )
+            self.assertEqual(caught.exception.code, "worker.wheelhouse_download_failed")
+            self.assertFalse((root / "export").exists())
+
+    def test_invalid_expansion_refuses_before_acquiring_resolver(self):
+        from literate_ai.remote_worker_bootstrap import export_worker_wheelhouse
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(framework)
+            with patch(
+                "literate_ai.remote_worker_bootstrap._wheelhouse_downloader"
+            ) as resolver:
+                for platform in (
+                    "manylinux_2_129_x86_64",
+                    "manylinux_2_039_x86_64",
+                    "manylinux_2_" + "9" * 5000 + "_x86_64",
+                    "manylinux_2_39_" + "x" * 1000,
+                ):
+                    with self.assertRaises(WorkerBootstrapError) as caught:
+                        export_worker_wheelhouse(
+                            framework,
+                            root / "export",
+                            framework_distribution_identity="sha256:" + "4" * 64,
+                            platform=platform,
+                        )
+                    self.assertEqual(
+                        caught.exception.code, "worker.wheelhouse_target_invalid"
+                    )
+            resolver.assert_not_called()
 
 
 class FreeBSDWheelhouseTests(unittest.TestCase):

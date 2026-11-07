@@ -1,0 +1,254 @@
+{
+  "kind": "native-development-verification",
+  "release_attestation": false,
+  "exporter_source_revision": "35948118b11a71fdc92a2b48622f0d2a5a84dd4e",
+  "framework_wheel_revision": "97e71a233765d4e26b2d6802942a2d7b808133dd",
+  "framework_wheel_sha256": "3aa12bb2cecca99b4eac65de84ec39b2c15ca7599c030f7ce101056602f5d479",
+  "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+  "dependency_closure_identity": "sha256:814fd764dc6971b84f4953518cc715e4b6d145abfd3cd0395af6809773a0701e",
+  "target": {
+    "abi": "cp312",
+    "implementation": "cp",
+    "platform": "manylinux_2_39_x86_64",
+    "python_version": "3.12"
+  },
+  "native_platform": {
+    "kernel": "5.15.0-1117-azure",
+    "architecture": "x86_64",
+    "python": [
+      3,
+      12,
+      3
+    ],
+    "libc": [
+      "glibc",
+      "2.39"
+    ],
+    "uid": 0
+  },
+  "verified_installed_distributions": [
+    {
+      "distribution_name": "arrow",
+      "distribution_version": "1.4.0",
+      "installed_identity": "sha256:b02b58029e58f44ac9954284cb253eb4509a234f8cc363af114467f5add34068"
+    },
+    {
+      "distribution_name": "attrs",
+      "distribution_version": "26.1.0",
+      "installed_identity": "sha256:b0a330b389db66c9da646a951a1678a2da0aeb7be17901aeabceaff6e40c2741"
+    },
+    {
+      "distribution_name": "boolean-py",
+      "distribution_version": "5.0",
+      "installed_identity": "sha256:ac584eadc005b8234cb2d5c71eec3ff145793599c6979769c834c38a25eda54f"
+    },
+    {
+      "distribution_name": "certifi",
+      "distribution_version": "2026.7.22",
+      "installed_identity": "sha256:86deaca372304985d9e39fb034d87fcaf102adfd544f10213b5d8aa746f94830"
+    },
+    {
+      "distribution_name": "cffi",
+      "distribution_version": "2.1.1",
+      "installed_identity": "sha256:bdfbd21fce8a9aae928812d479fe7b8d6cb5714c16bb229605d1f8bebfbf6aad"
+    },
+    {
+      "distribution_name": "cryptography",
+      "distribution_version": "50.0.1",
+      "installed_identity": "sha256:42525501ae99d706322ba7f43c12596f4a7fb1e57547a851cc3f9de2b2caf59e"
+    },
+    {
+      "distribution_name": "cyclonedx-python-lib",
+      "distribution_version": "11.11.0",
+      "installed_identity": "sha256:5defda89d97802ac76ea2c78081c4f1b851e07b0369de667473bb5057f37b5d3"
+    },
+    {
+      "distribution_name": "defusedxml",
+      "distribution_version": "0.7.1",
+      "installed_identity": "sha256:f19ed6537cf7f3d94a2ea5921333c5c705c24eed23d9ebe94343506994e6936c"
+    },
+    {
+      "distribution_name": "fqdn",
+      "distribution_version": "1.6.0",
+      "installed_identity": "sha256:2ddb6da03d964eda8f92321ebafc7ed81bf9dfc8c826d54008bc90bd1ea85fcb"
+    },
+    {
+      "distribution_name": "idna",
+      "distribution_version": "3.20",
+      "installed_identity": "sha256:e90f77f3806e8cf7aeec2fc607a8e1dbe59eee2c7063063e09f8efacf8b5182b"
+    },
+    {
+      "distribution_name": "isoduration",
+      "distribution_version": "20.11.0",
+      "installed_identity": "sha256:4539cc10ebab15c6291b5f7863c6755481b4cfeb0dc2c5a46641c8d66023f52e"
+    },
+    {
+      "distribution_name": "jsonpointer",
+      "distribution_version": "3.10",
+      "installed_identity": "sha256:082c6905a1f7b34b13b3a0b659494731fc95befca01b3162670c36192e78577b"
+    },
+    {
+      "distribution_name": "jsonschema",
+      "distribution_version": "4.26.0",
+      "installed_identity": "sha256:f5b1ba9b6af5bb84b5868b629f29101f1f2621fba076c8911da835f0e92b173f"
+    },
+    {
+      "distribution_name": "jsonschema-specifications",
+      "distribution_version": "2025.9.1",
+      "installed_identity": "sha256:e3e2787d4ec43730a0a94f13491aa99478345285ffd7ed4cec8192765a4807c6"
+    },
+    {
+      "distribution_name": "lark",
+      "distribution_version": "1.3.1",
+      "installed_identity": "sha256:a705e1f6d4ef8d93d787d76e34994db63978671e87725ad3a0e93032ec392fc6"
+    },
+    {
+      "distribution_name": "license-expression",
+      "distribution_version": "30.4.4",
+      "installed_identity": "sha256:f639356caf4ff89357aa4099b03083fbbbe77f470a455f7757daece6f375ddb1"
+    },
+    {
+      "distribution_name": "literate-ai",
+      "distribution_version": "1.4.0",
+      "installed_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a"
+    },
+    {
+      "distribution_name": "packageurl-python",
+      "distribution_version": "0.17.6",
+      "installed_identity": "sha256:d196aa6da1193efdc24e92b62b2149c1d22b1c4192cabe7803b79cd535283ac0"
+    },
+    {
+      "distribution_name": "packaging",
+      "distribution_version": "26.3",
+      "installed_identity": "sha256:e7470d1b7fafce2472d0f8fae039a9ec9c52b88af3c64684e98b090277619a8e"
+    },
+    {
+      "distribution_name": "py-serializable",
+      "distribution_version": "2.2.0",
+      "installed_identity": "sha256:9d23e172351c07b86d4cb8f8a8fa44551c079ea928f2239be52d4a186da331c8"
+    },
+    {
+      "distribution_name": "pycparser",
+      "distribution_version": "3.12",
+      "installed_identity": "sha256:80156bb6ad26a0bbbfec0a5140f25db67c0098e40824a7797f3461fc9867620d"
+    },
+    {
+      "distribution_name": "pyjwt",
+      "distribution_version": "2.14.0",
+      "installed_identity": "sha256:9048373081ec51c6e8a0505eb6e07466eea2e62c1bd86809eee47fe0dee9f7a7"
+    },
+    {
+      "distribution_name": "python-dateutil",
+      "distribution_version": "4.0.0",
+      "installed_identity": "sha256:9f424884bf54a9b74f04602352696c93c8bf7905bfbed822f5c45e96eeb10216"
+    },
+    {
+      "distribution_name": "pyyaml",
+      "distribution_version": "6.0.3",
+      "installed_identity": "sha256:2c104ce907b9609e0ff260d385221dd6cb3a8f642d4ae8ce1971d2ad7ded0279"
+    },
+    {
+      "distribution_name": "referencing",
+      "distribution_version": "0.37.0",
+      "installed_identity": "sha256:ec910f31ec9c0b3f50d20ec5fec8ccdf179a1783958a2ba64023e6545f37bd84"
+    },
+    {
+      "distribution_name": "rfc3339-validator",
+      "distribution_version": "0.1.4",
+      "installed_identity": "sha256:c99d222c2e07ca6a8725093557ebc54109027997bb92399083906c9e3d685267"
+    },
+    {
+      "distribution_name": "rfc3986-validator",
+      "distribution_version": "0.1.1",
+      "installed_identity": "sha256:73ea99426bd956e14765b957dc15e5631857169930107f8a9aa872238d4de30f"
+    },
+    {
+      "distribution_name": "rfc3987-syntax",
+      "distribution_version": "1.1.0",
+      "installed_identity": "sha256:9a2766b6ac055af45b4e844cb10dcc3504791a9c4ded1ee2610645334b939103"
+    },
+    {
+      "distribution_name": "rpds-py",
+      "distribution_version": "2026.9.1",
+      "installed_identity": "sha256:b6faf784bfb700d23201b7e163e44f2ecec63335f37690ed6595c27d6049b23e"
+    },
+    {
+      "distribution_name": "semantic-version",
+      "distribution_version": "2.10.0",
+      "installed_identity": "sha256:e0573bf1a074caf799aa65cbd954277236526df92f0d89883b73a43d8602e7d3"
+    },
+    {
+      "distribution_name": "semver",
+      "distribution_version": "3.1.0",
+      "installed_identity": "sha256:2a892ebaf595808dc6e09ea20472d557bfe74df84e1b2f1076a0cdd960c4bdec"
+    },
+    {
+      "distribution_name": "six",
+      "distribution_version": "1.17.0",
+      "installed_identity": "sha256:e420493bdca3cfae65df161a5c57f2394c4f30778fc023529571414fdac75d31"
+    },
+    {
+      "distribution_name": "sortedcontainers",
+      "distribution_version": "2.4.0",
+      "installed_identity": "sha256:9714ee4ed350db995dbb8cb30761b027c1250c6190fcd2cd279ae7a29de8dd5d"
+    },
+    {
+      "distribution_name": "typing-extensions",
+      "distribution_version": "4.16.0",
+      "installed_identity": "sha256:0620994cf14d69cdd392c470a7f3e9cb079645d72a47232aa3f73c72d7aa9039"
+    },
+    {
+      "distribution_name": "tzdata",
+      "distribution_version": "2026.6",
+      "installed_identity": "sha256:203efc4a42828319e01312ed8b934282835ad05e10df2efd9c741c6b104d1a87"
+    },
+    {
+      "distribution_name": "univers",
+      "distribution_version": "32.0.1",
+      "installed_identity": "sha256:018e854f95ff594905bc7b649180861acd2e864dd54cc07d0fac55a8dfec72cd"
+    },
+    {
+      "distribution_name": "uri-template",
+      "distribution_version": "1.3.0",
+      "installed_identity": "sha256:0f6a941e55e1c479ed4dd9b125dee22afd3d37baa3f15bf88c1724068a839960"
+    },
+    {
+      "distribution_name": "webcolors",
+      "distribution_version": "25.10.0",
+      "installed_identity": "sha256:c831e24479c842cb21686528d74fbd4d54bad9172121a0e8a22c5b49d1fce551"
+    }
+  ],
+  "native_extension_imports": [
+    "_cffi_backend",
+    "cryptography.hazmat.bindings._rust",
+    "yaml._yaml",
+    "rpds.rpds"
+  ],
+  "native_extension_origins_inside_verified_environment": true,
+  "native_framework_cgroup_preflight": {
+    "identity": "sha256:452d3c24aabe61843b907ba5f488fd86f850c2e31be79a7c86c25951e4c5ade1",
+    "observations": {
+      "cgroup.controllers": "cpuset cpu io memory hugetlb pids rdma misc\n",
+      "cgroup.events": "populated 0\nfrozen 0\n",
+      "cgroup.procs": "",
+      "cgroup.subtree_control": "",
+      "cgroup.type": "domain\n",
+      "cpu.max": "25000 100000\n",
+      "cpu.max.burst": "0\n",
+      "memory.max": "67108864\n",
+      "memory.oom.group": "1\n",
+      "memory.swap.max": "0\n",
+      "pids.max": "16\n"
+    },
+    "original_operator_node_revalidated": true,
+    "process_placement_and_kill_descriptors_opened_without_writes": true
+  },
+  "raw_native_result_sha256": "67acf8a6d63c7b1428ec4c5d3c924aefab8d42962861e4c6b07de3b626fe80a4",
+  "remaining": {
+    "production_runtime_enforcement": false,
+    "authenticated_stage_execution": false,
+    "native_vm_qualification": false,
+    "enterprise_security_acceptance": false
+  },
+  "generated_application_launched": false
+}

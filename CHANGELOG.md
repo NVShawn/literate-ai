@@ -4,6 +4,7 @@
 
 - Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
 - Initial tree HTML publication retains bounded private transaction records before output mutation and through index commit, preserving interrupted attempts and foreign journal changes (#279). Recovery and rerender remain unfinished.
+- Cross-platform worker wheelhouse export considers compatible older glibc-2 floors for an explicit PEP 600 target, preserving architecture, target identity and offline closure verification (#356).
 
 - Go applications compile their native behavior tests from `source/tests/litai_runtime.go`; the guarded builder binds the actual offline compiler-consumed source graph (#324).
 - Inert conversion recognizes JavaScript/TypeScript module and JSX suffixes while preserving sensitive, binary, generated, large, minified and test precedence (#328).
