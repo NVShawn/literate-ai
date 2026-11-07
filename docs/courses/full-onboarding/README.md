@@ -1,5 +1,10 @@
 # Eight Hours to Make Coffee
 
+This is the published 1.3.1 film and its historical production record. For
+current installation and onboarding commands, use the
+[getting-started guide](../../user/getting-started.md). A 1.4 introduction needs
+its own reviewed script, rendered media and captions.
+
 A full Sam / LitAI episode about doing serious engineering before waiting for CI,
 with a skeptical Sam, a sharper LitAI and a growing pile of domestic excuses.
 The [full narrative and animation annotations](NARRATIVE.md) pair every spoken turn
