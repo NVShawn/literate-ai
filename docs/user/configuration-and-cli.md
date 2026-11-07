@@ -830,7 +830,7 @@ reinstall a tool merely to run that check. Inspection is
 read-only; findings carry remediations and the exit status is nonzero until every
 worker is aligned. When a platform declares Git or Git LFS, including `git.exe` or
 `git-lfs.exe`, alignment checks both tools against the packaged os-base requirements:
-Git >=2.47,<3 and Git LFS >=3.2,<4. It probes each selected executable with a five-minute
+Git >=2.43,<3 and Git LFS >=3.2,<4. It probes each selected executable with a five-minute
 budget; failed or unreadable versions remain incompatible. Templates that declare
 only a coding CLI do not add repository tools. `--apply` runs only your declared
 installs for missing commands or incompatible repository tools and replaces only
