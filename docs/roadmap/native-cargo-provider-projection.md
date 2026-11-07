@@ -435,10 +435,47 @@ two-identifier F correction still refuses real framework drift. E's raw archive
 `65789a947a9b15892a6ed2fe487c6010ee9966c0f977045a3769a5ee60fb49a0`
 and its independent retirement remain preserved. No earlier result is rebound.
 
-The complete successor Python source gate is running separately on native macOS,
-after all seventeen targeted current-source preparation controls pass with zero
-skips and unchanged source/tools. This public-v2 result does not perform
+The complete successor Python source gate now passes on native macOS as recorded
+below, after all seventeen targeted current-source preparation controls pass with
+zero skips and unchanged source/tools. This public-v2 result does not perform
 independent qualification-archive replay or the real retained consumer
 plan/materialize/admit transaction. Those gates remain open, as do model-backed
 generation and whole ADR0040 certification. Keep the contribution draft; no
 upstream default-branch merge or downstream framework pin change is implied.
+
+
+## Native macOS full-source successor result
+
+The canonical managed Make Python gate passes at exact source
+`c9f45485001b624e655922aeabbf42150df3027f`, tree
+`d14f6fcc3c68b116c277180f4a206c6d50d4639b`: 2,763 selected, 2,638
+executed and passed, 125 skipped, zero failed or known failures. These are the
+terminal structured-report counts, not a checkpoint. All four captured phases
+exit zero with successful owned cleanup. Duration is 3,447.13 seconds, not a
+benchmark. The report SHA-256 is
+`b64a5f32247f56e8a752cb74b1ff2d9646df5654c8b349e827a2d024f66b0dbf`.
+
+Independent source readback checks all 5,294 tracked representations against
+that exact Git source: 5,292 byte-identical and two declared CRLF `.cmd` files,
+zero unexplained differences. Native tools, original HOME, operator Cargo
+configuration and boot remain unchanged. The separately owned canonical
+`/private/tmp` root uses the actual user's primary group before fixtures run;
+no operator path or test assertion was changed. Both controllers, selected
+compiler/cache processes, temporary root and original source workspace are
+independently absent after collection. All 44 closed raw evidence records rehash
+inside archive SHA-256
+`2cde063bb1375546f78988429b69d779281d4ef1fc06fc84d9e9a7e850a1683c`
+(865,855 bytes). Result and controller SHA-256s are respectively
+`76c0f903185918dbf981dc1ca5db2befa301fc08f089d2e32a9fb47fc3b123f5`
+and `81aa21c4820481dce1e67aebec7bf3041e6c0c6903f04c8a32bae097295ade44`.
+Earlier failed full attempts retain their original scope.
+
+The public retained preparation reaches attestation and static derivation only.
+Before signing, inspection finds a separate public authority gap:
+[#358](https://github.com/jordanhubbard/literate-ai/issues/358). `spec review`
+always labels authority as human, while public acceptance is human-only. An
+agent actor name cannot turn that into truthful policy review. No human review
+was fabricated or signed. A separately reviewed explicit policy-authority path,
+its own qualified successor wheel, real two-run regeneration, independent
+archive replay and retained consumer admission remain required. This full source
+gate and the narrower public-v2 result do not certify those unfinished paths.
