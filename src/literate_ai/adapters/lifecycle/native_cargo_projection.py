@@ -76,6 +76,30 @@ def _manifest(raw):
         "unsupported_manifest",
     )
     _require(value["package"].get("build", False) is False, "build_script")
+    package = value["package"]
+    _require(
+        "workspace" not in package
+        and not any(
+            type(item) is dict and "workspace" in item
+            for key, item in package.items()
+            if key != "metadata"
+        ),
+        "ambient_workspace",
+    )
+    _require(
+        not (type(value.get("lints")) is dict and "workspace" in value["lints"]),
+        "ambient_workspace",
+    )
+    for name in ("readme", "license-file", "license_file"):
+        if name not in package or (name == "readme" and type(package[name]) is bool):
+            continue
+        try:
+            canonical_relative_posix_paths([package[name]], label="Cargo package file")
+        except (TypeError, ValueError) as error:
+            raise NativeCargoProviderGraphError(
+                "cargo.provider.package_path"
+            ) from error
+
     dependencies = value.get("dependencies", {})
     _require(type(dependencies) is dict, "dependencies")
     for dependency in dependencies.values():
@@ -257,6 +281,13 @@ class NativeCargoProviderSource:
             )
             == self.original_manifest,
             "original_manifest_identity",
+        )
+        _require(
+            not any(
+                ".cargo" in [part.casefold() for part in PurePosixPath(row.path).parts]
+                for row in self.files
+            ),
+            "package_cargo_configuration",
         )
         package = str(PurePosixPath(self.manifest).parent)
         _require(
@@ -463,6 +494,10 @@ def validate_native_cargo_metadata(
         )
         by_id[row["id"]] = row
         if row.get("source") is not None:
+            _require(
+                row.get("name") not in {node.package for node in graph.nodes},
+                "metadata_native_package",
+            )
             continue
         matches = [
             revision

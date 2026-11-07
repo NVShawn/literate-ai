@@ -240,6 +240,26 @@ class NativeCargoProjectionTests(unittest.TestCase):
             ):
                 replace(self.beta, files=self.beta.files + (File(path, b"", 0o644),))
 
+    def test_package_workspace_metadata_paths_and_cargo_config_refused(self):
+        for extra in (
+            b'workspace="/ambient"\n',
+            b"authors={workspace=true}\n",
+            b'readme="../outside"\n',
+            b'license-file="/ambient/LICENSE"\n',
+            b"[lints]\nworkspace=true\n",
+        ):
+            with self.assertRaises(NativeCargoProviderGraphError):
+                self.projection(root_manifest=self.original + extra)
+        for name in (
+            "source/.cargo/config.toml",
+            "source/.CARGO/config",
+            ".cargo/config",
+        ):
+            with self.assertRaisesRegex(
+                NativeCargoProviderGraphError, "package_cargo_configuration"
+            ):
+                replace(self.beta, files=self.beta.files + (File(name, b"", 0o644),))
+
     def test_returned_manifest_and_archive_overhead_are_inside_output_bound(self):
         rewritten, files = self.projection()
         bytes_of_additions = sum(len(row.content) for row in files)
@@ -347,6 +367,15 @@ class NativeCargoProjectionTests(unittest.TestCase):
             )
             for mutate in (
                 lambda value: value["packages"].append(value["packages"][0]),
+                lambda value: value["packages"].append(
+                    {
+                        **next(
+                            row for row in value["packages"] if row["name"] == "beta"
+                        ),
+                        "source": "registry+https://example.invalid/index",
+                        "id": "registry+https://example.invalid/index#beta@1.0.0",
+                    }
+                ),
                 lambda value: value["resolve"].update({"root": "wrong"}),
                 lambda value: value["packages"][0].update(
                     {"manifest_path": "/ambient/Cargo.toml"}
