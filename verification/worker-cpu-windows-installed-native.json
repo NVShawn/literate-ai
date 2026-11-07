@@ -1,0 +1,26 @@
+{
+  "kind": "native-installed-development-verification",
+  "release_attestation": false,
+  "revision": "97e71a233765d4e26b2d6802942a2d7b808133dd",
+  "provider": "github-actions",
+  "run_id": 42411067487,
+  "job_id": 128519427209,
+  "artifact_id": 13590603036,
+  "artifact_digest": "sha256:bbcd6eb210fcdf283141d699793368a60d690b7366295d3edbdbc4889a50af6d",
+  "wheel_identity": "sha256:08a147ff9b1b966c00052fabc21a2bc087b5a53b02e911122d4e2e3288341e03",
+  "wheel_bytes": 4246420,
+  "framework_distribution_identity": "sha256:8a20189a37b931c4b811462c19b6e22984814ba150b5c42185b5e35e14b738ef",
+  "framework_members": 1369,
+  "worker_cpu": {
+    "case": "test_native_windows_local_and_receiver_cpu_satisfy_required_policy",
+    "installed_module_origins_verified": true,
+    "platform": "win32",
+    "receiver_transport": "local-child",
+    "skip_reasons": [],
+    "status": "passed"
+  },
+  "entire_installed_wheel_smoke_passed": true,
+  "raw_job_log_sha256": "dc301d7fffc7822b266d0b134fb2daf54646b23a540857be7f66742924d453aa",
+  "separate_ssh_host_transport_qualified": false,
+  "release_qualified": false
+}
