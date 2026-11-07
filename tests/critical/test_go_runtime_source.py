@@ -73,7 +73,7 @@ class GoRuntimeSourceTests(unittest.TestCase):
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name)
+        self.root = Path(temporary.name).resolve()
         self.source = self.root / "generated"
         (self.source / "source/tests").mkdir(parents=True)
         (self.source / "source/main.go").write_text(_MAIN, encoding="utf-8")

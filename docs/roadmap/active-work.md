@@ -33976,6 +33976,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 ### [ ] GO-001 — Restore buildable Go runtime tests and source custody
 
+- **Native macOS fixture correction (2026-11-07):** The exact `c072d74a3` full source run on macOS ARM64/Python 3.14.7 stopped after 744 started cases (35 reported skips) at the direct Go graph control. Its fixture supplied a raw temporary path while Go reported the canonical `/private/var` path, so the unchanged source-boundary guard correctly refused. Canonicalize the fixture root before creating its source and caches. Preserve the failed native run and exact unchanged 5,286-input source snapshot; the corrected seven-case native replay passed against the frozen production source with the original snapshot unchanged. Renewed full current-head qualification remains required before closure.
+
 - **Priority:** P1
 - **Release target:** 1.4.0
 - **GitHub issue:** [#324](https://github.com/jordanhubbard/literate-ai/issues/324)
