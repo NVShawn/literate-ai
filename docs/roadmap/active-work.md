@@ -33966,3 +33966,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
 - **Evidence:**
   - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.
+
+### [ ] NATIVE-CARGO-001 — Project qualified Rust library provider graphs into Cargo builds
+
+- **GitHub issue:** [#345](https://github.com/jordanhubbard/literate-ai/issues/345)
+- **Detailed contract:** [Native Cargo provider projection](native-cargo-provider-projection.md)
+- **Completion prerequisites:** none
+- **Priority:** P1
+- **Owner:** Standard Cargo lifecycle, Rust generation and portable native library packages; PROJECT goals 4 and 5
+- **Direction:** Issue #345: a declared native Rust library edge must materialize the exact qualified provider crate without copying nominal types or mutating admitted source.
+- **Conclusion:** Bind provider revision, export, package/import identity and transitive graph in a disposable projection and sealed relocatable package. Registry-only generation currently leaves consumer imports unresolved; environment paths alone are insufficient.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Author the provider graph/projection contract and preserve dependency-free behavior.
+  - [ ] Implement qualified graph admission, disposable Cargo projection and generation guidance without in-place sealed-source edits.
+  - [ ] Retain identity-bound lock, metadata, SBOM and portable package graph for independent acceptance and retained consumption.
+- **Evidence:**
+  - [ ] Exercise real two-library and shared-nominal-type consumer builds, clean regeneration, sealed relocation and model-free consumption.
+  - [ ] Refuse missing, substituted, duplicate, cyclic, escaping or modified providers; run the canonical project Python gate and required PR checks.
