@@ -634,8 +634,9 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         target = self.cargo_targets.get(plan.component_revision.uri)
         if target is None:
             return self._build_cargo_locked(plan, provider_artifacts, contract)
-        # Revisions and source bytes deliberately do not partition intermediates:
-        # Cargo invalidates changed inputs. Toolchain, target and providers do.
+        # Without native providers, Cargo invalidates changed consumer inputs.
+        # Native graph identity also includes the consumer revision, so native
+        # workspaces remain conservatively partitioned by that revision.
         native = self._current_native_cargo_inputs(plan, provider_artifacts)
         workspace_key = self._cargo_workspace_identity(
             plan, provider_artifacts, contract, native
