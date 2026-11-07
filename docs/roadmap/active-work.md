@@ -33742,6 +33742,7 @@ independent review and the complete combined gate from test one.
   - [ ] Independent source review, full python-check and installed worker readiness pass.
 
 - **Baseline source progress:** Both canonical and packaged-template SBOMs now require Git >=2.47,<3 and Git LFS >=3.2,<4; independent source review passed. Existing host-install controls pass all nine cases, and the unchanged native scoped-ownership module passes all twelve cases with Git 2.54. The exact minimum Git version is supported by upstream source inspection, not native qualification of 2.47. Canonical bootstrap composes and enforces these version constraints. The authored worker repair reads the same packaged baseline, checks the exact selected Git/LFS executables when repository tools are declared, and reports incompatible versions with a declared-install remedy. Public CLI controls pass all six tests, including real version-probe processes and a declared repair followed by fresh inspection. The version responders prove the probe protocol, not native qualification of the displayed tool versions. Independent review of this new alignment integration, complete source and installed-worker proof remain open; previous installed versions still perform only presence checks.
+- **Direct-checkout progress:** The checkout skill now probes `git lfs ls-files --json` in an empty local repository before adding a remote or fetching. A real subprocess wrapper that returns the unsupported-flag error is refused with an alignment instruction before source acquisition; the existing exact object/size and unresolved-pointer checks remain in place. Four local Git/LFS controls pass. After `litai worker align --all`, the aligned `mudflap-freebsd` worker reported Git 2.56.0 and Git LFS 3.8.1 and passed the same four native checkout controls plus the exact command-scoped foreign-ownership case. Local Git 2.43.0 fails that foreign-ownership case, confirming the selected tool matters. Changed-skill admission, documentation and lint checks pass. Independent review, complete source gates and installed-wheel worker proof remain open.
 
 ### [ ] RETAINED-PYTHON-BRIDGE-001 — Consume qualified native library children from retained Python projects
 
@@ -33918,10 +33919,10 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **GitHub issue:** [#315](https://github.com/jordanhubbard/literate-ai/issues/315)
 - **Owner:** Native child registration and conversion authority; PROJECT Goals 1, 4 and 6
 - **Direction:** Provide a public reviewed plan/apply transaction that adds an independently qualified child while retaining the parent receipt and existing children.
-- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Define atomic registry and qualification-evidence renewal with rollback and stale-plan refusals before implementation.
-- **Depends on:** Review a design under ADR 0006 before implementation
+- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Accepted ADR 0062 defines a public recoverable registry and qualification-evidence transaction. The directing user explicitly accepted the design on 2026-11-07; implementation and qualification remain open.
+- **Depends on:** Accepted [ADR 0062](../decisions/0062-qualified-native-child-addition.md); reuse current qualification and transaction authority
 - **Completion prerequisites:** none
-- **Next action:** Publish a proposed ADR under ADR 0006 for the public transaction, rollback and qualification boundary; request design acceptance before implementation.
+- **Next action:** Implement the accepted public addition transaction with current qualification readers, exact stale-plan refusal and recoverable registry/evidence publication.
 - **Implementation:**
   - [ ] Propose and obtain design acceptance, then implement a public plan/apply transaction with current authority, registry, child and receipt binding plus recovery.
 - **Evidence:**
@@ -33989,3 +33990,22 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Exercise real two-library and shared-nominal-type consumer builds, clean regeneration, sealed relocation and model-free consumption.
   - [ ] Refuse missing, substituted, duplicate, cyclic, escaping or modified providers; run the canonical project Python gate and required PR checks.
+
+### [ ] QUALIFIED-CHILD-REVISION-001 — Revise a qualified native child through a recoverable public transaction
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#350](https://github.com/jordanhubbard/literate-ai/issues/350)
+- **Accepted design:** [ADR 0066](../decisions/0066-qualified-native-child-revision.md), explicitly accepted by the directing user on 2026-11-07 ("Accept both designs").
+
+- **Priority:** P1
+- **Owner:** Native child registry, qualification and retained parent lifecycle; PROJECT Goals 1, 4 and 6
+- **Direction:** Complete included issue #350 in 1.4.0. The directing user explicitly accepted ADRs 0062 and 0066 on 2026-11-07.
+- **Conclusion:** Implement accepted ADR 0066: independently qualify a distinct physical v2 with the same logical identity, bind both children and the complete parent, publish registry and renewed policy-supported evidence recoverably, and retain separate consumer acceptance.
+- **Depends on:** Accepted ADR 0066 and shared qualification/transaction authority from ADR 0062
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Expose read-only revision planning, acknowledged apply, status and recovery using current canonical evidence readers and exact drift refusal.
+  - [ ] Preserve both child trees and unaffected children; reserve publication inputs and refuse incomplete or foreign recovery state.
+- **Evidence:**
+  - [ ] Use installed public CLI for a real v1/v2 plus unchanged sibling journey, prove actual consumer v2 behavior and fresh application acceptance.
+  - [ ] Qualify stale inputs, unsigned/unqualified/wrong-target/unsafe/duplicate candidates, exact rollback, interruption and foreign-file preservation; require independent review and full exact-head native/platform gates.

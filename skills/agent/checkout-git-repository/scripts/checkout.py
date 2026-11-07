@@ -336,6 +336,22 @@ def materialize(
             "Git LFS is required before repository materialization",
         ) from exc
     _run("git", "init", str(root), cwd=root, environment=environment)
+    try:
+        probe = json.loads(
+            _git_lfs(root, "ls-files", "--json", environment=environment)
+        )
+        if (
+            not isinstance(probe, dict)
+            or "files" not in probe
+            or not isinstance(probe["files"], (list, type(None)))
+        ):
+            raise ValueError("Git LFS JSON file inventory is invalid")
+    except (CheckoutError, UnicodeError, ValueError) as exc:
+        raise CheckoutError(
+            "repository-checkout.git-lfs-capability-unsupported",
+            "The selected Git LFS cannot provide ls-files --json; align a supported "
+            "Git LFS before fetching source",
+        ) from exc
     _git(root, "remote", "add", "origin", source, environment=environment)
     fetch = ["fetch", "--no-tags", "--force", "--progress"]
     if history_depth is not None:

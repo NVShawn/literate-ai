@@ -182,6 +182,7 @@ lists the per-project fields and their defaults.
 - [Selection-bound npm dependency lifecycle](decisions/0036-selection-bound-npm-dependency-lifecycle.md)
 - [Prefix-installed CLI self-update](decisions/0037-prefix-installed-cli-self-update.md)
 - [Continuous upstream shadow qualification](decisions/0063-continuous-upstream-shadow-qualification.md)
+- [Qualified native child revision](decisions/0066-qualified-native-child-revision.md)
 - [Source trust and build-security plan](security/source-trust-and-build-policy.md)
 
 ## Migration and roadmap
