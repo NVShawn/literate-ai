@@ -6,9 +6,9 @@ linked roadmap documents. Follow
 direction. Check an item only when its evidence is
 recorded; Git preserves prior states.
 
-**Current development release: 1.4.0.** The latest published release is 1.3.0;
-1.3.1 is a separately governed patch program with explicit goals in
-[`release-goals.json`](release-goals.json). [RELEASE-INTEGRATION-004](#release-integration-004-reconcile-and-execute-the-13-release-backlog)
+**Current development release: 1.4.0.** The latest published release is 1.3.1.
+[`release-goals.json`](release-goals.json) retains the 1.3.1 patch program and
+its explicitly carried-forward 1.4 obligations. [RELEASE-INTEGRATION-004](#release-integration-004-reconcile-and-execute-the-13-release-backlog)
 and the [1.3 integration plan](1.3-integration.md) are retained as 1.3.0 history.
 Existing unchecked acceptance remains open; evidence from an older release does not
 establish readiness for either the patch line or 1.4.0.
@@ -32187,6 +32187,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 <a id="release-integration-005"></a>
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
+
+- **2026-11-07 reviewed fix integration:** The combined Go runtime-test, bounded library-import, module-source inventory and Git 2.43 staging repairs are retained at runtime source `308f98efd7ec9a04075f0907415ab49ce0055725`. A fresh managed full run independently accounts for all 2,739 selected cases: 2,621 passed, 118 explicit skips and zero missing outcomes. The canonical noneditable wheel journey passes, and all 15 focused controls pass against the exact installed wheel outside the checkout with no skips. The accepted ADR 0062/0066 main integration changes only documentation and roadmap authority; runtime, tests, Flavors, skills and template bytes remain identical. See [the bounded source/artifact review](../../verification/1.4-fix-integration-review.json). Exact combined-head platform CI, main verification, remaining milestone features/native gates and publication remain open.
 
 - **2026-11-04 current-source forward integration (in progress):** Preserve the exact `731c755` Linux validation, installed-wheel and public-export pass (2,581 passed, 100 declared skips, all 5,235 authored inputs unchanged) separately from its full platform CI result: 26 successful jobs and one failing Windows shard, where five model-probe subtests reject a native Windows path as their declared remote SSH workspace. The compiler fixture now builds; do not relabel that source as fully qualified. Collect the independently reviewed receiver-planning and SDK-metadata batches, nine real-CAS contract controls, source-equivalent current MSVC history, the accepted initial retained-tree HTML slice with six POSIX custody controls, and the reviewed setup-uv action pin. Preserve published v1 schemas and both installed catalog/host and tree journeys. Correct only the two test fixtures' declared remote workspace values to explicit home-relative coordinates; preserve native local paths, the strict worker contract, all cases and all guards. A separate native fixture proof stopped before class setup because its isolated existing-Python environment lacked framework dependencies; retain its setup failure and claim no original/corrected native result. Require final source composition review, supported authority records, fresh whole-source qualification and exact required CI before landing. Original native scale/PACKAGE/VERIFY obligations, worktree completeness/retirement and unaccepted ADR decisions remain open; no release publication is claimed.
 
