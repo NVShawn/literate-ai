@@ -385,3 +385,13 @@ supported recorder after reviewing the composed source, never by choosing a
 parent's old computed identity or relabeling its prior full-suite result. Fresh
 public v2, full-source successor, independent replay and retained admission remain
 pending.
+
+
+The current-parent normal merge retains both independent queue additions and all
+accepted parent goals. Independent source review of `a75e7c64` approves the bounded
+coordinate/property and two projection/metadata path joins, the unchanged exact
+export graph and current qualified ABI/blob guards. The supported lifecycle review
+records exactly those two changed trusted files; its implementation identity is
+`sha256:5b5becd3f83532dde8a3a324afe58f593db108d0afe7bf3ba556253e7c752dd0`.
+This records source review, not a fresh full Python or installed-public result.
+The earlier failed attempt remains source-bound to the old wheel.
