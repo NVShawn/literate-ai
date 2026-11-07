@@ -54,6 +54,17 @@ Unsupported, denied, stale, unreachable and malformed observations retain distin
 reasons and cannot yield an overall healthy result. Unavailable optional metrics
 need not prohibit otherwise justified work; missing policy-required capacity does.
 
+Windows CPU observation uses a 100-millisecond native timing-counter window rather
+than Unix load averages. Kernel time includes idle time, which must be subtracted
+from the elapsed kernel-plus-user total. Native API failures, missing or reset
+counters and inconsistent deltas remain unavailable. Systems with multiple
+processor groups remain explicitly unsupported until complete system coverage is
+implemented; one group's utilization cannot establish whole-worker headroom.
+Local and standalone SSH sampling use the same provider behavior, preserving all
+configured sustained-sample thresholds and required-metric admission rules. The
+[Windows timing-counter contract](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getsystemtimes)
+defines idle/kernel accounting and the processor-group coverage limit.
+
 ### Classification and dispatch
 
 Expose healthy, warning, critical and unknown resource findings, and a separate

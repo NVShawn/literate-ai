@@ -99,6 +99,8 @@ development (2026-09-10):
 
 ## Current work
 
+[WORKER-CPU-001](docs/roadmap/active-work.md#worker-cpu-001) qualifies bounded native Windows CPU observations for the existing worker-health goal; unavailable or incomplete processor-group evidence remains a hold under required-metric policy.
+
 RELEASE-INTEGRATION-005 executes the user-requested complete outstanding PR/issue
 resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integration.md)
 tracks every initial item, the existing release goals, native qualification and

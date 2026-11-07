@@ -40,7 +40,7 @@ def _metric(value: int | None, status=CapacityProbeStatus.MEASURED) -> CapacityM
 
 
 def _cpu_basis_points() -> CapacityMetric:
-    if sys.platform.startswith("freebsd"):
+    if sys.platform == "win32" or sys.platform.startswith("freebsd"):
         measured = worker_pressure_probe._cpu()
         return _metric(measured["value"], CapacityProbeStatus(measured["status"]))
     try:
