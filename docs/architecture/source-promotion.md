@@ -181,8 +181,12 @@ kinds.
 
 When model-backed inverse translation is unavailable, a reviewer may attach one
 source-bound Component graph to a deterministic-static bundle with
-`spec review --component-graph`. The graph is not detector output: it is explicit human
-authority covered by the local review signature. Its root must exactly match the
+`spec review --component-graph`. The graph is not detector output: it is explicit
+review authority covered by the local review signature. Human review is the default;
+an authorized automation actor selects `--authority authorized-policy`, and acceptance
+requires the independent operator opt-in `--allow-authorized-policy-review`. The bundle
+cannot grant that opt-in, and the signed actor is never represented as human by this
+policy path. Its root must exactly match the
 derived Component definition; its one node must assign every observation exactly once;
 all source paths, capability contracts, entrypoints, and edge evidence must close over
 the bundle's exact evidence; and unknown semantics remain blocking. Acceptance renders

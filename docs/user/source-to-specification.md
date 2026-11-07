@@ -165,6 +165,19 @@ clear the gate. Update source, scope, evidence, or the review disposition delibe
 The signed review binds the Component graph identity. Editing, replacing, or omitting
 that graph after review invalidates acceptance.
 
+Human review remains the default. An automated reviewer operating under an explicit
+operator policy must identify its actual actor and select
+`--authority authorized-policy`; an actor label alone does not select authority.
+Policy review requires a non-empty explicit `--actor`. Its signature binds the chosen
+authority, source-backed decisions and graph. It does not claim human approval.
+
+Acceptance separately requires the operator's `--allow-authorized-policy-review`
+opt-in for that review. Without the flag, policy review is denied and no accepted
+target is created. Neither source content nor the review artifact supplies this
+permission. The accepted set records the actual selected promotion policy; ordinary
+human reviews retain their existing identities and human-only policy by default.
+These flags do not authorize host execution or waive separately required approvals.
+
 ## 4. Accept into a complete spec-driven project
 
 ```console
