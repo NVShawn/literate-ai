@@ -35,3 +35,7 @@ Both existing verifier paths need review. The Rust v1 source harness currently c
 5. Run canonical Python checks and applicable protected PR checks. Ordinary Cargo success is a diagnostic control, not full framework qualification.
 
 Implementation remains in progress. No dependency projection, independent native graph acceptance or authority-transfer completion is claimed by this design record.
+
+## Graph-value development checkpoint
+
+The new finite graph contract passes eight focused cases through canonical `make python-check` with a session-managed environment. They cover a shared diamond, dependency-free input, missing/disconnected nodes, direct/disconnected cycles, changed identity materials, normalized package/alias collisions, canonical ordering/bounds and closed wire decoding. Ruff formatting and lint pass. Log SHA-256: `b9a259e3bb1317990dd73f0a1e7ea7bf6b2c27c51ba477181279499ab478e5f8`. These are graph-value controls; no filesystem/package admission, Cargo execution, full Python gate or complete dependency-projection acceptance is claimed.
