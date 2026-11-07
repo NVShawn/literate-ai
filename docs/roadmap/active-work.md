@@ -33986,3 +33986,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Use installed public CLI for a real v1/v2 plus unchanged sibling journey, prove actual consumer v2 behavior and fresh application acceptance.
   - [ ] Qualify stale inputs, unsigned/unqualified/wrong-target/unsafe/duplicate candidates, exact rollback, interruption and foreign-file preservation; require independent review and full exact-head native/platform gates.
+
+### [ ] REVIEW-AUTHORITY-001 — Expose truthful policy review with explicit acceptance opt-in
+
+- **GitHub issue:** [#358](https://github.com/jordanhubbard/literate-ai/issues/358)
+- **Next action:** Preserve the old public CLI causal refusal, then expose honest policy review and separately explicit acceptance permission with unchanged human-only defaults.
+
+- **Priority:** P1
+- **Owner:** Public inverse CLI and promotion policy; PROJECT goals 2 and 4
+- **Direction:** Issue358: an automated actor must not be labeled human; expose an honest authorized-policy review and independently explicit operator acceptance choice.
+- **Conclusion:** Keep human-only defaults and signed source/graph binding. Review artifacts cannot grant their own acceptance policy. Core already represents authorized-policy but the public review and acceptance paths hardcode human authority.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Add explicit review authority with mandatory explicit policy actor and identity binding, plus separate acceptance opt-in and truthful accepted policy identity.
+  - [ ] Document the distinction between actor identity, signed review authority, operator acceptance policy, and execution authorization.
+- **Evidence:**
+  - [ ] Public CLI causal old-source regression, unchanged human default, policy denial without opt-in, opted-in acceptance, authority tamper refusal, and existing inverse regression gates.
+  - [ ] Independent source review and qualified successor wheel/public path; keep native Cargo and retained acceptance source-bound and unfinished until actual execution.
