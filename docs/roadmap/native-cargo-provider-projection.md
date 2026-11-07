@@ -311,3 +311,43 @@ Cargo consumer or symbol-only import control cannot substitute that admission.
 Keep the contribution draft. The completed full Python and public v1 evidence
 remain source-bound; no upstream main merge, release, downstream pin change or
 whole ADR0040 authority-transfer certification is claimed.
+
+
+## Stable verifier coordinate correction intent
+
+The first actual installed public graph v2 attempt refuses with
+`component_acceptance.rust_harness_resolution_drift`. Its independently authored
+intent agrees with native metadata on the four package names, versions, features
+and dependency edges. The mismatch is the managed provider directory: changing
+verifier authority reissues exact ArtifactExport identities even though provider
+Component revision, sealed source tree, import surface and original manifest
+remain unchanged. Embedding those execution-context export identities in an
+independent oracle creates a moving authority target. Do not learn replacement
+expectations from the failed native metadata or relabel cached v1 acceptance.
+
+Give each provider a deterministic projection coordinate derived from its
+Component revision, sealed source tree, import surface, original manifest and
+package/version, excluding only the execution-context ArtifactExport identity.
+Keep that full exact export identity in the graph and provenance and join current
+qualified blobs, ABI/target and contracts before any projection. A coordinate
+never admits source: duplicate revisions or conflicting source/import/material
+bindings must refuse rather than select a winner. Original manifests and sealed
+packages remain immutable. Native metadata still must match the complete exact
+projected graph and the independent closed oracle.
+
+Add a causal regression showing a new execution-context export identity preserves
+the coordinate while provenance changes, and source/import/manifest changes alter
+the coordinate or refuse. Preserve same-revision/different-material ambiguity
+refusal. Then build a fresh noneditable wheel and rerun the actual installed
+public v2 graph under fresh admission. Independent qualification archive replay
+and real retained consumer admission remain separate unfinished gates.
+
+Failed request `b9b2d1318fc56b86ac398ee121724776d6ffa474eb2b759c157723e73e904618`
+executes the prior `d31e8f09` wheel without source/framework observer substitution.
+The first project's three v1 builds pass before v2 refuses; a second project and
+v2 execution do not complete. All 5,291 support-source representations, native
+tools and operator Cargo configuration remain unchanged. Four owned phases retire
+all child groups; the unit, cgroup, controller and exact RAM root are independently
+absent. All 6,821 archived records rehash; failed raw archive SHA-256 is
+`2bd980c40e55f0d712d78637afd05cef0b4a3f5cd2412c58635c0cb5ee5cb5ed`.
+This is a retained failed qualification, not a new pass.
