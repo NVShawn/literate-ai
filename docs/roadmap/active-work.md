@@ -33977,7 +33977,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Direction:** Issue #345: a declared native Rust library edge must materialize the exact qualified provider crate without copying nominal types or mutating admitted source.
 - **Conclusion:** Bind provider revision, export, package/import identity and transitive graph in a disposable projection and sealed relocatable package. Registry-only generation currently leaves consumer imports unresolved; environment paths alone are insufficient.
 - **Depends on:** none
-- **Development checkpoint:** Finite graph and pure byte-projection controls pass 16 focused tests, including ordinary native Cargo nominal-type/relocation controls. Standard lifecycle, SBOM, independent acceptance and retained consumption remain pending; see the detailed contract.
+- **Development checkpoint:** Standard builder, graph-aware cache/evidence and native-to-managed resolved-SBOM integration pass 57 Cargo smoke tests with zero failures/skips, including 35 focused native controls and two clean native builder runs plus a relocated ordinary consumer. Test-owned source is not model generation; whole lifecycle, both independent verifier paths, full Python/skill gates and retained-product consumption remain pending. See the detailed contract.
+- **Next action:** Qualify both independent Rust verifier paths and actual model-free retained consumption, then complete canonical full-source/skill qualification before requesting final upstream review.
 - **Implementation:**
   - [ ] Author the provider graph/projection contract and preserve dependency-free behavior.
   - [ ] Implement qualified graph admission, disposable Cargo projection and generation guidance without in-place sealed-source edits.
