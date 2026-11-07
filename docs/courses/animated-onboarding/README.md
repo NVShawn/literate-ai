@@ -1,5 +1,10 @@
 # A plan before surprises
 
+This is the historical audition for the 1.3.1 onboarding film, which was
+[published with v1.3.1](https://github.com/jordanhubbard/literate-ai/releases/tag/v1.3.1).
+The production notes below retain their original review context; use the
+[getting-started guide](../../user/getting-started.md) for current instructions.
+
 Project-owned Sam / Literate AI onboarding audition using articulated SVG characters,
 Motion and recorded NVIDIA Magpie narration. This is a short review cut before a
 longer onboarding episode, not a replacement for the accepted film.
