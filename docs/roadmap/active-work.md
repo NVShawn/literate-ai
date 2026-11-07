@@ -33940,10 +33940,10 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **GitHub issue:** [#315](https://github.com/jordanhubbard/literate-ai/issues/315)
 - **Owner:** Native child registration and conversion authority; PROJECT Goals 1, 4 and 6
 - **Direction:** Provide a public reviewed plan/apply transaction that adds an independently qualified child while retaining the parent receipt and existing children.
-- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Define atomic registry and qualification-evidence renewal with rollback and stale-plan refusals before implementation.
-- **Depends on:** Review a design under ADR 0006 before implementation
+- **Conclusion:** Issue #315 is distinct from updates to a registered child and from Python library delivery. Accepted ADR 0062 defines a public recoverable registry and qualification-evidence transaction. The directing user explicitly accepted the design on 2026-11-07; implementation and qualification remain open.
+- **Depends on:** Accepted [ADR 0062](../decisions/0062-qualified-native-child-addition.md); reuse current qualification and transaction authority
 - **Completion prerequisites:** none
-- **Next action:** Publish a proposed ADR under ADR 0006 for the public transaction, rollback and qualification boundary; request design acceptance before implementation.
+- **Next action:** Implement the accepted public addition transaction with current qualification readers, exact stale-plan refusal and recoverable registry/evidence publication.
 - **Implementation:**
   - [ ] Propose and obtain design acceptance, then implement a public plan/apply transaction with current authority, registry, child and receipt binding plus recovery.
 - **Evidence:**
@@ -34040,3 +34040,23 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [x] Run managed source inventory and real inert derivation controls, including refusal to execute source. The exact wheel from `b49c8652` classified and derived all six variants with original bytes unchanged; local Linux ARM64 wheel check and full-platform run 42245817943 passed.
   - [ ] Verify independent source review, noneditable installed qualification, exact-head CI and post-merge main CI.
+
+
+### [ ] QUALIFIED-CHILD-REVISION-001 — Revise a qualified native child through a recoverable public transaction
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#350](https://github.com/jordanhubbard/literate-ai/issues/350)
+- **Accepted design:** [ADR 0066](../decisions/0066-qualified-native-child-revision.md), explicitly accepted by the directing user on 2026-11-07 ("Accept both designs").
+
+- **Priority:** P1
+- **Owner:** Native child registry, qualification and retained parent lifecycle; PROJECT Goals 1, 4 and 6
+- **Direction:** Complete included issue #350 in 1.4.0. The directing user explicitly accepted ADRs 0062 and 0066 on 2026-11-07.
+- **Conclusion:** Implement accepted ADR 0066: independently qualify a distinct physical v2 with the same logical identity, bind both children and the complete parent, publish registry and renewed policy-supported evidence recoverably, and retain separate consumer acceptance.
+- **Depends on:** Accepted ADR 0066 and shared qualification/transaction authority from ADR 0062
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Expose read-only revision planning, acknowledged apply, status and recovery using current canonical evidence readers and exact drift refusal.
+  - [ ] Preserve both child trees and unaffected children; reserve publication inputs and refuse incomplete or foreign recovery state.
+- **Evidence:**
+  - [ ] Use installed public CLI for a real v1/v2 plus unchanged sibling journey, prove actual consumer v2 behavior and fresh application acceptance.
+  - [ ] Qualify stale inputs, unsigned/unqualified/wrong-target/unsafe/duplicate candidates, exact rollback, interruption and foreign-file preservation; require independent review and full exact-head native/platform gates.
