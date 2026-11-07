@@ -239,8 +239,8 @@ wrapper subsequently fails a terminal metadata assertion: a live cgroup equality
 guard precedes normal `RemainAfterExit` handling. A separate tiny actual unit
 reproduces the same-invocation exit0 transition to an empty terminal cgroup.
 The original wrapper remains failed; its missing terminal manager observation
-is not reconstructed from that control. A forward terminal-only guard correction
-is separately unexecuted and does not rebind the old native result.
+is not reconstructed from that control. At that checkpoint the forward terminal-only guard correction
+was separately unexecuted and did not rebind the old native result.
 
 Independent readback verifies all tracked source representations, exact wheel
 origin/installed identity, receipt, oracle and package blob, unchanged tools,
@@ -262,3 +262,52 @@ relocation and the real retained consumer plan/materialize/admit boundary. A
 symbol-only oracle, passed builder fixture or copied standalone Cargo consumer
 cannot replace those remaining gates. The contribution remains draft; no upstream
 main merge, release or downstream framework rebind is claimed.
+
+
+## Two clean actual installed-public native graphs
+
+The same private noneditable `d31e8f09` wheel and installed distribution above
+now qualify two clean actual public beta/Event → alpha/read plus gamma consumer
+projects. Gamma imports both qualified providers, constructs beta's real nominal
+Event and passes it to alpha; the sealed graph has two provider nodes, three
+edges and one physical beta package. Native manifests remain portable and no
+admitted source or authored specification/oracle is rewritten. Each root uses
+real installed initialization, three public locks, documentation review and
+three public rebuilds with committed receipts: fourteen actual CLI calls total.
+The independent v1 oracles test 0, 37 and u32::MAX. Six rebuild summaries report
+36 passing case executions including repeated provider cases, zero failed/skipped.
+
+Source generation is a disclosed controlled external CLI reading the actual
+request, not an actual model and not a substituted framework result or observer.
+Fixture A incorrectly changed the Rust Flavor slot contract and failed its first
+lock. Fixture B declared generation/interface edges without separate build/artifact
+authority: beta qualified, but alpha correctly failed its missing dependency.
+Both failed outcomes and exact retired workspaces remain preserved. C explicitly
+authors both requirement kinds for every provider; no implicit artifact grant or
+framework workaround was added.
+
+Exact request `5b378c60bf6fbc49854bc0f91477b03fe8acecdd0986d08c1bce258e35e39805`
+executes with the reviewed RAM-only profile and measured native Linux tools.
+The current `7a209400` source support differs from the qualified wheel source
+only in previously recorded documentation. Both projects pass in 304.049 seconds;
+this duration is not a benchmark. All 5,291 tracked support-source representations,
+native tools and operator Cargo configuration remain unchanged. Independent
+readback recomputes the installed F, reserializes all six directory exports and
+matches their exact BlobRef sizes and SHA-256s. Export identity reuse between
+standalone or separate project contexts is not assumed.
+
+All 7,434 retained archive records are rehashed. The exact resource unit, cgroup,
+controller instance and owned RAM workspace are independently absent after
+collection. Final measured allocation is 152,145,920 bytes. Raw archive SHA-256:
+`8fab0c07f12df15c3cca45e386e49507016ff52f2ba2d2bfe95ed5d1989a9c28`.
+Six immutable sealed subjects are retained separately for relocation work, after
+the original projects/cache have been removed. The corrected outer terminal
+metadata guard is exercised by C only; it does not relabel the earlier failed
+single-library wrapper.
+
+Remaining acceptance is the actual v2 closed native-graph verifier and the real
+model-free retained consumer plan/materialize/admit boundary. A direct ordinary
+Cargo consumer or symbol-only import control cannot substitute that admission.
+Keep the contribution draft. The completed full Python and public v1 evidence
+remain source-bound; no upstream main merge, release, downstream pin change or
+whole ADR0040 authority-transfer certification is claimed.
