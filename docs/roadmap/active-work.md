@@ -34064,3 +34064,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Use installed public CLI for a real v1/v2 plus unchanged sibling journey, prove actual consumer v2 behavior and fresh application acceptance.
   - [ ] Qualify stale inputs, unsigned/unqualified/wrong-target/unsafe/duplicate candidates, exact rollback, interruption and foreign-file preservation; require independent review and full exact-head native/platform gates.
+
+### [ ] WORKER-WHEELHOUSE-GLIBC-001 — Resolve compatible glibc floors in cross-platform worker wheelhouse export
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#356](https://github.com/jordanhubbard/literate-ai/issues/356)
+- **Reproduction:** The canonical coordinator export for Python 3.12 / `manylinux_2_39_x86_64` refuses its binary download. Against public PyPI, the exact pinned Cryptography 50.0.1 download fails with the 2.39 tag and succeeds with the compatible `cp311-abi3-manylinux_2_34_x86_64` wheel. The newer explicit target is passed literally to pip, excluding lower floors. [PEP 600](https://peps.python.org/pep-0600/) defines compatibility with matching architecture and an equal or newer glibc. Preserve the failed export and both downloader observations; they do not establish installed native acceptance.
+- **Development verification:** Fourteen canonical bootstrap controls pass, including actual offline pip selection among synthetic wheel metadata for older/newer libc floors, legacy aliases and a foreign architecture; those fixtures do not claim native ABI execution. The repaired public CLI exports the real pinned framework/dependency closure for CPython 3.12 / `manylinux_2_39_x86_64`: 38 wheels, 12,708,667 bytes, closure identity `sha256:814fd764dc6971b84f4953518cc715e4b6d145abfd3cd0395af6809773a0701e`, with the exact requested target retained. The fresh Linux development suite passes 2,742 selected cases: 2,624 passed, 118 skipped, zero failures. Independent counts cover all 594 completed worker groups, 2,713 case starts and eight fixture-skip events accounting for 29 selected cases. Lint, formatting, documentation rendering and driver checks pass. Native installation is still pending: the provider returned a transfer conflict and then HTTP 503; original partial staging and request records are retained. Current-head CI, integration and release evidence remain open.
+
+- **Priority:** P1
+- **Owner:** Framework worker bootstrap and dependency closure
+- **Direction:** Unblock the existing 1.4 native runner qualification without worker-side indexes or weaker installed-wheel verification; GitHub issue #356.
+- **Conclusion:** Expand explicit PEP 600 targets into a bounded ordered list of compatible same-architecture glibc platform tags while preserving the declared target and all closure checks.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Repair coordinator resolver arguments and preserve non-PEP-600 target behavior, target marker evaluation, canonical identities and fail-closed bounds.
+- **Evidence:**
+  - [ ] Reproduce public PyPI failure and compatible older-floor download, then qualify complete native-target closure, rejection of newer floors/foreign architectures, focused regression and required integration gates.
