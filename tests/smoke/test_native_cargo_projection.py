@@ -14,6 +14,8 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
+from literate_ai.adapters.dependencies.acquisition import _generated_lock_projection
+from literate_ai.adapters.dependencies.types import DependencyObservationError
 from literate_ai.adapters.directory_artifacts import DirectoryExportFile as File
 from literate_ai.adapters.lifecycle.native_cargo_projection import (
     NativeCargoProviderSource as Source,
@@ -365,6 +367,19 @@ class NativeCargoProjectionTests(unittest.TestCase):
             self.assertEqual(
                 validate(document)["graph_identity"], self.graph.identity.uri
             )
+            lock_files = {
+                "source/Cargo.toml": self.original.decode(),
+                "source/Cargo.lock": (original / "source/Cargo.lock").read_text(),
+            }
+            with self.assertRaises(DependencyObservationError):
+                _generated_lock_projection(lock_files)
+            lock_binding = _generated_lock_projection(
+                lock_files,
+                native_cargo_graph=self.graph,
+                native_cargo_manifest="source/Cargo.toml",
+            )
+            self.assertEqual(len(lock_binding.packages), 3)
+            self.assertTrue(all(row.managed_ref for row in lock_binding.packages))
             for mutate in (
                 lambda value: value["packages"].append(value["packages"][0]),
                 lambda value: value["packages"].append(

@@ -26,6 +26,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
     canonical_relative_posix_path,
 )
+from literate_ai.contracts.native_cargo_provider_graph import NativeCargoProviderGraph
 from literate_ai.ports.contracts import (
     BuildDependencyObservation,
     BuildInputConsumption,
@@ -57,6 +58,7 @@ from .mix_resolution import (
     validate_mix_source_bom,
 )
 from .mix_source import MixSourceAuthority
+from .native_cargo_lock import require_native_cargo_managed_graph
 from .observation import (
     _MAX_OBSERVED_FILES,
     _MAX_TOOL_OUTPUT,
@@ -152,6 +154,8 @@ class CycloneDxLifecycleResolver:
         | None = None,
         mix_source_authority: MixSourceAuthority | None = None,
         mix_dependency_observer: Callable[[], MixDependencyEvidence] | None = None,
+        native_cargo_graph: NativeCargoProviderGraph | None = None,
+        native_cargo_manifest: str | None = None,
     ) -> None:
         self.managed_graph = managed_graph
         self.observer = observer
@@ -160,6 +164,20 @@ class CycloneDxLifecycleResolver:
         self.additional_edges = tuple(additional_edges)
         self.repository_resolutions = tuple(repository_resolutions)
         self.allow_missing_cargo_lock = allow_missing_cargo_lock
+        if native_cargo_graph is not None:
+            require_native_cargo_managed_graph(native_cargo_graph, managed_graph)
+            if not isinstance(native_cargo_manifest, str):
+                raise DependencyObservationError(
+                    "dependencies.rust-native-graph-invalid",
+                    "native graph requires its selected manifest",
+                )
+        elif native_cargo_manifest is not None:
+            raise DependencyObservationError(
+                "dependencies.rust-native-graph-invalid",
+                "native manifest requires its typed graph",
+            )
+        self.native_cargo_graph = native_cargo_graph
+        self.native_cargo_manifest = native_cargo_manifest
         self.runtime_python_imports = runtime_python_imports
         self.mix_source_authority = mix_source_authority
         self.mix_dependency_observer = mix_dependency_observer
@@ -337,6 +355,8 @@ class CycloneDxLifecycleResolver:
             resolution_files,
             python_source_authority=self.python_source_authority,
             mix_source_authority=self.mix_source_authority,
+            native_cargo_graph=self.native_cargo_graph,
+            native_cargo_manifest=self.native_cargo_manifest,
         )
         if self.mix_source_authority is not None:
             if self.mix_dependency_observer is None:
@@ -388,6 +408,7 @@ class CycloneDxLifecycleResolver:
             ),
             lock_projection=lock_projection,
             authoritative_bzlmod_versions=dict(bazel_resolution.authoritative_versions),
+            native_cargo_graph=self.native_cargo_graph,
         )
         edges = (
             *source_edges,
@@ -1838,6 +1859,7 @@ def _resolved_source_projection(
     lock_projection: _LockProjection,
     authoritative_bzlmod_versions: Mapping[str, str] | None = None,
     require_package_dependency_kind: bool = False,
+    native_cargo_graph: NativeCargoProviderGraph | None = None,
 ) -> tuple[tuple[dict[str, object], ...], tuple[tuple[str, str], ...]]:
     """Preserve source inventory/edges and replace ranges with exact evidence."""
 
@@ -1854,6 +1876,32 @@ def _resolved_source_projection(
             "source BOM inventory or dependency graph is invalid",
         )
     managed_refs = {item.bom_ref for item in managed_graph.components}
+    native_packages = tuple(
+        package
+        for package in lock_projection.packages
+        if package.managed_ref is not None
+    )
+    if native_packages:
+        require_native_cargo_managed_graph(native_cargo_graph, managed_graph)
+        from literate_ai.contracts.sbom import component_bom_ref
+
+        expected_native = {
+            (node.package, node.version): component_bom_ref(node.component_revision)
+            for node in native_cargo_graph.nodes
+        }
+        observed_native = {
+            (package.coordinate, package.version): package.managed_ref
+            for package in native_packages
+            if not package.root
+        }
+        if observed_native != {
+            (_lock_coordinate("cargo", name), version): ref
+            for (name, version), ref in expected_native.items()
+        }:
+            raise DependencyObservationError(
+                "dependencies.rust-native-graph-invalid",
+                "native lock references differ from their exact managed graph",
+            )
     candidate_by_ref: dict[str, dict[str, object]] = {}
     for raw in resolution_candidates:
         candidate = dict(raw)
@@ -1873,7 +1921,11 @@ def _resolved_source_projection(
 
     projected: list[dict[str, object]] = []
     consumed_candidates: set[str] = set()
-    package_ref_by_lock_key: dict[str, str] = {}
+    package_ref_by_lock_key: dict[str, str] = {
+        package.key: package.managed_ref
+        for package in native_packages
+        if not package.root
+    }
     for raw in raw_components:
         if not isinstance(raw, Mapping):
             raise DependencyObservationError(

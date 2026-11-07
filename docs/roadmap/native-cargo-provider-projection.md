@@ -34,7 +34,7 @@ Both existing verifier paths need review. The Rust v1 source harness currently c
 4. Refuse missing, substituted, duplicate, cyclic, escaping and modified providers, altered graph/original manifest bytes and conflicting generator declarations. Preserve dependency-free Cargo and existing registry dependency controls.
 5. Run canonical Python checks and applicable protected PR checks. Ordinary Cargo success is a diagnostic control, not full framework qualification.
 
-Implementation remains in progress. No dependency projection, independent native graph acceptance or authority-transfer completion is claimed by this design record.
+End-to-end qualification remains in progress. The builder integration below is partial evidence; independent native graph acceptance and authority-transfer completion remain outstanding.
 
 ## Graph-value development checkpoint
 
@@ -57,3 +57,44 @@ The input binder reads only exact export blobs and joins their current library c
 ## Ambient Cargo authority review
 
 A second independent source review identified `package.workspace` as an ambient workspace selector despite the top-level workspace refusal. The successor rejects that selector, inherited package/lint workspace values, escaping explicit readme/license paths and package-local `.cargo` configuration. Canonical relative package metadata paths remain supported. The real metadata control also rejects a same-named registry package alongside a qualified native provider. Twenty-four focused tests pass, zero failures/skips; changed Python files pass Ruff. Log SHA-256: `acbf5652fee31149b4caff4952e3638529d186d92896059cfa762a94771de505`. These remain helper/profile controls; the Standard/SBOM/verifier/retained production integration is not yet complete.
+
+
+## Standard builder and resolved-SBOM checkpoint
+
+The Standard Cargo builder now joins its current finalized intent and exact export
+blobs to the native graph, injects dependencies only into disposable source, and
+checks actual Cargo metadata against the shared provider paths and aliases.
+Graph-aware cache keys retain the projection profile; cache reuse revalidates the
+current provider graph, original manifest, metadata and retained provider-lock
+identities. The native graph file is included in the exact dependency-evidence
+manifest and evidence recorder.
+
+The resolver admits source-less Cargo packages only through an explicitly supplied
+typed graph for one selected manifest/lock. Each native node maps to its existing
+managed Component BOM reference; it does not become a fabricated registry package.
+Managed Component versions keep their authored meaning. Registry packages still
+require checksums. Each qualified provider's prior lock inventory, source,
+checksum and outgoing dependency edges must survive fresh resolution unchanged;
+a changed resolution refuses before compilation. This also refuses extra optional
+registry edges activated on an already qualified provider. Solver selection that
+requires changing those constraints needs separate qualification.
+
+Canonical `make python-check` passes all 57 Cargo smoke tests with zero failures
+or skips, including 35 focused native graph/profile cases. The actual native
+builder control creates beta/Event and alpha/read twice in clean temporary roots,
+builds both through Standard ports, checks generated-source immutability and
+resolved-SBOM identities, exercises cache reuse, then copies the export to another
+path, removes the original export and compiles/runs an independent consumer of
+the same nominal beta type. The generated source is a test-owned fixture, not a
+new model generation. This is builder integration and ordinary relocated-consumer
+coverage; it is not whole Standard lifecycle, independent verifier acceptance,
+or retained-product import qualification. Full Python and skill-admission gates
+remain outstanding. Cargo checks log SHA-256: `4514b1365244e99a8ca068e226da43b8c64b714f677dd4f1c2916314254ebdf5`.
+
+Cargo generation guidance now distinguishes generator-authored registry intent
+from the framework-owned native edges and preserves the prohibition on invented
+paths and copied nominal types. Root and initialized-template skill bytes match.
+The generic Codex skill validator rejects the canonical framework's additional
+frontmatter fields; those fields remain intact, and the framework-specific skill
+admission check is still required. No downstream installation or runtime pin
+changed.

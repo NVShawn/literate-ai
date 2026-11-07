@@ -2154,6 +2154,8 @@ class LocalStandardLifecyclePorts:
         additional_build_evidence: Mapping[str, object] | None = None,
         python_observer: StandardPythonDependencyObserver | None = None,
         mix_observer: MixDependencyObserver | None = None,
+        native_cargo_graph=None,
+        native_cargo_manifest: str | None = None,
     ) -> CycloneDxBomBinding:
         source = self.source_trees.evidence(plan.request.source_tree_identity)
         from literate_ai.adapters.native_sdk_dependencies import (
@@ -2265,6 +2267,8 @@ class LocalStandardLifecyclePorts:
                 None if mix_observer is None else mix_observer.source
             ),
             mix_dependency_observer=mix_observer,
+            native_cargo_graph=native_cargo_graph,
+            native_cargo_manifest=native_cargo_manifest,
             allow_missing_cargo_lock=(
                 additional_build_evidence is not None
                 and additional_build_evidence.get("cargo_lifecycle_profile") is True

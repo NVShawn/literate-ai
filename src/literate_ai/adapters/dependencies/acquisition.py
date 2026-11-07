@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import PurePosixPath
 from urllib.parse import unquote
 
+from literate_ai.contracts.native_cargo_provider_graph import NativeCargoProviderGraph
+
 from .admission import (
     _cargo_dependencies,
     _cargo_manifest,
@@ -21,6 +23,7 @@ from .admission import (
 )
 from .mix_lock import MixLock
 from .mix_source import MixSourceAuthority, prepare_mix_source_authority
+from .native_cargo_lock import native_cargo_lock_refs
 from .python_lock import PythonWheelLock
 from .python_source import PythonSourceAuthority, prepare_python_source_authority
 from .types import DependencyObservationError, _normalized_package_name
@@ -35,6 +38,7 @@ class _LockedPackage:
     integrity_algorithm: str
     integrity_digest: str
     root: bool
+    managed_ref: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,7 +106,11 @@ def _matching_locked_package(
     ecosystem, coordinate = package_identity
     matches: list[_LockedPackage] = []
     for package in projection.packages:
-        if package.root or (package.ecosystem, package.coordinate) != package_identity:
+        if (
+            package.root
+            or package.managed_ref is not None
+            or (package.ecosystem, package.coordinate) != package_identity
+        ):
             continue
         source_version = source.get("version")
         if isinstance(source_version, str):
@@ -190,6 +198,8 @@ def _generated_lock_projection(
     allow_missing_cargo_lock: bool = False,
     python_source_authority: PythonSourceAuthority | None = None,
     mix_source_authority: MixSourceAuthority | None = None,
+    native_cargo_graph: NativeCargoProviderGraph | None = None,
+    native_cargo_manifest: str | None = None,
 ) -> _LockProjection:
     text_files = {
         path: content
@@ -354,6 +364,20 @@ def _generated_lock_projection(
     cargo_manifests = {
         str(PurePosixPath(path).parent / "Cargo.toml") for path in cargo_locks
     }
+    if native_cargo_graph is not None and (
+        type(native_cargo_graph) is not NativeCargoProviderGraph
+        or not isinstance(native_cargo_manifest, str)
+        or cargo_manifests != {native_cargo_manifest}
+    ):
+        raise DependencyObservationError(
+            "dependencies.rust-native-graph-invalid",
+            "native graph requires its one exact selected manifest/lock",
+        )
+    if native_cargo_graph is None and native_cargo_manifest is not None:
+        raise DependencyObservationError(
+            "dependencies.rust-native-graph-invalid",
+            "native manifest selector requires its typed graph",
+        )
     for path, content in text_files.items():
         if PurePosixPath(path).name != "Cargo.toml":
             continue
@@ -401,7 +425,7 @@ def _generated_lock_projection(
                 f"generated lock {path} lacks its Cargo.toml",
             )
         lock_packages, lock_edges = _cargo_lock_projection(
-            path, content, manifest_content
+            path, content, manifest_content, native_cargo_graph=native_cargo_graph
         )
         packages.extend(lock_packages)
         edges.extend(lock_edges)
@@ -611,7 +635,11 @@ def _npm_integrity(value: object, *, path: str) -> tuple[str, str]:
 
 
 def _cargo_lock_projection(
-    path: str, content: str, manifest_content: str
+    path: str,
+    content: str,
+    manifest_content: str,
+    *,
+    native_cargo_graph: NativeCargoProviderGraph | None = None,
 ) -> tuple[tuple[_LockedPackage, ...], tuple[tuple[str, str], ...]]:
     try:
         document = tomllib.loads(content)
@@ -632,6 +660,13 @@ def _cargo_lock_projection(
     root_version = (
         root_manifest.get("version") if isinstance(root_manifest, Mapping) else None
     )
+    native_refs = (
+        native_cargo_lock_refs(
+            graph=native_cargo_graph, manifest=manifest, packages=raw_packages
+        )
+        if native_cargo_graph is not None
+        else {}
+    )
     prefix = f"cargo:{PurePosixPath(path).parent}:"
     packages: dict[str, _LockedPackage] = {}
     records: dict[str, Mapping[str, object]] = {}
@@ -649,11 +684,16 @@ def _cargo_lock_projection(
             )
         root = name == root_name and version == root_version and source is None
         checksum = raw.get("checksum")
-        if not root and (
-            not isinstance(source, str)
-            or not source.startswith("registry+")
-            or not isinstance(checksum, str)
-            or not re.fullmatch(r"[0-9a-f]{64}", checksum)
+        managed_ref = native_refs.get((name, version)) if source is None else None
+        if (
+            not root
+            and managed_ref is None
+            and (
+                not isinstance(source, str)
+                or not source.startswith("registry+")
+                or not isinstance(checksum, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", checksum)
+            )
         ):
             raise DependencyObservationError(
                 "dependencies.rust-lock-unsupported",
@@ -668,6 +708,7 @@ def _cargo_lock_projection(
             "SHA-256",
             checksum if isinstance(checksum, str) else "0" * 64,
             root,
+            managed_ref,
         )
         records[key] = raw
         by_name.setdefault(name, []).append(key)

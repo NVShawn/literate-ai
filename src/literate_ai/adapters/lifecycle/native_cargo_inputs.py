@@ -35,6 +35,102 @@ def _require(condition, code):
         raise NativeCargoProviderGraphError("cargo.provider." + code)
 
 
+def validate_native_cargo_provider_locks(
+    *, graph, sources, consumer_manifest=None, consumer_lock=None
+):
+    """Preserve each qualified provider's exact native and registry resolution.
+
+    A fresh solver may otherwise choose newer registry packages while rebuilding
+    unchanged qualified source. Refuse that change before compilation rather
+    than treating the earlier provider qualification as covering a new graph.
+    This joins inert lock values only; it never grants Cargo execution.
+    """
+    from literate_ai.adapters.dependencies.acquisition import _cargo_lock_projection
+
+    def label(package):
+        if package.managed_ref is not None:
+            return ("native", package.managed_ref)
+        return (
+            "registry",
+            package.coordinate,
+            package.version,
+            package.integrity_algorithm,
+            package.integrity_digest,
+            package.key.split("|", 1)[1],
+        )
+
+    def normalized(projection):
+        records, edges = projection
+        packages = {row.key: label(row) for row in records}
+        return set(packages.values()), {(packages[a], packages[b]) for a, b in edges}
+
+    current = None
+    _require(
+        (consumer_manifest is None) == (consumer_lock is None), "provider_lock_context"
+    )
+    if consumer_lock is not None:
+        current = normalized(
+            _cargo_lock_projection(
+                "Cargo.lock",
+                consumer_lock.decode(),
+                consumer_manifest.decode(),
+                native_cargo_graph=graph,
+            )
+        )
+    evidence = []
+    for source in sources:
+        members = {source.node.component_revision}
+        pending = list(members)
+        while pending:
+            consumer = pending.pop()
+            for edge in graph.edges:
+                if (
+                    edge.consumer_revision == consumer
+                    and edge.provider_revision not in members
+                ):
+                    members.add(edge.provider_revision)
+                    pending.append(edge.provider_revision)
+        old_graph = NativeCargoProviderGraph(
+            source.node.component_revision,
+            tuple(
+                node
+                for node in graph.nodes
+                if node.component_revision in members
+                and node.component_revision != source.node.component_revision
+            ),
+            tuple(edge for edge in graph.edges if edge.consumer_revision in members),
+        )
+        lock_path = source.manifest.removesuffix("Cargo.toml") + "Cargo.lock"
+        lock = next(
+            (row.content for row in source.files if row.path == lock_path), None
+        )
+        _require(
+            type(lock) is bytes and len(lock) <= MAX_PROJECTION_BYTES,
+            "provider_lock_missing",
+        )
+        previous = normalized(
+            _cargo_lock_projection(
+                lock_path,
+                lock.decode(),
+                source.original_manifest.decode(),
+                native_cargo_graph=old_graph,
+            )
+        )
+        if current is not None:
+            _require(previous[0] <= current[0], "provider_registry_resolution_changed")
+            _require(
+                {edge for edge in current[1] if edge[0] in previous[0]} == previous[1],
+                "provider_registry_resolution_changed",
+            )
+        evidence.append(
+            {
+                "component_revision": source.node.component_revision.uri,
+                "lock_identity": "sha256:" + hashlib.sha256(lock).hexdigest(),
+            }
+        )
+    return sorted(evidence, key=lambda row: row["component_revision"])
+
+
 def bind_native_cargo_inputs(
     *,
     consumer_revision,
