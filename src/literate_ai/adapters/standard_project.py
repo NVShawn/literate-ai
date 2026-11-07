@@ -985,7 +985,23 @@ def _encoded_multi_entrypoint_outputs(outputs: object) -> str:
 
 
 def _encoded_library_import_surface(surface: LibraryImportSurface) -> str:
-    content = json.dumps(surface.to_dict(), separators=(",", ":")).encode("utf-8")
+    # The verifier consumes import mappings, not repeated typed authority records.
+    # Bind those records through the complete surface identity so an interface-only
+    # change still changes the immutable execute command.
+    verifier_surface = {
+        "identity": surface.identity.to_dict(),
+        "language": surface.language,
+        "package": surface.package,
+        "capabilities": [
+            {
+                "capability": item.capability,
+                "module": item.module,
+                "symbols": list(item.symbols),
+            }
+            for item in surface.capabilities
+        ],
+    }
+    content = json.dumps(verifier_surface, separators=(",", ":")).encode("utf-8")
     encoded = base64.urlsafe_b64encode(zlib.compress(content, level=9)).decode("ascii")
     if len(encoded) > 4096:
         raise StandardCommandProjectionError(

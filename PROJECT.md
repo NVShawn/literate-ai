@@ -111,8 +111,11 @@ PYTHON-LIBRARY-IMPORT-001 cover JavaScript export-map ordering, ambient Python
 imports and standard-library imports under Goals 1 and 4. PR #318 merged the
 export-order fix; PR #308 merged both Python verifier repairs. Installed-wheel
 controls pass for all three; post-merge main CI run `42124478195` passed at
-`be1bf57b8`. Roadmap closure is recorded in this PR.
+`be1bf57b8`. Roadmap closure landed through PR #327.
 The broader draft PR #313 needs separate reconciliation without regressions.
+LIBRARY-IMPORT-COMMAND-001 covers issue #330 under Goals 1 and 4: project every
+declared library import within a bounded verifier command while binding the full
+typed surface identity. The focused repair and qualification remain open.
 QUALIFIED-CHILD-ADD-001 extends Goals 1, 4 and 6 with a public atomic
 transaction for adding an independently qualified native child to a qualified
 retained parent. Issue #315 requires accepted design, implementation and native
