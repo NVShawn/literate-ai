@@ -1,13 +1,13 @@
 # ADR 0062: Add an Independently Qualified Native Child to a Qualified Retained Parent
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-05
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0
 - Roadmap: [QUALIFIED-CHILD-ADD-001](../roadmap/active-work.md#qualified-child-add-001-add-a-qualified-native-child-to-a-qualified-retained-parent-atomically)
 - GitHub issue: [#315](https://github.com/jordanhubbard/literate-ai/issues/315)
 - Governance: [ADR 0006](0006-significant-feature-request-governance.md)
-- Approval: pending explicit review and acceptance of this design
+- Approval: directing user explicitly accepted this design on 2026-11-07 ("Accept both designs", ADRs 0062 and 0066)
 
 ## Context
 
@@ -25,7 +25,7 @@ The registered-child update path in [issue #48](https://github.com/jordanhubbard
 rebinds an existing child. This request adds a distinct child without changing
 the existing children or transferring the parent's retained source authority.
 
-## Proposed decision
+## Decision
 
 ### Expose one public plan and apply operation
 
@@ -104,5 +104,5 @@ valid under their own versioned contracts.
    exact-head CI. Keep source-transfer evidence separate.
 
 These are acceptance criteria for a future implementation, not evidence this
-proposal has met them. ADR 0006 requires explicit design acceptance before
-implementation begins.
+proposal has met them. The directing user accepted this design under ADR 0006; implementation and every
+acceptance criterion above remain required.

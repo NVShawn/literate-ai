@@ -1,8 +1,12 @@
 # Literate AI instructional courses
 
-## Start here: the continuous video play
+## 1.3.1 continuous video play
 
-**[Watch or download: Eight Hours to Make Coffee.](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)**
+**[Watch or download: Eight Hours to Make Coffee.](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4)**
+
+This film was produced for 1.3.1. For current commands, use the
+[getting-started guide](../user/getting-started.md) and
+[version-aware feature map](../user/current-features.md).
 
 Sam, a skeptical C++/Make engineer, defends an eight-hour CI loop while LitAI moves
 useful feedback earlier without weakening required CI, independent review, native

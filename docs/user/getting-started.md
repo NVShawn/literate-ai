@@ -6,12 +6,12 @@ from an installed release wheel, checks the host, and follows one reviewed onboa
 plan into either a new project or an adopted source tree.
 
 The checked-out `main` branch is currently developing 1.4.0, while the latest published
-wheel is 1.3.0 and 1.3.1 is a separate patch program. See
+wheel is 1.3.1. See
 [current features and release posture](current-features.md) before assuming a command
 or qualification described from `main` is already present in the published wheel.
 
-Prefer to watch first? The 12:04 animated onboarding film,
-[Eight Hours to Make Coffee](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4), explains how reviewed plans, selected targets, aligned workers and independent evidence provide useful feedback before required CI. Its source-backed project case studies retain explicit native and adoption limits. The
+Prefer to watch first? The 12:04 animated onboarding film produced for 1.3.1,
+[Eight Hours to Make Coffee](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4), explains how reviewed plans, selected targets, aligned workers and independent evidence provide useful feedback before required CI. Its source-backed project case studies retain explicit native and adoption limits. The
 [instructional courses](../courses/README.md) break the same ground into short lessons:
 [your first greenfield project](../courses/01-greenfield-first-project/01-greenfield-first-project.mp4),
 [using machines you already have](../courses/02-use-your-existing-machines/02-use-your-existing-machines.mp4)

@@ -1,11 +1,16 @@
 # Native FreeBSD installed SDK qualification
 
-Use the **Native FreeBSD SDK qualification** workflow to renew the 1.3.1 patch
-program's installed public retained-SDK acceptance on an actual FreeBSD 15.1
-guest. It builds a wheel from one exact commit, installs it non-editably and runs
-the consumer as an unprivileged account in a disposable VM on hosted Linux.
-No configured FreeBSD worker is currently available; this is the platform cell
-that the aligned worker fleet cannot cover.
+Use the **Native FreeBSD SDK qualification** workflow to check an exact candidate's
+installed public retained-SDK behavior on an actual FreeBSD 15.1 guest. It builds
+a wheel from one commit, installs it non-editably and runs the consumer as an
+unprivileged account in a disposable VM on hosted Linux. This workflow is one
+native platform cell; its result does not replace the candidate's other release
+gates. Align the configured workers before dispatch and use this hosted cell when
+an aligned worker cannot provide the required FreeBSD environment.
+
+The 14.3 and 14.4 observations below are historical evidence from the 1.3.1
+qualification work. They explain the choice of the current 15.1 guest; they do
+not describe the readiness of a later release candidate.
 
 The original 14.3 guest could not install current packages: that release
 [reached end of life on June 30, 2026](https://lists.freebsd.org/archives/freebsd-announce/2026-June/000277.html),
@@ -120,5 +125,8 @@ private keys stay in the disposable guest's private home; artifact upload copies
 only the explicit report/log whitelist. It does not alter a host's SSH settings.
 
 Development source acceptance can close its narrowly evidenced roadmap work.
-Final prepared-candidate lifecycle, package and native release qualification
-remain mandatory in the [1.3.1 execution checklist](../roadmap/1.3.1-release-execution.md).
+For the current candidate, final lifecycle, package and native release
+qualification remain mandatory under the [release policy](../../literate.release.json)
+and [project release protocol](../architecture/project-releases.md). The
+[1.3.1 execution checklist](../roadmap/1.3.1-release-execution.md) is a historical
+record of that release.

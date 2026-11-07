@@ -1,7 +1,10 @@
 # Installation and first run
 
-New to Literate AI? Watch the [animated onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4) and the
-[instructional courses](../courses/README.md) for a guided tour before installing.
+New to Literate AI? Start with the [current getting-started guide](getting-started.md).
+The [1.3.1 animated onboarding film](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4) and
+[instructional courses](../courses/README.md) remain available as historical tours;
+check [current features and release posture](current-features.md) for version-specific
+commands before installing.
 
 ## Requirements
 

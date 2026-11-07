@@ -21,6 +21,8 @@ The command fetches the exact requested revision at depth one, verifies the resu
 commit and tree, initializes recursive submodules at bounded depth, configures Git LFS
 locally in the root and every nested repository, pulls their selected LFS objects, and
 rejects unresolved current-tree LFS pointers, incomplete submodules, or a dirty result.
+It checks `git lfs ls-files --json` in an empty local repository before fetching, so an
+unsupported Git LFS fails with an alignment instruction before source acquisition.
 Preserve its JSON report with worker evidence.
 
 Use `--history-depth COMMITS` only when the requested operation names a bounded ancestry

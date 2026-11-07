@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -192,6 +194,38 @@ class RepositoryCheckoutSkillTests(unittest.TestCase):
         self.assertEqual(
             caught.exception.code, "repository-checkout.git-lfs-unavailable"
         )
+
+    @unittest.skipIf(os.name == "nt", "POSIX executable wrapper")
+    def test_lfs_without_json_inventory_refuses_before_fetch(self) -> None:
+        checkout = _module()
+        actual_lfs = shutil.which("git-lfs")
+        self.assertIsNotNone(actual_lfs)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            wrapper = root / "git-lfs"
+            wrapper.write_text(
+                "#!/bin/sh\n"
+                'if [ "$1" = "ls-files" ] && [ "$2" = "--json" ]; then\n'
+                '  echo "Error: unknown flag: --json" >&2\n'
+                "  exit 2\n"
+                "fi\n"
+                f'exec {shlex.quote(actual_lfs)} "$@"\n',
+                encoding="utf-8",
+            )
+            wrapper.chmod(0o755)
+            destination = root / "checkout"
+            with mock.patch.dict(
+                os.environ, PATH=str(root) + os.pathsep + os.environ.get("PATH", "")
+            ):
+                with self.assertRaises(checkout.CheckoutError) as caught:
+                    checkout.materialize(
+                        self.origin, "main", destination, history_depth=1
+                    )
+            self.assertEqual(
+                caught.exception.code,
+                "repository-checkout.git-lfs-capability-unsupported",
+            )
+            self.assertEqual(_git(destination, "remote"), "")
 
 
 if __name__ == "__main__":

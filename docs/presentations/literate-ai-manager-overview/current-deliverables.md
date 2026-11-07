@@ -1,9 +1,10 @@
-# Current deliverables
+# 1.3.0 deliverables
 
 The checked-in members below are the verified local **1.3.0 retained-source and
 native-custody edition**. The stable Google Workspace resources carry the same
 published 1.3.0 edition, verified by export-back. Their stable IDs and links did not
-change.
+change. This page records that edition; the 1.4 document pair is still pending
+release-candidate regeneration and review.
 
 - Native Google Slides (stable 1.3.0 resource): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
   — export-back verified 26 slides / 26 notes pages.
