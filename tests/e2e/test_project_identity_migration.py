@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from types import SimpleNamespace
 from unittest import mock
 
 from literate_ai.adapters import project_identity_migration as migration
@@ -197,13 +198,11 @@ class ProjectIdentityMigrationTests(RetainedScopeRefreshTests):
 
     def test_two_renames_keep_an_independently_validated_chain(self):
         previous = self.renamed("beta")
-        self.assertEqual(
-            self.migration_apply(previous, self.migration_plan(previous))[0], 0
-        )
+        code, result = self.migration_apply(previous, self.migration_plan(previous))
+        self.assertEqual(code, 0, result)
         previous = self.renamed("gamma")
-        self.assertEqual(
-            self.migration_apply(previous, self.migration_plan(previous))[0], 0
-        )
+        code, result = self.migration_apply(previous, self.migration_plan(previous))
+        self.assertEqual(code, 0, result)
         state = FilesystemConversionAuthorityStore(self.root).load_optional()
         self.assertEqual(state.project_id, "gamma")
         records = list((self.root / migration.HISTORY).glob("*.json"))
@@ -214,6 +213,44 @@ class ProjectIdentityMigrationTests(RetainedScopeRefreshTests):
         first.unlink()
         with self.assertRaises(RuntimeError):
             FilesystemConversionAuthorityStore(self.root).load_optional()
+
+    def test_history_keeps_per_observer_times_and_rejects_metadata_drift(self):
+        previous = self.renamed()
+        plan = self.migration_plan(previous)
+        code, result = self.migration_apply(previous, plan)
+        self.assertEqual(code, 0, result)
+        identity = migration.ContentIdentity.parse_uri(plan["record_identity"])
+        original = os.fstat
+        calls = 0
+        drifting = False
+
+        def observed(fd):
+            nonlocal calls
+            calls += 1
+            value = original(fd)
+            fields = {
+                name: getattr(value, name)
+                for name in (
+                    "st_dev",
+                    "st_ino",
+                    "st_mode",
+                    "st_size",
+                    "st_mtime_ns",
+                    "st_ctime_ns",
+                    "st_nlink",
+                )
+            }
+            fields["st_ctime_ns"] += calls if drifting else 1
+            return SimpleNamespace(**fields)
+
+        with mock.patch.object(migration.os, "fstat", side_effect=observed):
+            self.assertEqual(
+                migration._read_record(self.root, identity), plan["record"]
+            )
+            drifting = True
+            with self.assertRaises(migration.ProjectIdentityMigrationError) as error:
+                migration._read_record(self.root, identity)
+            self.assertEqual(error.exception.code, "project_identity.history_invalid")
 
     def test_closing_source_change_rolls_back_only_the_owned_state(self):
         previous = self.renamed()

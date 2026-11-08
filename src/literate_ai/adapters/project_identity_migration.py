@@ -18,6 +18,7 @@ from typing import Any
 from literate_ai.adapters.conversion_authority import (
     CONVERSION_AUTHORITY_FILE,
     FilesystemConversionAuthorityStore,
+    _named_file_matches,
 )
 from literate_ai.adapters.harness_tree import (
     _validated_scope,
@@ -65,6 +66,7 @@ def _history_path(root: Path, identity: ContentIdentity) -> Path:
 def _read_record(root: Path, identity: ContentIdentity) -> dict[str, Any]:
     path = _history_path(root, identity)
     try:
+        named_before = path.lstat()
         fd = os.open(
             path,
             os.O_RDONLY
@@ -81,12 +83,26 @@ def _read_record(root: Path, identity: ContentIdentity) -> dict[str, Any]:
             named = path.lstat()
 
             def stamp(s):
-                return (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
+                return (
+                    s.st_dev,
+                    s.st_ino,
+                    s.st_mode,
+                    s.st_size,
+                    s.st_mtime_ns,
+                    s.st_ctime_ns,
+                    s.st_nlink,
+                )
 
+            # Windows fstat and lstat can expose different ctime meanings.
+            # Preserve change detection within each observer; bind their file
+            # identity with the conversion store's native Windows fallback.
             if (
                 len(content) != before.st_size
                 or stamp(before) != stamp(after)
-                or stamp(before) != stamp(named)
+                or stamp(named_before) != stamp(named)
+                or (before.st_size, before.st_mtime_ns)
+                != (named.st_size, named.st_mtime_ns)
+                or not _named_file_matches(path, fd, before)
             ):
                 raise ValueError
         finally:
