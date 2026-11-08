@@ -34142,3 +34142,17 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
 - **Evidence:**
   - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
+
+### [ ] WORKER-LIMIT-001 — Preserve inherited file-size ceilings in command-addressed transfers
+
+- **Source:** [Upstream issue #372](https://github.com/jordanhubbard/literate-ai/issues/372), discovered during the source-bound full Python qualification of #347. This is separate from Codex runtime-state issue #365.
+- **Priority:** high
+- **Owner:** remote worker transport
+- **Direction:** Correct the confirmed full-gate command-route refusal without raising any inherited process ceiling; keep explicit byte, digest and inode custody.
+- **Conclusion:** The current limiter attempts to set its default 8 GiB allowance above an inherited 512 MiB hard ceiling and exits before the connector. An actual tiny native control reproduces that failure and reaches the expected no-output refusal with an explicit 512 MiB allowance. Keep original 7ce failed gate and retirement evidence unchanged; full renewed-source qualification remains pending.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Clamp the requested finite staging ceiling to stricter inherited finite soft and hard RLIMIT_FSIZE values in the trusted limiter. Preserve connector protocol and all existing tests; add native actual-limit and boundary refusal controls. Link the separate upstream issue before implementation.
+- **Evidence:**
+  - [ ] Actual native POSIX inherited-soft/hard and lower-requested controls, original failing no-output assertion, transport regressions and unchanged unfiltered whole Python gate on a freshly admitted worker; exact-source local gates precede hosted CI.
