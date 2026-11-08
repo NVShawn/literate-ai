@@ -34142,3 +34142,23 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
 - **Evidence:**
   - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
+
+### [ ] GENERATION-012 — Give Codex invocations owned SQLite and log state
+
+- **GitHub issue:** [#365](https://github.com/jordanhubbard/literate-ai/issues/365)
+- **Current next action:** Implement the shared owned-state context for both execution paths, then qualify its lifetime, output exclusion and actual fresh model calls before review. The observed private-state no-op is a prerequisite only; no accepted library generation or retained-provider replay/importer result exists.
+
+- **Priority:** P1
+- **Owner:** framework coding CLI adapter; PROJECT goals 3 and 4
+- **Direction:** Prevent ambient Codex runtime database size from breaking bounded source generation while retaining the selected provider, model, authentication and resource limits.
+- **Conclusion:** Actual Codex 0.164 wrote an ambient logging SQLite file beyond a 64 MiB child limit and died SIGXFSZ. log_dir alone was insufficient; documented private sqlite_home plus log_dir completed a real bounded no-op with unchanged HOME/auth/model/default signals and cleanup. Isolate invocation runtime data outside generated Component outputs; this does not itself qualify fresh library generation.
+- **Depends on:** Existing Codex command and private subprocess lifetime contracts; no dependency on the separate native Cargo PR 347.
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Own temporary SQLite and log directories for both source generation and JSON tasks using documented per-call configuration, preserving normal HOME and authentication.
+  - [ ] Keep provider runtime state out of admitted generated source and remove only the owned directories after child retirement on success and failure.
+  - [ ] Retain the actual negative/positive scope and link upstream issue 365; prepare a separate reviewable change without default merge or downstream pin movement.
+- **Evidence:**
+  - [ ] Causal native normal/default-signals EFBIG/SIGXFSZ and private-state real no-op comparison with unchanged 64 MiB limit and independent retirement.
+  - [ ] Meaningful command/environment, output-boundary, exception and owned-lifetime regression controls for both execution paths, preserving other providers.
+  - [ ] Exact changed-source local checks and independent peer review before PR CI; genuine model-backed library qualification remains independently required.
