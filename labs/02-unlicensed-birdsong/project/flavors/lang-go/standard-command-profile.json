@@ -3,7 +3,7 @@
   "target": "go",
   "toolchain": "go",
   "source_entrypoint": "source/main.go",
-  "generated_test_entrypoint": "source/tests/litai_test.go",
+  "generated_test_entrypoint": "source/tests/litai_runtime.go",
   "artifact_layout": "file",
   "artifact_entrypoint": "run",
   "bazel_output_path": "run",

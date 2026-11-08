@@ -314,20 +314,36 @@ class NativeSdkQualificationHarnessTests(unittest.TestCase):
             self.assertFalse(terminal["collection_complete"])
             self.assertNotEqual(self.check_collected(destination).returncode, 0)
 
+    @unittest.skipIf(os.name == "nt", "exercise the actual POSIX guest clone shell")
     def test_foreign_owned_framework_staging_trust_is_exact_and_command_scoped(self):
         workflow = Path(__file__).resolve().parents[2] / (
             ".github/workflows/native-sdk-qualification.yml"
         )
-        clone = next(
-            line.strip()
-            for line in workflow.read_text(encoding="utf-8").splitlines()
-            if " clone --bare --no-hardlinks " in line
+        workflow_lines = [
+            line.strip() for line in workflow.read_text(encoding="utf-8").splitlines()
+        ]
+        setup_start = next(
+            index
+            for index, line in enumerate(workflow_lines)
+            if line.startswith("scoped_git_config=$(mktemp ")
+        )
+        clone_index = next(
+            index
+            for index, line in enumerate(workflow_lines)
+            if " git clone --bare --no-hardlinks " in line
+        )
+        scoped_setup = workflow_lines[setup_start:clone_index]
+        self.assertEqual(len(scoped_setup), 3)
+        clone = workflow_lines[clone_index]
+        self.assertIn(
+            'GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL="$scoped_git_config"', clone
         )
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             source, unrelated = root / "source", root / "unrelated"
             work = root / "work"
             work.mkdir()
+            (work / "tmp").mkdir()
             global_config = root / "global-config"
             global_config.write_bytes(b"# Existing operator configuration\n")
             original = global_config.read_bytes()
@@ -383,13 +399,23 @@ class NativeSdkQualificationHarnessTests(unittest.TestCase):
             )
             self.assertNotEqual(refused.returncode, 0)
             self.assertIn("dubious ownership", refused.stderr)
-            argv = [
-                part.replace("$source_checkout", source.as_posix()).replace(
-                    "$work", work.as_posix()
+            scoped_environment = {
+                **environment,
+                "source_checkout": source.as_posix(),
+                "unrelated_checkout": unrelated.as_posix(),
+                "work": work.as_posix(),
+            }
+
+            def scoped_clone(command):
+                return subprocess.run(
+                    ["/bin/sh", "-c", "\n".join((*scoped_setup, command))],
+                    env=scoped_environment,
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
                 )
-                for part in shlex.split(clone)
-            ]
-            accepted = git(*argv[1:])
+
+            accepted = scoped_clone(clone)
             self.assertEqual(accepted.returncode, 0, accepted.stderr)
             actual = git(
                 "-c",
@@ -401,8 +427,12 @@ class NativeSdkQualificationHarnessTests(unittest.TestCase):
             )
             self.assertEqual(actual.returncode, 0, actual.stderr)
             self.assertEqual(actual.stdout.strip(), expected)
-            argv[-2:] = [str(unrelated), str(work / "unrelated.git")]
-            refused = git(*argv[1:])
+            unrelated_clone = clone.replace(
+                '"$source_checkout" "$work/framework.git"',
+                '"$unrelated_checkout" "$work/unrelated.git"',
+            )
+            self.assertNotEqual(unrelated_clone, clone)
+            refused = scoped_clone(unrelated_clone)
             self.assertNotEqual(refused.returncode, 0)
             self.assertIn("dubious ownership", refused.stderr)
             self.assertEqual(global_config.read_bytes(), original)

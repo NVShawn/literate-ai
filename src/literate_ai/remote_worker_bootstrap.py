@@ -710,6 +710,54 @@ def verify_worker_wheelhouse(
     return manifest, identity, root / framework
 
 
+def _compatible_target_platforms(platform: str | None) -> tuple[str, ...]:
+    """Expand a glibc-2 floor without borrowing the coordinator's native tags.
+
+    Explicit pip platform options are literal for PEP 600 tags. Prefer the
+    requested floor, then older same-architecture floors and their legacy names.
+    Other platform families keep pip's existing platform handling. The finite
+    minor-version ceiling bounds resolver arguments even for hostile input.
+    """
+    if platform is None:
+        return ()
+    if platform.startswith("manylinux_2_") and len(platform) > 128:
+        raise WorkerBootstrapError(
+            "worker.wheelhouse_target_invalid", "glibc target exceeds resolver bound"
+        )
+    match = re.fullmatch(r"manylinux_2_([0-9]+)_([a-z0-9_]+)", platform)
+    if match is None:
+        return (platform,)
+    if (
+        len(match[1]) > 3
+        or int(match[1]) > 128
+        or str(int(match[1])) != match[1]
+        or len(match[2]) > 64
+    ):
+        raise WorkerBootstrapError(
+            "worker.wheelhouse_target_invalid", "glibc target exceeds resolver bound"
+        )
+    minor, architecture = int(match[1]), match[2]
+    minimum = 5 if architecture in {"x86_64", "i686"} else 17
+    if minor < minimum:
+        return (platform,)
+    platforms = []
+    legacy = {17: "manylinux2014", 12: "manylinux2010", 5: "manylinux1"}
+    legacy_architectures = {
+        "x86_64",
+        "i686",
+        "aarch64",
+        "armv7l",
+        "ppc64",
+        "ppc64le",
+        "s390x",
+    }
+    for floor in range(minor, minimum - 1, -1):
+        platforms.append(f"manylinux_2_{floor}_{architecture}")
+        if floor in legacy and architecture in legacy_architectures:
+            platforms.append(f"{legacy[floor]}_{architecture}")
+    return tuple(platforms)
+
+
 def _pip_target_arguments(
     *,
     platform: str | None,
@@ -717,9 +765,12 @@ def _pip_target_arguments(
     implementation: str | None,
     abi: str | None,
 ) -> list[str]:
-    result: list[str] = []
+    result = [
+        argument
+        for selected in _compatible_target_platforms(platform)
+        for argument in ("--platform", selected)
+    ]
     for option, value in (
-        ("--platform", platform),
         ("--python-version", python_version),
         ("--implementation", implementation),
         ("--abi", abi),
@@ -736,6 +787,8 @@ def _target_marker_environment(
     implementation: str | None,
 ) -> dict[str, str]:
     from packaging.markers import default_environment
+
+    _compatible_target_platforms(platform)
 
     environment = default_environment()
     if python_version is not None:

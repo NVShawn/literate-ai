@@ -12,6 +12,18 @@
   source/graph/authority binding. These choices grant intent review, not host
   execution or regenerative qualification.
 
+- Codex source generation and JSON tasks use owned temporary SQLite and log directories, preserving normal login settings and excluding runtime data from generated source (#365).
+
+- Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
+- Initial tree HTML publication retains bounded private transaction records before output mutation and through index commit, preserving interrupted attempts and foreign journal changes (#279). Recovery and rerender remain unfinished.
+- Cross-platform worker wheelhouse export considers compatible older glibc-2 floors for an explicit PEP 600 target, preserving architecture, target identity and offline closure verification (#356).
+
+- Go applications compile their native behavior tests from `source/tests/litai_runtime.go`; the guarded builder binds the actual offline compiler-consumed source graph (#324).
+- Inert conversion recognizes JavaScript/TypeScript module and JSX suffixes while preserving sensitive, binary, generated, large, minified and test precedence (#328).
+- Large library import commands retain every declared mapping and bind the complete typed surface identity within the finite argument limit (#330).
+- Repository checkout checks Git LFS JSON-inventory support before configuring a remote. FreeBSD SDK staging propagates exact source-only Git trust to the clone child through a disposable config (#305).
+
+- Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
 
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,
@@ -23,7 +35,7 @@
   all direct byte, dependency, SDK, tool, revocation and deadline checks. Custom
   callbacks retain independent replanning; plan values grant no execution.
 
-- Host bootstrap requires Git 2.47 or newer and Git LFS 3.2 or newer for
+- Host bootstrap requires Git 2.43 or newer and Git LFS 3.2 or newer for
   scoped ownership checks and complete JSON LFS inventories. Worker alignment
   reports incompatible selected Git/LFS tools and rechecks declared repairs.
 

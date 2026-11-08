@@ -25,6 +25,11 @@ from literate_ai.storage import FileSystemCAS
 from .html_publication import read_output
 from .html_tree_generation import stage_html_tree_generation
 from .html_tree_inputs import observe_owned_html_tree_inputs
+from .html_tree_journal import (
+    JOURNAL_MEMORY_RESERVATION,
+    JOURNAL_STORAGE_RESERVATION,
+    initial_html_tree_journal,
+)
 from .html_tree_output_initialization import initialize_html_tree_output
 from .html_tree_render import _framework, _renderer_identity, plan_html_tree_render
 from .repository_refresh import _local_identity_wire
@@ -135,6 +140,7 @@ def apply_initial_html_tree(
 
     with exclusive_cache_lock(lock, timeout_seconds=0, on_locked=locked):
         managed_nodes = {}
+        journal_guard = None
 
         def require_paths():
             require_declaration_current()
@@ -169,6 +175,8 @@ def apply_initial_html_tree(
 
         def require_current():
             require_paths()
+            if journal_guard is not None:
+                journal_guard()
             framework = _framework()
             if (
                 framework.framework_distribution_identity.to_dict()
@@ -188,14 +196,39 @@ def apply_initial_html_tree(
             managed_nodes[path] = _private_directory(path)
         if os.path.lexists(cas_root):
             raise ValueError("html.tree.initial-cas-already-exists")
+        if (
+            JOURNAL_MEMORY_RESERVATION + 65536
+            >= request.limits.max_metadata_memory_bytes
+            or JOURNAL_STORAGE_RESERVATION + 4096
+            >= request.limits.max_retained_generation_bytes
+        ):
+            raise ValueError("html.tree.journal-reservation-policy-exceeded")
         require_current()
-        with initialize_html_tree_output(
-            root,
-            request,
-            acknowledged_plan_identity=canonical_identity(plan["output_plan"]),
-        ) as owner:
+        with (
+            initial_html_tree_journal(
+                target / "journal",
+                prepared_data={
+                    "plan_identity": acknowledged_plan_identity.uri,
+                    "request_identity": request.identity.uri,
+                    "target_identity": target_identity.uri,
+                },
+                require_current=require_paths,
+            ) as (record, current_journal),
+            initialize_html_tree_output(
+                root,
+                request,
+                acknowledged_plan_identity=canonical_identity(plan["output_plan"]),
+                reserved_external_memory_bytes=JOURNAL_MEMORY_RESERVATION,
+                reserved_external_storage_bytes=JOURNAL_STORAGE_RESERVATION,
+            ) as owner,
+        ):
+            journal_guard = current_journal
             # The identifiable output owner exists before any retained payload.
             require_current()
+            record(
+                "output-reserved",
+                {"namespace_node": _local_identity_wire(_node(owner.path.lstat()))},
+            )
             os.mkdir(cas_root, 0o700)
             cas_node = _private_directory(cas_root)
             ensure_cache_directory(cas_root, kind="object", project_root=state)
@@ -220,6 +253,13 @@ def apply_initial_html_tree(
                 require_current()
                 owner.stage_generation(observed.tree, store, staged)
                 require_current()
+                record(
+                    "generation-staged",
+                    {
+                        "source_identity": observed.tree.identity.uri,
+                        "generation_manifest": staged.manifest.to_dict(),
+                    },
+                )
                 owner.publish_generation(
                     source_observation=observed,
                     require_publication_current=require_current,
@@ -250,7 +290,9 @@ def apply_initial_html_tree(
                     "page_bytes": staged.page_bytes,
                     "published": True,
                 }
+                record("published", result)
                 del snapshot
             require_current()
+        journal_guard = None
         require_current()
     return result

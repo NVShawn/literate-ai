@@ -32,9 +32,11 @@ _IGNORED_DIRECTORIES = frozenset(
 )
 _SOURCE_LANGUAGES = {
     ".c": "c",
+    ".cjs": "javascript",
     ".cc": "cpp",
     ".cpp": "cpp",
     ".cs": "csharp",
+    ".cts": "typescript",
     ".ex": "elixir",
     ".exs": "elixir",
     ".go": "go",
@@ -42,15 +44,24 @@ _SOURCE_LANGUAGES = {
     ".hpp": "cpp",
     ".java": "java",
     ".js": "javascript",
+    ".jsx": "javascript",
     ".kt": "kotlin",
     ".m": "objective-c",
     ".mm": "objective-cpp",
+    ".mjs": "javascript",
+    ".mts": "typescript",
     ".py": "python",
     ".rb": "ruby",
     ".rs": "rust",
     ".swift": "swift",
     ".ts": "typescript",
+    ".tsx": "typescript",
 }
+_SCRIPT_SOURCE_SUFFIXES = frozenset(
+    suffix
+    for suffix, language in _SOURCE_LANGUAGES.items()
+    if language in {"javascript", "typescript"}
+)
 _CONFIG_NAMES = frozenset(
     {
         "cargo.toml",
@@ -436,9 +447,10 @@ def _classify(
         return SourceFileClassification.BINARY, language, ""
     if size > 2 * 1024 * 1024:
         return SourceFileClassification.LARGE, language, text
-    if name.endswith((".min.js", ".min.css")) or (
-        len(text) > 4096 and text.count("\n") <= 2
-    ):
+    if (
+        suffix in _SCRIPT_SOURCE_SUFFIXES | {".css"}
+        and path.stem.lower().endswith(".min")
+    ) or (len(text) > 4096 and text.count("\n") <= 2):
         return SourceFileClassification.MINIFIED, language, text
     generated_path = "generated" in {part.lower() for part in path.parts}
     if generated_path or _GENERATED_PATTERN.search(text[:8192]):
@@ -446,6 +458,10 @@ def _classify(
     if (
         name.startswith("test_")
         or name.endswith(("_test.py", ".test.js", ".test.ts", ".spec.js", ".spec.ts"))
+        or (
+            suffix in _SCRIPT_SOURCE_SUFFIXES
+            and path.stem.lower().endswith((".test", ".spec"))
+        )
         or "tests" in {part.lower() for part in path.parts}
     ):
         return SourceFileClassification.TEST, language, text

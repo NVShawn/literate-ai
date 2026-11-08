@@ -1566,10 +1566,14 @@ class GenerationRecipe:
                     "retains the program name at index 0 and silently shifts",
                     "every downstream field lookup. Do not read standard input.",
                     "Put the generated Go behavior-test implementation in",
-                    "`source/tests/litai_test.go` as `package tests`, import it",
-                    "unconditionally from `source/main.go` so `--litai-test` and",
-                    "`--litai-smoke` can execute it, and do not gate it behind a",
-                    "`//go:build` tag. Emit only the JSON result on standard",
+                    "`source/tests/litai_runtime.go` as `package tests`, import it",
+                    "unconditionally from `source/main.go` as the declared local",
+                    "`./tests` package, and pass the real application behavior to",
+                    "its exported test runner as a callback. The test package must",
+                    "not import `main`. `--litai-test` and `--litai-smoke` must",
+                    "execute compiled native assertions without reading the test",
+                    "manifest; do not gate the runtime source behind a `//go:build`",
+                    "tag. Emit only the JSON result on standard",
                     "output.",
                 ]
             )
@@ -2604,6 +2608,11 @@ class CodingCliTaskRunner:
                     self.selection,
                     workspace=workspace,
                 ) as process_environment,
+                _coding_cli_runtime_state(
+                    self.selection,
+                    workspace=workspace,
+                    environment=process_environment,
+                ) as runtime_state,
             ):
                 try:
                     interface = _require_coding_cli_compatible(
@@ -2620,6 +2629,7 @@ class CodingCliTaskRunner:
                         model=model,
                         prompt=instruction,
                         opencode_interface=interface,
+                        codex_runtime_state=runtime_state,
                     )
                     completed = _run_bounded(
                         command,
@@ -2896,6 +2906,12 @@ def _select_fallback_coding_cli(
     return None
 
 
+@dataclass(frozen=True, slots=True)
+class _CodexRuntimeState:
+    sqlite_home: Path
+    log_dir: Path
+
+
 def _coding_cli_command(
     selection: CodingCliSelection,
     workspace: Path,
@@ -2903,6 +2919,7 @@ def _coding_cli_command(
     model: str | None,
     prompt: str,
     opencode_interface: str | None = None,
+    codex_runtime_state: _CodexRuntimeState | None = None,
 ) -> list[str]:
     executable = selection.executable
     if selection.name == "codex":
@@ -2924,6 +2941,19 @@ def _coding_cli_command(
                 str(workspace),
             )
         )
+        if codex_runtime_state is not None:
+            command.extend(
+                (
+                    "-c",
+                    "sqlite_home="
+                    + json.dumps(
+                        str(codex_runtime_state.sqlite_home), ensure_ascii=False
+                    ),
+                    "-c",
+                    "log_dir="
+                    + json.dumps(str(codex_runtime_state.log_dir), ensure_ascii=False),
+                )
+            )
     elif selection.name == "claude":
         command = [
             executable,
@@ -3360,6 +3390,11 @@ class CodingCliSourceGenerator:
                 self.selection,
                 workspace=workspace,
             ) as process_environment,
+            _coding_cli_runtime_state(
+                self.selection,
+                workspace=workspace,
+                environment=process_environment,
+            ) as runtime_state,
         ):
             try:
                 interface = _require_coding_cli_compatible(
@@ -3370,7 +3405,12 @@ class CodingCliSourceGenerator:
                 _configure_opencode_interface(
                     process_environment, interface, self.selection, workspace
                 )
-                command = self._command(workspace, model, opencode_interface=interface)
+                command = self._command(
+                    workspace,
+                    model,
+                    opencode_interface=interface,
+                    codex_runtime_state=runtime_state,
+                )
                 completed = _run_bounded(
                     command,
                     cwd=workspace,
@@ -3637,6 +3677,7 @@ class CodingCliSourceGenerator:
         model: str | None,
         *,
         opencode_interface: str | None = None,
+        codex_runtime_state: _CodexRuntimeState | None = None,
     ) -> list[str]:
         prompt = (
             "Read .literate-ai-generation-request.md and perform exactly that "
@@ -3648,6 +3689,7 @@ class CodingCliSourceGenerator:
             model=model,
             prompt=prompt,
             opencode_interface=opencode_interface,
+            codex_runtime_state=codex_runtime_state,
         )
 
     def _collect(
@@ -4356,6 +4398,41 @@ def _coding_cli_environment(
     scrubbed = _selected_environment(environment, allowed)
     scrubbed["PWD"] = str(workspace)
     return scrubbed
+
+
+@contextmanager
+def _coding_cli_runtime_state(
+    selection: CodingCliSelection,
+    *,
+    workspace: Path,
+    environment: Mapping[str, str],
+) -> Iterator[_CodexRuntimeState | None]:
+    """Keep Codex runtime databases outside generated output and normal auth state."""
+
+    if selection.name != "codex":
+        yield None
+        return
+    temporary_parent = next(
+        (
+            environment[name]
+            for name in ("TMPDIR", "TEMP", "TMP")
+            if environment.get(name)
+        ),
+        None,
+    )
+    with tempfile.TemporaryDirectory(
+        prefix="literate-ai-codex-state-", dir=temporary_parent
+    ) as temporary:
+        root = Path(temporary).resolve()
+        if root.is_relative_to(workspace.resolve()):
+            raise CodingCliError(
+                "coding_cli.runtime_state_inside_workspace",
+                "Codex runtime state must be outside the generated workspace",
+            )
+        sqlite_home, log_dir = root / "sqlite", root / "log"
+        sqlite_home.mkdir(mode=0o700)
+        log_dir.mkdir(mode=0o700)
+        yield _CodexRuntimeState(sqlite_home, log_dir)
 
 
 @contextmanager
