@@ -34036,24 +34036,26 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Refresh all current material from the final 1.4 candidate source and preserve prior release or event material only as labeled history.
 - **Evidence:**
   - [ ] Review inventory and changes against final 1.4 source; verify rendered docs, media, slides, captions, links, installation commands and published assets on the exact release candidate; reject stale current-release or AI Unprompted claims; retain only clearly labeled historical 1.3.1 artifacts and complete the post-publication README/provider readback.
-### [ ] SOURCE-MODULE-VARIANTS-001 — Preserve JavaScript and TypeScript module source in inert conversion
+### [x] SOURCE-MODULE-VARIANTS-001 — Preserve JavaScript and TypeScript module source in inert conversion
 
 - **Priority:** P1
 - **Release target:** 1.4.0
 - **GitHub issue:** [#328](https://github.com/jordanhubbard/literate-ai/issues/328)
 - **Owner:** source-to-specification inventory and static derivation; PROJECT Goals 1 and 4
 - **Direction:** Recognize `.mjs`, `.cjs`, `.jsx`, `.mts`, `.cts` and `.tsx` as language source without executing or rewriting input; preserve safety and test classifications.
-- **Conclusion:** Current main `be1bf57b8` inventories a real `.mjs` source as `other` with no language. Mixed draft PR #313 contains a candidate correction, but its unrelated changes require separate review.
+- **Conclusion:** The defect reproduced at `be1bf57b8` classified a real `.mjs` source as `other` with no language. The bounded correction extracted from mixed draft PR #313 landed through PR #329; unrelated draft changes remain separate.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Qualify the current-main integration at its exact head, complete independent source review, then land and verify main before closing #328.
+- **Next action:** Close #328 after this completion record lands and its post-merge checks pass; complete 1.4 release qualification remains open.
 - **Implementation:**
   - [x] Admit the six module and JSX suffixes under their JavaScript or TypeScript language while preserving input paths and bytes. PR #329 at `b49c8652` exercises all six through an installed noneditable wheel outside this checkout.
   - [x] Preserve sensitive, binary, generated, large, minified and test precedence. Repository-managed conversion custody and negative inventory controls pass at `b49c8652`.
 - **Evidence:**
   - [x] Run managed source inventory and real inert derivation controls, including refusal to execute source. The exact wheel from `b49c8652` classified and derived all six variants with original bytes unchanged; local Linux ARM64 wheel check and full-platform run 42245817943 passed.
-  - [ ] Verify independent source review, noneditable installed qualification, exact-head CI and post-merge main CI.
+  - [x] Verify independent source review, noneditable installed qualification, exact-head CI and post-merge main CI.
 
+
+- **Integration acceptance (2026-11-08):** [PR #329](https://github.com/jordanhubbard/literate-ai/pull/329) is merged at `af8485680` through the reviewed [PR #353](https://github.com/jordanhubbard/literate-ai/pull/353) integration. The [fresh automated source review](https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295) covers these inventory changes. All 27 jobs pass both at the original exact source `b49c8652` in [run 42245817943](https://github.com/jordanhubbard/literate-ai/actions/runs/42245817943) and at post-merge main `1d4238d7a` in [run 42449444068](https://github.com/jordanhubbard/literate-ai/actions/runs/42449444068). The inventory and four-control test module remain byte-identical at main `9dc36f945`. A fresh native Linux x86_64 / Python 3.12.3 installed run passes all four maintained controls with zero failures, errors or skips: all six new suffixes plus ordinary `.js`/`.ts`, inert static derivation, unchanged input bytes and sensitive/binary/generated/large/minified/test precedence. It uses that main build's provider artifact `13605673772`, wheel SHA-256 `42e4a616381c1e0088cdc88e35877ff9adcd1b7d054abd8361d4a2bb39d325a5`; canonical installed-RECORD identity `sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74` matches before and after, with the imported inventory inside the noneditable environment. The installed inventory bytes match current source, and only roadmap documentation changed since that wheel's source. These maintained read-only controls use their fixture origin label without promoting source authority or granting execution. This completes SOURCE-MODULE-VARIANTS-001; all other unchecked 1.4 obligations remain open.
 
 ### [ ] QUALIFIED-CHILD-REVISION-001 — Revise a qualified native child through a recoverable public transaction
 
