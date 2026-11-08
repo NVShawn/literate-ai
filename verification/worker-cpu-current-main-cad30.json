@@ -1,0 +1,161 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "WORKER-CPU-001",
+  "issue": 348,
+  "revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+  "completion_record_base": "04e27e34eaadac2a459d464d15772657f3905763",
+  "source_sha256": {
+    "src/literate_ai/worker_pressure_probe.py": "fef1cb6b1f690dfa71dc93f004d7289066c390215d1ea25311361fd5113cdcd8",
+    "src/literate_ai/adapters/worker_pressure.py": "7137494eff28bf49f21bfeea4832fbc1ef21e62ca6704b6aea4f7223e39dd51f",
+    "src/literate_ai/application/worker_pressure.py": "5b8239e38f6fdc90a21fda899bfa34f33dcc3e81f5b68aa7730886c3019dbfc6",
+    "src/literate_ai/application/worker_capacity.py": "02d1eeebaf414e58d0b2c6300ec9aaad14684616bac9d9279f32ecd4662a6b03",
+    "src/literate_ai/contracts/worker_capacity.py": "7c03a48460f2d5c1d0620720f6f80df3bd3484cfcc30fd483f66d7617be1cec9",
+    "tests/e2e/test_worker_pressure_windows_cpu.py": "f144d5a184e97e6ab821ead08eb66689f547471d6ec1fc30ae905fbf8729b01e"
+  },
+  "installed_probe_sha256": "64408f9cb1d0fb8bab996dc3688e2719567cb44e335145fe3baa9311d9b8dfd0",
+  "source_equality": {
+    "whole_files_equal_across_revisions": [
+      "97e71a233765d4e26b2d6802942a2d7b808133dd",
+      "2f4faf253e135ff3b8e4f59512cbe874c30f64e0",
+      "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+      "04e27e34eaadac2a459d464d15772657f3905763"
+    ],
+    "native_wheel_cpu_modules_equal_current_source": true,
+    "installed_probe_and_native_case_equal": true,
+    "artifact_revisions_preserved": true
+  },
+  "independent_source_review": {
+    "revision": "2f4faf253e135ff3b8e4f59512cbe874c30f64e0",
+    "review": "https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295",
+    "scope": "Automated independent review of all consolidated production changes and CI/wheel acceptance hooks explicitly preserves unsupported Windows multi-group CPU. This is not a human-authority signature."
+  },
+  "native_windows": {
+    "provider": "github-actions",
+    "run": 42488156657,
+    "revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "run_success": true,
+    "artifacts": [
+      {
+        "id": 13622035954,
+        "name": "windows-conformance-profile-3",
+        "digest": "sha256:1fa67e98e1865cf438c6bed4f87600cb12ae5e3fe00c450b492ce31ddd4da7ef",
+        "bytes": 32436,
+        "run": 42488156657,
+        "source_revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+        "expired": false
+      },
+      {
+        "id": 13621392400,
+        "name": "qualified-wheel-windows-3.12",
+        "digest": "sha256:60e7656ca3b94a9411b0ca90900b968ed15f108e0e8d2138300c069d6f8e42dd",
+        "bytes": 4085689,
+        "run": 42488156657,
+        "source_revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+        "expired": false
+      }
+    ],
+    "source_cases": [
+      {
+        "name": "test_failed_or_missing_native_api_never_becomes_zero_load",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_high_filetime_words_survive_low_word_wrap",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_idle_is_subtracted_once_from_kernel_plus_user_time",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.003,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_local_adapter_uses_the_same_windows_provider_and_statuses",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.003,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_native_windows_local_and_receiver_cpu_satisfy_required_policy",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.672,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_processor_group_change_during_window_is_not_complete_evidence",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_uncovered_processor_groups_do_not_report_partial_system_usage",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.003,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      },
+      {
+        "name": "test_zero_reset_and_inconsistent_counters_stay_unavailable",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.007,
+        "xml": "test-results-3.xml",
+        "xml_sha256": "cfb9e89febe21c262b3da1feb136ec0108d3eebe86652ba39a2d71b1d67f5b1d",
+        "status": "passed"
+      }
+    ],
+    "source_case_count": 8,
+    "source_skipped": 0,
+    "installed": {
+      "case": "test_native_windows_local_and_receiver_cpu_satisfy_required_policy",
+      "installed_module_origins_verified": true,
+      "platform": "win32",
+      "receiver_transport": "local-child",
+      "skip_reasons": [],
+      "status": "passed"
+    },
+    "wheel": {
+      "name": "run-x_g0k3h8/literate_ai-1.4.0-py3-none-any.whl",
+      "bytes": 4253718,
+      "sha256": "c3cd9c737d81986fae528993fc9364e5bdf8d595b5d50fdbdb6e18e166bbd5de"
+    },
+    "runtime_report_sha256": "7840790a6dda86be229bca183ed486b5169bf7c1b662dc189301f5e5b5d21bd5",
+    "raw_job_log_sha256": "4cafac9714171a5414f5daa2a0fe99ad33e4d567060c6291075fa675e68e6218"
+  },
+  "integrated_main": {
+    "revision": "99f3fe19623ee4321bd02a635db5db6d702cd35e",
+    "ci_run": 42500678614,
+    "terminal_success": true,
+    "jobs": 27,
+    "all_jobs_success": true,
+    "skipped_jobs": 0,
+    "website_run": 42500678616,
+    "website_success": true
+  },
+  "historical_installed_record": "verification/worker-cpu-windows-installed-native.json",
+  "historical_failures_retained": true,
+  "coverage_boundary": [
+    "Native API/counter/reset/inconsistent/multi-group failure controls and required-pressure semantics remain unchanged.",
+    "The actual Windows local collector and standalone receiver execute native CPU sampling. The receiver uses a real local child in place of SSH transport.",
+    "Separate-host SSH transport, complete generation/lifecycle acceptance, the remaining release goals and release publication are not qualified by this CPU record.",
+    "Earlier wheels, source suites, failures and the macOS/Linux platform skips retain their original identities."
+  ],
+  "separate_ssh_host_transport_qualified": false,
+  "release_attestation": false
+}
