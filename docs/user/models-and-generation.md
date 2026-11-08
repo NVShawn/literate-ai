@@ -703,6 +703,15 @@ locality therefore remains `unknown`, and a no-egress routing policy cannot sele
 An integration that needs a verified local model must expose an endpoint whose locality
 and revision can actually be attested.
 
+Codex source-generation and JSON-task calls select temporary `sqlite_home` and
+`log_dir` directories through the provider's documented per-call configuration.
+They live outside the generated workspace, use the invocation's temporary-directory
+environment, and are removed when the bounded call returns or raises. The adapter
+retains normal `HOME`, `CODEX_HOME`, authentication and model selection; it does not
+copy the existing databases or credentials. Runtime databases and logs are not
+generated Component outputs. Fresh provider state can incur indexing work, which
+remains subject to the original invocation deadline and resource limits.
+
 Run `litai plan` with the same Component and Flavor selectors first. It resolves and
 verifies the domain identities, recipe, exact skill closure, workflow, routing-policy
 identity, declared model mappings, entrypoint, and guarded lifecycle without selecting

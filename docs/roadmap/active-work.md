@@ -34146,7 +34146,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 ### [ ] GENERATION-012 — Give Codex invocations owned SQLite and log state
 
 - **GitHub issue:** [#365](https://github.com/jordanhubbard/literate-ai/issues/365)
-- **Current next action:** Implement the shared owned-state context for both execution paths, then qualify its lifetime, output exclusion and actual fresh model calls before review. The observed private-state no-op is a prerequisite only; no accepted library generation or retained-provider replay/importer result exists.
+- **Current next action:** Peer the source/control checkpoint, then qualify actual fresh-state model calls and the exact local whole-suite subject before PR CI. The observed private-state no-op is a prerequisite only; no accepted library generation or retained-provider replay/importer result exists.
 
 - **Priority:** P1
 - **Owner:** framework coding CLI adapter; PROJECT goals 3 and 4
@@ -34155,10 +34155,13 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** Existing Codex command and private subprocess lifetime contracts; no dependency on the separate native Cargo PR 347.
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Own temporary SQLite and log directories for both source generation and JSON tasks using documented per-call configuration, preserving normal HOME and authentication.
-  - [ ] Keep provider runtime state out of admitted generated source and remove only the owned directories after child retirement on success and failure.
+  - [x] Own temporary SQLite and log directories for both source generation and JSON tasks using documented per-call configuration, preserving normal HOME and authentication.
+  - [x] Keep provider runtime state out of admitted generated source and remove only the owned directories after child retirement on success and failure.
   - [ ] Retain the actual negative/positive scope and link upstream issue 365; prepare a separate reviewable change without default merge or downstream pin movement.
 - **Evidence:**
   - [ ] Causal native normal/default-signals EFBIG/SIGXFSZ and private-state real no-op comparison with unchanged 64 MiB limit and independent retirement.
   - [ ] Meaningful command/environment, output-boundary, exception and owned-lifetime regression controls for both execution paths, preserving other providers.
   - [ ] Exact changed-source local checks and independent peer review before PR CI; genuine model-backed library qualification remains independently required.
+
+- **Source development controls:** Thirty-eight focused controls pass, including six new two-path state/lifetime/output-boundary cases and the existing generation, cache, OpenCode and quota-fallback cases. The unchanged original execution owners fail the new contract (five assertion failures and one missing-helper error across six methods); their five relevant ASTs match the current-main baseline. This uses controlled transport doubles, not model-generation evidence. Source hashes are `9b454c74e36faa8bbf6f91500f95eac7e2a3d8a33a40db07400b58c109d6b2cf` (adapter) and `40193179633d77a06967828dd51364a937698f971ce30dd05222a79291eed6e1` (controls).
+- **Historical diagnostic boundary:** The actual Codex 0.164 normal-state FD failure and a warm private-state no-op are independently retained; the positive call takes 6.973 seconds under unchanged 64 MiB/default signals and returns exact `READY`, with owned retirement. A log-only attempt fails and fresh private indexing previously times out. These observations justify the correction direction but do not qualify this new source, fresh library generation, archive replay or retained import/admission. All those acceptance gates remain open.
