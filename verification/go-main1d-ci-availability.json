@@ -1,0 +1,201 @@
+{
+  "action": {
+    "commit": "b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+    "dependency_cache": false,
+    "metadata_checked": "action.yml at this exact commit; node24 runtime and go-version/cache inputs",
+    "metadata_sha256": "cbfae748992b96b9a1bfa3f1679d17c898c78375aad8a0d0184820683c82c482",
+    "release_url": "https://github.com/actions/setup-go/releases/tag/v7.0.0",
+    "repository": "actions/setup-go",
+    "tag": "v7.0.0"
+  },
+  "change": "Provision Go 1.27.3 with the exact official setup-go v7.0.0 commit throughout the macOS qualification job. Require actual Go version and canonical toolchain discovery before test collection; keep optional local test guards unchanged.",
+  "expected_case_class": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests",
+  "expected_cases_per_selected_cell": 7,
+  "finding": "Linux and Windows each complete seven native Go controls; all seven are skipped on macOS Python 3.11 because go is absent. A green overall matrix does not close GO-001.",
+  "go_release": {
+    "observed_supported_stable_versions": [
+      "go1.27.3",
+      "go1.26.10"
+    ],
+    "source": "https://go.dev/dl/?mode=json",
+    "version": "1.27.3"
+  },
+  "head": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+  "kind": "native-go-ci-availability-development-audit",
+  "local_validation": {
+    "ci_pin_controls": {
+      "canonical_make_exit": 0,
+      "passed": 15,
+      "report_sha256": "72a8ae1abff3983a535c2762755ceea26d3986261bf7fe727cdb18ca349b19d1",
+      "selected": 15,
+      "skipped": 0
+    },
+    "documentation": {
+      "canonical_make_exit": 0,
+      "log_sha256": "63d515139c4c8b885e381c67461c8514c29659971610d039b1ab1c9763592543",
+      "markdown_files": 1948,
+      "mermaid_diagrams": 181
+    },
+    "documentation_authority": "current",
+    "driver_review": "current; identity unchanged",
+    "local_preflight": {
+      "canonical_discovery": "passed",
+      "go_version": "go1.27.3",
+      "platform": "linux/arm64",
+      "scope": "Checks the proposed preflight command locally; not native macOS execution evidence."
+    },
+    "project_authority": true
+  },
+  "observed_artifacts": {
+    "linux311.zip": {
+      "archive_sha256": "c80cdb4d5d153539b65daabcc7f3e5f88fa5866be7c0f76d71aa9d8bff87e841",
+      "cases": [
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_changed_application_or_assertion_fails_native_cases",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_compiled_native_cases_and_app_work_without_source",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_external_package_is_refused_offline",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_guarded_builder_records_real_compiler_consumption",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_missing_or_hidden_runtime_source_refuses",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_old_test_filename_fails_real_compiler",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_unsafe_import_is_refused_even_when_go_can_resolve_it",
+          "detail": "ok",
+          "member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+          "status": "passed"
+        }
+      ]
+    },
+    "mac311-1.zip": {
+      "archive_sha256": "20bf608693aea37ecc909e8abb169c045f3c685a259d3a1e88618a5300692eef",
+      "cases": [
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_changed_application_or_assertion_fails_native_cases",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_compiled_native_cases_and_app_work_without_source",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_external_package_is_refused_offline",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_guarded_builder_records_real_compiler_consumption",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_missing_or_hidden_runtime_source_refuses",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_old_test_filename_fails_real_compiler",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_unsafe_import_is_refused_even_when_go_can_resolve_it",
+          "detail": "skipped 'Go toolchain unavailable'",
+          "member": "evidence/20261108T051303Z-8ebf67/n0001/stderr.log",
+          "status": "skipped"
+        }
+      ]
+    },
+    "windows-1.zip": {
+      "archive_sha256": "370eadb386000b74fe57135018326b4b6aa037b802e39d7b95472ba59c32f03d",
+      "cases": [
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_unsafe_import_is_refused_even_when_go_can_resolve_it",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_old_test_filename_fails_real_compiler",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_missing_or_hidden_runtime_source_refuses",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_compiled_native_cases_and_app_work_without_source",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_external_package_is_refused_offline",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_changed_application_or_assertion_fails_native_cases",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        },
+        {
+          "case": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_guarded_builder_records_real_compiler_consumption",
+          "member": "test-results-1.xml",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "release_attestation": false,
+  "remaining": [
+    "Exact-head macOS CI with seven actual non-skipped native Go outcomes in each selecting cell",
+    "Post-merge qualification and acceptance reconciliation before GO-001 or issue 324 closes"
+  ],
+  "run_id": 42449444068,
+  "run_url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42449444068",
+  "selecting_cells": [
+    "macos-latest / Python 3.11 (1 of 4)",
+    "macos-latest / Python 3.14 (smoke)"
+  ],
+  "source_review": {
+    "head": "2f4faf253e135ff3b8e4f59512cbe874c30f64e0",
+    "scope": "Production Python, Go Flavor/skill/template copies and runtime compiler consumption. This CI-only repair changes no production Go source.",
+    "url": "https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295"
+  }
+}

@@ -225,6 +225,8 @@ runnable entrypoint. CLIs and services require an evidence-backed entrypoint; un
 semantics block project promotion instead of becoming a fabricated
 `portable-application/run`.
 
+For a new promoted project, `--authoring-template installed` explicitly selects the current installed framework's portable implementation skill, dev workflow and dev routing policy before Component pins, locks and the new promotion audit are created. The default `inherited` retains existing parent selection. This opt-in preserves repository lineage and build inheritance; it does not change signed intent, qualification profiles or an existing child. Review these executable generation inputs and repeat the same option when planning and applying replacement. Every selected artifact is included in the audit, so later changes invalidate promotion evidence.
+
 For incremental conversion of an existing retained adopted project, use
 `--integrate-project path/to/adopted-root` instead of `--project-target`. Acceptance
 creates the same source-free project beneath `.literate/native-projects/` and atomically

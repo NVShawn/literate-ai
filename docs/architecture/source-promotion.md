@@ -165,6 +165,8 @@ contract. It then resolves and persists the exact qualification target/Flavor
 `component.lock.json` without generating source. A missing acceptance profile or failed
 qualification leaves release authority at the source baseline.
 
+Forward-authoring selection is separate from repository lineage. The public acceptance opt-in `--authoring-template installed` materializes the current installed framework's implementation skill, workflow and routing before authoring pins, lock resolution and promotion audit creation. Default inheritance is unchanged. The complete audit includes each of these three operative inputs, including the implementation skill itself; changing any one later refuses current promotion evidence. It grants no model execution or qualification.
+
 An incremental adopted project keeps each promoted native boundary as a complete
 source-free child beneath `.literate/native-projects/`. Its root registry binds the exact
 relative child path, project identifier, and project-definition identity. Conversion
