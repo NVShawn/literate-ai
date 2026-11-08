@@ -174,14 +174,15 @@ class WorkerAlignmentTests(unittest.TestCase):
                     ),
                 ):
                     for declared, git, lfs, exit_code, failed in (
-                        ("git", "git version 2.43.0", "git-lfs/3.4.1", "0", "git"),
+                        ("git", "git version 2.34.1", "git-lfs/3.4.1", "0", "git"),
+                        ("git", "git version 2.43.0", "git-lfs/3.4.1", "0", None),
                         ("git", "git version 2.56.0", "git-lfs/3.1.0", "0", "git-lfs"),
                         ("git", "git version 2.56.0", "git-lfs/3.4.1", "7", "git"),
                         ("git", "git version 2.56.0", "unknown", "0", "git-lfs"),
                         ("git", "git version 2.56.0", "git-lfs/3.4.1", "0", None),
                         (
                             "git.exe",
-                            "git version 2.43.0",
+                            "git version 2.34.1",
                             "git-lfs/3.4.1",
                             "0",
                             "git.exe",
@@ -194,6 +195,7 @@ class WorkerAlignmentTests(unittest.TestCase):
                             "git-lfs.exe",
                         ),
                         ("git.exe", "git version 2.56.0", "git-lfs/3.4.1", "0", None),
+                        ("git.exe", "git version 2.43.0", "git-lfs/3.4.1", "0", None),
                     ):
                         with self.subTest(
                             declared=declared, git=git, lfs=lfs, exit_code=exit_code
@@ -223,7 +225,7 @@ class WorkerAlignmentTests(unittest.TestCase):
                                 before,
                                 {p.name: p.read_bytes() for p in tools.iterdir()},
                             )
-                    (tools / "git.exe.version").write_text("git version 2.43.0")
+                    (tools / "git.exe.version").write_text("git version 2.34.1")
                     output, errors = io.StringIO(), io.StringIO()
                     status = main((*arguments, "--apply"), stdout=output, stderr=errors)
                     result = json.loads(output.getvalue() or errors.getvalue())

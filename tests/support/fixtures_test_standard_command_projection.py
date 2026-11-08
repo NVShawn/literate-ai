@@ -213,6 +213,7 @@ def _locked_snapshot(
         skill_by_language = {
             "elixir": "elixir-portable-application",
             "cpp": "cpp17-portable-json-application",
+            "go": "go-portable-application",
             "javascript": "javascript-portable-json-application",
             "rust": "rust-portable-json-application",
         }
