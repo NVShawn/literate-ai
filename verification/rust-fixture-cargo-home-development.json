@@ -1,0 +1,148 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "RUST-HARNESS-DEPS-001",
+  "issue": 377,
+  "scope": "Fixture-only Cargo-home retention; broader Rust native/installed/provider acceptance remains open",
+  "base_revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+  "source_sha256": {
+    "tests/e2e/test_rust_library_test_driver.py": "120aec0aa501ab7edced9bc98fb507079f45df61916acb727c01dd20f8ca3101"
+  },
+  "predecessor": {
+    "base": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "root_exit": 2,
+    "summary": {
+      "executed": 4,
+      "failed": 1,
+      "known_failed": 0,
+      "passed": 3,
+      "selected": 6,
+      "skipped": 0
+    },
+    "failure": "public rebuild runs actual rejecting wrapper from synthetic operator Cargo configuration; exit91 and marker observed",
+    "marker_bytes": "invoked",
+    "hostile_configuration_sha256": "256e02fc7a95f9fa13235656daa646f853de546b91f488094694a87638ea2065",
+    "log_sha256": "ad5dd7801bdfc157049a886f7debf9356eee3bc9f1bb8b63124f90cc4ac4c688",
+    "selected_but_unexecuted": 2,
+    "release_attestation": false
+  },
+  "causal_control": "A real rustc-built rejecting wrapper is selected by actual Cargo under a synthetic operator home; its exit91 and marker are observed. The subsequent public rebuild must succeed with the prepared fixture home, never invoke the wrapper and preserve hostile configuration bytes. Native compilation, custody, graph, feature, checksum and refusal oracles remain real.",
+  "platform": "Linux ARM64 / Python 3.12 only; no macOS or Windows execution is claimed by this development record",
+  "full_source_gate": {
+    "root_exit_code": 0,
+    "summary": {
+      "executed": 2655,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2655,
+      "selected": 2774,
+      "skipped": 119
+    },
+    "worker_groups": 597,
+    "all_groups_done": true,
+    "event_totals": {
+      "start": 2745,
+      "success": 2655,
+      "done": 597,
+      "skip": 90,
+      "fixture_skip": 8
+    },
+    "indexed_outcomes_match_report": true,
+    "duplicate_raw_test_ids": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "c82a9c540c6c7931ca7cf318861313d9e2c6267b4915a334f606a180771e2cbf",
+    "log_sha256": "e792c62ea2a22a41f72d8cac1b0487b8139a61f5ffe1dab69c45894543ef04e7",
+    "actual_unicode_wrapper_path": true
+  },
+  "authority_checks": {
+    "lint": true,
+    "format": true,
+    "driver_current_without_repin": true,
+    "project": true,
+    "documentation_authority": true,
+    "documentation_rendering": {
+      "diagrams": 181,
+      "markdown_files": 1948
+    }
+  },
+  "original_reported_full_failure": {
+    "source": "https://github.com/jordanhubbard/literate-ai/issues/377",
+    "classification": "reported failed run; original raw log not collected by this correction",
+    "passed": 2062,
+    "failed": 1,
+    "selected_skips": 98,
+    "retained_as_failure": true
+  },
+  "production_source_changed": false,
+  "driver_pin_advanced": false,
+  "release_attestation": false,
+  "earlier_source_sha256": {
+    "tests/e2e/test_rust_library_test_driver.py": "6d790cef6443391ac6736d075098174f98aee9ced958337c03aa4da00f8483fd"
+  },
+  "earlier_full_source_gate": {
+    "root_exit_code": 0,
+    "summary": {
+      "executed": 2655,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2655,
+      "selected": 2774,
+      "skipped": 119
+    },
+    "worker_groups": 597,
+    "all_groups_done": true,
+    "event_totals": {
+      "start": 2745,
+      "success": 2655,
+      "done": 597,
+      "skip": 90,
+      "fixture_skip": 8
+    },
+    "indexed_outcomes_match_report": true,
+    "duplicate_raw_test_ids": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "7ef55afa250b7a890d9ac395b4609ff1985a3a53c395e73d58bc28547dea680f",
+    "log_sha256": "1785cba414c31ec28e89884062d6b1afd2be069eed2d04893b38230abde2b54a"
+  },
+  "earlier_repaired_native_controls": {
+    "root_exit": 0,
+    "summary": {
+      "executed": 6,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 6,
+      "selected": 6,
+      "skipped": 0
+    },
+    "report_sha256": "90791b2f42cde0e8c4bd693950cf63382bbf292064fdc36170840b001d1d9a55",
+    "log_sha256": "c0186a2492cb459f2dcddd0903c32cbc8e599c751cb0cadfc09950664eae2803",
+    "source_sha256": {
+      "tests/e2e/test_rust_library_test_driver.py": "6d790cef6443391ac6736d075098174f98aee9ced958337c03aa4da00f8483fd"
+    }
+  },
+  "repaired_native_controls": {
+    "summary": {
+      "selected": 6,
+      "passed": 6,
+      "skipped": 0,
+      "failed": 0
+    },
+    "case_keys": [
+      "tests.e2e.test_rust_library_test_driver.RustLibraryTestDriverTests.test_failing_native_case_refuses_and_retains_case_diagnostic",
+      "tests.e2e.test_rust_library_test_driver.RustLibraryTestDriverTests.test_native_integration_and_nested_unit_tests_pass_before_json_protocol",
+      "tests.e2e.test_rust_library_test_driver.RustVerifierDependencyExecutionTests.test_own_path_and_fixed_git_dependency_graph_reopens_and_refuses_drift",
+      "tests.e2e.test_rust_library_test_driver.RustVerifierDependencyExecutionTests.test_public_standard_library_rebuild_uses_reviewed_extra_crates",
+      "tests.e2e.test_rust_library_test_driver.RustVerifierDependencyExecutionTests.test_real_extra_crates_and_selected_features_reopen_and_refuse_drift",
+      "tests.e2e.test_rust_library_test_driver.RustVerifierDependencyExecutionTests.test_real_verifier_configuration_checksum_features_and_output_refuse"
+    ],
+    "source_sha256": {
+      "tests/e2e/test_rust_library_test_driver.py": "120aec0aa501ab7edced9bc98fb507079f45df61916acb727c01dd20f8ca3101"
+    },
+    "observation": "All six actual native controls complete in the fresh whole-source gate; public rebuild uses the final space/accent/non-BMP wrapper-path control."
+  }
+}

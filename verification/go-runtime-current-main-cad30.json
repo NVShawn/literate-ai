@@ -1,0 +1,300 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "GO-001",
+  "issue": 324,
+  "revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+  "source_sha256": {
+    "src/literate_ai/adapters/builders/go.py": "a30d34c70cfd22636beaf3b7f269da66f96cc636b4ddee6fbd7ca23630684a51",
+    "src/literate_ai/adapters/standard_project.py": "0d98b7dd3eb83a67d7d1696159fcc35f20c364285f2b1933c682c5526fc4404c",
+    "flavors/lang-go/flavor.md": "c244d4f454777bc00c690d3f1dfd11401dab4570e46291a1eef5a31b09428d05",
+    "flavors/lang-go/standard-command-profile.json": "96f6ecad66bebdd871fa59b3e4268541a755a877aa72681b50cf61f2c2c53e52",
+    "flavors/lang-go/openspec/spec.md": "4c60f582ab0fe5248790e85193069552089b520cd925fc26188ddc94db4c9cb6",
+    "tests/critical/test_go_runtime_source.py": "d560fe1e2d6427e8170d74daa2f89be069fcfcd3fcf945e106fdd16c18aee5fc",
+    "tests/conformance/test_standard_locked_command_projection.py": "bafa7d6821cc31714715f0837f3f23afc68f2949adeadeaa4fd956effbaa7c87"
+  },
+  "independent_source_review": {
+    "revision": "2f4faf253e135ff3b8e4f59512cbe874c30f64e0",
+    "review": "https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295",
+    "scope": "Automated independent source review explicitly covers production Python, Go Flavor/skill/template copies, native Go assertions and compiler input coverage. Scoped source and tests remain byte-identical."
+  },
+  "integration": {
+    "implementation_review": 325,
+    "macos_toolchain_review": 367,
+    "macos_toolchain_merge": "25c1485e493630afcb8afae8a443d153da494a34",
+    "full_ci_run": 42488156657,
+    "full_ci_jobs": 27,
+    "all_jobs_success": true,
+    "website_run": 42488156666,
+    "website_success": true
+  },
+  "native_compiler_controls": {
+    "revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "run": 42488156657,
+    "test_source_sha256": "d560fe1e2d6427e8170d74daa2f89be069fcfcd3fcf945e106fdd16c18aee5fc",
+    "cells": [
+      {
+        "artifact_id": 13622162632,
+        "artifact": "macos-qualification-3.11-1",
+        "archive_sha256": "d57fc1e077eca084799270805910ae319a9e7168fa049bd4b7418dbfb1065b43",
+        "log_member": "evidence/20261108T140841Z-05bb5e/n0001/stderr.log",
+        "log_sha256": "997db6aef4783d0517ada871adc8160a77ff53f81e11f453ccbb3d55bf3ce661",
+        "case_names": [
+          "test_changed_application_or_assertion_fails_native_cases",
+          "test_compiled_native_cases_and_app_work_without_source",
+          "test_external_package_is_refused_offline",
+          "test_guarded_builder_records_real_compiler_consumption",
+          "test_missing_or_hidden_runtime_source_refuses",
+          "test_old_test_filename_fails_real_compiler",
+          "test_unsafe_import_is_refused_even_when_go_can_resolve_it"
+        ],
+        "passed": 7,
+        "skipped": 0,
+        "failed": 0
+      },
+      {
+        "artifact_id": 13621914583,
+        "artifact": "macos-qualification-3.14-0",
+        "archive_sha256": "c8b0a62137c9e0d081006a5d9fb6657a0be6b85e650a2847ac851d3d3cf0e06d",
+        "log_member": "evidence/20261108T141140Z-7f91db/n0001/stderr.log",
+        "log_sha256": "d05efd4a32103819d80459030f3cf422f4cb2a673de0e863e18f12c48553ac5a",
+        "case_names": [
+          "test_changed_application_or_assertion_fails_native_cases",
+          "test_compiled_native_cases_and_app_work_without_source",
+          "test_external_package_is_refused_offline",
+          "test_guarded_builder_records_real_compiler_consumption",
+          "test_missing_or_hidden_runtime_source_refuses",
+          "test_old_test_filename_fails_real_compiler",
+          "test_unsafe_import_is_refused_even_when_go_can_resolve_it"
+        ],
+        "passed": 7,
+        "skipped": 0,
+        "failed": 0
+      },
+      {
+        "cell": "Linux/Python3.14",
+        "log_sha256": "91a048374b0aee3984b8d9c71fbaa80447b60d8ae0a17f9b0b3e5f234fdb62b6",
+        "case_names": [
+          "test_changed_application_or_assertion_fails_native_cases",
+          "test_compiled_native_cases_and_app_work_without_source",
+          "test_external_package_is_refused_offline",
+          "test_guarded_builder_records_real_compiler_consumption",
+          "test_missing_or_hidden_runtime_source_refuses",
+          "test_old_test_filename_fails_real_compiler",
+          "test_unsafe_import_is_refused_even_when_go_can_resolve_it"
+        ],
+        "passed": 7,
+        "skipped": 0,
+        "failed": 0
+      },
+      {
+        "cell": "Windows/Python3.12",
+        "cases": [
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_unsafe_import_is_refused_even_when_go_can_resolve_it",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          },
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_old_test_filename_fails_real_compiler",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          },
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_missing_or_hidden_runtime_source_refuses",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          },
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_compiled_native_cases_and_app_work_without_source",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          },
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_external_package_is_refused_offline",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          },
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_changed_application_or_assertion_fails_native_cases",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          },
+          {
+            "id": "tests.critical.test_go_runtime_source.GoRuntimeSourceTests.test_guarded_builder_records_real_compiler_consumption",
+            "status": "passed",
+            "artifact_id": 13622301405,
+            "artifact": "windows-conformance-profile-1",
+            "member": "test-results-1.xml",
+            "report_sha256": "fe419460c6718817415ae462f2f5928bf49ae14cf3d1b45085ee81846da0b9d0"
+          }
+        ],
+        "passed": 7,
+        "skipped": 0,
+        "failed": 0
+      }
+    ],
+    "native_go_outcomes": {
+      "passed": 28,
+      "skipped": 0,
+      "failed": 0
+    },
+    "whole_matrix_conclusion": "success: all27 jobs",
+    "release_attestation": false
+  },
+  "native_windows_standard_and_make": [
+    {
+      "case": "tests.conformance.test_standard_locked_command_projection.StandardLockedCommandProjectionConformanceTests.test_go_toolchain_compiles_and_runs_projected_artifact",
+      "status": "passed",
+      "artifact_id": 13622193087,
+      "artifact_sha256": "bc7f0cfb5f44753ad5122258dffd1e124964b2bffeed113b73c1db5b7da7155a",
+      "member": "test-results-2.xml",
+      "report_sha256": "3de81adeeac799cd93cc97f733680a37d6e845596ab2864a4dd7edb1efa7ca17"
+    },
+    {
+      "case": "tests.conformance.test_standard_locked_command_projection.StandardLockedCommandProjectionConformanceTests.test_go_make_flavor_compiles_and_runs_projected_artifact",
+      "status": "passed",
+      "artifact_id": 13622193087,
+      "artifact_sha256": "bc7f0cfb5f44753ad5122258dffd1e124964b2bffeed113b73c1db5b7da7155a",
+      "member": "test-results-2.xml",
+      "report_sha256": "3de81adeeac799cd93cc97f733680a37d6e845596ab2864a4dd7edb1efa7ca17"
+    }
+  ],
+  "installed_linux_arm64_controls": {
+    "ok": true,
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "framework_distribution_before": "sha256:472fea40adeb5784067680410e6b72b12e4decf17feb750a8fb60b396d4d1083",
+    "framework_distribution_after": "sha256:472fea40adeb5784067680410e6b72b12e4decf17feb750a8fb60b396d4d1083",
+    "installed_go_builder_sha256": "a30d34c70cfd22636beaf3b7f269da66f96cc636b4ddee6fbd7ca23630684a51",
+    "test_module_sha256": "d560fe1e2d6427e8170d74daa2f89be069fcfcd3fcf945e106fdd16c18aee5fc",
+    "go_version": "go version go1.27.3 linux/arm64",
+    "go_binary_sha256": "1b4476254764408469356b5895f496730080dc04a5a6739cba13f9a393440a90",
+    "native_python": [
+      3,
+      12,
+      3
+    ],
+    "wheel_identity": "sha256:b8513c9ddfd31ffa02f4a95955d0caf77c1abfec4aa8d57bab57f8acb8b15894",
+    "module_origin_inside_runtime": true,
+    "release_attestation": false
+  },
+  "retained_direct_compiler_counterexamples": {
+    "ok": true,
+    "go_version": "go version go1.27.3 linux/arm64",
+    "test_module_sha256": "d560fe1e2d6427e8170d74daa2f89be069fcfcd3fcf945e106fdd16c18aee5fc",
+    "records": [
+      {
+        "label": "old-filename-compile",
+        "exit": 1,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "3a9d8eec23022630cdc35fc5733de8e1ba67d1c524d9e386d9f0f2391b267b6e"
+      },
+      {
+        "label": "positive-compile",
+        "exit": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "positive-after-source-removal",
+        "exit": 0,
+        "stdout_sha256": "3cdf58d6407a160e45e27d0c04510e82447acfa1cb3a79aa60128175e4760f33",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "application-after-source-removal",
+        "exit": 0,
+        "stdout_sha256": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "changed-application-compile",
+        "exit": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "changed-application-native-cases",
+        "exit": 1,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "c3ae09824f39741d1bf23bfdb6dcaf2de2aeb3910bc3e2cf66e29acae7ea304c"
+      },
+      {
+        "label": "changed-assertion-compile",
+        "exit": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "changed-assertion-native-cases",
+        "exit": 1,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "84f54353965bce82f442d251adf1c0031bfddad5c4e89b020b7cd08e6b50f1f3"
+      }
+    ],
+    "old_filename_real_compiler_failure_retained": true,
+    "compiled_cases_and_application_pass_after_source_removal": true,
+    "actual_application_and_assertion_mutations_fail_native_cases": true,
+    "classification": "Supplementary direct-compiler counterexamples; the seven separate installed guarded-builder controls establish framework behavior.",
+    "release_attestation": false
+  },
+  "native_installed_log_sha256": "d18dd7adb07c8a0b118b8d01370cd88a60d56ed591d937ac79dff93883efc5a2",
+  "native_compiler_counterexample_log_sha256": "6fdbb14cb1350fa9bee1824c873b0f6b242221c9b8d2cfec5c3f5c4d45e47d4d",
+  "historical_availability_gap_record": "verification/go-main1d-ci-availability.json",
+  "historical_failures_retained": [
+    "Original _test.go compile failure",
+    "Native macOS raw/canonical temporary-path mismatch",
+    "Windows cold-build timeout and unquoted tool path",
+    "Earlier PR367 external dependency-fetch failures and retries"
+  ],
+  "scope": "Bounded Go runtime-test package, exact compiler consumption and existing command paths. The native API controls use explicitly acknowledged unsandboxed host execution. No model-generation, enterprise containment or whole-release qualification is implied.",
+  "release_attestation": false,
+  "fresh_documentation_successor_source_gate": {
+    "root_exit_code": 0,
+    "summary": {
+      "executed": 2655,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2655,
+      "selected": 2774,
+      "skipped": 119
+    },
+    "worker_groups": 597,
+    "all_groups_done": true,
+    "indexed_outcomes_match_report": true,
+    "event_totals": {
+      "start": 2745,
+      "success": 2655,
+      "done": 597,
+      "skip": 90,
+      "fixture_skip": 8
+    },
+    "duplicate_raw_test_ids": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "3cdfa12b3f783c8d369bc46f467d345989c04886f3633e3dd595a2375694c0b3",
+    "log_sha256": "7d8c1df604656f6f9c23154c8c8d1737b16470f4762386fcad7bbb83c5bb9745"
+  }
+}

@@ -33792,14 +33792,19 @@ independent review and the complete combined gate from test one.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Native development evidence:** All six selected native Linux ARM64 cases passed with zero skips and zero failures in the canonical Make gate (246.817 seconds). The actual public lifecycle, offline locked Cargo inputs, own-Cargo path/fixed-Git controls and declared dependency/feature boundaries were exercised. Complete source and native Cargo/rustc identities remained unchanged. The first attempt refused an ambient ancestor Cargo configuration; the successful attempt used a new private temporary directory without changing that configuration or relaxing the production refusal. This is source development evidence, not a complete source, installed-package or release qualification. The durable private dispatch record has SHA-256 `c5a323688d7d4276bf30f2d423a6c5054b60c8cd8b774c6d00d480b80234fe2b`.
+- **Fixture isolation correction ([#377](https://github.com/jordanhubbard/literate-ai/issues/377)):** Preserve the once-provisioned fixture Cargo home through subsequent native verifier and public rebuild operations while retaining the normal operator home and exact native tool bindings. Retain the reported failed full gate as a failure; this correction grants no installed, provider or release qualification.
 - **Implementation:**
+  - [x] Retain the fixture-owned Cargo home after native seed provisioning without changing operator configuration.
   - [ ] Add typed reviewed dependency declarations and exact bounded v2 oracle loading while preserving the closed v1 field set and identities.
   - [ ] Compose the temporary manifest from closed values and exact qualified library; reuse canonical streaming Cargo input owners and config/tool custody, observe exact resolution/features/source identities, and run offline locked native Cargo under current execution policy.
   - [ ] Capture and reopen the versioned oracle, harness, lock, dependency/source/configuration closure, generated manifest, native tools and actual command/case results.
 - **Evidence:**
+  - [x] Prove with actual Cargo that a synthetic hostile operator configuration invokes its rejecting wrapper, then require the public rebuild to succeed with the fixture home and leave that hostile configuration unchanged. Run affected native controls and fresh whole-source verification; preserve predecessor failure separately.
   - [ ] Exercise the public lifecycle with a real serde_json-using verifier and provisioned offline crates, including unchanged v1 positive/refusal behavior and actual incorrect-result refusal.
   - [ ] Refuse changed source/lock/manifest/features/registry/configuration, missing or unexpected dependencies, alias collisions, extracted-source/checksum disagreement and exact/over-budget inputs; retain actual command and output failures.
   - [ ] Obtain independent source review, canonical driver/documentation records, complete local and exact integrated CI gates, and fresh noneditable installed/native qualification before completion.
+
+- **Fixture correction development evidence:** The same maintained public rebuild control first failed through the actual synthetic operator wrapper (exit 91 and marker; three passes, one failure, two remaining selected cases unexecuted). After preserving the provisioned Cargo home, all six native Rust controls pass with zero skips, including the public rebuild and existing source, checksum, feature, graph and boundary refusals. No operator files, production source or TCB pin changed. The first fresh canonical Python 3.12 source gate completes with root exit zero: 2,655 passed, 119 skipped, zero failures out of 2,774 selected cases, reconciled against every indexed event in all 597 completed groups. Lint, formatting, project/documentation authority, current unchanged driver pin and 181 rendered diagrams pass. See [the development record](../../verification/rust-fixture-cargo-home-development.json). Final review then corrected JSON surrogate escaping in the new Cargo configuration and gave the actual wrapper a path containing a space, accented letter and non-BMP character; the final-byte fresh whole-source gate also passes with the same 2,655 passes, 119 skips and zero failures, including all six native controls using the real Unicode wrapper path. Every indexed outcome matches the report across all 597 completed groups and the root exits zero. Exact PR/integrated CI remains pending; the original reported failed whole gate remains failed.
 
 ### [ ] RETAINED-RECEIPT-PROMOTE-001 — Promote a verified retained-project run into the project test receipt
 
@@ -33833,7 +33838,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 - **Combined source preparation (pending independent review and gate):** The current integration retains qualified HCI `f146a2d69da2cc3d6e96194ee8a98c6b7f905f69`, GPI `d597f77ad0bba0ab5aa2e18680da1c726bdd0bf0`, root Python/Git-readiness commit `dcd33ba4a31518c4508ef352770072d1869f9976`, current main `70cf6b20a152953fa01764086ef90b12e3147d94`, the complete published receipt-promotion base `09bb4ff9c59798b43360c162d1e98329a4934be0` plus its independently reviewed correction, and the exact reviewed Rust-harness delta from ancestor `072d66e81eff85f58515a09d93d19528499a5ec1`. Both installed tree and Rust journeys remain in the wheel driver. The root branch's source gate passed 2,559 tests with 131 declared skips and no failures; the direct Rust profile passed six native development cases; receipt promotion passed its real public planning and critical journey with complete source custody unchanged. These are separate exact-snapshot results, not qualification of this new union. Preserve all 47 current release-goal IDs, including the existing receipt-promotion queue item missing from its previous manifest. Canonical pin renewal, one fresh complete source gate, exact-head full platform CI, fresh installed qualification and all remaining native/consumer/browser acceptance remain required. Proposed ADR 0061 still requires directing-user design acceptance before implementation.
 
-### [ ] ADOPT-BASELINE-COMMANDS-001 — Select reviewed baseline commands for a single adoption root
+### [x] ADOPT-BASELINE-COMMANDS-001 — Select reviewed baseline commands for a single adoption root
 
 - **Priority:** P1
 - **Release target:** 1.4.0
@@ -33843,7 +33848,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Conclusion:** Extend the existing identity-bound root-plan command route to one selected root. Keep complete source ownership, real detected roots, explicit baseline acknowledgement, currentness and honest selected-command evidence; do not infer broader test coverage or invent skipped execution. Existing implicit and multi-root behavior remains supported.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Current action:** Integrate the independently reviewed single-root override and
+- **Historical development checkpoint:** Integrate the independently reviewed single-root override and
   nonempty bundle-reader support into the current source union, preserving all
   unselected detected phases and their complete planned rows. The fresh focused
   development run passed all 17 existing onboarding/root-plan, adoption, component
@@ -33855,11 +33860,13 @@ implementation, policy weakening, qualification or issue closure is recorded her
   full source gate and installed/platform qualification remain pending. Earlier
   failed development attempts remain failure evidence.
 - **Implementation:**
-  - [ ] Support a nonempty explicitly selected root set, including a single repository root, through the existing reviewed plan and transaction.
-  - [ ] Document scoped Cargo baseline commands and unchanged stale-plan, source-ownership and execution requirements.
+  - [x] Support a nonempty explicitly selected root set, including a single repository root, through the existing reviewed plan and transaction.
+  - [x] Document scoped Cargo baseline commands and unchanged stale-plan, source-ownership and execution requirements.
 - **Evidence:**
-  - [ ] Use a real public Cargo workspace adoption: the default broad test fails, the explicitly reviewed scoped test passes without manifest mutation or artificial splitting, and only selected commands are credited.
-  - [ ] Reject an empty selection, incomplete ownership, invalid or changed commands and stale acknowledgement before execution; renew focused/full/installed qualification and independent review before landing.
+  - [x] Use a real public Cargo workspace adoption: the default broad test fails, the explicitly reviewed scoped test passes without manifest mutation or artificial splitting, and only selected commands are credited.
+  - [x] Reject an empty selection, incomplete ownership, invalid or changed commands and stale acknowledgement before execution; renew focused/full/installed qualification and independent review before landing.
+
+- **Completed integration acceptance (2026-11-08):** All six scoped implementation/test files remain byte-identical to independently reviewed `2b9c392d9` (reviewer `/root/review_worktree_discovery`, packet `e9f461ceee144d6d0b19524555e835eef9f7df9fc0d48d9b98618504c1aa860c`). Exact integrated main `cad30c4e7` passes all 27 jobs in [run 42488156657](https://github.com/jordanhubbard/literate-ai/actions/runs/42488156657) and its website gate. The maintained real Cargo adoption control passes on native Windows and both macOS Python cells. A fresh closed 38-distribution native Linux ARM64/Python 3.12 runtime installs the exact current-main CI wheel; actual public CLI planning is read-only, empty/changed selections refuse, the broad Cargo test really fails and the reviewed three-command scoped baseline plus lift-and-shift pass with original source bytes and installed framework identity unchanged. [Sanitized proof](../../verification/adoption-baseline-current-main-cad30.json) retains source, wheel, distribution, closure, phase and raw-log identities. Only selected commands are credited; the package command lists files. Existing refused and historical checkpoints remain retained. Renewing commands on an already adopted subject, requested separately in #366, is not asserted by this initial-adoption goal.
 
 ### [x] WHEEL-RUNTIME-ENV-001 — Isolate wheel runtime creation and installation from Python startup policy
 
@@ -33989,9 +33996,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Actual upstream-layout repair export/rebase and accepted merge-back plus rejected proposal retention pass without unearned admission.
   - [ ] Independent source review, full source and platform gates, and noneditable installed/native qualification pass at the exact head.
 
-### [ ] GO-001 — Restore buildable Go runtime tests and source custody
+### [x] GO-001 — Restore buildable Go runtime tests and source custody
 
-- **2026-11-08 macOS CI availability gap:** Exact-main full CI `42449444068` at `1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d` is green overall, but its retained case logs show all seven `GoRuntimeSourceTests` skipped on macOS Python 3.11 because `go` was absent from PATH. The same seven cases pass on Linux and native Windows. The [case-level audit](../../verification/go-main1d-ci-availability.json) retains the exact artifact hashes and outcomes. Provision pinned Go `1.27.3` through official setup-go `v7.0.0` commit `b7ad1dad31e06c5925ef5d2fc7ad053ef454303e` throughout the macOS qualification job and require canonical toolchain preflight before collection. Its Python 3.11 group 1 and Python 3.14 smoke cell select the seven Go controls. Keep the ordinary optional local guard and all source, compiler-input, mutation and offline-package refusals unchanged. Actual non-skipped exact-head macOS outcomes and post-merge reconciliation remain required; the green matrix alone does not close this goal.
+- **2026-11-08 macOS CI availability gap (resolved below):** Exact-main full CI `42449444068` at `1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d` is green overall, but its retained case logs show all seven `GoRuntimeSourceTests` skipped on macOS Python 3.11 because `go` was absent from PATH. The same seven cases pass on Linux and native Windows. The [case-level audit](../../verification/go-main1d-ci-availability.json) retains the exact artifact hashes and outcomes. Provision pinned Go `1.27.3` through official setup-go `v7.0.0` commit `b7ad1dad31e06c5925ef5d2fc7ad053ef454303e` throughout the macOS qualification job and require canonical toolchain preflight before collection. Its Python 3.11 group 1 and Python 3.14 smoke cell select the seven Go controls. Keep the ordinary optional local guard and all source, compiler-input, mutation and offline-package refusals unchanged. Actual non-skipped exact-head macOS outcomes and post-merge reconciliation remain required; the green matrix alone does not close this goal.
 
 - **Native macOS fixture correction (2026-11-07):** The exact `c072d74a3` full source run on macOS ARM64/Python 3.14.7 stopped after 744 started cases (35 reported skips) at the direct Go graph control. Its fixture supplied a raw temporary path while Go reported the canonical `/private/var` path, so the unchanged source-boundary guard correctly refused. Canonicalize the fixture root before creating its source and caches. Preserve the failed native run and exact unchanged 5,286-input source snapshot; the corrected seven-case native replay passed against the frozen production source with the original snapshot unchanged. Renewed full current-head qualification remains required before closure.
 
@@ -34011,9 +34018,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [x] Retain the real _test.go compiler failure, positive native build, mutation failures, missing or hidden source refusal, and external-package refusal.
   - [x] Validate source indexing, compiler-consumed files, artifact provenance, project/template authority, and noneditable installed-wheel execution after source removal.
-  - [ ] Pass exact-head platform CI and independent source review before merging and closing issue #324.
+  - [x] Pass exact-head platform CI and independent source review before merging and closing issue #324.
 
-  PR #325 at `aed471d4` carries the implementation. Seven repository-managed
+  Historical pre-integration qualification: PR #325 at `aed471d4` carries the implementation. Seven repository-managed
   compiler controls and the locked Standard command journey pass; eight Go
   controls pass against a noneditable installed wheel outside the checkout.
   Root and six copied lab projects validate, and `make wheel-check` passed from
@@ -34027,6 +34034,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
   The focused repair bounds Go conformance builds at five minutes and quotes the
   fixture's language tool path; both affected real Go journeys pass locally on
   Linux ARM64. The Windows rerun and independent review remain required.
+
+- **Completed integration acceptance (2026-11-08):** PR #367 lands the pinned Go 1.27.3 macOS provisioning and pre-collection preflight as `25c1485e4`. Exact integrated main `cad30c4e7` passes all 27 jobs in [run 42488156657](https://github.com/jordanhubbard/literate-ai/actions/runs/42488156657) and its website gate. Rehashed provider archives and exact per-case records prove all seven native Go controls pass without skips on macOS Python 3.11 and 3.14, Linux Python 3.14 and native Windows Python 3.12; both formerly failing Windows locked-Standard/Make conformance journeys also pass without skips. Scoped source/test bytes match the [independent 2f source review](https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295). A fresh closed native Linux ARM64/Python 3.12 runtime executes all seven controls from the exact current-main noneditable wheel with Go 1.27.3, no skips, and unchanged distribution identity. Separate retained direct-compiler records reproduce the old filename failure, successful compiled cases and application execution after source removal, and actual application/assertion mutation failures. [Sanitized source, artifact and native proof](../../verification/go-runtime-current-main-cad30.json) preserves every original failure boundary; this bounded capability completion is not complete 1.4 or production-containment qualification.
 
 ### [ ] RELEASE-COLLATERAL-001 — Refresh all user-facing documentation and collateral for each release
 
