@@ -5,6 +5,8 @@
 - Record the included Codex runtime-state and remote file-ceiling work as explicit
   1.4 roadmap and release-manifest gates; both remain incomplete pending their
   existing implementation, review and native qualification.
+- Retain standalone Windows MSVC setup and C++ discovery timings in native qualification while preserving the five-minute default and caller-selected bounds.
+- Renew retained Windows command, source/context drift and missing native sidecar checks through the noneditable wheel on base and private interpreters (#102, #103).
 
 - Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
 

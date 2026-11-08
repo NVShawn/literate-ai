@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import os
@@ -17,6 +18,7 @@ from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 from threading import RLock
 
+from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.html_publication import html_output_path, read_output
 from literate_ai.contracts import canonical_identity
 from literate_ai.contracts.html_observability import HtmlArtifact
@@ -107,6 +109,109 @@ print(json.dumps({
     "installed_module_origins_verified": True,
     "receiver_transport": "local-child",
 }))
+"""
+
+INSTALLED_WINDOWS_RETAINED_PROBE = """
+import importlib
+import json
+import sys
+import unittest
+from pathlib import Path
+
+repository, installation, mode, case_name = sys.argv[1:]
+repository = Path(repository).resolve(strict=True)
+installation = Path(installation).resolve(strict=True)
+if sys.platform != "win32" or mode not in {"base", "installed"}:
+    raise RuntimeError("actual Windows base or installed interpreter required")
+if not sys.flags.isolated:
+    raise RuntimeError("isolated Python startup required")
+if mode == "base":
+    if not sys.flags.no_site or sys.prefix != sys.base_prefix:
+        raise RuntimeError("base interpreter must disable ambient site processing")
+    packages = installation / "Lib" / "site-packages"
+    if not packages.is_dir():
+        raise RuntimeError("canonical installed site-packages unavailable")
+    sys.path.insert(0, str(packages))
+elif (
+    Path(sys.prefix).resolve(strict=True) != installation
+    or sys.prefix == sys.base_prefix
+):
+    raise RuntimeError("canonical installed interpreter required")
+
+
+def require_installed_origins():
+    paths = {}
+    for name, module in tuple(sys.modules.items()):
+        if name == "literate_ai" or name.startswith("literate_ai."):
+            path = getattr(module, "__file__", None)
+            if path is None or not Path(path).resolve(strict=True).is_relative_to(
+                installation
+            ):
+                raise RuntimeError(
+                    "retained probe imported framework outside installation"
+                )
+            paths[name] = str(Path(path).resolve(strict=True))
+    if not paths:
+        raise RuntimeError("retained probe did not import the installed framework")
+    return paths
+
+
+import literate_ai
+
+require_installed_origins()
+# Only the maintained test package is selected here. The checkout's src/ is
+# never added, and every framework module is checked again after execution.
+sys.path.insert(0, str(repository))
+module = importlib.import_module("tests.critical.test_retained_project_environment")
+case_type = module.RetainedOutputCommandPathTests
+inventory = unittest.defaultTestLoader.getTestCaseNames(case_type)
+if case_name not in inventory:
+    raise RuntimeError("unknown maintained retained-environment case")
+suite = unittest.TestSuite([case_type(case_name)])
+expected = {case_type(case_name).id()}
+required = {
+    case_type("test_actual_windows_command_and_late_source_or_context_drift").id(),
+    case_type("test_missing_captured_python_dll_refuses_fresh_native_workspace").id(),
+}
+result = unittest.TextTestRunner(verbosity=2).run(suite)
+skipped = {case.id(): reason for case, reason in result.skipped}
+if (
+    result.testsRun != len(expected)
+    or not result.wasSuccessful()
+    or required & set(skipped)
+):
+    raise RuntimeError(
+        "installed native retained command/environment acceptance failed"
+    )
+origins = require_installed_origins()
+print(
+    json.dumps(
+        {
+            "platform": sys.platform,
+            "mode": mode,
+            "status": "passed",
+            "interpreter": str(Path(sys.executable).resolve(strict=True)),
+            "ambient_site_disabled": bool(sys.flags.no_site),
+            "installed_module_origins_verified": True,
+            "framework_modules": sorted(origins),
+            "inventory": inventory,
+            "cases": [
+                {
+                    "id": name,
+                    "status": "skipped" if name in skipped else "passed",
+                    "reason": skipped.get(name),
+                }
+                for name in sorted(expected)
+            ],
+            "summary": {
+                "selected": result.testsRun,
+                "passed": result.testsRun - len(skipped),
+                "skipped": len(skipped),
+                "failed": 0,
+            },
+        }
+    )
+)
 """
 
 INSTALLED_EVIDENCE_SIGNATURE_PROBE = """
@@ -460,6 +565,104 @@ def _subprocess_environment() -> dict[str, str]:
     }
     sanitized["NO_COLOR"] = "1"
     return sanitized
+
+
+def qualify_installed_windows_retained_context(repository, installation, python, cwd):
+    if sys.platform != "win32":
+        return {
+            "status": "skipped",
+            "reason": "requires actual Windows PE commands and system context",
+            "results": [],
+        }
+    test_path = repository / "tests/critical/test_retained_project_environment.py"
+    module = ast.parse(test_path.read_bytes())
+    case_type = next(
+        node
+        for node in module.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "RetainedOutputCommandPathTests"
+    )
+    inventory = sorted(
+        node.name
+        for node in case_type.body
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")
+    )
+    required = {
+        "test_actual_windows_command_and_late_source_or_context_drift",
+        "test_missing_captured_python_dll_refuses_fresh_native_workspace",
+    }
+    if not required <= set(inventory):
+        raise RuntimeError("required native retained cases are missing")
+    reports = []
+    for mode, interpreter, flags in (
+        ("base", Path(sys._base_executable).resolve(strict=True), ("-I", "-S")),
+        ("installed", python, ("-I",)),
+    ):
+        cases = []
+        modules = set()
+        for case in inventory:
+            result = run_bounded_process(
+                (
+                    str(interpreter),
+                    *flags,
+                    "-c",
+                    INSTALLED_WINDOWS_RETAINED_PROBE,
+                    str(repository),
+                    str(installation),
+                    mode,
+                    case,
+                ),
+                cwd=cwd,
+                environment=_subprocess_environment(),
+                timeout_seconds=300,
+                stdout_limit_bytes=1024 * 1024,
+                stderr_limit_bytes=1024 * 1024,
+                error_prefix="wheel.windows-retained",
+                terminate_descendants=True,
+            )
+            if result.returncode:
+                detail = result.stderr.decode(errors="replace")[-4000:]
+                raise RuntimeError(f"installed retained {mode}/{case} failed: {detail}")
+            observed = json.loads(result.stdout)
+            if (
+                observed["status"] != "passed"
+                or observed["mode"] != mode
+                or sorted(observed["inventory"]) != inventory
+                or not observed["installed_module_origins_verified"]
+                or len(observed["cases"]) != 1
+                or not observed["cases"][0]["id"].endswith("." + case)
+            ):
+                raise RuntimeError("installed retained case identity mismatch")
+            cases.append(
+                {**observed["cases"][0], "elapsed_seconds": result.elapsed_seconds}
+            )
+            modules.update(observed["framework_modules"])
+        if any(
+            case["status"] != "passed"
+            for case in cases
+            if case["id"].rsplit(".", 1)[1] in required
+        ):
+            raise RuntimeError("required native retained case did not pass")
+        skipped = sum(case["status"] == "skipped" for case in cases)
+        reports.append(
+            {
+                "mode": mode,
+                "platform": "win32",
+                "status": "passed",
+                "installed_module_origins_verified": True,
+                "framework_modules": sorted(modules),
+                "case_timeout_seconds": 300,
+                "fixture_sha256": hashlib.sha256(test_path.read_bytes()).hexdigest(),
+                "cases": cases,
+                "summary": {
+                    "selected": len(cases),
+                    "passed": len(cases) - skipped,
+                    "skipped": skipped,
+                    "failed": 0,
+                },
+            }
+        )
+    return {"status": "passed", "results": reports}
 
 
 def run(
@@ -2008,6 +2211,9 @@ def _main() -> int:
                 cwd=root,
             ).stdout
         )
+        windows_retained_context = qualify_installed_windows_retained_context(
+            repository, environment, python, root
+        )
         checkpoint_help = run(
             str(python),
             "-m",
@@ -2856,6 +3062,7 @@ def _main() -> int:
                     "runtime_environment": runtime_environment,
                     "evidence_signature_primitives": installed_evidence_signatures,
                     "worker_cpu": installed_worker_cpu,
+                    "windows_retained_context": windows_retained_context,
                     "schema_catalog_versions": sorted(
                         key for key in schema_versions if key.startswith("v")
                     ),

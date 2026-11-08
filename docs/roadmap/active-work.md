@@ -30495,6 +30495,8 @@ All framework imports resolve inside the installed prefix. The current code
 now has full controller and scoped installed qualification; fresh exact-head
 hosted CI and canonical tree worker/live SDK integration remain open.
 
+- **Installed qualification renewal in progress:** Reuse the maintained retained command/environment cases through the canonical noneditable wheel harness on actual Windows, under both the real base interpreter and private installed interpreter. Verify every loaded framework module stays inside the installed distribution; load the base interpreter with ambient site processing disabled. Add a native missing-Python-DLL refusal that first establishes a valid actual PE closure, then removes only the private captured sidecar and recaptures current inputs. Preserve native command, late source/context drift, strict DLL resolution and all existing deadlines and platform skips. No production source or lifecycle-driver pin changes.
+
 - **Current main failure renewal:** Exact main CI `39922312793`, Windows/Python 3.12 shard 2 (`120310290199`), rejects `test_actual_windows_command_and_late_source_or_context_drift` with `retained.execution.tool-mismatch`. Its rediscovery after copying whoami.exe omits explicit executable intent for both that tool and the existing shared runner. Restore the complete sorted executable declaration in this fixture; keep production executable, PE closure, native command and late context/source drift checks unchanged. Next action: validate the corrected case on actual Windows base and venv interpreters, then renew complete regression and exact review CI.
 
 - **Consolidated source renewal:** Frozen implementation `d5b11cc8` passes a fresh uninterrupted complete local suite: 2139 passed, 71 explicit platform/tool skips, zero failures across 2210 selected. Static gates, zero-finding documentation audit, all 22 tooling tests, 121 diagrams, strict OpenSpec and current reviewed driver pass. The framework receipt remains current with 233 passes and verify has no failing gates. Packaged runtime source and wheel/install drivers are unchanged from the passing 131-span installed-wheel source `1063ecd8`. The corrected identity fixture has an observed native base-interpreter pass; private-venv and complete native qualification plus exact review CI remain open. See `verification/runtime-install-windows-integration.json`.
@@ -33503,6 +33505,8 @@ independent review and the complete combined gate from test one.
   [development evidence](../../verification/msvc-x64-cmd-boundary-evidence.json).
   The diagnostic is not a compiler build or release
   qualification, and no timeout or required-variable guard is relaxed.
+
+- **Native timing renewal in progress:** Retain the existing guarded native compiler cases and observe the actual production vendor-environment call and complete toolchain discovery separately. The timing wrapper forwards the original compiler, environment, target, output limits and timeout, and returns the original result. Capture the default allowance, required vendor-variable transition and exact compiler identity alongside the actual elapsed times; keep whole-case timings and original failed runs distinct. Production source and the lifecycle-driver pin remain unchanged.
 
 - **Priority:** P1
 - **Owner:** C++ toolchain discovery and MSVC environment initialization
