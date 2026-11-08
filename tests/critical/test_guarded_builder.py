@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -208,6 +209,59 @@ class GuardedCppBuilderTests(unittest.TestCase):
                     for name, value in os.environ.items()
                     if name.casefold() not in {"include", "lib", "libpath"}
                 }
+                samples = []
+                original_setup = cpp_builder_module._windows_msvc_environment
+
+                def timed_setup(compiler, configured, **options):
+                    before = {
+                        name.casefold(): value for name, value in configured.items()
+                    }
+                    started = time.monotonic()
+                    result = original_setup(compiler, configured, **options)
+                    elapsed = time.monotonic() - started
+                    after = {name.casefold(): value for name, value in result}
+                    samples.append(
+                        {
+                            "vendor_setup_seconds": elapsed,
+                            "timeout_seconds": options["timeout_seconds"],
+                            "requested_target": options["requested_target"],
+                            "vendor_fields_missing_before": all(
+                                not before.get(name)
+                                for name in ("include", "lib", "libpath")
+                            ),
+                            "vendor_fields_present_after": all(
+                                after.get(name)
+                                for name in ("include", "lib", "libpath", "path")
+                            ),
+                        }
+                    )
+                    return result
+
+                started = time.monotonic()
+                with patch.object(
+                    cpp_builder_module, "_windows_msvc_environment", timed_setup
+                ):
+                    toolchain = discover_cpp_toolchain(environment)
+                print(
+                    "literate-ai-cpp-discovery "
+                    + json.dumps(
+                        {
+                            "case": sys._getframe(1).f_code.co_name,
+                            "toolchain_discovery_seconds": time.monotonic() - started,
+                            "default_timeout_seconds": (
+                                cpp_builder_module.DEFAULT_CPP_VERSION_TIMEOUT_SECONDS
+                            ),
+                            "compiler_family": toolchain.family,
+                            "compiler_version": toolchain.version,
+                            "compiler_digest": toolchain.executable_digest,
+                            "toolchain_identity": toolchain.identity,
+                            "vendor_calls": samples,
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
+                return toolchain
             return discover_cpp_toolchain(environment)
         except BuildError as exc:
             if exc.code != "builder.cpp_toolchain_unavailable":
