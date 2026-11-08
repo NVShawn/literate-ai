@@ -276,6 +276,9 @@
       },
       {
         "id": "PROJECT-ID-001"
+      },
+      {
+        "id": "RUST-FIXTURE-ISOLATION-001"
       }
     ]
   }
