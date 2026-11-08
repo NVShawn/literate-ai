@@ -34181,3 +34181,20 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Windows history observer correction:** Native Python 3.12 reads the same immutable file with equal device/file IDs, size, modification time and canonical content, but descriptor `ctime` differs from pathname `ctime`. The history reader now checks before/after stability separately for each observer and uses the existing conversion-store native identity binding, retaining timestamp-change refusal. A deterministic cross-observer regression and the two-rename native control exercise this path. All 16 focused tests pass on macOS; fresh native Windows, whole Python and installed-wheel gates remain required after the correction.
 
 - **Release integration:** PR [#364](https://github.com/jordanhubbard/literate-ai/pull/364) landed as `b88563b9cdf2b23a8978c9cf70a3afd63116d76a`; the first stable 1.4 minor candidate must contain current main. The release-goal manifest therefore includes this existing item for 1.4.0. The parent checkbox remains open: the PR reports newer native results than the retained local checkpoints above, which need source/artifact binding and independent verification. Exact PR-head `98bb737a1` run `42466522596` passed attempt 5 with 11 successful jobs and two expected profile skips; its earlier failed attempts remain failed. This is PR coverage, not the full native platform matrix. Exact current-main CI run `42481507994` is in progress; its predecessor run `42480917934` was cancelled. Next: verify retained native Windows/macOS/Linux install and migration controls, independent source review and exact post-merge platform CI before closure. No successful release or completed native acceptance is inferred from landing alone.
+
+
+### [ ] PROMOTION-AUTHORING-001 — Select reviewed forward authoring before native-child promotion audit
+
+- **GitHub issue:** [#379](https://github.com/jordanhubbard/literate-ai/issues/379)
+- **Priority:** P1
+- **Owner:** Source-to-specification public promotion CLI
+- **Direction:** Resolve the actual pre-model native-child preparation gap while preserving repository lineage, signed source intent and existing inheritance defaults.
+- **Conclusion:** Explicit retained-host parent selection overlays canonical parent root catalogs during child creation. Those root workflow/routing bytes can be permissive even while current installed project templates contain the reviewed strict generation instructions. Post-accept edits correctly invalidate the audit. Provide an explicit reviewed pre-audit authoring selection; do not silently replace inheritance or old promotion evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Add the smallest explicit selection at public acceptance, materializing and pinning selected current template bytes before locks and the new promotion audit.
+- **Evidence:**
+  - [ ] Preserve default inherited selection, explicit selection and source/lock/audit drift refusals; exercise the complete public acceptance path and affected local gates before PR CI.
+
+- **Original observation:** The failed preparation completed a genuine three-file retained host and its twelve Cargo tests, then accepted the original separate two-file signed provider. All four normative facets, twelve-case profile and eleven accepted-intent artifacts remain exact. Final independent comparison refused three changed generation-authority pins. The inherited implementation skill is older and workflow/routing permit fallback; the current installed template bytes exactly match the original strict authoring. No model generation, preparation acceptance, replay, consumer admission or old-proof rebind is claimed.
