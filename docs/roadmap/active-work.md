@@ -33504,6 +33504,8 @@ independent review and the complete combined gate from test one.
   The diagnostic is not a compiler build or release
   qualification, and no timeout or required-variable guard is relaxed.
 
+- **Native timing renewal in progress:** Retain the existing guarded native compiler cases and observe the actual production vendor-environment call and complete toolchain discovery separately. The timing wrapper forwards the original compiler, environment, target, output limits and timeout, and returns the original result. Capture the default allowance, required vendor-variable transition and exact compiler identity alongside the actual elapsed times; keep whole-case timings and original failed runs distinct. Production source and the lifecycle-driver pin remain unchanged.
+
 - **Priority:** P1
 - **Owner:** C++ toolchain discovery and MSVC environment initialization
 - **Direction:** The directing user requested replacing the 60-second tool discovery deadline with five minutes.

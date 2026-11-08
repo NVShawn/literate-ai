@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Retain standalone Windows MSVC setup and C++ discovery timings in native qualification while preserving the five-minute default and caller-selected bounds.
+
 - Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
 
 - Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
