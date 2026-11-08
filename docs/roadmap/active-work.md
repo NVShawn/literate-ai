@@ -34277,3 +34277,24 @@ implementation, policy weakening, qualification or issue closure is recorded her
     Original 7ce/I remains failed (1,444 passes, 82 declared skips, one failure);
     no old receipt, successful subset or higher file-size ceiling replaces it.
 
+### [ ] RUST-FIXTURE-ISOLATION-001 — Keep verifier Cargo state independent of operator configuration
+
+- **GitHub issue:** [#377](https://github.com/jordanhubbard/literate-ai/issues/377)
+- **Release target:** 1.4.0
+
+- **Priority:** P1
+- **Owner:** Native Rust verifier test fixtures
+- **Direction:** Fix issue377 on its owning upstream source after a real full-gate failure, preserving all native provider and public rebuild oracles.
+- **Conclusion:** The class strips an explicitly isolated CARGO_HOME, then later native Cargo loads the normal-home operator wrapper and cache environment. Keep the fixture-owned Cargo home that prepare_seed already provisioned; leave operator HOME/config and source authority unchanged. Original f527 full failure and O550f installed/model subjects remain separate.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Bind later verifier and public rebuild operations to the already provisioned private Cargo home and add a real hostile-operator-config regression.
+- **Evidence:**
+  - [x] Require the old controlled Cargo route to fail with the explicit wrapper marker, the corrected route to pass without invoking that wrapper, affected native controls and independent source review before any PR CI.
+
+- **Causal development evidence:** An actual native Cargo control executes the maintained environment-comprehension AST. The old environment drops supplied private Cargo state and invokes an observable rejecting wrapper from a synthetic operator configuration (Cargo101); explicit fixture-owned Cargo state builds successfully without invoking that wrapper. Both groups retire and the synthetic configuration is unchanged. The real operator configuration is never mutated. This is fixture isolation, not cache backend or model/provider acceptance.
+
+- **Focused native evidence:** The maintained hostile-config regression passes with real Cargo/Rust and no skip. Removing only the new private-Cargo binding makes that same regression fail once with the explicit hostile-wrapper marker (zero errors/skips); the controlled negative is not a passing functional test. The first negative-loader attempt failed before selecting any tests and a subsequent filename transport refusal are retained separately. All owned captures retire. The complete affected seven-method native module now passes with zero skips/failures (557.997 seconds); it includes the formerly failing public Standard rebuild and all native checksum/feature/path/Git dependency refusal controls. Captured source-file bytes are unchanged at implementation checkpoint `202648d5`. Independent source/causal review `e35a55e7` joins the exact one-line old-source negative and the native positive/module captures. Full current framework/platform/PR/main gates remain pending.
+
+- **Release-scope status:** The local 1.4.0 manifest includes this requested work item. The supported external contribution-disposition command refused the issue milestone update because the authenticated contributor lacks repository permission; no remote milestone/include success is claimed. Maintainer release-scope acknowledgement remains pending.
