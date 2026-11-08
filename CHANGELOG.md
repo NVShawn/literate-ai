@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Complete current-main native qualification of retained Windows system context,
+  base/private interpreter DLL capture, and the five-minute C++ discovery bound;
+  preserve command drift, missing-sidecar and guarded native build refusals (#102, #103).
+
 - Record the included Codex runtime-state and remote file-ceiling work as explicit
   1.4 roadmap and release-manifest gates; both remain incomplete pending their
   existing implementation, review and native qualification.

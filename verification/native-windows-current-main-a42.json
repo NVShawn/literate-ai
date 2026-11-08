@@ -1,0 +1,616 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goals": [
+    "RETAINED-WIN-CONTEXT-001",
+    "RETAINED-WIN-FIXTURE-001",
+    "CPP-DISCOVERY-BUDGET-001",
+    "WORKER-CPU-001"
+  ],
+  "revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+  "full_matrix": {
+    "run": 42523805761,
+    "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42523805761",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 128862823707,
+        "name": "profile",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862916850,
+        "name": "macos-latest / Python 3.11 (2 of 4)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862916855,
+        "name": "FreeBSD POSIX.1e ACL preflight",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862916875,
+        "name": "macos-latest / Python 3.11 (4 of 4)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862916927,
+        "name": "macos-latest / Python 3.11 (3 of 4)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862916933,
+        "name": "macos-latest / Python 3.11 (1 of 4)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862916972,
+        "name": "macos-latest / Python 3.14 (smoke)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917025,
+        "name": "ubuntu-latest / Python 3.11",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917067,
+        "name": "ubuntu-latest / Python 3.14",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917078,
+        "name": "Changed skill admission",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917093,
+        "name": "Sample composition / ubuntu-latest",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917116,
+        "name": "Sample composition / windows-latest",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917169,
+        "name": "Elixir 1.18.0 / OTP 27.0 / windows-2022",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917182,
+        "name": "Elixir 1.20.4 / OTP 29.1.1 / macos-15",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917187,
+        "name": "Windows / Python 3.12 / tests (3 of 3)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917190,
+        "name": "macOS / Python 3.14 / PR smoke (not release qualification)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917194,
+        "name": "Elixir 1.20.4 / OTP 29.1.1 / windows-2022",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917207,
+        "name": "Elixir 1.18.0 / OTP 27.0 / macos-15",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917215,
+        "name": "Native C++ library / ubuntu-latest",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917217,
+        "name": "Windows / Python 3.12 / tests (2 of 3)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917223,
+        "name": "Sample composition / macos-latest",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917246,
+        "name": "Elixir 1.18.0 / OTP 27.0 / ubuntu-24.04",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917293,
+        "name": "Native C++ library / windows-latest",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917301,
+        "name": "Elixir 1.20.4 / OTP 29.1.1 / ubuntu-24.04",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917325,
+        "name": "Windows / Python 3.12 / lint, OpenSpec, wheel",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917332,
+        "name": "Windows / Python 3.12 / tests (1 of 3)",
+        "conclusion": "success"
+      },
+      {
+        "id": 128862917413,
+        "name": "Windows / Python 3.12 / PR smoke (not release qualification)",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "integration": {
+    "review": 388,
+    "source_revision": "326af6d7dd142b640953a75158ee9dc3b49f1779",
+    "source_and_main_git_tree": "7490d515bd2b596cf311e66776018e8f408bc086",
+    "local_source_gate": {
+      "selected": 2775,
+      "summary": {
+        "executed": 2655,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2655,
+        "selected": 2775,
+        "skipped": 120
+      },
+      "worker_groups": 597,
+      "all_case_events_joined": true,
+      "root_exit": 0
+    },
+    "independent_automated_source_review": "https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295",
+    "human_authority_signature": false
+  },
+  "artifacts": [
+    {
+      "id": 13635778346,
+      "name": "windows-conformance-profile-1",
+      "run": 42523805761,
+      "revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+      "provider_digest": "sha256:79d5d58bad3daf99e513ca86417b7e1478c449371d48c111cd3c6c23cdd093d3",
+      "downloaded_archive_sha256": "79d5d58bad3daf99e513ca86417b7e1478c449371d48c111cd3c6c23cdd093d3"
+    },
+    {
+      "id": 13636715337,
+      "name": "qualified-wheel-windows-3.12",
+      "run": 42523805761,
+      "revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+      "provider_digest": "sha256:6b75218c52bfc56bf69fa8b3fc7cd59e3c2eb67f468512342d99968c0d935495",
+      "downloaded_archive_sha256": "6b75218c52bfc56bf69fa8b3fc7cd59e3c2eb67f468512342d99968c0d935495"
+    },
+    {
+      "id": 13635154425,
+      "name": "windows-conformance-profile-3",
+      "run": 42523805761,
+      "revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+      "provider_digest": "sha256:6d673af1e82544550e4a29e153dde350b109f89a1b5d24f22034db869d40b311",
+      "downloaded_archive_sha256": "6d673af1e82544550e4a29e153dde350b109f89a1b5d24f22034db869d40b311"
+    },
+    {
+      "id": 13635998259,
+      "name": "windows-conformance-profile-2",
+      "run": 42523805761,
+      "revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+      "provider_digest": "sha256:b92c1a456e64ad6a1125621e67c13f3b37bab06a459b7fabce788c4feccbb761",
+      "downloaded_archive_sha256": "b92c1a456e64ad6a1125621e67c13f3b37bab06a459b7fabce788c4feccbb761"
+    },
+    {
+      "id": 13634687603,
+      "name": "native-cpp-qualification-windows-latest",
+      "run": 42523805761,
+      "revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+      "provider_digest": "sha256:a944972f4bf4a40a5d105fe620b17b1767c79dafebe2d5db8409087e851a44a8",
+      "downloaded_archive_sha256": "a944972f4bf4a40a5d105fe620b17b1767c79dafebe2d5db8409087e851a44a8"
+    }
+  ],
+  "retained_windows": {
+    "source_environment_cases": [
+      {
+        "class": "RetainedRuntimePathTests",
+        "case": "test_redirected_runtime_directory_refuses",
+        "status": "skipped",
+        "reason": "requires native directory symlink"
+      },
+      {
+        "class": "RetainedRuntimePathTests",
+        "case": "test_host_mapping_order_and_no_caller_environment",
+        "status": "passed",
+        "reason": null
+      },
+      {
+        "class": "RetainedRuntimePathTests",
+        "case": "test_legacy_wire_and_explicit_selection_round_trip",
+        "status": "passed",
+        "reason": null
+      },
+      {
+        "class": "RetainedRuntimePathTests",
+        "case": "test_real_private_library_tool_runs_only_with_reviewed_captured_search_path",
+        "status": "skipped",
+        "reason": "requires native POSIX compiler"
+      },
+      {
+        "class": "RetainedRuntimePathTests",
+        "case": "test_source_empty_missing_and_file_directories_refuse",
+        "status": "passed",
+        "reason": null
+      },
+      {
+        "class": "RetainedOutputCommandPathTests",
+        "case": "test_original_style_lookup_executes_new_export_and_refuses_without_selection",
+        "status": "skipped",
+        "reason": "requires native POSIX fixture"
+      },
+      {
+        "class": "RetainedOutputCommandPathTests",
+        "case": "test_missing_future_directory_and_captured_tools_have_fixed_order",
+        "status": "passed",
+        "reason": null
+      },
+      {
+        "class": "RetainedOutputCommandPathTests",
+        "case": "test_missing_captured_python_dll_refuses_fresh_native_workspace",
+        "status": "passed",
+        "reason": null
+      },
+      {
+        "class": "RetainedOutputCommandPathTests",
+        "case": "test_opt_in_round_trip_preserves_default_wire",
+        "status": "passed",
+        "reason": null
+      },
+      {
+        "class": "RetainedOutputCommandPathTests",
+        "case": "test_existing_file_and_redirected_directory_refuse",
+        "status": "skipped",
+        "reason": "requires POSIX directory symlink"
+      },
+      {
+        "class": "RetainedOutputCommandPathTests",
+        "case": "test_actual_windows_command_and_late_source_or_context_drift",
+        "status": "passed",
+        "reason": null
+      }
+    ],
+    "installed_modes": [
+      {
+        "case_timeout_seconds": 300,
+        "cases": [
+          {
+            "elapsed_seconds": 240.0,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_actual_windows_command_and_late_source_or_context_drift",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 2.1090000000000373,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_existing_file_and_redirected_directory_refuse",
+            "reason": "requires POSIX directory symlink",
+            "status": "skipped"
+          },
+          {
+            "elapsed_seconds": 154.812,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_missing_captured_python_dll_refuses_fresh_native_workspace",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 153.563,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_missing_future_directory_and_captured_tools_have_fixed_order",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 2.0150000000001,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_opt_in_round_trip_preserves_default_wire",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 1.9689999999998236,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_original_style_lookup_executes_new_export_and_refuses_without_selection",
+            "reason": "requires native POSIX fixture",
+            "status": "skipped"
+          }
+        ],
+        "fixture_sha256": "23bd591a3022d8aabc81247c438b7875a27c8eb483ba454d6c49dfd5b24e3a43",
+        "installed_module_origins_verified": true,
+        "mode": "base",
+        "platform": "win32",
+        "status": "passed",
+        "summary": {
+          "failed": 0,
+          "passed": 4,
+          "selected": 6,
+          "skipped": 2
+        },
+        "module_count": 368
+      },
+      {
+        "case_timeout_seconds": 300,
+        "cases": [
+          {
+            "elapsed_seconds": 206.82799999999997,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_actual_windows_command_and_late_source_or_context_drift",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 2.094000000000051,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_existing_file_and_redirected_directory_refuse",
+            "reason": "requires POSIX directory symlink",
+            "status": "skipped"
+          },
+          {
+            "elapsed_seconds": 155.78100000000018,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_missing_captured_python_dll_refuses_fresh_native_workspace",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 147.56299999999987,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_missing_future_directory_and_captured_tools_have_fixed_order",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 2.1089999999999236,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_opt_in_round_trip_preserves_default_wire",
+            "reason": null,
+            "status": "passed"
+          },
+          {
+            "elapsed_seconds": 2.0470000000000255,
+            "id": "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_original_style_lookup_executes_new_export_and_refuses_without_selection",
+            "reason": "requires native POSIX fixture",
+            "status": "skipped"
+          }
+        ],
+        "fixture_sha256": "23bd591a3022d8aabc81247c438b7875a27c8eb483ba454d6c49dfd5b24e3a43",
+        "installed_module_origins_verified": true,
+        "mode": "installed",
+        "platform": "win32",
+        "status": "passed",
+        "summary": {
+          "failed": 0,
+          "passed": 4,
+          "selected": 6,
+          "skipped": 2
+        },
+        "module_count": 368
+      }
+    ],
+    "wheel_sha256": "2bf5f4acea40b981a7f3c1a9cf211c1d68226eb16bdf375e7813cef20d5b404f",
+    "fixture_sha256": "23bd591a3022d8aabc81247c438b7875a27c8eb483ba454d6c49dfd5b24e3a43",
+    "windows_wheel_log_sha256": "ec1cf3ef19bd65991649b7356b800488c2a9047f54eb9d8a365e21e9bab69a96"
+  },
+  "native_cpp": {
+    "goal": "CPP-DISCOVERY-BUDGET-001",
+    "source_revision": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+    "run": 42523805761,
+    "native_windows_job": 128862917293,
+    "job_success": true,
+    "archive_sha256": "a944972f4bf4a40a5d105fe620b17b1767c79dafebe2d5db8409087e851a44a8",
+    "xml_sha256": "8270c8918a7bd6c41418e66349343191f48a89d5f033cd8343892404b7b3ab8f",
+    "raw_job_log_sha256": "db09b2d91fa56d90bcd73c48ff0e09bf223d3f69abab2362cc1c625d6844adb9",
+    "production_source_sha256": {
+      "src/literate_ai/adapters/builders/cpp.py": "a236f34c28e42a31c1218d86509b92b98ab0f0a844a177adf840bce7666ce90b"
+    },
+    "native_cases": [
+      {
+        "case": "test_locked_cpp_library_runs_through_complete_filesystem_runtime",
+        "class": "tests.e2e.test_cpp_bazel_outputs.CppBazelOutputTests",
+        "whole_case_seconds": 308.469,
+        "status": "passed"
+      },
+      {
+        "case": "test_valid_authorization_builds_native_executable",
+        "class": "tests.critical.test_guarded_builder.GuardedCppBuilderTests",
+        "whole_case_seconds": 19.22,
+        "status": "passed"
+      },
+      {
+        "case": "test_source_drift_during_native_compilation_is_rejected",
+        "class": "tests.critical.test_guarded_builder.GuardedCppBuilderTests",
+        "whole_case_seconds": 14.567,
+        "status": "passed"
+      },
+      {
+        "case": "test_staged_native_artifact_rejects_undeclared_output_before_publish",
+        "class": "tests.critical.test_guarded_builder.GuardedCppBuilderTests",
+        "whole_case_seconds": 14.338,
+        "status": "passed"
+      }
+    ],
+    "metrics": [
+      {
+        "case": "test_source_drift_during_native_compilation_is_rejected",
+        "compiler_digest": "sha256:b0a1818ebae6da7f18230a84e76ce839212584ac4c2ab55b97a0d5268085da57",
+        "compiler_family": "msvc",
+        "compiler_version": "19.51.36260",
+        "default_timeout_seconds": 300.0,
+        "toolchain_discovery_seconds": 13.53200000000001,
+        "toolchain_identity": "sha256:aef847e9580a3de78f56ff214092a70835bf22860ae94242ad8d665e53290055",
+        "vendor_calls": [
+          {
+            "requested_target": "x86_64",
+            "timeout_seconds": 300.0,
+            "vendor_fields_missing_before": true,
+            "vendor_fields_present_after": true,
+            "vendor_setup_seconds": 13.40700000000001
+          }
+        ]
+      },
+      {
+        "case": "test_staged_native_artifact_rejects_undeclared_output_before_publish",
+        "compiler_digest": "sha256:b0a1818ebae6da7f18230a84e76ce839212584ac4c2ab55b97a0d5268085da57",
+        "compiler_family": "msvc",
+        "compiler_version": "19.51.36260",
+        "default_timeout_seconds": 300.0,
+        "toolchain_discovery_seconds": 13.343999999999994,
+        "toolchain_identity": "sha256:aef847e9580a3de78f56ff214092a70835bf22860ae94242ad8d665e53290055",
+        "vendor_calls": [
+          {
+            "requested_target": "x86_64",
+            "timeout_seconds": 300.0,
+            "vendor_fields_missing_before": true,
+            "vendor_fields_present_after": true,
+            "vendor_setup_seconds": 13.061999999999983
+          }
+        ]
+      },
+      {
+        "case": "test_valid_authorization_builds_native_executable",
+        "compiler_digest": "sha256:b0a1818ebae6da7f18230a84e76ce839212584ac4c2ab55b97a0d5268085da57",
+        "compiler_family": "msvc",
+        "compiler_version": "19.51.36260",
+        "default_timeout_seconds": 300.0,
+        "toolchain_discovery_seconds": 2.0929999999999893,
+        "toolchain_identity": "sha256:aef847e9580a3de78f56ff214092a70835bf22860ae94242ad8d665e53290055",
+        "vendor_calls": [
+          {
+            "requested_target": "x86_64",
+            "timeout_seconds": 300.0,
+            "vendor_fields_missing_before": true,
+            "vendor_fields_present_after": true,
+            "vendor_setup_seconds": 1.828000000000003
+          }
+        ]
+      }
+    ],
+    "metrics_agree_between_artifact_and_job_log": true,
+    "distinct_native_cases": 4,
+    "xml_nested_suite_test_count_not_used_as_distinct_case_count": true,
+    "native_skipped": 0,
+    "standalone_vendor_seconds": [
+      1.828000000000003,
+      13.40700000000001,
+      13.061999999999983
+    ],
+    "whole_discovery_seconds": [
+      2.0929999999999893,
+      13.53200000000001,
+      13.343999999999994
+    ],
+    "original_61_second_failure_preserved": true,
+    "prior_failure_cause_explained": false
+  },
+  "windows_cpu": {
+    "head": "a42e27392b891c2e6cf85725e76d949ce57ee526",
+    "run": 42523805761,
+    "source_cases": [
+      {
+        "name": "test_idle_is_subtracted_once_from_kernel_plus_user_time",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.003,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_failed_or_missing_native_api_never_becomes_zero_load",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_native_windows_local_and_receiver_cpu_satisfy_required_policy",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 1.066,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_high_filetime_words_survive_low_word_wrap",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_uncovered_processor_groups_do_not_report_partial_system_usage",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.003,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_local_adapter_uses_the_same_windows_provider_and_statuses",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_zero_reset_and_inconsistent_counters_stay_unavailable",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.005,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      },
+      {
+        "name": "test_processor_group_change_during_window_is_not_complete_evidence",
+        "class": "tests.e2e.test_worker_pressure_windows_cpu.WindowsCpuTests",
+        "seconds": 0.002,
+        "status": "passed",
+        "xml": "test-results-3.xml",
+        "xml_sha256": "210892f6e49353b1a262738371e55de7e01667a52557aaade5904f02f91dea46",
+        "artifact_id": 13635154425
+      }
+    ],
+    "source_fixture_sha256": "f144d5a184e97e6ab821ead08eb66689f547471d6ec1fc30ae905fbf8729b01e",
+    "production_and_native_fixture_bindings": {
+      "src/literate_ai/worker_pressure_probe.py": "fef1cb6b1f690dfa71dc93f004d7289066c390215d1ea25311361fd5113cdcd8",
+      "src/literate_ai/adapters/worker_pressure.py": "7137494eff28bf49f21bfeea4832fbc1ef21e62ca6704b6aea4f7223e39dd51f",
+      "src/literate_ai/application/worker_pressure.py": "5b8239e38f6fdc90a21fda899bfa34f33dcc3e81f5b68aa7730886c3019dbfc6",
+      "src/literate_ai/application/worker_capacity.py": "02d1eeebaf414e58d0b2c6300ec9aaad14684616bac9d9279f32ecd4662a6b03",
+      "src/literate_ai/contracts/worker_capacity.py": "7c03a48460f2d5c1d0620720f6f80df3bd3484cfcc30fd483f66d7617be1cec9",
+      "tests/e2e/test_worker_pressure_windows_cpu.py": "f144d5a184e97e6ab821ead08eb66689f547471d6ec1fc30ae905fbf8729b01e"
+    },
+    "source_cases_selected": 8,
+    "source_cases_passed": 8,
+    "native_source_skipped": 0,
+    "installed_probe": {
+      "case": "test_native_windows_local_and_receiver_cpu_satisfy_required_policy",
+      "installed_module_origins_verified": true,
+      "platform": "win32",
+      "receiver_transport": "local-child",
+      "skip_reasons": [],
+      "status": "passed"
+    },
+    "wheel_identity": "sha256:2bf5f4acea40b981a7f3c1a9cf211c1d68226eb16bdf375e7813cef20d5b404f",
+    "separate_ssh_host_transport_qualified": false
+  },
+  "completed_goal_scope": "Windows retained context and fixture, finite native C++ discovery allowance, and previously completed Windows CPU qualification only. Installed CPU receiver transport is a local native child, not a separate SSH host. Original C++ timeout cause remains unexplained; three timing samples do not establish a general performance bound. All other open release goals remain required.",
+  "release_attestation": false,
+  "source_sha256": {
+    "src/literate_ai/adapters/builders/cpp.py": "a236f34c28e42a31c1218d86509b92b98ab0f0a844a177adf840bce7666ce90b",
+    "tests/critical/test_retained_project_environment.py": "23bd591a3022d8aabc81247c438b7875a27c8eb483ba454d6c49dfd5b24e3a43",
+    "scripts/wheel_smoke.py": "33555414a03e1fd5eac4f51cd0b8b6ae5c13cca6647abc3f2bfc04d0c1d8028d",
+    "tests/critical/test_guarded_builder.py": "c26a5bfcae0a94c42ae276f990b6f84c538dfd3325f3effd4ed3b84d116db09c"
+  }
+}

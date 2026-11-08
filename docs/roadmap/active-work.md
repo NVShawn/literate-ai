@@ -30255,19 +30255,33 @@ executes and no receipt is admitted. Preserve this failure under
 [issue #102](https://github.com/jordanhubbard/literate-ai/issues/102). Do not relax
 the guard or replace this failure with an empty dependency observation.
 
-### [ ] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
+### [x] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
 
 - **GitHub issue:** [#102](https://github.com/jordanhubbard/literate-ai/issues/102)
 - **Release target:** 1.4.0
 - **Owner:** Retained execution environment, dependency observation and native runtime custody
 - **Direction:** Supply explicitly bound native Windows system context and complete
   captured tool runtime while preserving caller-injection refusal and POSIX identities.
-- **Evidence:** The real native source check fails at the `SystemRoot` requirement
-  after the fixture's executable naming repair. Subsequent runtime closure remains
-  unproven. This is separate from receiver observation deadline issue #90.
+- **Original failure:** The real native source check failed at the `SystemRoot`
+  requirement after the executable naming repair. Preserve that failure separately
+  from receiver observation deadline issue #90; completed renewal is recorded below.
 - **Acceptance:** Native workspace/command checks pass with actual PE closure;
   source/context/runtime drift refuses; existing loader-policy assertions and
   finite observation deadlines remain intact. Renew full, installed and exact CI gates.
+
+- **Completion record:** [PR #390](https://github.com/jordanhubbard/literate-ai/pull/390).
+
+- **Completed current-main qualification:** Main `a42e27392` passes all 27 jobs in
+  [run 42523805761](https://github.com/jordanhubbard/literate-ai/actions/runs/42523805761),
+  with no skipped jobs. The [provider-bound native record](../../verification/native-windows-current-main-a42.json)
+  retains all 11 source environment cases (seven passes, four existing POSIX skips)
+  and both noneditable Windows interpreter modes (four passes and two existing
+  POSIX skips per mode). Each mode passes the real command, late source/context
+  drift refusal and missing Python DLL refusal inside the unchanged 300-second
+  case bound; all 368 loaded framework module origins are inside its prefix.
+  Source-integrated full regression passes 2,655 cases with 120 explicit skips
+  across 2,775 selected and 597 completed groups. Its Git tree equals main.
+  This renews the context/runtime acceptance without changing production guards.
 
 ### [x] WINDOWS-PE-OBSERVE-001 — Bound native Windows PE dependency observation
 
@@ -30443,7 +30457,7 @@ the selected form plus real LINK/live-owner proof. Exercise altered limits,
 provenance and provider identities, and require source/selected native construction
 to produce the same physical archive with distinct exact result-plan bindings.
 
-### [ ] RETAINED-WIN-FIXTURE-001 — Capture complete Windows retained fixture executable inputs
+### [x] RETAINED-WIN-FIXTURE-001 — Capture complete Windows retained fixture executable inputs
 
 - **GitHub issue:** [#103](https://github.com/jordanhubbard/literate-ai/issues/103)
 
@@ -30457,8 +30471,8 @@ to produce the same physical archive with distinct exact result-plan bindings.
   - [x] Bind the shared runner filename, hash and profile once and capture base interpreter Python/VC runtime DLL inputs on Windows.
   - [x] Use the same fixture in PATH/runtime-role tests and exercise both base Python and private venv layouts without new skips or production guard changes.
 - **Evidence:**
-  - [ ] Hosted failing workspace/PATH/source-drift cases pass on actual base and venv Windows interpreters; missing sidecars still refuse.
-  - [ ] Renew focused, native, full regression and exact CI gates; preserve failed cbcd337d shard3 logs.
+  - [x] Hosted failing workspace/PATH/source-drift cases pass on actual base and venv Windows interpreters; missing sidecars still refuse.
+  - [x] Renew focused, native, full regression and exact CI gates; preserve failed cbcd337d shard3 logs.
 
 Native selected-plan source qualification passes 61 FreeBSD cases (59 passes,
 two existing Windows-only skips) in 74.547 test / 77.883 supervised seconds.
@@ -30502,6 +30516,17 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Consolidated source renewal:** Frozen implementation `d5b11cc8` passes a fresh uninterrupted complete local suite: 2139 passed, 71 explicit platform/tool skips, zero failures across 2210 selected. Static gates, zero-finding documentation audit, all 22 tooling tests, 121 diagrams, strict OpenSpec and current reviewed driver pass. The framework receipt remains current with 233 passes and verify has no failing gates. Packaged runtime source and wheel/install drivers are unchanged from the passing 131-span installed-wheel source `1063ecd8`. The corrected identity fixture has an observed native base-interpreter pass; private-venv and complete native qualification plus exact review CI remain open. See `verification/runtime-install-windows-integration.json`.
 
 - **Native corrected-fixture renewal:** The unchanged Windows production execution/context/input owners and shared base/venv fixture run the exact corrected environment test file (`sha256:ea316103b0e0b05c43073dfc294a3fcbc24f2fbe032a24ddc98bc677930d98b5`) on actual base Python and a private venv. Each run passes six cases with four existing POSIX-only skips, including the real whoami command and both late source/context drift refusals. Both terminal exits are zero. Downloaded evidence is independently hash-verified (`sha256:96a9476c96ea1c4dd249a55cff9fe217dfeafe969f9441a5ed17e40156f15bf9`); see `verification/windows-identity-fixture-native.json`. Complete native packaging/regression and exact PR128 CI remain required before landing.
+
+- **Completed current-main qualification:** The [native Windows record](../../verification/native-windows-current-main-a42.json)
+  binds main `a42e27392`, all three Windows shard archives, the installed wheel
+  (`sha256:2bf5f4acea40b981a7f3c1a9cf211c1d68226eb16bdf375e7813cef20d5b404f`),
+  and the exact fixture bytes. Base Python with only the installed site-packages
+  and a private installed interpreter each select six cases: four pass and two
+  retain their existing POSIX-only skips. Both modes execute the real Windows
+  command, reject late source/context changes and reject a missing captured DLL.
+  All 27 exact-main CI jobs succeed in run `42523805761`; the equal integration
+  tree passes 2,655 local cases with 120 explicit skips and zero failures.
+  Earlier failed runs remain retained; no new skip or production guard change.
 
 ### [ ] RETAINED-SDK-PUBLIC-001 — Connect public retained execution to live native SDK producers
 
@@ -33483,7 +33508,7 @@ Keep canonical overlap checks and all safe-directory/append guards. Add a real
 ancestor-alias positive control plus explicit leaf-alias refusal, then renew
 independent review and the complete combined gate from test one.
 
-### [ ] CPP-DISCOVERY-BUDGET-001 — Allow five minutes for bounded C++ toolchain discovery
+### [x] CPP-DISCOVERY-BUDGET-001 — Allow five minutes for bounded C++ toolchain discovery
 
 - **Release target:** 1.4.0
 - **Failure evidence:** Current-main Windows CI [job 125602587916](https://github.com/jordanhubbard/literate-ai/actions/runs/41540137634/job/125602587916) stops during MSVC vendor environment discovery at 61.516 seconds against a 60-second budget, before Bazel builds. The directing user explicitly requested a five-minute discovery allowance. The reason vendor setup exceeded the previous limit remains unproven; retain the failure and require actual Windows completion within the new finite bound.
@@ -33515,11 +33540,25 @@ independent review and the complete combined gate from test one.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Set the default C++ version and MSVC environment discovery budget to 300 seconds and document the scope.
-  - [ ] Preserve explicit short discovery budgets and existing timeout, output and process cleanup behavior.
+  - [x] Set the default C++ version and MSVC environment discovery budget to 300 seconds and document the scope.
+  - [x] Preserve explicit short discovery budgets and existing timeout, output and process cleanup behavior.
 - **Evidence:**
-  - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
-  - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
+  - [x] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
+  - [x] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
+
+- **Completed current-main qualification:** The [native timing record](../../verification/native-windows-current-main-a42.json)
+  binds four distinct actual Windows C++ cases, all passed with zero skips,
+  including the complete filesystem/Bazel library runtime and all three guarded
+  build/refusal cases. Main `a42e27392`, run `42523805761`, passes all 27 jobs.
+  Real MSVC 19.51 vendor setup takes 1.828, 13.407 and 13.062 seconds; complete
+  discovery takes 2.093, 13.532 and 13.344 seconds under the default 300-second
+  bound. Exact log and XML metrics agree. Production C++ source equals the
+  independently reviewed consolidated source; full local regression, clean wheel
+  qualification and unchanged driver review passed before integration, whose
+  entire source Git tree equals main. Explicit caller bounds remain unchanged.
+  The original 61.516-second failure and its unexplained cause remain recorded;
+  these samples establish neither a general performance bound nor qualification
+  of every historical MSVC toolset.
 
 ### [x] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
 
@@ -34135,6 +34174,14 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Full source qualification:** Frozen `0cf600f70fa4767ca80dd8ec8b5bf9b424f40695` completes canonical `make python-check` on native macOS with two workers, Python 3.14.10, Git 2.56.0, Rust 1.97.1 and sccache 0.19.0. The structured report selects 2,728 cases: 2,599 execute and pass, 129 are explicitly skipped, with zero failures or known failures and no unexecuted selected cases. Its SHA-256 is `57f727a4f2f0c520003a19220cd3c059f233bd7aec942e58367e47a9f1fe478d`; independently collected source/report/log archive SHA-256 is `b2bb2a6f4ed1def8c7581c5b78880e92e2d92a8735fb780db9167c9191b8b11a`. All 5,281 authored inputs match frozen Git bytes, including two declared command-file CRLF representations; source remains unchanged and Git-clean. Native tool hashes and the operator's Cargo configuration remain unchanged. All five bounded phases exit zero with owned groups absent; the controller and private temporary root are independently absent afterward. The first Mac run's SGID assertion failure is preserved: a new temporary root inherited an unrelated group, so the requested SGID mode never existed before invocation. Giving a separate new job root the actual worker UID/primary GID makes the unchanged exact receipt test and then the full gate pass; no product/test assertion, operator directory, deadline or skip policy changes. This qualifies the source gate, not installed-wheel, full Windows, generation/import, native project lifecycle or release acceptance. At that checkpoint, draft [PR #351](https://github.com/jordanhubbard/literate-ai/pull/351) remained unmerged pending its separate review and remaining project gates.
 - **Completed integrated qualification:** The [current CPU record](../../verification/worker-cpu-current-main-cad30.json) binds six whole production/test files and the isolated installed probe to the independently reviewed consolidated source, both original native wheel candidates and current main. Native Windows at `cad30c4e7` passes all eight CPU cases with zero skips; provider-bound XML confirms the actual local/standalone-receiver positive. The canonical noneditable Windows wheel smoke also passes that positive with both module origins inside the installed environment. Exact integrated main `99f3fe196` then passes all 27 CI jobs without skipped jobs, plus its website gate. The receiver uses a real local child, preserving the explicit separate-host SSH transport boundary. Earlier revisions and failures remain retained; this closes the CPU item without granting whole-release acceptance.
 
+- **Current-main confirmation:** Main `a42e27392` passes all 27 jobs in run
+  `42523805761`. The [renewed native record](../../verification/native-windows-current-main-a42.json)
+  joins all eight Windows CPU cases with zero skips to the exact fixture source
+  and preserves byte equality of the six reviewed CPU production/test files.
+  The same run's noneditable wheel passes the actual native local collector and
+  standalone receiver required-CPU case with installed origins verified.
+  The receiver uses a real local child; separate-host SSH transport and
+  uncovered processor groups remain outside this completion claim.
 
 ### [x] WORKER-WHEELHOUSE-GLIBC-001 — Resolve compatible glibc floors in cross-platform worker wheelhouse export
 
@@ -34235,3 +34282,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling.
   - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
+
+### [ ] QUALIFICATION-DIAGNOSTICS-001 — Retain original bounded observations when native qualification fails
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#389](https://github.com/jordanhubbard/literate-ai/issues/389)
+
+- **Priority:** P1
+- **Owner:** Framework native qualification recorder and diagnostic store
+- **Direction:** Include issue #389 in 1.4: preserve original per-case failure evidence after parity failure without qualifying failed products.
+- **Conclusion:** Add a separate bounded provenance-bound diagnostic result/store for failed qualification. Preserve nonzero refusal, empty qualified product captures, private custody, stream limits and timeout cleanup; a replay cannot replace the original observation.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Retain plan/run/case/process identities and available bounded stdout/stderr blobs on failed qualification through a diagnostic-only path.
+  - [ ] Keep failed diagnostic evidence separate from qualified library products and clear stale success across later failed clean runs.
+- **Evidence:**
+  - [ ] Reproduce nonzero parity exit and invalid JSON, verify original marker/exit identities and private durable diagnostics, and reject diagnostic evidence as qualified products.
+  - [ ] Exercise a later failure after an earlier success; renew independent review, full source, installed/native and exact-head integration gates.
