@@ -14,6 +14,8 @@
 
 - Codex source generation and JSON tasks use owned temporary SQLite and log directories, preserving normal login settings and excluding runtime data from generated source (#365).
 
+- Preserve stricter inherited POSIX file-size ceilings when launching command-addressed remote transfers, so a larger evidence allowance cannot prevent the connector from starting ([#372](https://github.com/jordanhubbard/literate-ai/issues/372)).
+
 - Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
 - Initial tree HTML publication retains bounded private transaction records before output mutation and through index commit, preserving interrupted attempts and foreign journal changes (#279). Recovery and rerender remain unfinished.
 - Cross-platform worker wheelhouse export considers compatible older glibc-2 floors for an explicit PEP 600 target, preserving architecture, target identity and offline closure verification (#356).

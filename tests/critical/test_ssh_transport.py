@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import hashlib
 import os
 import platform
@@ -173,6 +174,71 @@ class SshTransportTests(unittest.TestCase):
             self.assertGreater(hash_clock_calls[0], 5)
             self.assertEqual(source.read_bytes(), content)
             self.assertEqual(list(root.glob("litai-route-download-*")), [])
+
+    @unittest.skipUnless(os.name == "posix", "native POSIX file-size ceiling")
+    def test_command_route_limiter_preserves_inherited_and_requested_ceilings(self):
+        import json
+
+        from literate_ai.adapters import remote_transport
+
+        source = Path(remote_transport.__file__).resolve().parents[2]
+        script = r'''
+import json, os, resource, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from literate_ai.adapters.remote_transport import BoundedRemoteProcessRunner
+soft, hard, requested = map(int, sys.argv[3:])
+resource.setrlimit(resource.RLIMIT_FSIZE, (soft, hard))
+probe = r"""
+import errno, json, os, resource, sys
+limit = resource.getrlimit(resource.RLIMIT_FSIZE)
+fd = os.open(sys.argv[1], os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+try:
+    os.ftruncate(fd, limit[0])
+    try:
+        os.ftruncate(fd, limit[0] + 1)
+    except OSError as exc:
+        overflow = exc.errno
+    else:
+        overflow = None
+finally:
+    os.close(fd)
+    os.unlink(sys.argv[1])
+print(json.dumps({'limits': limit, 'overflow_errno': overflow}))
+"""
+root = Path(sys.argv[2])
+result = BoundedRemoteProcessRunner().run(
+    (sys.executable, '-I', '-c', probe, str(root / 'bounded-file')),
+    cwd=root, timeout_seconds=10, file_limit_bytes=requested,
+)
+if result.returncode:
+    raise RuntimeError(result.stderr.decode(errors='replace'))
+print(result.stdout.decode(), end='')
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            for requested, expected in ((64 * 1024**2, 16384), (8192, 8192)):
+                with self.subTest(requested=requested):
+                    result = subprocess.run(
+                        (
+                            sys.executable,
+                            "-I",
+                            "-c",
+                            script,
+                            str(source),
+                            directory,
+                            "16384",
+                            "32768",
+                            str(requested),
+                        ),
+                        capture_output=True,
+                        text=True,
+                        timeout=20,
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    observed = json.loads(result.stdout)
+                    self.assertEqual(observed["limits"], [expected, expected])
+                    self.assertEqual(observed["overflow_errno"], errno.EFBIG)
+                    self.assertFalse((Path(directory) / "bounded-file").exists())
 
     @unittest.skipIf(os.name == "nt", "POSIX connector descendant control")
     def test_remote_connector_keeps_bounded_diagnostics_and_stops_owned_descendants(

@@ -34192,5 +34192,31 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Meaningful command/environment, output-boundary, exception and owned-lifetime regression controls for both execution paths, preserving other providers.
   - [ ] Exact changed-source local checks and independent peer review before PR CI; genuine model-backed library qualification remains independently required.
 
+- **Composition continuation:** The independently reviewed issue #372 limiter correction is normally merged before final runtime construction. It fixes the inherited-ceiling failure found by the full source gate without raising its 512 MiB ceiling. Prior K/47a prefix preparation and its 5011 distribution remain historical; build a fresh final-composition wheel and review its public rebind plan before genuine qualification.
+
 - **Source development controls:** Thirty-eight focused controls pass, including six new two-path state/lifetime/output-boundary cases and the existing generation, cache, OpenCode and quota-fallback cases. The unchanged original execution owners fail the new contract (five assertion failures and one missing-helper error across six methods); their five relevant ASTs match the current-main baseline. This uses controlled transport doubles, not model-generation evidence. Source hashes are `9b454c74e36faa8bbf6f91500f95eac7e2a3d8a33a40db07400b58c109d6b2cf` (adapter) and `40193179633d77a06967828dd51364a937698f971ce30dd05222a79291eed6e1` (controls).
 - **Historical diagnostic boundary:** The actual Codex 0.164 normal-state FD failure and a warm private-state no-op are independently retained; the positive call takes 6.973 seconds under unchanged 64 MiB/default signals and returns exact `READY`, with owned retirement. A log-only attempt fails and fresh private indexing previously times out. These observations justify the correction direction but do not qualify this new source, fresh library generation, archive replay or retained import/admission. All those acceptance gates remain open.
+
+### [ ] WORKER-LIMIT-001 — Preserve inherited file-size ceilings in command-addressed transfers
+
+- **Source:** [Upstream issue #372](https://github.com/jordanhubbard/literate-ai/issues/372), discovered during the source-bound full Python qualification of #347. This is separate from Codex runtime-state issue #365.
+- **Priority:** high
+- **Owner:** remote worker transport
+- **Direction:** Correct the confirmed full-gate command-route refusal without raising any inherited process ceiling; keep explicit byte, digest and inode custody.
+- **Conclusion:** The current limiter attempts to set its default 8 GiB allowance above an inherited 512 MiB hard ceiling and exits before the connector. An actual tiny native control reproduces that failure and reaches the expected no-output refusal with an explicit 512 MiB allowance. Keep original 7ce failed gate and retirement evidence unchanged; full renewed-source qualification remains pending.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Clamp the requested finite staging ceiling to stricter inherited finite soft and hard RLIMIT_FSIZE values in the trusted limiter. Preserve connector protocol and all existing tests; add native actual-limit and boundary refusal controls. Link the separate upstream issue before implementation.
+- **Evidence:**
+  - [x] Actual native inherited-soft/hard and smaller-requested cases report the
+    effective kernel limit, allow a write at that boundary and refuse one byte
+    above it. The original limiter fails the same control. Canonical focused
+    `make python-check` passes all 7 SSH tests under 512 MiB, including the
+    original missing-output case; 16 coherent current-source transport/receiver
+    controls pass. The first broader probe used an older receiver environment,
+    refused two source-identity checks and remains preserved separately.
+  - [ ] Pass the unchanged unfiltered whole Python gate on a freshly admitted
+    worker with the final composed source, then exact-source hosted checks.
+    Original 7ce/I remains failed (1,444 passes, 82 declared skips, one failure);
+    no old receipt, successful subset or higher file-size ceiling replaces it.

@@ -71,8 +71,12 @@ class BoundedRemoteProcessRunner:
                 )
             # Apply the hard bound in a fresh trusted process, avoiding a Python
             # preexec_fn in a controller that may have concurrent worker threads.
+            # A transfer allowance must not raise the enclosing lifecycle's limits.
             limiter = (
                 "import os,resource,sys;limit=int(sys.argv[1]);"
+                "inherited=resource.getrlimit(resource.RLIMIT_FSIZE);"
+                "limit=min([limit]+[value for value in inherited "
+                "if value!=resource.RLIM_INFINITY]);"
                 "resource.setrlimit(resource.RLIMIT_FSIZE,(limit,limit));"
                 "os.execvpe(sys.argv[2],sys.argv[2:],os.environ)"
             )
