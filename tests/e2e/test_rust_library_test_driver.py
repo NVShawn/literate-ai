@@ -187,6 +187,88 @@ class RustVerifierDependencyExecutionTests(unittest.TestCase):
             )
         )
         prepare_seed(cls.seed, archives, cls.cargo, cls.environment)
+        cls.environment["CARGO_HOME"] = str(cls.seed / "cargo-home")
+
+    def test_public_fixture_cargo_home_excludes_operator_configuration(self):
+        from literate_ai.adapters.builders._process import run_bounded_process
+
+        with tempfile.TemporaryDirectory(prefix="Cargo home isolation ") as raw:
+            root = Path(raw)
+            home = root / "operator-home"
+            (home / ".cargo").mkdir(parents=True)
+            package = root / "package"
+            (package / "src").mkdir(parents=True)
+            (package / "Cargo.toml").write_text(
+                '[package]\nname="cargo-home-isolation"\n'
+                'version="0.1.0"\nedition="2021"\n',
+                encoding="utf-8",
+            )
+            (package / "src/lib.rs").write_text(
+                "pub fn echo(value: u32) -> u32 { value }\n", encoding="utf-8"
+            )
+            marker = root / "wrapper-observed"
+            wrapper_source = root / "wrapper.rs"
+            wrapper_source.write_text(
+                "fn main() { std::fs::write(std::env::var_os("
+                '"LITAI_FIXTURE_WRAPPER_MARKER").unwrap(), b"observed").unwrap(); '
+                'eprintln!("FIXTURE_OPERATOR_CARGO_CONFIG_REACHED"); '
+                "std::process::exit(86); }\n",
+                encoding="utf-8",
+            )
+            wrapper = root / ("wrapper.exe" if os.name == "nt" else "wrapper")
+            environment = {
+                **self.environment,
+                "HOME": str(home),
+                "USERPROFILE": str(home),
+                "RUSTC": self.rustc.command[0],
+                "LITAI_FIXTURE_WRAPPER_MARKER": str(marker),
+            }
+
+            def run(command, values):
+                return run_bounded_process(
+                    command,
+                    cwd=package,
+                    environment=values,
+                    timeout_seconds=30,
+                    stdout_limit_bytes=131072,
+                    stderr_limit_bytes=131072,
+                    terminate_descendants=True,
+                    trace=False,
+                    error_prefix="fixture.cargo_home",
+                )
+
+            compiled = run(
+                (*self.rustc.command, str(wrapper_source), "-o", str(wrapper)),
+                environment,
+            )
+            self.assertEqual(compiled.returncode, 0, compiled.stderr)
+            config = home / ".cargo/config.toml"
+            config.write_text(
+                "[build]\nrustc-wrapper=" + json.dumps(str(wrapper)) + "\n",
+                encoding="utf-8",
+            )
+            original_config = config.read_bytes()
+            command = (
+                *self.cargo.command,
+                "check",
+                "--offline",
+                "--manifest-path",
+                str(package / "Cargo.toml"),
+                "--target-dir",
+                str(root / "target"),
+            )
+            inherited = dict(environment)
+            inherited.pop("CARGO_HOME", None)
+            refused = run(command, inherited)
+            self.assertNotEqual(refused.returncode, 0)
+            self.assertIn(b"FIXTURE_OPERATOR_CARGO_CONFIG_REACHED", refused.stderr)
+            self.assertTrue(marker.is_file())
+            marker.unlink()
+            isolated = run(command, environment)
+            self.assertEqual(isolated.returncode, 0, isolated.stderr)
+            self.assertFalse(marker.exists())
+            self.assertEqual(environment["CARGO_HOME"], str(self.seed / "cargo-home"))
+            self.assertEqual(config.read_bytes(), original_config)
 
     def test_real_extra_crates_and_selected_features_reopen_and_refuse_drift(self):
         import re

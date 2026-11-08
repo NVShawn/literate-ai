@@ -34194,8 +34194,10 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Bind later verifier and public rebuild operations to the already provisioned private Cargo home and add a real hostile-operator-config regression.
+  - [x] Bind later verifier and public rebuild operations to the already provisioned private Cargo home and add a real hostile-operator-config regression.
 - **Evidence:**
   - [ ] Require the old controlled Cargo route to fail with the explicit wrapper marker, the corrected route to pass without invoking that wrapper, affected native controls and independent source review before any PR CI.
 
 - **Causal development evidence:** An actual native Cargo control executes the maintained environment-comprehension AST. The old environment drops supplied private Cargo state and invokes an observable rejecting wrapper from a synthetic operator configuration (Cargo101); explicit fixture-owned Cargo state builds successfully without invoking that wrapper. Both groups retire and the synthetic configuration is unchanged. The real operator configuration is never mutated. This is fixture isolation, not cache backend or model/provider acceptance.
+
+- **Focused native evidence:** The maintained hostile-config regression passes with real Cargo/Rust and no skip. Removing only the new private-Cargo binding makes that same regression fail once with the explicit hostile-wrapper marker (zero errors/skips); the controlled negative is not a passing functional test. The first negative-loader attempt failed before selecting any tests and a subsequent filename transport refusal are retained separately. All owned captures retire. Full affected module and independent source review remain pending.

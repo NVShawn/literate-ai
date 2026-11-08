@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Native Rust verifier fixtures preserve their private Cargo home across public rebuilds, keeping operator wrapper configuration outside the test authority (#377).
+
 - Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
 
 - Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
