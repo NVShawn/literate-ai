@@ -1,0 +1,264 @@
+{
+  "schema": "literate-ai/retained-catalog-current-main-qualification@1",
+  "goal": "ADOPT-CATALOG-001",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/212",
+  "completion_record_base": "99f3fe19623ee4321bd02a635db5db6d702cd35e",
+  "production_file_bindings": [
+    {
+      "path": "src/literate_ai/adapters/component_lock_planning.py",
+      "sha256": "8c119d22baf3c1d34649b39bdb8103edca87a75f6baa9d5b10ca040259847f78"
+    },
+    {
+      "path": "src/literate_ai/adapters/project_validation.py",
+      "sha256": "1f801b0e7ef5759acf8dcb7e0a518f32f4141cc40d25ece1a07ba8376b8dcfa3"
+    },
+    {
+      "path": "src/literate_ai/project_authority_graph.py",
+      "sha256": "7e2f65dee693960670b4aeef4033f7fe7e3001e8535484bb2717ee0ec991f8d3"
+    }
+  ],
+  "whole_file_source_equality": {
+    "original_installed_macos": "41b2dc9a732201bef7aa28a12306b653c66d45e1",
+    "native_linux_matrix": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "terminal_main_matrix": "bc7e56f06ef9bad7b34ab9bd351c93df3c02c470",
+    "completion_record_base": "99f3fe19623ee4321bd02a635db5db6d702cd35e",
+    "all_three_files_identical": true
+  },
+  "previous_reviewed_macos_installed": {
+    "record": "verification/installed-retained-catalog-qualification.json",
+    "source": "41b2dc9a732201bef7aa28a12306b653c66d45e1",
+    "wheel_sha256": "c9c0a52d3c442074540085a261f974cd6fab776e64fba452828eae43e18bbaf7",
+    "distribution": "sha256:f2f3b29e87db4f746220ee8cc97bb1ec9737bf409fb4bd7a15546ccf2f282513",
+    "canonical_wheel_gate_passed": true,
+    "authored_inputs_unchanged": 5223
+  },
+  "renewed_linux_installed": {
+    "run": 42488156657,
+    "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42488156657",
+    "source": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "artifact_id": 13621801435,
+    "artifact_archive_sha256": "cba5b102dc9155eaa90fef35316cf12af02d098afc225afe1418c8d6d863a621",
+    "wheel_identity": "sha256:b8513c9ddfd31ffa02f4a95955d0caf77c1abfec4aa8d57bab57f8acb8b15894",
+    "runtime_record_sha256": "b0632d4cd9075de8a6243df700057474fbfbedcf5a8792cf7309e16617723e02",
+    "result": {
+      "actual_unittest_baseline_and_parity": true,
+      "adoption_evidence": {
+        "baseline": "sha256:538d20e9713751632ab72d30aabf0dcb57b9d93ea518d62284855d7973269dd0",
+        "lift_shift": "sha256:15b60aa781d36ddab3b0d9f419ac41ebdae4d83cb60d106748b3640acc546ab3",
+        "wrapper_parity": "sha256:b5f99c38f9302b40ae64f10fe245386d6960ecd10245a94117e844700400edaa"
+      },
+      "authority_graph_sha256": "d963a28ec40b203d3bdfda9c57fc80391834c4a84c52606581107f0df467495f",
+      "catalog_manifests": 10,
+      "dependency_bytes_preserved": {
+        "node_modules/extend/component.json": "967c1d48ca6f7f06dfbb2ccedd2341019e3617a0b4b1075aaefaaead4a3cfa8e",
+        "node_modules/lock/component.lock.json": "e7d5216a9b97a015fe0c063f4f058b940156ffd216f9642486b56a5501e3aadf",
+        "node_modules/markdown/component.md": "7f942cc1697f8f94baaa48f9a7904f9b4ad70accb81935b1438b8d5bed9274e8"
+      },
+      "distribution": "sha256:472fea40adeb5784067680410e6b72b12e4decf17feb750a8fb60b396d4d1083",
+      "platform": "linux",
+      "public_adopt_applied": true,
+      "qualified": true,
+      "validated_components": [
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/backend-application",
+          "input_closure_identity": "sha256:54e7aa7450300d80fe3f9da8c203da5494e67c51d52396ee76447459bb1b1e38",
+          "revision_identity": "sha256:cf3603f32062d1476febd232bd9935448c1f72bfc01c94ed7e3e7a5ac6d06a39",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/document-pair",
+          "input_closure_identity": "sha256:6b4d7b49754e444e271757f63544ce6b2774d6fe4c70ba72a819e422e6f7c65f",
+          "revision_identity": "sha256:5b2d057e37276b0ce5d910edd94589d07c45a284fbe3e37d674a7186555fd1e7",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/frontend-application",
+          "input_closure_identity": "sha256:6cdbf2cb50f81dc6f57b02297ac571f2db92bb217c0b51dcb16bd3fac42f8817",
+          "revision_identity": "sha256:7832f2513cd75b3daafaa6d2452be2af9fbc31b69f85867b78b66d64851da3a2",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/invoice-service",
+          "input_closure_identity": "sha256:9fe616dc6175db1419a286f8b1cd753d7c65b98014937d27b18612158d6e525b",
+          "revision_identity": "sha256:330b0c43afe95ce36363a355ec950d8f0c13aa937248a250203b13b6c8aab72f",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://legacy-adoption/legacy-project-wrapper",
+          "input_closure_identity": "sha256:ba9b36e8d577cc50bcc6f9ac5f842ed19cbd10b49d7c26ab6d8b36d301d3ff2e",
+          "revision_identity": "sha256:7569f01af1067a2d440bd210b431213847a206098684a6016c619c7a06ab5149",
+          "routing_identity": "sha256:c689ec606596e5cf794bbf8b280efd09612cf8f3192e28e0fb526ba238fa8fc5",
+          "workflow_identity": "sha256:7a13a2266a78a448c2601e2678973b042465a371ca338f4bc6355f57f2983aea"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/literate-ai-overview",
+          "input_closure_identity": "sha256:1087f70b90ae7b6ecfd784cebd6c5c275a0b2d43c821282eedbb4a7222bdf053",
+          "revision_identity": "sha256:0465035f2f3a9d8ca5536e4b55ba9af24ff0471c6810acd73ada83a10d3e8326",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/mcp-application",
+          "input_closure_identity": "sha256:ae6cf57ad65254a594c648175fad60558f8363c6b27fe75037625cade0eda505",
+          "revision_identity": "sha256:50dabdd0d322a62e2f6a84fce401725f7e8d13f16475fc41f2e952d9d911956f",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/webmcp",
+          "input_closure_identity": "sha256:a04dfb6b168e61f76859576b0c01a55aa286d9657fdcbdbc82d8810bec10b49b",
+          "revision_identity": "sha256:4005c9db6858d9271c90e88c6cfbb65f5bc199f3072b4ddf58b91c0fcc5f02e6",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://literate-ai/money-calculation",
+          "input_closure_identity": "sha256:9ef539b987ed283259acc3f6a7056225bd6f5fb7d0b4a9c21595408ad212e8f5",
+          "revision_identity": "sha256:38aa0d8dd12afc0c7dc9865f00c9fea6b987b581a661ba02923ee44b59f1a083",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        },
+        {
+          "authoring_format": "component.md",
+          "authority_convergence_identity": null,
+          "coordinate": "component://samples/hello-component",
+          "input_closure_identity": "sha256:5f70ffee9f96bf54ac79dd95e59e8f71d6f444a17137c55808bfc87b3eba5a13",
+          "revision_identity": "sha256:c764a6de30f25b687b1fb5f578d127e42a4af9d009e0c550f776fbc7fd78c91c",
+          "routing_identity": "sha256:df6705ce35984f6e89d00899aff53074445773d81c4f8e38c3833c73c31efb9a",
+          "workflow_identity": "sha256:1c7fc76d6b639cdce172a90f47d27114cc4e97d17b167e55d6b9c132acb00699"
+        }
+      ]
+    }
+  },
+  "controller_source_controls": {
+    "source": "ad43d52a3b2f458ae6709c1a29663d98775ee5a1",
+    "python": "3.12",
+    "platform": "linux-arm64",
+    "test_source_path": "tests/e2e/test_retained_catalog_discovery.py",
+    "test_source_sha256": "bb880b9ee388fae2e13d1f97022985c0934bb5ccc84b1d27c0bc60b523cec88a",
+    "test_source_unchanged_to_completion_base": true,
+    "cases": [
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_public_adopt_preserves_untracked_dependency_manifest_and_validates"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_real_legacy_only_authoring_still_requires_migration"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_real_validation_and_graph_do_not_enter_retained_dependency_tree"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_shared_discovery_keeps_nested_components_and_implementation_groups"
+      }
+    ],
+    "passed": 4,
+    "skipped": 0,
+    "failed": 0,
+    "complete_source_gate": {
+      "selected": 2774,
+      "passed": 2655,
+      "skipped": 119,
+      "failed": 0,
+      "root_exit": 0
+    }
+  },
+  "native_windows_source_controls": {
+    "run": 42488156657,
+    "source": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "cases": [
+      {
+        "case": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_shared_discovery_keeps_nested_components_and_implementation_groups",
+        "status": "passed",
+        "seconds": "10.417",
+        "skip_reason": null,
+        "artifact_id": 13622301405,
+        "artifact_sha256": "7025ecc6f1cb0f1ca77db8d902f199f1e2b2db03adce6f703f2485c0c7fa839e"
+      },
+      {
+        "case": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_real_validation_and_graph_do_not_enter_retained_dependency_tree",
+        "status": "passed",
+        "seconds": "14.299",
+        "skip_reason": null,
+        "artifact_id": 13622301405,
+        "artifact_sha256": "7025ecc6f1cb0f1ca77db8d902f199f1e2b2db03adce6f703f2485c0c7fa839e"
+      },
+      {
+        "case": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_public_adopt_preserves_untracked_dependency_manifest_and_validates",
+        "status": "skipped",
+        "seconds": "0.001",
+        "skip_reason": "POSIX Make fixture",
+        "artifact_id": 13622301405,
+        "artifact_sha256": "7025ecc6f1cb0f1ca77db8d902f199f1e2b2db03adce6f703f2485c0c7fa839e"
+      },
+      {
+        "case": "tests.e2e.test_retained_catalog_discovery.RetainedCatalogDiscoveryTests.test_real_legacy_only_authoring_still_requires_migration",
+        "status": "passed",
+        "seconds": "11.342",
+        "skip_reason": null,
+        "artifact_id": 13622301405,
+        "artifact_sha256": "7025ecc6f1cb0f1ca77db8d902f199f1e2b2db03adce6f703f2485c0c7fa839e"
+      }
+    ],
+    "passed": 3,
+    "skipped": 1,
+    "failed": 0
+  },
+  "windows_installed_catalog_fixture": {
+    "platform": "win32",
+    "qualified": false,
+    "reason": "public retained catalog fixture requires POSIX Make"
+  },
+  "terminal_main_ci": {
+    "source": "bc7e56f06ef9bad7b34ab9bd351c93df3c02c470",
+    "run": 42495268620,
+    "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42495268620",
+    "jobs_passed": 27,
+    "jobs_total": 27,
+    "skipped_jobs": 0,
+    "conclusion": "success"
+  },
+  "boundaries": [
+    "The Windows POSIX-Make adoption fixture remains explicitly unsupported; Windows source discovery/validation controls and the ordinary installed golden adoption path retain their actual separate scopes.",
+    "Earlier wheels and evidence keep their original revisions and identities; whole-file source equality does not relabel those artifacts.",
+    "This completes retained dependency exclusion in the existing adopted layout. Selected/root/custom layouts, overall 1.4 qualification and publication remain separate tracked work."
+  ],
+  "release14_qualified": false
+}

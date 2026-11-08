@@ -32661,7 +32661,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   acceptance before that independent provider extension begins. The issue and
   1.4 release goal remain open.
 
-### [ ] ADOPT-CATALOG-001 — Keep retained implementation trees outside Component discovery
+### [x] ADOPT-CATALOG-001 — Keep retained implementation trees outside Component discovery
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#212](https://github.com/jordanhubbard/literate-ai/issues/212)
@@ -32676,7 +32676,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Expose shared bounded Component manifest discovery and use it for validation and Component authority graph/lock candidates.
 - **Evidence:**
   - [x] Prove real CLI validation ignores retained component.json, component.md and component.lock.json, preserves graph identity, discovers ordinary nested Components and refuses actual legacy-only authoring; run lock/scale/graph regressions.
-  - [ ] Require exact integrated CI and installed adoption qualification before issue 212 closes.
+  - [x] Require exact integrated CI and installed adoption qualification before issue 212 closes.
 
 - **Development evidence:** Thirty-seven project CLI, catalog/lock/graph and scale
   tests pass. A guarded directory-enumeration test proves validation and graph
@@ -32702,6 +32702,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   outcome, and exact integrated review/main CI remains open. The historical full
   regression belongs to source `8826a6c1bae060d26ecf0ff83009837489df0030`;
   it is not relabeled as a full run of this newer union.
+
+- **Completion evidence (2026-11-08):** [Current-main retained catalog qualification](../../verification/retained-catalog-current-main-bc7e.json) verifies all three complete production files remain identical to the reviewed macOS installed source through `cad30c4e7`, `bc7e56f06` and completion-record base `99f3fe196`. The exact `cad30c4e7` Linux wheel completes actual public adoption, Python unittest baseline/parity, dependency-byte preservation, validation, ten-manifest discovery and authority-graph construction. All four fresh Linux source controls pass. Windows passes the three discovery/validation controls and explicitly skips the POSIX-Make adoption fixture; its installed catalog fixture retains the same named unsupported outcome. The exact `bc7e56f06` main matrix passes all 27 jobs without skipped jobs. This completes existing retained-layout catalog exclusion and its installed/integration requirement; ADR 0057 selected/root layouts and the overall release remain separately tracked.
 
 ### [x] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
 
@@ -33515,7 +33517,7 @@ independent review and the complete combined gate from test one.
   - [ ] Run existing C++ discovery and timeout/refusal controls plus affected native Bazel library coverage; retain actual Windows discovery duration.
   - [ ] Complete independent review, driver/documentation gates, full local checks and exact CI before claiming release qualification.
 
-### [ ] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
+### [x] HOST-STATUS-001 — Resolve adopted project host tools through canonical Flavor authority
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#268](https://github.com/jordanhubbard/literate-ai/issues/268)
@@ -33541,11 +33543,13 @@ independent review and the complete combined gate from test one.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Resolve project-local selected Flavor coordinates independently of directory names and preserve built-in selection.
-  - [ ] Reuse trusted packaged host probes only for the same canonical Flavor coordinate and exact sidecar bytes; report custom local probes as unsupported without executing them or suppressing unavailable requirements.
+  - [x] Resolve project-local selected Flavor coordinates independently of directory names and preserve built-in selection.
+  - [x] Reuse trusted packaged host probes only for the same canonical Flavor coordinate and exact sidecar bytes; report custom local probes as unsupported without executing them or suppressing unavailable requirements.
 - **Evidence:**
-  - [ ] Exercise an adopted project with a differently named local Flavor directory and missing, duplicate and toolchain failure controls.
-  - [ ] Obtain independent source review, renew canonical pins and pass complete regression and exact CI before closure.
+  - [x] Exercise an adopted project with a differently named local Flavor directory and missing, duplicate and toolchain failure controls.
+  - [x] Obtain independent source review, renew canonical pins and pass complete regression and exact CI before closure.
+
+- **Completion evidence (2026-11-08):** [Current-main host-status qualification](../../verification/host-status-current-main-bc7e.json) verifies that all four production files are byte-identical across the reviewed macOS installed source, the later native matrix and main `bc7e56f06` through completion-record base `99f3fe196`. The original macOS noneditable journey retains its real readiness and unchanged-input observations. The exact `cad30c4e7` Linux and Windows installed golden paths resolve the local shim with a current retained receipt while honestly reporting separate missing-tool readiness. All seven fresh Linux controls pass; Windows passes six and explicitly skips its unavailable symbolic-link fixture. The exact `bc7e56f06` main matrix passes all 27 jobs without skipped jobs, and its website check passes. Prior artifact identities remain attributed to their original revisions. This completes canonical selected-Flavor host-status resolution; overall 1.4 qualification and publication remain open.
 
 ### [ ] ADOPT-RELOCATE-001 — Support selected and relocated retained implementation layouts
 
