@@ -34193,8 +34193,10 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Add the smallest explicit selection at public acceptance, materializing and pinning selected current template bytes before locks and the new promotion audit.
+  - [x] Add explicit installed-template selection at public acceptance, materializing and pinning selected current template bytes before locks and the new promotion audit.
 - **Evidence:**
   - [ ] Preserve default inherited selection, explicit selection and source/lock/audit drift refusals; exercise the complete public acceptance path and affected local gates before PR CI.
 
 - **Original observation:** The failed preparation completed a genuine three-file retained host and its twelve Cargo tests, then accepted the original separate two-file signed provider. All four normative facets, twelve-case profile and eleven accepted-intent artifacts remain exact. Final independent comparison refused three changed generation-authority pins. The inherited implementation skill is older and workflow/routing permit fallback; the current installed template bytes exactly match the original strict authoring. No model generation, preparation acceptance, replay, consumer admission or old-proof rebind is claimed.
+
+- **Focused source evidence:** Seven actual controls pass, including public signed replacement with installed templates, selection-bound replacement-plan refusal, each of three selected files present in the actual audit, and same-length mutation refusal for each operative path. Default inherited bytes, missing/nonregular inputs, package drift and inherited build guards remain covered. The first borrowed-environment run refused multiple Git origins before acceptance; a fresh canonical managed environment resolves that prerequisite. An initial append mutation encountered the existing size limit before digest mismatch; the final same-length control proves the digest boundary. Full affected replacement/framework/platform and installed-model qualification remain pending.

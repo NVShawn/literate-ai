@@ -1170,6 +1170,61 @@ def _inherited_promotion_build(project):
         raise CliFailure(exc.code, exc.message) from exc
 
 
+_PROMOTION_TEMPLATE_AUTHORING = (
+    "skills/specification-to-source/portable-application-implementation/SKILL.md",
+    "workflows/production/staging/dev/workflow.md",
+    "routing/production/staging/dev/routing.json",
+)
+
+
+def _installed_promotion_authoring() -> dict[str, bytes]:
+    from importlib.resources import files
+
+    template = files("literate_ai.project_template")
+    contents = {}
+    for relative in _PROMOTION_TEMPLATE_AUTHORING:
+        resource = template.joinpath(*Path(relative).parts)
+        if not resource.is_file() or (
+            isinstance(resource, Path) and resource.is_symlink()
+        ):
+            raise CliFailure(
+                "promotion.authoring_template_missing",
+                f"installed authoring input is not a regular file: {relative}",
+            )
+        contents[relative] = resource.read_bytes()
+    return contents
+
+
+def _select_promotion_authoring(root: Path, selection: str) -> dict[str, str]:
+    """Select forward authoring before any Component pin or audit is created."""
+    if selection not in {"inherited", "installed"}:
+        raise CliFailure(
+            "promotion.authoring_template_invalid", "unknown authoring template"
+        )
+    if selection == "installed":
+        # Snapshot the complete closed selection before changing the staged tree.
+        contents = _installed_promotion_authoring()
+        for relative in contents:
+            path = root / relative
+            if path.is_symlink() or not path.is_file():
+                raise CliFailure(
+                    "promotion.authoring_template_missing",
+                    f"staged authoring input is not a regular file: {relative}",
+                )
+        for relative, content in contents.items():
+            path = root / relative
+            path.write_bytes(content)
+        if _installed_promotion_authoring() != contents:
+            raise CliFailure(
+                "promotion.authoring_template_changed",
+                "installed authoring templates changed during selection",
+            )
+    return {
+        relative: hashlib.sha256((root / relative).read_bytes()).hexdigest()
+        for relative in _PROMOTION_TEMPLATE_AUTHORING
+    }
+
+
 def _create_promoted_project(
     *,
     accepted_root: Path,
@@ -1186,6 +1241,7 @@ def _create_promoted_project(
     inverse_evidence_custody: object | None,
     parent_selection: RepositoryParentSelection | None,
     promotion_parent=None,
+    authoring_template: str = "inherited",
 ) -> dict[str, object]:
     """Create one complete, disposable-source-ready project from an accepted set."""
 
@@ -1277,6 +1333,9 @@ def _create_promoted_project(
                 empty=True,
                 parent_selection=parent_selection,
             )
+        )
+        selected_template_authoring = _select_promotion_authoring(
+            staging, authoring_template
         )
         # Canonical initialization includes a tutorial Component.  A promotion is
         # itself the complete application graph, so retaining that unrelated lock
@@ -1968,6 +2027,7 @@ def _create_promoted_project(
             (
                 "skills/specification-to-source/portable-application/SKILL.md"
             ): PromotionInputKind.FORWARD_SKILL,
+            _PROMOTION_TEMPLATE_AUTHORING[0]: PromotionInputKind.FORWARD_SKILL,
             (
                 "skills/specification-to-source/bazel-build-system/SKILL.md"
             ): PromotionInputKind.FORWARD_SKILL,
@@ -2173,6 +2233,10 @@ def _create_promoted_project(
         "authority_projection_count": 3 * len(component_revisions),
         "generation_input_audit_count": len(promotion_audits),
         "proposed_flavors": sorted(created_flavors),
+        "authoring_template": {
+            "selection": authoring_template,
+            "files": selected_template_authoring,
+        },
     }
 
 
@@ -3052,6 +3116,14 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             )
         return response, 0
     if command == "accept":
+        authoring_template = getattr(args, "authoring_template", "inherited")
+        if authoring_template != "inherited" and not (
+            args.project_target or args.integrate_project
+        ):
+            raise CliFailure(
+                "promotion.authoring_project_required",
+                "authoring template selection requires project creation",
+            )
         replacement_path = getattr(args, "replace_native_child", None)
         replacement_planning = getattr(args, "plan_native_child_replacement", False)
         replacement_requested = replacement_path is not None or replacement_planning
@@ -3376,10 +3448,31 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 "qualification_profile_identity": canonical_digest(profile_value),
                 "qualification_target": args.qualification_target,
                 "flavors": list(args.flavor),
+                "authoring_template": authoring_template,
+                "authoring_template_inputs": (
+                    {
+                        name: hashlib.sha256(content).hexdigest()
+                        for name, content in _installed_promotion_authoring().items()
+                    }
+                    if authoring_template == "installed"
+                    else None
+                ),
             }
 
             def replacement_guard():
                 guard.require_unchanged()
+                if (
+                    authoring_template == "installed"
+                    and {
+                        name: hashlib.sha256(content).hexdigest()
+                        for name, content in _installed_promotion_authoring().items()
+                    }
+                    != replacement_request["authoring_template_inputs"]
+                ):
+                    raise CliFailure(
+                        "promotion.authoring_template_changed",
+                        "reviewed installed authoring changed before replacement",
+                    )
                 observed_source = (
                     inventory_source(selected_source).identity
                     if standalone
@@ -3528,6 +3621,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                         inverse_evidence_custody=inverse_evidence_custody,
                         parent_selection=parent_selection,
                         promotion_parent=integration_project,
+                        authoring_template=authoring_template,
                     )
 
                 if replacement_plan is not None:
@@ -4148,6 +4242,16 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
         help="apply a reviewed child replacement plan and retain recovery evidence",
     )
     accept.add_argument("--project-id")
+    accept.add_argument(
+        "--authoring-template",
+        choices=("inherited", "installed"),
+        default="inherited",
+        help=(
+            "select inherited authoring (default) or the current installed "
+            "framework's implementation skill, workflow and routing before "
+            "creating Component pins and a new promotion audit"
+        ),
+    )
     accept.add_argument(
         "--qualification-target",
         default="host",

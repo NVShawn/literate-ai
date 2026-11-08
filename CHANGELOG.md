@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Allow explicit installed-template forward authoring during source promotion while preserving inherited defaults and auditing each selected generation input (#379).
+
 - Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
 
 - Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).
