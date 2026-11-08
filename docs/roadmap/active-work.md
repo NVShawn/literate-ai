@@ -34196,3 +34196,38 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Windows history observer correction:** Native Python 3.12 reads the same immutable file with equal device/file IDs, size, modification time and canonical content, but descriptor `ctime` differs from pathname `ctime`. The history reader now checks before/after stability separately for each observer and uses the existing conversion-store native identity binding, retaining timestamp-change refusal. A deterministic cross-observer regression and the two-rename native control exercise this path. All 16 focused tests pass on macOS; fresh native Windows, whole Python and installed-wheel gates remain required after the correction.
 
 - **Release integration:** PR [#364](https://github.com/jordanhubbard/literate-ai/pull/364) landed as `b88563b9cdf2b23a8978c9cf70a3afd63116d76a`; the first stable 1.4 minor candidate must contain current main. The release-goal manifest therefore includes this existing item for 1.4.0. The parent checkbox remains open: the PR reports newer native results than the retained local checkpoints above, which need source/artifact binding and independent verification. Exact PR-head `98bb737a1` run `42466522596` passed attempt 5 with 11 successful jobs and two expected profile skips; its earlier failed attempts remain failed. This is PR coverage, not the full native platform matrix. Exact current-main CI run `42481507994` is in progress; its predecessor run `42480917934` was cancelled. Next: verify retained native Windows/macOS/Linux install and migration controls, independent source review and exact post-merge platform CI before closure. No successful release or completed native acceptance is inferred from landing alone.
+
+### [ ] CODEX-STATE-001 — Own per-invocation Codex SQLite and log state under finite limits
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#365](https://github.com/jordanhubbard/literate-ai/issues/365)
+
+- **Priority:** P0
+- **Owner:** Framework coding CLI process lifetime and provider command projection
+- **Direction:** Repair issue #365 without changing HOME, authentication, selected provider/model or finite resource limits.
+- **Conclusion:** Own provider-local SQLite and log state for each bounded Codex invocation. Preserve authentication, exact provider/model selection, caller resource ceilings and generated-output custody. Pending implementation and qualification remain in the existing worktree.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Own private Codex runtime-state directories across command, generation and diagnostic child lifetime.
+  - [ ] Bind supported sqlite_home and log_dir settings; preserve provider isolation, finite limits and cleanup.
+- **Evidence:**
+  - [ ] Retain the original finite-file-limit failure and prove supported CLI configuration, native private state routing, process lifetime and unchanged parent environment.
+  - [ ] Pass focused and full source gates, independent review before driver repin, installed/native finite-profile generation with an explicit operator model, and current-head integration gates.
+
+### [ ] REMOTE-FILE-CEILING-001 — Preserve inherited file-size ceilings in remote evidence transport
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#372](https://github.com/jordanhubbard/literate-ai/issues/372)
+
+- **Priority:** P1
+- **Owner:** Framework core remote transport and native resource boundary
+- **Direction:** Fix issue #372, which blocks included Cargo qualification #347: an evidence allowance must never raise a caller file-size ceiling.
+- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. Pending implementation and qualification remain in the existing worktree.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
+- **Evidence:**
+  - [ ] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling.
+  - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
