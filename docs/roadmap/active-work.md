@@ -33861,7 +33861,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Use a real public Cargo workspace adoption: the default broad test fails, the explicitly reviewed scoped test passes without manifest mutation or artificial splitting, and only selected commands are credited.
   - [ ] Reject an empty selection, incomplete ownership, invalid or changed commands and stale acknowledgement before execution; renew focused/full/installed qualification and independent review before landing.
 
-### [ ] WHEEL-RUNTIME-ENV-001 — Isolate wheel runtime creation and installation from Python startup policy
+### [x] WHEEL-RUNTIME-ENV-001 — Isolate wheel runtime creation and installation from Python startup policy
 
 - **Priority:** P0
 - **Release target:** 1.4.0
@@ -33870,9 +33870,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Conclusion:** Ambient Python bytecode and startup selectors must not cross the isolated runtime seeding, wheel build or pip installation boundaries. Use the canonical copied-runtime builder in a sanitized child, preserve package-index/proxy policy and verify real pip plus framework RECORD custody; do not weaken canonical bootstrap validation.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Current action:** Freeze the isolated seeding/build/install correction and its
-  real same-wheel safe/unsafe-cache regression for independent review before
-  runtime qualification. Keep strict canonical RECORD containment unchanged.
+- **Current action:** Land the completed evidence reconciliation. The reviewed correction and actual same-wheel safe/unsafe-cache controls are qualified on native Linux, macOS and Windows; final release-candidate qualification remains separate.
 - **Failure evidence:** Exact core commit `426b71ec` CI run
   [41943200622](https://github.com/jordanhubbard/literate-ai/actions/runs/41943200622)
   rejects recorded framework bytecode under the invoking checkout's `_build/pycache`
@@ -33885,12 +33883,14 @@ implementation, policy weakening, qualification or issue closure is recorded her
   keeps isolation only when already selected. Invoke the unchanged canonical copied
   runtime builder in a sanitized child instead of mutating process-global state.
 - **Implementation:**
-  - [ ] Sanitize isolated child Python startup selectors consistently without process-global environment mutation.
-  - [ ] Seed copied runtimes through the existing canonical builder under the same sanitized environment.
-  - [ ] Exercise actual candidate wheel install and canonical record reopening with positive and escaping-private-cache controls.
+  - [x] Sanitize isolated child Python startup selectors consistently without process-global environment mutation.
+  - [x] Seed copied runtimes through the existing canonical builder under the same sanitized environment.
+  - [x] Exercise actual candidate wheel install and canonical record reopening with positive and escaping-private-cache controls.
 - **Evidence:**
-  - [ ] Preserve exact 426 CI failure, raw logs, artifact hashes and all remaining original matrix outcomes.
-  - [ ] Independent source review, meaningful actual install/reopen regression and fresh exact-head full qualification must pass before completion.
+  - [x] Preserve exact 426 CI failure, raw logs, artifact hashes and all remaining original matrix outcomes.
+  - [x] Independent source review, meaningful actual install/reopen regression and fresh exact-head full qualification must pass before completion.
+
+- **Completed native acceptance:** [Retained verification record](../../verification/wheel-runtime-startup-main1d.json) binds all five installed-wheel cells from exact post-merge main `1d4238d7a`, full CI run `42449444068` (27 successful jobs). Linux 3.11/3.14, macOS 3.11/3.14 and Windows 3.12 each check actual seeded pip and framework RECORD containment in the safe runtime; the same-wheel counterexample reproduces escaping pip/framework bytecode and receives the unchanged canonical refusal. Every qualified wheel archive was downloaded, matched to its provider digest and reopened to match manifest revision, exact wheel bytes and native gate identity. The six environment-boundary functions and RECORD probe match independently reviewed `2b9c392d9`; current relevant source/tests also match the fresh 2,758-case whole-source gate (2,639 passed, 119 skips). All four original core-run failures, their raw-log hashes, every original matrix outcome and the provider artifact inventory remain retained. No failed predecessor or old wheel is relabeled as final 1.4 release qualification.
 
 ### [x] LIBRARY-EXPORT-ORDER-001 — Verify JavaScript export maps without JSON key-order dependence
 
