@@ -167,6 +167,18 @@ qualification leaves release authority at the source baseline.
 
 Forward-authoring selection is separate from repository lineage. The public acceptance opt-in `--authoring-template installed` materializes the current installed framework's implementation skill, workflow and routing before authoring pins, lock resolution and promotion audit creation. Default inheritance is unchanged. The complete audit includes each of these three operative inputs, including the implementation skill itself; changing any one later refuses current promotion evidence. It grants no model execution or qualification.
 
+An older inherited language skill can pin the implementation being explicitly
+replaced. Installed selection first validates the inherited skill catalog, then
+updates only those direct typed dependency version/content references to the
+selected implementation. It preserves every inherited Markdown instruction-body
+byte and all other metadata values. The complete proposed catalog must validate
+before any staged file is written; unrelated stale references and unsupported
+reference documents refuse selection. Each changed reference-bearing skill is
+reported alongside the three selected templates and included in the new promotion
+audit. A later mutation of any of these paths invalidates that evidence. This
+reference migration belongs only to the explicit installed-template opt-in;
+ordinary inheritance, repository lineage and build preference stay unchanged.
+
 An incremental adopted project keeps each promoted native boundary as a complete
 source-free child beneath `.literate/native-projects/`. Its root registry binds the exact
 relative child path, project identifier, and project-definition identity. Conversion

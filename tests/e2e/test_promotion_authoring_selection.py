@@ -1,8 +1,11 @@
 """Public signed replacement seals each explicitly selected authoring artifact."""
 
+import hashlib
 import json
 import unittest
 from importlib.resources import files
+from pathlib import Path
+from unittest.mock import patch
 
 from literate_ai.adapters.authority import FileAuthorityProjectionStore
 from literate_ai.adapters.component_markdown import parse_component_markdown
@@ -40,7 +43,33 @@ class PromotionAuthoringJourneyTests(unittest.TestCase):
         self.assertEqual(
             json.loads(errors)["error"]["code"], "promotion.replacement_plan_stale"
         )
-        result = self.success(*args, "--replace-native-child", str(path))
+        from literate_ai.cli.source_to_specification import _select_promotion_authoring
+
+        # Supply actual canonical875 inherited files at the staging boundary;
+        # public selection, locks, promotion audit and mutation checks stay real.
+        old = json.loads(
+            (
+                Path(__file__).parents[1] / "fixtures/promotion_authoring_875.json"
+            ).read_bytes()
+        )
+        old_contents = {row["path"]: row["utf8"].encode() for row in old["files"]}
+        for row in old["files"]:
+            self.assertEqual(
+                hashlib.sha256(old_contents[row["path"]]).hexdigest(), row["sha256"]
+            )
+
+        def old_parent_selection(root, selection):
+            for relative, content in old_contents.items():
+                staged = root / relative
+                self.assertTrue(staged.is_file())
+                staged.write_bytes(content)
+            return _select_promotion_authoring(root, selection)
+
+        with patch(
+            "literate_ai.cli.source_to_specification._select_promotion_authoring",
+            side_effect=old_parent_selection,
+        ):
+            result = self.success(*args, "--replace-native-child", str(path))
         selected = result["promoted_project"]["authoring_template"]
         self.assertEqual(selected["selection"], "installed")
         self.assertEqual(
@@ -55,12 +84,21 @@ class PromotionAuthoringJourneyTests(unittest.TestCase):
         )
         service = SourcePromotionService()
         verified = service.verify_evidence(self.child, projection)
-        for relative in _PROMOTION_TEMPLATE_AUTHORING:
+        self.assertEqual(len(selected["files"]), 12)
+        for relative in selected["files"]:
             original = (self.child / relative).read_bytes()
-            self.assertEqual(
-                original,
-                files("literate_ai.project_template").joinpath(relative).read_bytes(),
-            )
+            if relative in _PROMOTION_TEMPLATE_AUTHORING:
+                self.assertEqual(
+                    original,
+                    files("literate_ai.project_template")
+                    .joinpath(relative)
+                    .read_bytes(),
+                )
+            else:
+                self.assertEqual(
+                    original.split(b"\n---\n", 1)[1],
+                    old_contents[relative].split(b"\n---\n", 1)[1],
+                )
             verified.audit_containing(relative)
             (self.child / relative).write_bytes(b"!" + original[1:])
             try:

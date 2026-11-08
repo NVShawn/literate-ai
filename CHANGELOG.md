@@ -16,7 +16,7 @@
 
 - Preserve stricter inherited POSIX file-size ceilings when launching command-addressed remote transfers, so a larger evidence allowance cannot prevent the connector from starting ([#372](https://github.com/jordanhubbard/literate-ai/issues/372)).
 
-- Allow explicit installed-template forward authoring during source promotion while preserving inherited defaults and auditing each selected generation input (#379).
+- Allow explicit installed-template forward authoring during source promotion while preserving inherited defaults, keeping older language-skill dependency pins consistent without changing instructions, and auditing every selected or reference-adjusted generation input (#379).
 
 - Native Rust verifier fixtures preserve their private Cargo home across public rebuilds, keeping operator wrapper configuration outside the test authority (#377).
 

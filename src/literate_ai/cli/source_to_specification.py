@@ -1201,6 +1201,7 @@ def _select_promotion_authoring(root: Path, selection: str) -> dict[str, str]:
         raise CliFailure(
             "promotion.authoring_template_invalid", "unknown authoring template"
         )
+    selected_paths = list(_PROMOTION_TEMPLATE_AUTHORING)
     if selection == "installed":
         # Snapshot the complete closed selection before changing the staged tree.
         contents = _installed_promotion_authoring()
@@ -1211,18 +1212,100 @@ def _select_promotion_authoring(root: Path, selection: str) -> dict[str, str]:
                     "promotion.authoring_template_missing",
                     f"staged authoring input is not a regular file: {relative}",
                 )
+        references = _promotion_authoring_references(root, contents)
+        contents.update(references)
+        selected_paths.extend(sorted(references))
         for relative, content in contents.items():
             path = root / relative
             path.write_bytes(content)
-        if _installed_promotion_authoring() != contents:
+        if _installed_promotion_authoring() != {
+            relative: contents[relative] for relative in _PROMOTION_TEMPLATE_AUTHORING
+        }:
             raise CliFailure(
                 "promotion.authoring_template_changed",
                 "installed authoring templates changed during selection",
             )
     return {
         relative: hashlib.sha256((root / relative).read_bytes()).hexdigest()
-        for relative in _PROMOTION_TEMPLATE_AUTHORING
+        for relative in selected_paths
     }
+
+
+def _promotion_authoring_references(
+    root: Path, selected: dict[str, bytes]
+) -> dict[str, bytes]:
+    """Keep old-parent dependency pins consistent with the explicit selection.
+
+    This changes only references to the selected implementation. It does not
+    replace language instructions or repair an already-invalid inherited catalog.
+    The complete proposed catalog must validate before any staged write.
+    """
+    from literate_ai.application.agent_skill_catalog import (
+        AgentSkillCatalog,
+        AgentSkillCatalogError,
+    )
+    from literate_ai.contracts.authoring_markdown import (
+        AuthoringMarkdownError,
+        parse_authoring_markdown,
+        render_authoring_markdown,
+    )
+
+    try:
+        inherited = AgentSkillCatalog.discover(root, catalog_roots=(root / "skills",))
+        path = _PROMOTION_TEMPLATE_AUTHORING[0]
+        previous = inherited.by_name("portable-application-implementation")
+        if str(previous.logical_manifest) != path:
+            raise CliFailure(
+                "promotion.authoring_reference_invalid",
+                "selected implementation does not match inherited skill authority",
+            )
+        replacement = AgentSkillCatalog.from_documents(
+            {path: selected[path]}, validate_dependencies=False
+        )
+        current = replacement.by_name(previous.name)
+        if current.logical_manifest != previous.logical_manifest:
+            raise CliFailure(
+                "promotion.authoring_reference_invalid",
+                "installed implementation changed its skill identity",
+            )
+        if current.identity == previous.identity:
+            return {}
+        changes: dict[str, bytes] = {}
+        for skill in inherited.skills:
+            if not any(
+                dependency.skill_id == previous.name and dependency.identity is not None
+                for dependency in skill.dependencies
+            ):
+                continue
+            relative = str(skill.logical_manifest)
+            frontmatter, body = parse_authoring_markdown(skill.content, source=relative)
+            for reference in frontmatter["dependencies"]:
+                if (
+                    isinstance(reference, dict)
+                    and reference["skill_id"] == previous.name
+                ):
+                    reference["version"] = current.version
+                    reference["identity"] = {
+                        **reference["identity"],
+                        "digest": current.identity.removeprefix("sha256:"),
+                    }
+            # Canonicalize only the metadata. Preserve every original body byte.
+            header = render_authoring_markdown(frontmatter, body).split(b"\n---\n", 1)[
+                0
+            ]
+            original_body = skill.content.split(b"\n---\n", 1)[1]
+            content = header + b"\n---\n" + original_body
+            if content != skill.content:
+                changes[relative] = content
+        proposed = {
+            str(skill.logical_manifest): skill.content for skill in inherited.skills
+        }
+        proposed.update(changes)
+        proposed[path] = selected[path]
+        AgentSkillCatalog.from_documents(proposed)
+        return changes
+    except (AgentSkillCatalogError, AuthoringMarkdownError) as exc:
+        raise CliFailure(exc.code, exc.message) from exc
 
 
 def _create_promoted_project(
@@ -2032,6 +2115,9 @@ def _create_promoted_project(
                 "skills/specification-to-source/bazel-build-system/SKILL.md"
             ): PromotionInputKind.FORWARD_SKILL,
         }
+        for relative in selected_template_authoring:
+            if relative.startswith("skills/"):
+                forward_paths[relative] = PromotionInputKind.FORWARD_SKILL
         for coordinate, (_node_namespace, node_name) in node_coordinates.items():
             forward_paths[f"components/{node_name}/component.md"] = (
                 PromotionInputKind.COMPONENT_INTENT
