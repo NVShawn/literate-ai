@@ -75,6 +75,34 @@ cross-project, concurrently changed, or illegally advanced state fails closed.
 
 ## Validation
 
+### Explicit identity maintenance
+
+An original-source converted project may deliberately change its authored
+`project_id`. That edit first makes ordinary status and retained operations refuse
+the cross-project conversion state. `litai project identity migrate
+--from-project-id OLD` plans the reconciliation to the definition's new ID without
+writing. Apply requires acknowledgment and the exact reviewed plan identity.
+The plan binds the current source, project bytes, authored authority and retained
+historical evidence; it never infers permission from a mismatched name alone.
+
+The mutation holds the project lifecycle lock. It publishes an immutable,
+content-identified `.literate/project-identity-migrations/` record containing the
+full prior conversion state before atomically comparing and replacing that state.
+An optional identity-migration reference preserves canonical bytes for projects
+that have never renamed. Readers validate every referenced record in the bounded
+rename chain, and later conversion-stage transitions retain that reference.
+Historical imports, baseline/parity evidence and receipts remain byte-identical.
+The stage and original-source release authority do not advance; this operation
+refuses original-unconverted and specification-qualified states.
+
+An interrupted history-only attempt earns no new authority and may be reviewed
+and retried. Ordinary closing-source failures restore only the state still owned
+by this transaction, preserving both new user changes and immutable attempt
+history. This is process-interruption handling, not a power-loss recovery claim.
+After migration, review and apply `project retained-scope refresh`, then execute
+and adopt a fresh retained receipt under the new ID. A historical receipt is never
+relabelled or accepted for the renamed subject.
+
 - Contract tests reject forged release-authority claims, noncanonical evidence,
   duplicate identities, skipped transitions, and advancement without the required
   receipt or Component evidence.

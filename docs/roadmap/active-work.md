@@ -34142,3 +34142,23 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
 - **Evidence:**
   - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
+
+### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
+
+- **GitHub issue:** [#361](https://github.com/jordanhubbard/literate-ai/issues/361)
+
+- **Priority:** P1
+- **Owner:** Framework adopted-project lifecycle
+- **Direction:** Support an explicit canonical project identity rename without rewriting historical producer evidence.
+- **Conclusion:** Plan and acknowledge a lifecycle-locked identity migration that binds prior state and project bytes, refuses qualified conversion until independently renewed, and requires a new receipt for the renamed subject.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Add a typed read-only rename plan and acknowledged compare-and-swap apply with durable rename lineage.
+  - [x] Expose the operation through the project CLI and document retained-source renewal and interruption behavior.
+- **Evidence:**
+  - [x] Exercise normal migration, stale plan, changed conversion/source, metadata path and concurrent change refusals.
+  - [x] Verify historical bytes remain unchanged, old receipts refuse, and fresh renamed retained qualification succeeds.
+  - [x] Run current framework Python, formatting, lint and required review gates.
+
+- **Local qualification:** The complete current framework gate selects 2,773 tests: 2,685 pass and 88 retain their declared skips (four-worker run, 1,883.191 seconds). All 15 focused identity-migration E2E controls pass, as do the 603-test smoke gate (600 pass, three skips), lint/format and repository/documentation/driver/runner/skill checks. Earlier documentation-inventory refusals and an eight-worker ancestor-device identity refusal remain retained; the unchanged 24-case retained-runtime module and the complete fresh four-worker gate both pass afterward. No admission guard was relaxed. Installed-wheel/exported-HEAD proof, protected exact-head CI and main landing remain pending.
