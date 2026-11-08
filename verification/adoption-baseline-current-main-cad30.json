@@ -1,0 +1,171 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "ADOPT-BASELINE-COMMANDS-001",
+  "issue": 207,
+  "revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+  "source_sha256": {
+    "src/literate_ai/adapters/monorepo_adoption.py": "a860eea9f36f8bcec37e4fdf730219d581c58a4d0a13b40e146f2bffd954ba72",
+    "src/literate_ai/adapters/monorepo_components.py": "fb97c3b7fb35c6be3f7f991fccdb0550a9905961083f19ded586f1698cbb1e93",
+    "src/literate_ai/adapters/project_initialization.py": "a534eeb4b5dbf0be9b71a6c358264352358b703e3b2a8a2df6d286f9b0b9de20",
+    "src/literate_ai/adapters/retained_project_inputs.py": "6dfdcae5128efbb822465e545a406412cc396ae523d29b7cbc74d38ecf672f24",
+    "src/literate_ai/cli/retained_unit_execution.py": "55efcab3e63be9fba9bc1f5fc7f003304032e8c1b0f7721aaea4952da8e4c23f",
+    "tests/e2e/test_onboard_plan_readonly.py": "e39dcb2168484ae63c16adaae184ad38dab10a996c93fd687cfbc0be4ce415f7"
+  },
+  "independent_source_review": {
+    "commit": "2b9c392d9bb869f31f95a04a4a7a867456dbc58e",
+    "reviewer": "/root/review_worktree_discovery",
+    "source_packet_sha256": "e9f461ceee144d6d0b19524555e835eef9f7df9fc0d48d9b98618504c1aa860c",
+    "scoped_implementation_and_test_bytes_unchanged": true
+  },
+  "integrated_ci": {
+    "run": 42488156657,
+    "head": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "jobs": 27,
+    "all_success": true,
+    "website_run": 42488156666,
+    "website_success": true
+  },
+  "maintained_native_platform_cases": [
+    {
+      "artifact": "macos-qualification-3.11-1",
+      "artifact_id": 13622162632,
+      "log_member": "evidence/20261108T140841Z-05bb5e/n0001/stderr.log",
+      "status": "passed",
+      "case": "test_single_cargo_root_uses_reviewed_baseline_commands"
+    },
+    {
+      "artifact": "macos-qualification-3.14-0",
+      "artifact_id": 13621914583,
+      "log_member": "evidence/20261108T141140Z-7f91db/n0001/stderr.log",
+      "status": "passed",
+      "case": "test_single_cargo_root_uses_reviewed_baseline_commands"
+    },
+    {
+      "artifact": "windows-conformance-profile-3",
+      "artifact_id": 13622035954,
+      "member": "test-results-3.xml",
+      "status": "passed",
+      "case": "tests.e2e.test_onboard_plan_readonly.OnboardReadOnlyPlanTests.test_single_cargo_root_uses_reviewed_baseline_commands"
+    }
+  ],
+  "installed_linux": {
+    "ok": true,
+    "goal": "ADOPT-BASELINE-COMMANDS-001",
+    "issue": 207,
+    "revision": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "wheel_identity": "sha256:b8513c9ddfd31ffa02f4a95955d0caf77c1abfec4aa8d57bab57f8acb8b15894",
+    "framework_distribution_before": "sha256:472fea40adeb5784067680410e6b72b12e4decf17feb750a8fb60b396d4d1083",
+    "framework_distribution_after": "sha256:472fea40adeb5784067680410e6b72b12e4decf17feb750a8fb60b396d4d1083",
+    "dependency_closure_identity": "sha256:24497d2ae432588eda45efc0b43e82484b3d480a9e343f1ddc871799f4f4e03c",
+    "native_python": [
+      3,
+      12,
+      3
+    ],
+    "baseline_commands": [
+      "cargo build --locked --offline -j 1",
+      "cargo test --locked --offline -p healthy -j 1",
+      "cargo package --list --offline --allow-dirty"
+    ],
+    "baseline_state": "passed",
+    "lift_shift_state": "passed",
+    "original_source_bytes_unchanged": true,
+    "empty_selection_refused": true,
+    "changed_command_invalidates_acknowledgement": true,
+    "plan_read_only": true,
+    "actual_broad_test_failed": true,
+    "actual_scoped_test_passed": true,
+    "model_invoked": false
+  },
+  "installed_distributions": 38,
+  "phases": [
+    {
+      "phase": "build",
+      "command": "cargo build --locked --offline -j 1",
+      "exit_code": 0,
+      "timed_out": false,
+      "output_within_limits": true,
+      "stdout_identity": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_identity": "sha256:23b9a21bbaf189889e08dc27ed8eba521021280c5852db22205f721db08b2c7c",
+      "test_collection": {
+        "failed": null,
+        "known_failed": null,
+        "passed": null,
+        "skipped": null,
+        "state": "not-applicable",
+        "total": null
+      }
+    },
+    {
+      "phase": "test",
+      "command": "cargo test --locked --offline -p healthy -j 1",
+      "exit_code": 0,
+      "timed_out": false,
+      "output_within_limits": true,
+      "stdout_identity": "sha256:ad432611ba880baa6dd13e568ffeeee1bfded78921f8cdd82b9b7570f25957d3",
+      "stderr_identity": "sha256:0a20ca4d618cf41fa46c790769b03d4df4a98ffc4bfbf9f1ad3994ab38e314b8",
+      "test_collection": {
+        "excluded": 0,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 1,
+        "skipped": 0,
+        "state": "nonempty",
+        "total": 1
+      }
+    },
+    {
+      "phase": "package",
+      "command": "cargo package --list --offline --allow-dirty",
+      "exit_code": 0,
+      "timed_out": false,
+      "output_within_limits": true,
+      "stdout_identity": "sha256:60b9cf51860115069b30277bb75012fbe2e4053f5a9c506fe8e5d436d2d64d52",
+      "stderr_identity": "sha256:6dbd0245da23ae9abab0633ed8714916c1754bfab99f3b67faf0a260c21f0b81",
+      "test_collection": {
+        "failed": null,
+        "known_failed": null,
+        "passed": null,
+        "skipped": null,
+        "state": "not-applicable",
+        "total": null
+      }
+    }
+  ],
+  "baseline_bytes_sha256": "3a03c6d187e865965a0f7b60f125921c76b7e949fc3f7fdb1d82caa663df195a",
+  "lift_shift_bytes_sha256": "2d61a477b5a9e5d828955f608c06cd192876ed02f9f7d3016741437edd028ab0",
+  "native_driver_sha256": "e921cde20568b583f53ea4020a354e92642c3daf5880b8aa09f5f1b4b7ec1f85",
+  "native_log_sha256": "ec0f3198cb1738ac7f3a2ac976961aed6fbadce0b1d640862dd52cac80ae58ab",
+  "coverage_boundary": "Only the selected commands are credited. The unavailable package test remains outside the selected test scope and fails in the broad control. The package baseline lists files and does not establish package production. This is original-source adoption, not renewed command admission on an already adopted project.",
+  "model_invoked": false,
+  "production_containment_qualified": false,
+  "release_attestation": false,
+  "fresh_documentation_successor_source_gate": {
+    "root_exit_code": 0,
+    "summary": {
+      "executed": 2655,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2655,
+      "selected": 2774,
+      "skipped": 119
+    },
+    "worker_groups": 597,
+    "all_groups_done": true,
+    "indexed_outcomes_match_report": true,
+    "event_totals": {
+      "start": 2745,
+      "success": 2655,
+      "done": 597,
+      "skip": 90,
+      "fixture_skip": 8
+    },
+    "duplicate_raw_test_ids": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "3cdfa12b3f783c8d369bc46f467d345989c04886f3633e3dd595a2375694c0b3",
+    "log_sha256": "7d8c1df604656f6f9c23154c8c8d1737b16470f4762386fcad7bbb83c5bb9745"
+  }
+}
