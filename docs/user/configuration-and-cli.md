@@ -2767,8 +2767,10 @@ The shared process owner bounds operation time, descendants, stdout and diagnost
 tails. Upload guards retain and rehash the staged regular file. Downloads use private
 staging, a finite size allowance, fresh hashes and collision-safe publication;
 receiver evidence is independently imported and checked afterward. The POSIX
-controller also imposes a hard per-file limit with a 64 MiB floor; this is not an
-aggregate disk sandbox. Command-based downloads currently require a POSIX controller.
+controller requests a per-file limit of at least 64 MiB, while preserving any
+stricter inherited finite soft or hard limit. Transfer allowances never raise an
+enclosing lifecycle's file-size ceiling. This is not an aggregate disk sandbox.
+Command-based downloads currently require a POSIX controller.
 Native Windows connector qualification remains open. Failed or uncertain mutations
 are not automatically replayed by the new route.
 

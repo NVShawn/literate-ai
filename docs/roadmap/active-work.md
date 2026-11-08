@@ -34153,6 +34153,16 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Clamp the requested finite staging ceiling to stricter inherited finite soft and hard RLIMIT_FSIZE values in the trusted limiter. Preserve connector protocol and all existing tests; add native actual-limit and boundary refusal controls. Link the separate upstream issue before implementation.
+  - [x] Clamp the requested finite staging ceiling to stricter inherited finite soft and hard RLIMIT_FSIZE values in the trusted limiter. Preserve connector protocol and all existing tests; add native actual-limit and boundary refusal controls. Link the separate upstream issue before implementation.
 - **Evidence:**
-  - [ ] Actual native POSIX inherited-soft/hard and lower-requested controls, original failing no-output assertion, transport regressions and unchanged unfiltered whole Python gate on a freshly admitted worker; exact-source local gates precede hosted CI.
+  - [x] Actual native inherited-soft/hard and smaller-requested cases report the
+    effective kernel limit, allow a write at that boundary and refuse one byte
+    above it. The original limiter fails the same control. Canonical focused
+    `make python-check` passes all 7 SSH tests under 512 MiB, including the
+    original missing-output case; 16 coherent current-source transport/receiver
+    controls pass. The first broader probe used an older receiver environment,
+    refused two source-identity checks and remains preserved separately.
+  - [ ] Pass the unchanged unfiltered whole Python gate on a freshly admitted
+    worker with the final composed source, then exact-source hosted checks.
+    Original 7ce/I remains failed (1,444 passes, 82 declared skips, one failure);
+    no old receipt, successful subset or higher file-size ceiling replaces it.
