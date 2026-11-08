@@ -1,0 +1,187 @@
+{
+  "schema": "literate-ai/development-evidence@1",
+  "classification": "exact-main installed trusted-framework readiness on an external Linux worker; not release or generated-application qualification",
+  "revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+  "ci_run": "https://github.com/jordanhubbard/literate-ai/actions/runs/42449444068",
+  "framework_wheel": {
+    "identity": "sha256:42e4a616381c1e0088cdc88e35877ff9adcd1b7d054abd8361d4a2bb39d325a5",
+    "bytes": 4249524,
+    "framework_distribution_identity": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74"
+  },
+  "dependency_closure_identity": "sha256:c525e6827a97c059663fb493c82b4347fccfe74d23871f07406f13ec61564645",
+  "native": {
+    "os": "Linux",
+    "machine": "x86_64",
+    "libc": [
+      "glibc",
+      "2.39"
+    ],
+    "python": [
+      3,
+      12,
+      3
+    ],
+    "tools": {
+      "git": {
+        "exit_code": 0,
+        "stdout": "git version 2.56.0"
+      },
+      "lfs": {
+        "exit_code": 0,
+        "stdout": "git-lfs/3.4.1 (GitHub; linux amd64; go 1.22.2)"
+      }
+    }
+  },
+  "bootstrap": {
+    "ok": true,
+    "distribution_identity": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+    "installed_distributions": 38
+  },
+  "public_cli": {
+    "empty_project_initialization": true,
+    "positive_alignment": {
+      "exit_code": 0,
+      "aligned": true,
+      "findings": []
+    },
+    "unsupported_tools": {
+      "selected_versions": {
+        "git": "2.42.0",
+        "git-lfs": "3.0.2"
+      },
+      "mechanism": "Owned executable wrappers intercept version probes; every other invocation delegates to actual native tools.",
+      "exit_code": 1,
+      "aligned": false,
+      "findings": [
+        {
+          "detail": "selected executable does not prove Git >=2.43,<3; Git binds source acquisition to exact revisions and supports exact process-scoped safe.directory trust in child Git operations without operator-global exceptions.",
+          "kind": "command",
+          "name": "git",
+          "remediation": "install a compatible tool and rerun alignment, or declare its installation in worker-alignment.json",
+          "state": "incompatible"
+        },
+        {
+          "detail": "selected executable does not prove Git LFS >=3.2,<4; Git LFS provides ls-files --json for complete object and working-tree evidence during exact repository checkout.",
+          "kind": "command",
+          "name": "git-lfs",
+          "remediation": "install a compatible tool and rerun alignment, or declare its installation in worker-alignment.json",
+          "state": "incompatible"
+        }
+      ]
+    }
+  },
+  "installed_import": {
+    "inside_new_install_prefix": true,
+    "module_relative_to_prefix": "lib/python3.12/site-packages/literate_ai/__init__.py",
+    "python": [
+      3,
+      12,
+      3
+    ]
+  },
+  "operator_git_configuration": {
+    "unchanged": true,
+    "exit_code": 0,
+    "stdout_sha256": "45f0186a8c6a75e90978a2ae60e61e687c5257ca14d19cf81fc2ae5f34c1242f",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "artifact_sha256": {
+    "litai14-main1d-installed-git-readiness-python312.log": "b1ee4589781e3a80d3a1fef0a2109e0c0169dee5c641bd2a49b6ef54f0b5bfd0",
+    "litai14-git-readiness-native-before.json": "d76fb3e1e9dcc018c51ab88af4e281abefc8ab21e0665e0cf5778addc6cd3c6d",
+    "litai14-git-readiness-worker-alignment.json": "a6dee331e0e353e853fd0c12e94ea30953f050daf23dd4e78b9fa7aff19dcd0f",
+    "litai14-main1d-wheelhouse-python312-export-r2.log": "cb8db2f34d6e3f8523fa3dbc5c2bc6df16809f6d3884a39bcbcea719a7ac54c0"
+  },
+  "private_operation_sha256": "0bb84bc42ea045185f29407e10c3435118a06d9630ed663a89e06a3a8076542e",
+  "preserved_failures": [
+    "An upload outside the declared workspace refused before bootstrap.",
+    "The first caller transfer deadline expired before bootstrap.",
+    "Two HGX hub chunk refusals preserved partial copies; explicit continuation verified the complete native prefix before appending and full archive digest before use.",
+    "Native bulk-storage upload succeeded but this worker did not expose the uploaded object through its mount; it was not used for bootstrap.",
+    "The original Python 3.12.3 target refused native compatibility before install. The installed canonical CLI re-exported a separate Python 3.12 manifest and pinned closure; compatibility checks were not weakened.",
+    "The first offline export refused a wheel directory containing a non-wheel manifest. The corrected source contains only independently hash-verified wheel files."
+  ],
+  "boundary": "The framework installer, initialization and native tool-readiness paths execute outside the repository using the exact CI wheel, isolated Python and sanitized environment. The configured worker was aligned before dispatch. The synthetic native loopback worker exercises the installed command transport and baseline tool probes. No generated application runs, production containment, full native project acceptance, release publication is established. Uncommitted HTML source is outside this main commit.",
+  "remaining": [
+    "Land this reconciled goal/evidence record and verify its exact post-merge checks before closing issue #305.",
+    "Complete every other 1.4 milestone requirement and clean final integrated release qualification."
+  ],
+  "native_exact_main_checkout_controls": {
+    "revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+    "selected": 5,
+    "ran": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "ok": true,
+    "log_sha256": "c090a9b11660b311e24eb70d73d64a265a9a9cc53d29690d250c4db953888764",
+    "input_sha256": {
+      ".github/workflows/native-sdk-qualification.yml": "b3d96031f9bae09f8ffaab1880ee0ddfbdce5e26fec80286d802386a6e6fe5c8",
+      "tests/e2e/test_repository_checkout_skill.py": "257a839b2d6ab075992b1ec46dd320c032e2ecedb9acda59c26b68b873c98412",
+      "tests/critical/test_native_sdk_qualification_harness.py": "7c14b6bde894991ac5ef472981ed099d760966a977023e1e4a73d7aa0c0b7c59",
+      "skills/agent/checkout-git-repository/scripts/checkout.py": "b633a0164d74e8a373fed4a23c90534f6364d5d349511c5bd68cb9874afd5daf"
+    },
+    "operator_git_config": {
+      "exit_code": 0,
+      "stdout_sha256": "45f0186a8c6a75e90978a2ae60e61e687c5257ca14d19cf81fc2ae5f34c1242f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scope": "native exact-main authored checkout/workflow controls under the isolated installed interpreter; installed readiness is separately retained",
+    "verified_behavior": [
+      "branch, tag and exact SHA shallow checkout with recursive submodules and hydrated LFS objects",
+      "exact LFS object/size and unresolved current-tree pointer refusal",
+      "missing LFS tool failure",
+      "unsupported LFS JSON inventory refuses before fetch",
+      "narrow disposable-config source and .git trust permits the intended child clone while unrelated foreign ownership refuses and operator config stays unchanged"
+    ]
+  },
+  "current_local_foreign_trust_recheck": {
+    "reported_git_version": "2.43.0",
+    "platform": "Linux ARM64",
+    "git_executable_sha256": "aa6540695d076182256dd6e96c8b302e4d56381e3000bbfd5c71bbdfe94a4942",
+    "selected": 1,
+    "passed": 1,
+    "skipped": 0,
+    "artifact": "litai14-git243-foreign-trust-recheck.log",
+    "artifact_sha256": "467ce024ff231d94526c7d4dc8f12f0fac3f3224a9792c0fcbcd57315669e8c7",
+    "scope": "The current selected local Git passes the exact command-scoped foreign-ownership test. This refresh supersedes the older failed observation for current readiness; neither historical result is relabeled."
+  },
+  "source_review": {
+    "baseline_commit": "dcd33ba4a",
+    "baseline_reviewer": "review_pr239",
+    "record": "The original commit records independent source, TCB and authority review before recording its pins.",
+    "later_scoped_git_staging_review": "https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295"
+  },
+  "source_and_main_integration": {
+    "canonical_source_gate_revision": "c5dc8f25aea9658e9bf7e0b0e038363736a52984",
+    "canonical_source_report_sha256": "c878df68a0963c7d38e5530a48e47f72ed06d93f9a7a20973fad9b62d1d04980",
+    "summary": {
+      "executed": 2639,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2639,
+      "selected": 2758,
+      "skipped": 119
+    },
+    "main_full_ci_run": 42449444068,
+    "main_full_ci_head": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+    "main_full_ci_successful_jobs": 27,
+    "reconciled_main": "2c6c2431da2e1f3b6104f6bf1b381aef89412322",
+    "runtime_scripts_flavors_skills_schemas_and_workflows_unchanged_since_source_gate": true
+  },
+  "declared_repair_protocol": {
+    "test": "tests.e2e.test_worker_alignment.WorkerAlignmentTests.test_public_alignment_rejects_old_repository_tools_and_rechecks_declared_repair",
+    "source_sha256": "3b94c265e392a5ded7fa02230a73e83dc5ffeebb01db47b1a02457baccaef6e8",
+    "ci_artifact": 13605738589,
+    "ci_artifact_sha256": "c80cdb4d5d153539b65daabcc7f3e5f88fa5866be7c0f76d71aa9d8bff87e841",
+    "log_member": "20261108T050743Z-fb8f86/n0001/stderr.log",
+    "passed": true,
+    "scope": "Public CLI with real version-response processes and declared repair argv; SSH is replaced at the transport boundary. This does not claim native old-tool binaries or an OS package-manager upgrade. Native supported checkout is independently recorded below."
+  },
+  "native_control_log_retention": {
+    "bytes": 979,
+    "sha256": "c090a9b11660b311e24eb70d73d64a265a9a9cc53d29690d250c4db953888764",
+    "read_back_from_original_native_file": true,
+    "local_summary_sha256": "9f033477f577771245223fe89787470c0ee59711503f6bfe5649606c975cf6f2",
+    "note": "The local .log-named controller artifact is a JSON summary; the separately retained original native text log has the log_sha256 recorded by that summary."
+  }
+}
