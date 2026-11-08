@@ -2,11 +2,17 @@
 
 import tempfile
 import unittest
+import hashlib
+import json
 from importlib.resources import files
 from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.cli.errors import CliFailure
+from literate_ai.application.agent_skill_catalog import (
+    AgentSkillCatalog,
+    AgentSkillCatalogError,
+)
 from literate_ai.cli.source_to_specification import (
     _PROMOTION_TEMPLATE_AUTHORING,
     _select_promotion_authoring,
@@ -14,6 +20,55 @@ from literate_ai.cli.source_to_specification import (
 
 
 class PromotionAuthoringSelectionTests(unittest.TestCase):
+    def old_parent(self, root):
+        fixture = json.loads(
+            (Path(__file__).parents[1] / "fixtures/promotion_authoring_875.json")
+            .read_bytes()
+        )
+        self.assertEqual(
+            fixture["revision"], "87506c804210c46835723e11d1ca1c6cae0f496c"
+        )
+        for row in fixture["files"]:
+            content = row["utf8"].encode("utf-8")
+            self.assertEqual(hashlib.sha256(content).hexdigest(), row["sha256"])
+            path = root / row["path"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        return AgentSkillCatalog.discover(root, catalog_roots=(root / "skills",))
+
+    def test_actual_old_parent_consumer_dependency_survives_installed_selection(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            inherited = self.old_parent(root)
+            consumer = inherited.by_name("cpp17-portable-json-application")
+            original = consumer.content
+            self.assertEqual(consumer.dependencies[0].version, "1.8.4")
+            selected = _select_promotion_authoring(root, "installed")
+            try:
+                current = AgentSkillCatalog.discover(
+                    root, catalog_roots=(root / "skills",)
+                )
+            except AgentSkillCatalogError as exc:
+                self.fail(f"OLD_PARENT_CONSUMER_REFERENCE_STALE: {exc}")
+            changed = current.by_name(consumer.name)
+            implementation = current.by_name("portable-application-implementation")
+            self.assertEqual(changed.dependencies[0].version, implementation.version)
+            self.assertEqual(changed.dependencies[0].identity, implementation.identity)
+            # Only reference-bearing frontmatter may migrate, never instructions.
+            body = lambda content: content.split(b"\n---\n", 1)[1]
+            self.assertEqual(body(changed.content), body(original))
+            self.assertEqual(
+                selected[str(changed.logical_manifest)],
+                hashlib.sha256(changed.content).hexdigest(),
+            )
+            for relative in _PROMOTION_TEMPLATE_AUTHORING:
+                self.assertEqual(
+                    (root / relative).read_bytes(),
+                    files("literate_ai.project_template")
+                    .joinpath(relative)
+                    .read_bytes(),
+                )
+
     def staged(self, root):
         for relative in _PROMOTION_TEMPLATE_AUTHORING:
             path = root / relative
