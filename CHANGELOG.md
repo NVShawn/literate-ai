@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Record the included Codex runtime-state and remote file-ceiling work as explicit
+  1.4 roadmap and release-manifest gates; both remain incomplete pending their
+  existing implementation, review and native qualification.
+
 - Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
 
 - Qualify native Windows CPU pressure with all eight native controls and the noneditable local/standalone-receiver acceptance case; preserve required-pressure refusal and explicit unsupported processor groups (#348).
