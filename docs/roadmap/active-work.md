@@ -34181,3 +34181,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Windows history observer correction:** Native Python 3.12 reads the same immutable file with equal device/file IDs, size, modification time and canonical content, but descriptor `ctime` differs from pathname `ctime`. The history reader now checks before/after stability separately for each observer and uses the existing conversion-store native identity binding, retaining timestamp-change refusal. A deterministic cross-observer regression and the two-rename native control exercise this path. All 16 focused tests pass on macOS; fresh native Windows, whole Python and installed-wheel gates remain required after the correction.
 
 - **Release integration:** PR [#364](https://github.com/jordanhubbard/literate-ai/pull/364) landed as `b88563b9cdf2b23a8978c9cf70a3afd63116d76a`; the first stable 1.4 minor candidate must contain current main. The release-goal manifest therefore includes this existing item for 1.4.0. The parent checkbox remains open: the PR reports newer native results than the retained local checkpoints above, which need source/artifact binding and independent verification. Exact PR-head `98bb737a1` run `42466522596` passed attempt 5 with 11 successful jobs and two expected profile skips; its earlier failed attempts remain failed. This is PR coverage, not the full native platform matrix. Exact current-main CI run `42481507994` is in progress; its predecessor run `42480917934` was cancelled. Next: verify retained native Windows/macOS/Linux install and migration controls, independent source review and exact post-merge platform CI before closure. No successful release or completed native acceptance is inferred from landing alone.
+
+### [ ] RUST-FIXTURE-ISOLATION-001 — Keep verifier Cargo state independent of operator configuration
+
+- **GitHub issue:** [#377](https://github.com/jordanhubbard/literate-ai/issues/377)
+- **Release target:** 1.4.0
+
+- **Priority:** P1
+- **Owner:** Native Rust verifier test fixtures
+- **Direction:** Fix issue377 on its owning upstream source after a real full-gate failure, preserving all native provider and public rebuild oracles.
+- **Conclusion:** The class strips an explicitly isolated CARGO_HOME, then later native Cargo loads the normal-home operator wrapper and cache environment. Keep the fixture-owned Cargo home that prepare_seed already provisioned; leave operator HOME/config and source authority unchanged. Original f527 full failure and O550f installed/model subjects remain separate.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Bind later verifier and public rebuild operations to the already provisioned private Cargo home and add a real hostile-operator-config regression.
+- **Evidence:**
+  - [ ] Require the old controlled Cargo route to fail with the explicit wrapper marker, the corrected route to pass without invoking that wrapper, affected native controls and independent source review before any PR CI.
+
+- **Causal development evidence:** An actual native Cargo control executes the maintained environment-comprehension AST. The old environment drops supplied private Cargo state and invokes an observable rejecting wrapper from a synthetic operator configuration (Cargo101); explicit fixture-owned Cargo state builds successfully without invoking that wrapper. Both groups retire and the synthetic configuration is unchanged. The real operator configuration is never mutated. This is fixture isolation, not cache backend or model/provider acceptance.
