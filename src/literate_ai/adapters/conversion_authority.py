@@ -338,6 +338,10 @@ class FilesystemConversionAuthorityStore:
             state = ConversionAuthorityState.from_dict(value)
             if content != canonical_json_bytes(state.to_dict()) + b"\n":
                 raise ValueError("conversion authority is not canonical JSON")
+            if state.identity_migration_identity is not None:
+                from .project_identity_migration import validate_identity_migrations
+
+                validate_identity_migrations(self.root, state)
             return state
         except ConversionAuthorityError:
             raise
