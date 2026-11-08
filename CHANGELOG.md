@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Renew retained Windows command, source/context drift and missing native sidecar checks through the noneditable wheel on base and private interpreters (#102, #103).
+
 - Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
 
 - Wheel qualification reuses the native Windows CPU acceptance case with installed local and standalone-receiver modules; unsupported platforms remain explicit skips (#348).

@@ -8,6 +8,7 @@ import subprocess
 import sys
 import unittest
 from dataclasses import replace
+from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai._filesystem import UnsafeFilesystemPathError
@@ -151,6 +152,7 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
                 workspace = f.workspace()
                 workspace.execute_next()
                 self.assertEqual(len(workspace.observations), 1)
+
                 observed = workspace.observations[0]
                 self.assertEqual(observed.result.returncode, 0)
                 self.assertTrue(observed.result.stdout.strip())
@@ -172,6 +174,54 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         workspace.execute_next()
                 self.assertEqual(len(workspace.observations), 1)
+
+    @unittest.skipUnless(os.name == "nt", "Requires actual Windows PE imports")
+    def test_missing_captured_python_dll_refuses_fresh_native_workspace(self):
+        f = self.fixture
+        runner = f.source / f.runner_path
+        shutil.copyfile(Path(sys._base_executable).resolve(strict=True), runner)
+        identity = ContentIdentity.parse_uri(
+            "sha256:" + hashlib.sha256(runner.read_bytes()).hexdigest()
+        )
+        f.profile = replace(
+            f.profile,
+            tools=tuple(
+                (name, path, identity if path == f.runner_path else digest)
+                for name, path, digest in f.profile.tools
+            ),
+        )
+
+        def refresh():
+            f.manifest = discover_retained_project_inputs(
+                f.source,
+                {
+                    "src": "source",
+                    "tools": "toolchain",
+                    "test-policy.json": "test-policy",
+                },
+                f.manifest.limits,
+                executable_paths=(f.runner_path,),
+            )
+            f.plan = replace(
+                f.plan, profile=f.profile, manifest_identity=f.manifest.identity
+            )
+            f.current = f.plan
+
+        refresh()
+        self.assertIsNotNone(f.workspace().dependency_observation)
+        sidecar = (
+            runner.parent
+            / f"python{sys.version_info.major}{sys.version_info.minor}.dll"
+        )
+        self.assertTrue(sidecar.is_file())
+        sidecar.unlink()
+        refresh()
+        with self.assertRaisesRegex(ValueError, "observation-rejected") as refused:
+            f.workspace()
+        self.assertEqual(
+            refused.exception.__cause__.code, "dependencies.pe-import-unresolved"
+        )
+        self.assertIn(sidecar.name.lower(), str(refused.exception).lower())
 
     @unittest.skipUnless(
         os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
