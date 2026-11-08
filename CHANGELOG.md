@@ -45,7 +45,8 @@
 - Add installed-wheel adoption coverage for retained third-party Component-shaped
   files, using real unittest, build, package and parity controls. Exercise public
   status with an explicitly selected local shim and preserve native/Python
-  requirements and adopted-project inputs.
+  requirements and adopted-project inputs. Installed macOS and Linux adoption
+  journeys preserve retained dependency files named like framework authority (#212).
 
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
@@ -135,6 +136,8 @@
 - Adopted-project status resolves selected project-local Flavors by canonical
   identity. Toolchain-free shims add no requirements; custom local observation
   probes refuse explicitly, and copied framework Flavors retain their host tools.
+  Installed macOS, Linux and Windows status journeys preserve actual host-readiness
+  results (#268).
 
 - C++ toolchain discovery, including MSVC environment initialization, now defaults
   to a finite five-minute budget instead of one minute.

@@ -1,0 +1,221 @@
+{
+  "schema": "literate-ai/host-status-current-main-qualification@1",
+  "goal": "HOST-STATUS-001",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/268",
+  "completion_record_base": "99f3fe19623ee4321bd02a635db5db6d702cd35e",
+  "production_file_bindings": [
+    {
+      "path": "src/literate_ai/adapters/operator_status.py",
+      "sha256": "38e5a9ffd02f6d65fa675ae54d48dc8716a8ad3b0eb06532c9c1eb286da41e1e"
+    },
+    {
+      "path": "src/literate_ai/adapters/project_host_flavors.py",
+      "sha256": "8b7dcb7de53f535f71a3ebfcf6d01459888cc4092582d011842560ae99d7adac"
+    },
+    {
+      "path": "src/literate_ai/adapters/component_lock_planning.py",
+      "sha256": "8c119d22baf3c1d34649b39bdb8103edca87a75f6baa9d5b10ca040259847f78"
+    },
+    {
+      "path": "src/literate_ai/adapters/host_install.py",
+      "sha256": "4d0aee36bb2dc4abac13c315edc700af6fa1e65e51c807d13ccc7ea02ffafa11"
+    }
+  ],
+  "source_equality": {
+    "original_installed_macos": "e6513d529fc289870c6cfc603fe38acf2063863a",
+    "renewed_native_matrix": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "terminal_main_matrix": "bc7e56f06ef9bad7b34ab9bd351c93df3c02c470",
+    "completion_record_base": "99f3fe19623ee4321bd02a635db5db6d702cd35e",
+    "all_four_whole_production_files_identical": true
+  },
+  "independent_review": {
+    "url": "https://github.com/jordanhubbard/literate-ai/pull/342#issuecomment-6710585186",
+    "reviewed_pr": 342,
+    "reviewed_head": "8d8d58bed2ab6d6055d7fa2dd048edb88a6b6852",
+    "scope": "Canonical project-local Flavor resolution, retained base/Python requirements, installed adopted status read-only behavior, seven focused refusal/positive controls and exact 27-job qualification before landing."
+  },
+  "original_macos_installed": {
+    "record": "verification/installed-selected-shim-status-qualification.json",
+    "source": "e6513d529fc289870c6cfc603fe38acf2063863a",
+    "wheel_sha256": "2d2f254084285f9a30bf11820b3cd961a752894968f0c9ba46c1e195114bdc77",
+    "framework_distribution_identity": "sha256:c2cdd93fae26e1733d0aa167bc25d54e8c05ee75dd83d2dffe98f2946b6465a4",
+    "canonical_wheel_gate_passed": true,
+    "status_fixture_nodes_per_observation": 569,
+    "authored_source_inputs_unchanged": 5224,
+    "physical_manifest": "flavors/legacy-project-shim/flavor.md",
+    "selected_canonical_flavor": "+flavor://legacy-adoption/build-legacy-shim",
+    "host_tools_ready_observed": true
+  },
+  "renewed_native_matrix": {
+    "run": 42488156657,
+    "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42488156657",
+    "source": "cad30c4e7c57e7be80e0d47ce245b5a56df363cc",
+    "jobs_passed": 27,
+    "jobs_total": 27,
+    "installed_golden_paths": [
+      {
+        "cell": "linux314",
+        "adopt": {
+          "host_toolchain_resolved": true,
+          "host_tools_ready": false,
+          "receipt": "current",
+          "release_authority": "original-source",
+          "stage": "retained"
+        },
+        "record_sha256": "b0632d4cd9075de8a6243df700057474fbfbedcf5a8792cf7309e16617723e02"
+      },
+      {
+        "cell": "windows312",
+        "adopt": {
+          "host_toolchain_resolved": true,
+          "host_tools_ready": false,
+          "receipt": "current",
+          "release_authority": "original-source",
+          "stage": "retained"
+        },
+        "record_sha256": "7840790a6dda86be229bca183ed486b5169bf7c1b662dc189301f5e5b5d21bd5"
+      }
+    ],
+    "windows_controls": [
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_custom_probe_refuses_before_any_host_observation_without_writes",
+        "status": "passed",
+        "seconds": "5.964",
+        "skip_reason": null
+      },
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_rendered_adoption_shim_resolves_coordinate_without_host_requirements",
+        "status": "passed",
+        "seconds": "8.627",
+        "skip_reason": null
+      },
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_symbolic_toolchain_refuses_without_reading_or_executing_target",
+        "status": "skipped",
+        "seconds": "0.003",
+        "skip_reason": "POSIX symlink counterexample"
+      },
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_copied_framework_flavor_retains_tools_even_if_sidecar_is_removed",
+        "status": "passed",
+        "seconds": "7.812",
+        "skip_reason": null
+      },
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_ordered_selection_and_missing_flavor_refusal",
+        "status": "passed",
+        "seconds": "5.915",
+        "skip_reason": null
+      },
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_duplicate_canonical_flavor_refuses_before_host_observation",
+        "status": "passed",
+        "seconds": "4.497",
+        "skip_reason": null
+      },
+      {
+        "case": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_oversized_sidecar_refuses_before_decoding_or_observation",
+        "status": "passed",
+        "seconds": "4.954",
+        "skip_reason": null
+      }
+    ],
+    "windows_control_summary": {
+      "passed": 6,
+      "skipped": 1,
+      "failed": 0
+    },
+    "windows_skip_boundary": "Native symbolic-link fixture requires supported symlink creation; the Linux native source run executes and passes that control."
+  },
+  "fresh_controller_source": {
+    "source": "ad43d52a3b2f458ae6709c1a29663d98775ee5a1",
+    "python": "3.12",
+    "platform": "linux-arm64",
+    "root_exit": 0,
+    "summary": {
+      "executed": 2655,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2655,
+      "selected": 2774,
+      "skipped": 119
+    },
+    "worker_groups": 597,
+    "case_events_and_report_agree": true,
+    "report_sha256": "c82a9c540c6c7931ca7cf318861313d9e2c6267b4915a334f606a180771e2cbf",
+    "event_audit_sha256": "88a2716590f33aa87ac38a6d2c42845d61926be1c04add39315d3902f3c97553",
+    "focused_cases": [
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_copied_framework_flavor_retains_tools_even_if_sidecar_is_removed"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_custom_probe_refuses_before_any_host_observation_without_writes"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_duplicate_canonical_flavor_refuses_before_host_observation"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_ordered_selection_and_missing_flavor_refusal"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_oversized_sidecar_refuses_before_decoding_or_observation"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_rendered_adoption_shim_resolves_coordinate_without_host_requirements"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_project_host_flavors.ProjectHostFlavorTests.test_symbolic_toolchain_refuses_without_reading_or_executing_target"
+      }
+    ],
+    "test_source_path": "tests/critical/test_project_host_flavors.py",
+    "test_source_sha256": "a1959c3c15abd463991f0e606668d198dcac6bbb534de75374f64dda902a6275",
+    "test_source_identical_to_completion_base": true
+  },
+  "terminal_main_integration": {
+    "source": "bc7e56f06ef9bad7b34ab9bd351c93df3c02c470",
+    "run": 42495268620,
+    "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42495268620",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs_passed": 27,
+    "jobs_total": 27,
+    "skipped_jobs": 0,
+    "website_run": 42495268552,
+    "website_conclusion": "success"
+  },
+  "boundaries": [
+    "Artifact and runtime identities retain their original exact revisions; source equality does not relabel an earlier wheel.",
+    "The Windows and Linux installed golden paths resolve the local shim while preserving aggregate host readiness false for separate missing capabilities.",
+    "Selecting the existing local shim is explicit fixture setup; automatic default selection is not claimed.",
+    "This record completes the host-status resolution goal. Overall 1.4 qualification, publication and other roadmap goals remain separate."
+  ],
+  "release14_qualified": false
+}
