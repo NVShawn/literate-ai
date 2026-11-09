@@ -1046,7 +1046,9 @@ def reopen_qualification_products(
         raise QualificationCaptureError(
             "qualification.capture.standard-authority-mismatch"
         )
-    verify_qualification_parity(reader, result=result, profile=current_profile)
+    verify_qualification_parity(
+        reader, result=result, profile=current_profile, component_lock=component_lock
+    )
     acceptances = tuple(
         StandardComponentAcceptanceEvidence.from_dict(reader.read_json(identity))
         for identity in run.acceptance_evidence_identities
@@ -1067,10 +1069,12 @@ def verify_qualification_parity(
     *,
     result: QualificationLifecycleResult,
     profile: object,
+    component_lock: ComponentLock | None = None,
 ) -> None:
     """Recompute every retained parity result against current profile authority."""
 
     from literate_ai.adapters.qualification_authority import (
+        qualification_root_library_export,
         qualification_verifier_case_map,
         qualification_verifier_record,
     )
@@ -1091,6 +1095,10 @@ def verify_qualification_parity(
     ):
         raise QualificationCaptureError(
             "qualification.capture.parity-authority-invalid"
+        )
+    if profile.uses_library_artifact and not isinstance(component_lock, ComponentLock):
+        raise QualificationCaptureError(
+            "qualification.capture.parity-library-authority-invalid"
         )
 
     def same(identity, document):
@@ -1123,6 +1131,20 @@ def verify_qualification_parity(
             same(canonical_identity(case.to_dict()), case.to_dict())
         for parity in result.parity_evidence:
             same(parity.identity, parity.to_dict())
+            artifact_export_identity = None
+            if profile.uses_library_artifact:
+                run = next(
+                    run
+                    for run in result.runs
+                    if run.run_identity == parity.run_identity
+                )
+                root = reopen_qualification_root(reader, run)
+                artifact_export_identity = qualification_root_library_export(
+                    root,
+                    component_lock_identity=component_lock.identity,
+                    root_revision=component_lock.root_revision,
+                    target_identity=run.target_profile_identity,
+                ).identity
             for evidence in parity.cases:
                 same(evidence.identity, evidence.to_dict())
                 case = cases[evidence.case_id]
@@ -1133,27 +1155,35 @@ def verify_qualification_parity(
                     ensure_ascii=False,
                 )
                 observations = []
-                for identity, command in (
-                    (evidence.baseline_observation_identity, profile.source_command),
+                for identity, command, selected_export in (
+                    (
+                        evidence.baseline_observation_identity,
+                        profile.source_command,
+                        None,
+                    ),
                     (
                         evidence.generated_observation_identity,
                         profile.generated_command,
+                        artifact_export_identity,
                     ),
                 ):
                     document = reader.read_json(identity)
                     stdout = ContentIdentity.parse_uri(document["stdout"])
                     stderr = ContentIdentity.parse_uri(document["stderr"])
-                    same(
-                        identity,
-                        {
-                            "schema": "literate-ai/qualification-process-observation@1",
-                            "command": [*command, argument],
-                            "exit_status": 0,
-                            "stdout": stdout.uri,
-                            "stderr": stderr.uri,
-                            "json_output_valid": True,
-                        },
-                    )
+                    expected = {
+                        "schema": "literate-ai/qualification-process-observation@1",
+                        "command": [*command, argument],
+                        "exit_status": 0,
+                        "stdout": stdout.uri,
+                        "stderr": stderr.uri,
+                        "json_output_valid": True,
+                    }
+                    if selected_export is not None:
+                        expected["schema"] = (
+                            "literate-ai/qualification-process-observation@2"
+                        )
+                        expected["artifact_export_identity"] = selected_export.uri
+                    same(identity, expected)
                     output = reader.read_bytes(stdout)
                     diagnostic = reader.read_bytes(stderr)
                     if max(len(output), len(diagnostic)) > profile.maximum_output_bytes:

@@ -22,13 +22,16 @@ from literate_ai.adapters.component_acceptance import (
     oracle_path,
     root_component_name,
 )
+from literate_ai.adapters.directory_artifacts import directory_export_bytes
 from literate_ai.adapters.generation_preparation import PreparedLockedGeneration
 from literate_ai.adapters.lifecycle.standard_local import (
     LocalIndependentAcceptanceCase,
     LocalIndependentAcceptanceOracle,
+    LocalStandardLifecycleError,
     LocalStandardLifecyclePorts,
 )
 from literate_ai.adapters.qualification_authority import (
+    qualification_root_library_export,
     qualification_verifier_case_map,
     qualification_verifier_record,
 )
@@ -61,6 +64,9 @@ from literate_ai.contracts import (
 )
 from literate_ai.contracts.library_products import LibraryArtifactProduct
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
+from literate_ai.contracts.standard_root_integration import (
+    StandardRootIntegrationEvidence,
+)
 from literate_ai.projects import LoadedProject
 from literate_ai.source_to_specification.contracts import (
     canonical_digest,
@@ -104,12 +110,24 @@ def _json_argument(value: object) -> str:
 
 
 def _expand(
-    command: Sequence[str], *, workspace: Path, build_root: Path
+    command: Sequence[str],
+    *,
+    workspace: Path,
+    build_root: Path,
+    library_artifact: Path | None = None,
 ) -> tuple[str, ...]:
-    return tuple(
-        item.replace("{workspace}", str(workspace)).replace(
-            "{build_root}", str(build_root)
+    if (
+        any("{library_artifact}" in item for item in command)
+        and library_artifact is None
+    ):
+        raise FilesystemQualificationError(
+            "qualification.library_artifact_custody_missing",
+            "qualified library parity has no exact current root export",
         )
+    return tuple(
+        item.replace("{workspace}", str(workspace))
+        .replace("{build_root}", str(build_root))
+        .replace("{library_artifact}", str(library_artifact))
         for item in command
     )
 
@@ -123,7 +141,12 @@ def _observe(
     maximum_output_bytes: int,
     identity_command: Sequence[str] | None = None,
     recorder: QualificationEvidenceRecorder | None = None,
+    artifact_export_identity: ContentIdentity | None = None,
 ) -> tuple[object | None, ContentIdentity, bool]:
+    if artifact_export_identity is not None and not isinstance(
+        artifact_export_identity, ContentIdentity
+    ):
+        raise TypeError("parity requires a typed library export identity")
     try:
         process = run_with_tree_kill(
             tuple(command),
@@ -161,6 +184,9 @@ def _observe(
         "stderr": "sha256:" + hashlib.sha256(process.stderr).hexdigest(),
         "json_output_valid": valid,
     }
+    if artifact_export_identity is not None:
+        document["schema"] = "literate-ai/qualification-process-observation@2"
+        document["artifact_export_identity"] = artifact_export_identity.uri
     observation = canonical_identity(document)
     if recorder is not None:
         recorder.remember_bytes(process.stdout)
@@ -338,6 +364,22 @@ class FilesystemStandardQualificationLifecyclePort:
             str, tuple[QualificationLifecycleExecution, LocalStandardLifecyclePorts]
         ] = {}
         self.profile = profile
+        if profile.uses_library_artifact and (
+            prepared.locked_authority_snapshot.authority.root_authoring.resolved_kind
+            != "library"
+        ):
+            raise FilesystemQualificationError(
+                "qualification.library_artifact_root_required",
+                "qualified library parity requires a library root Component",
+            )
+        self.root_library_contexts: dict[
+            str,
+            tuple[
+                QualificationLifecycleRequest,
+                StandardRootIntegrationEvidence,
+                LocalStandardLifecyclePorts,
+            ],
+        ] = {}
         self.acceptance_oracle: LocalIndependentAcceptanceOracle | LibraryAcceptance = (
             _qualification_acceptance_oracle(project, prepared, profile)
         )
@@ -510,6 +552,18 @@ class FilesystemStandardQualificationLifecyclePort:
                 execution,
                 adapter.runtime.lifecycle_ports,
             )
+        if self.profile.uses_library_artifact:
+            integration = execution.lifecycle.root_integration
+            if integration is None:
+                raise FilesystemQualificationError(
+                    "qualification.library_artifact_custody_missing",
+                    "qualified library parity lacks completed root integration",
+                )
+            self.root_library_contexts[request.run_identity.uri] = (
+                request,
+                integration,
+                adapter.runtime.lifecycle_ports,
+            )
         return execution
 
 
@@ -556,6 +610,58 @@ class FilesystemQualificationParityVerifier:
     def provider_identity(self) -> ContentIdentity:
         return self._provider_identity
 
+    def _library_artifact(self, run_identity: ContentIdentity):
+        """Return exact run-owned material and a drift detector, not a sandbox."""
+
+        def current():
+            try:
+                request, integration, ports = self.lifecycle.root_library_contexts[
+                    run_identity.uri
+                ]
+                lock = self.lifecycle.prepared.locked_authority_snapshot.authority.lock
+                if (
+                    not isinstance(request, QualificationLifecycleRequest)
+                    or request.run_identity != run_identity
+                    or request.source_snapshot_identity != self.source_snapshot_identity
+                    or request.component_lock_identity != lock.identity
+                ):
+                    raise ValueError("qualification.library_artifact_run_mismatch")
+                self.lifecycle.require_current_authority()
+                export = qualification_root_library_export(
+                    integration,
+                    component_lock_identity=lock.identity,
+                    root_revision=lock.root_revision,
+                    target_identity=request.target_profile_identity,
+                )
+                custody = ports.project_package_custody(
+                    integration.package_plan, integration.package_result
+                )
+                path = require_safe_directory(
+                    custody.artifact_paths[export.identity.uri]
+                )
+                if not path.is_relative_to(custody.root.resolve(strict=True)):
+                    raise ValueError("qualification.library_artifact_path_mismatch")
+                material = directory_export_bytes(path)
+                if material != ports.read_artifact_blob(export.blob):
+                    raise ValueError("qualification.library_artifact_material_mismatch")
+                return export.identity, path
+            except (
+                AttributeError,
+                KeyError,
+                TypeError,
+                ValueError,
+                OSError,
+                LocalStandardLifecycleError,
+                UnsafeFilesystemPathError,
+            ) as exc:
+                raise FilesystemQualificationError(
+                    "qualification.library_artifact_custody_missing",
+                    "qualified library parity differs from exact current run custody",
+                ) from exc
+
+        identity, path = current()
+        return identity, path, current
+
     def verify(
         self,
         *,
@@ -589,7 +695,16 @@ class FilesystemQualificationParityVerifier:
                 "qualification.root_tree_missing",
                 "generated root Component tree has no retained custody",
             )
-        native_root = generated_root.joinpath(*Path(self.profile.generated_root).parts)
+        library_artifact = None
+        artifact_export_identity = None
+        artifact_current = None
+        if self.profile.uses_library_artifact:
+            artifact_export_identity, library_artifact, artifact_current = (
+                self._library_artifact(run_identity)
+            )
+        native_root = (library_artifact or generated_root).joinpath(
+            *Path(self.profile.generated_root).parts
+        )
         try:
             native_root = require_safe_directory(native_root)
         except UnsafeFilesystemPathError as exc:
@@ -629,12 +744,21 @@ class FilesystemQualificationParityVerifier:
                 maximum_output_bytes=self.profile.maximum_output_bytes,
                 recorder=recorder,
             )
+            if artifact_current is not None and artifact_current() != (
+                artifact_export_identity,
+                library_artifact,
+            ):
+                raise FilesystemQualificationError(
+                    "qualification.library_artifact_custody_changed",
+                    "qualified library parity material changed before execution",
+                )
             generated_value, generated_observation, generated_valid = _observe(
                 (
                     *_expand(
                         self.profile.generated_command,
                         workspace=generated_root,
                         build_root=build_root,
+                        library_artifact=library_artifact,
                     ),
                     argument,
                 ),
@@ -644,7 +768,16 @@ class FilesystemQualificationParityVerifier:
                 maximum_output_bytes=self.profile.maximum_output_bytes,
                 identity_command=(*self.profile.generated_command, argument),
                 recorder=recorder,
+                artifact_export_identity=artifact_export_identity,
             )
+            if artifact_current is not None and artifact_current() != (
+                artifact_export_identity,
+                library_artifact,
+            ):
+                raise FilesystemQualificationError(
+                    "qualification.library_artifact_custody_changed",
+                    "qualified library parity material changed during execution",
+                )
             cases.append(
                 QualificationParityCaseEvidence(
                     binding.case_id,
@@ -747,6 +880,7 @@ class FilesystemStandardQualificationAdapter:
         self.library_captures = ()
         self.evidence_blobs = ()
         self.lifecycle.product_sources.clear()
+        self.lifecycle.root_library_contexts.clear()
         if plan.case_map != self.parity.case_map:
             raise FilesystemQualificationError(
                 "qualification.case_map_mismatch",
@@ -859,6 +993,7 @@ class FilesystemStandardQualificationAdapter:
             # Captures contain immutable bytes, not runtimes or scratch paths.
             # A failed later run cannot leave an earlier run exposed as qualified.
             self.lifecycle.product_sources.clear()
+            self.lifecycle.root_library_contexts.clear()
             self.lifecycle.evidence_recorder = None
 
 

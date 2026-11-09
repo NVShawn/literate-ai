@@ -296,6 +296,7 @@ class QualificationCaptureTests(unittest.TestCase):
         adapter.lifecycle = SimpleNamespace(
             retain_library_products=True,
             product_sources={},
+            root_library_contexts={},
             require_current_authority=Mock(),
         )
         adapter.parity = SimpleNamespace(case_map=case_map)

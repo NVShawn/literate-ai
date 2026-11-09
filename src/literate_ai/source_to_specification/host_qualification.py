@@ -61,7 +61,9 @@ def _content_identity(value: object, *, label: str) -> str:
     return value
 
 
-def _command(value: Sequence[str], *, label: str) -> tuple[str, ...]:
+def _command(
+    value: Sequence[str], *, label: str, library_artifact: bool = False
+) -> tuple[str, ...]:
     command = tuple(value)
     if not command or any(not isinstance(item, str) or not item for item in command):
         raise SourceToSpecificationError(
@@ -73,6 +75,7 @@ def _command(value: Sequence[str], *, label: str) -> tuple[str, ...]:
         for item in command
         for match in _PLACEHOLDER.finditer(item)
         if match.group(0) not in _ALLOWED_PLACEHOLDERS
+        and not (library_artifact and match.group(0) == "{library_artifact}")
     }
     if unknown:
         raise SourceToSpecificationError(
@@ -373,7 +376,9 @@ class LocalQualificationProfile:
         object.__setattr__(
             self,
             "generated_command",
-            _command(self.generated_command, label="generated_command"),
+            _command(
+                self.generated_command, label="generated_command", library_artifact=True
+            ),
         )
         if not self.test_commands or not self.cases:
             raise SourceToSpecificationError(
@@ -417,6 +422,12 @@ class LocalQualificationProfile:
                 "qualification_host.profile_invalid",
                 "process bounds must be positive",
             )
+
+    @property
+    def uses_library_artifact(self) -> bool:
+        """Opt into exact Standard root-export custody, never path discovery."""
+
+        return any("{library_artifact}" in item for item in self.generated_command)
 
     @property
     def identity(self) -> str:
@@ -500,6 +511,11 @@ class LocalHostSpecRegenerator:
         profile: LocalQualificationProfile,
         environment: Mapping[str, str] | None = None,
     ) -> None:
+        if profile.uses_library_artifact:
+            raise SourceToSpecificationError(
+                "qualification_host.standard_library_context_required",
+                "qualified library parity requires the Standard lifecycle",
+            )
         self.generation_command = _command(
             generation_command, label="generation_command"
         )
@@ -597,6 +613,11 @@ class LocalHostParityVerifier:
         profile: LocalQualificationProfile,
         environment: Mapping[str, str] | None = None,
     ) -> None:
+        if profile.uses_library_artifact:
+            raise SourceToSpecificationError(
+                "qualification_host.standard_library_context_required",
+                "qualified library parity requires the Standard lifecycle",
+            )
         self.source_root = source_root.resolve(strict=True)
         self.source_snapshot_id = source_snapshot_id
         self.profile = profile

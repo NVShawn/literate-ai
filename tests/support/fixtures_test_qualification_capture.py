@@ -503,6 +503,7 @@ class QualificationCaptureTests(unittest.TestCase):
         adapter.lifecycle = SimpleNamespace(
             retain_library_products=True,
             product_sources={},
+            root_library_contexts={},
             require_current_authority=Mock(),
         )
         adapter.parity = SimpleNamespace(case_map=case_map)
@@ -670,10 +671,20 @@ class QualificationCaptureTests(unittest.TestCase):
         promotion_audit=None,
         artifact_payloads=None,
         allocation_salt="",
+        library_artifact_context=False,
     ):
         producer, surface, oracle = self.library_authority_fixture(
             bind_current_target=promotion_audit is not None
         )
+        if library_artifact_context:
+            self.current_profile = replace(
+                self.current_profile,
+                generated_command=(
+                    "fixture-generated",
+                    "{library_artifact}",
+                    "{build_root}",
+                ),
+            )
         qualification = lifecycle_fixtures.QualificationLifecycleRunnerTests()
         qualification.setUp()
         import tempfile
@@ -842,12 +853,12 @@ class QualificationCaptureTests(unittest.TestCase):
                     ),
                 )
             profile = self.current_profile
+            from literate_ai.adapters.qualification_authority import (
+                qualification_verifier_record,
+            )
+
             provider = recorder.remember_json(
-                {
-                    "provider": "filesystem-standard-independent-parity@1",
-                    "source_snapshot_identity": run.source_snapshot_identity.uri,
-                    "profile_identity": profile.identity,
-                }
+                qualification_verifier_record(profile, run.source_snapshot_identity)
             )
             recorder.remember_json(profile.to_dict())
             qualification.case_map = QualificationVerifierCaseMap(
@@ -876,7 +887,14 @@ class QualificationCaptureTests(unittest.TestCase):
                     separators=(",", ":"),
                     ensure_ascii=False,
                 )
-                for command in (profile.source_command, profile.generated_command):
+                for generated, command in (
+                    (False, profile.source_command),
+                    (True, profile.generated_command),
+                ):
+                    selected_export = None
+                    if generated and profile.uses_library_artifact:
+                        root = execution.lifecycle.root_integration
+                        selected_export = root.package_plan.root_artifact_identity
                     with patch(
                         "literate_ai.adapters.qualification.run_with_tree_kill",
                         return_value=subprocess.CompletedProcess(
@@ -890,6 +908,7 @@ class QualificationCaptureTests(unittest.TestCase):
                             timeout_seconds=profile.timeout_seconds,
                             maximum_output_bytes=profile.maximum_output_bytes,
                             recorder=recorder,
+                            artifact_export_identity=selected_export,
                         )
                     observation_ids.append(observation)
                 evidence = QualificationParityCaseEvidence(

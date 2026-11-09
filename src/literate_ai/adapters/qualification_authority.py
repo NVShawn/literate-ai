@@ -6,7 +6,11 @@ from pathlib import Path, PurePosixPath
 
 from literate_ai._filesystem import require_safe_directory
 from literate_ai.contracts import ContentIdentity, canonical_identity
+from literate_ai.contracts.executable_components import ArtifactExport
 from literate_ai.contracts.paths import canonical_relative_posix_path
+from literate_ai.contracts.standard_root_integration import (
+    StandardRootIntegrationEvidence,
+)
 from literate_ai.projects import PinnedInputClosure
 from literate_ai.source_to_specification.host_qualification import (
     LocalQualificationProfile,
@@ -27,10 +31,46 @@ def qualification_verifier_record(
             "qualification verifier requires typed profile and source identity"
         )
     return {
-        "provider": "filesystem-standard-independent-parity@1",
+        "provider": (
+            "filesystem-standard-independent-parity@2"
+            if profile.uses_library_artifact
+            else "filesystem-standard-independent-parity@1"
+        ),
         "source_snapshot_identity": source_snapshot_identity.uri,
         "profile_identity": profile.identity,
     }
+
+
+def qualification_root_library_export(
+    root: StandardRootIntegrationEvidence,
+    *,
+    component_lock_identity: ContentIdentity,
+    root_revision: ContentIdentity,
+    target_identity: ContentIdentity,
+) -> ArtifactExport:
+    """Select only the current run's exact library root; no fallback or search."""
+
+    if (
+        not isinstance(root, StandardRootIntegrationEvidence)
+        or root.component_lock_identity != component_lock_identity
+        or root.package_plan.root_component_revision != root_revision
+        or root.package_plan.target_identity != target_identity
+    ):
+        raise ValueError("qualification.library_artifact_root_mismatch")
+    matches = tuple(
+        export
+        for manifest in root.artifact_graph.manifests
+        for export in manifest.exports
+        if export.identity == root.package_plan.root_artifact_identity
+    )
+    if (
+        len(matches) != 1
+        or matches[0].role != "library"
+        or matches[0].component_revision != root_revision
+        or matches[0].target_identity != target_identity
+    ):
+        raise ValueError("qualification.library_artifact_export_mismatch")
+    return matches[0]
 
 
 def qualification_verifier_case_map(

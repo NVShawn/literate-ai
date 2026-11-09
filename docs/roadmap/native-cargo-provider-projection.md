@@ -479,3 +479,23 @@ was fabricated or signed. A separately reviewed explicit policy-authority path,
 its own qualified successor wheel, real two-run regeneration, independent
 archive replay and retained consumer admission remain required. This full source
 gate and the narrower public-v2 result do not certify those unfinished paths.
+
+
+## Exact qualified-root parity context
+
+Regenerative parity can explicitly use `{library_artifact}` in its generated
+command to consume the exact current run's sealed root library projection.
+The profile keeps its unexpanded command identity; a versioned observation binds
+the actual ArtifactExport identity without putting moving export identities in
+oracle authority. Live checks reuse current package custody, and retained replay
+requires the caller's current Component lock and the same run/root selection.
+Old source profiles and their observation protocol remain unchanged. Missing,
+wrong-run, wrong-role, wrong-target, stale or changed material refuses without a
+source-tree fallback. This is drift detection under the existing local execution
+policy, not atomic or OS-enforced file isolation.
+
+Focused native/package, parser and contract-archive controls are preparatory
+checks. Full current-source validation, genuine two-clean model-backed graph
+qualification, independent verifier/provider alias support, sealed public replay
+and actual retained check/materialize/admit remain mandatory. An ordinary native
+consumer diamond or transported contract fixture alone does not complete them.

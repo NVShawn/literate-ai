@@ -404,6 +404,25 @@ attestations. Local execution is explicitly authorized and unsandboxed; organiza
 integrations may replace these providers and the local HMAC root with their own trusted
 execution and signing services.
 
+Standard library qualification can opt into the exact qualified root export in
+`generated_command` with `{library_artifact}`. The lifecycle supplies this path
+from the current run's completed package custody; it never searches build
+folders or falls back to the generated source tree. The working directory is
+that export's safe `generated_root` subdirectory. This permits a native Cargo
+probe to consume the sealed provider projection, including shared nominal types.
+Use `{build_root}` for compiler targets and other outputs; the sealed export is
+an input. Ordinary `{workspace}` source profiles retain their existing behavior.
+
+The new placeholder is allowed only in the generated parity command and requires
+a Standard library root. Baseline, build, test and legacy local-host routes do
+not accept this context. Generated observations bind the actual root export
+identity; archive replay reopens the exact run's root and requires a separately
+supplied current Component lock. Missing, stale, substituted or changed material
+refuses. Before/after custody checks detect observed drift under the existing
+unsandboxed execution policy; they do not provide OS-enforced immutability or
+atomic execution. The probe must actually call the public API: an export-bound
+constant output is still not independent behavioral acceptance.
+
 Each successful clean run is checkpointed under
 `BUILD_DIR/qualification-checkpoints/`. This is signed evidence caching, not generated
 source caching: every measured run still requires a source-cache miss. If a later run is
