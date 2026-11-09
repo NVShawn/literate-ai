@@ -14,6 +14,49 @@ provisions the exact package, requires reviewed retired roots already to be abse
 runs the complete ordered gates and independently reviewed per-target test inventory
 under current custody, and returns a canonical admission receipt.
 
+## Author independent acceptance for native provider types
+
+A Rust `literate-ai/library-acceptance-oracle@2` may declare
+`rust_harness.qualified_providers` when its independent harness needs the exact
+native provider types already used by the qualified library. This is an authored
+interface selector. Author it from the current locked Component graph before
+source generation, together with the unchanged harness, cases, reviewed lockfile
+and expected resolution. Do not derive expectations from generated source or
+update them to match a candidate.
+
+When present, `qualified_providers` is a nonempty array sorted by Component
+revision URI, containing every node in the library's complete native provider
+graph, including transitive-only providers. Each closed record contains:
+
+- `component_revision` and `import_surface_identity`: canonical ContentIdentity
+  objects for the exact locked revision and public Rust import surface.
+- `package` and `version`: the exact public crate name and semantic version.
+- `features`: the uniquely sorted expected selected feature names.
+- `alias`: an exact direct Cargo alias, or `null` for a transitive-only provider.
+
+A resolved provider package uses scope `qualified:<component-revision-URI>` and
+its original provider-relative manifest, such as `source/Cargo.toml`. It does not
+name a generated export digest or physical projection directory. A non-null alias
+must select that exact resolved package from the harness root. Aliases must not
+collide with the library or registry aliases, including Rust's hyphen/underscore
+normalization. The existing aggregate direct-alias, feature and oracle byte
+limits still apply. Omitting the field preserves the previous declaration and
+identity; an explicitly empty field or an undeclared qualified scope refuses.
+
+The framework resolves physical paths only from current finalized build inputs,
+qualified typed exports and package custody. It checks the complete actual graph,
+original manifests and materials before and after execution. Each run separately
+binds its moving export, graph, source and manifest identities into versioned
+acceptance evidence. A `null` alias does not waive current graph admission.
+Archived replay independently receives the current lock and command contracts;
+it checks exact retained native evidence and treats historical POSIX/Windows paths
+as inert coordinates without opening them. No candidate, archive or decoded graph
+grants host execution or importer admission.
+
+See the [native Cargo contract](../roadmap/native-cargo-provider-projection.md)
+for graph and qualification boundaries. Controlled-source development checks do
+not establish genuine model qualification or retained-consumer acceptance.
+
 ## Prepare reviewed inputs
 
 The importing maintainer supplies the reviewed retained-library binding, Cargo

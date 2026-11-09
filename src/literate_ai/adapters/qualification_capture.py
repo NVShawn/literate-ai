@@ -230,9 +230,11 @@ def capture_qualification_run(
         or ordered(item.generated_test_suite_identity for item in acceptances)
         != run.generated_test_suite_identities
         or ordered(
-            case.case_identity
-            for item in acceptances
-            for case in item.generated_tests.cases
+            {
+                case.case_identity
+                for item in acceptances
+                for case in item.generated_tests.cases
+            }
         )
         != run.generated_test_case_identities
         or sum(len(item.generated_tests.cases) for item in acceptances)
@@ -961,7 +963,9 @@ def reopen_qualification_products(
     if root_product is None:
         raise QualificationCaptureError("qualification.capture.root-export-mismatch")
     for member in result.runs:
-        execution = reopen_qualification_run(reader, member, current_commands=commands)
+        execution = reopen_qualification_run(
+            reader, member, current_commands=commands, component_lock=component_lock
+        )
         if {
             node.component_revision for node in execution.lifecycle.node_results
         } != set(recipes):
@@ -1029,6 +1033,8 @@ def reopen_qualification_products(
             ),
             component_lock=component_lock,
             oracle=oracle,
+            current_commands=commands,
+            lifecycle=execution.lifecycle,
         )
     from literate_ai.contracts.projects import StandardProjectLifecycleDriver
 
@@ -1525,6 +1531,8 @@ def verify_qualification_build(
     build: StandardBuildEvidence,
     provider_exports: Mapping | None = None,
     current_commands: Mapping | None = None,
+    component_lock: ComponentLock | None = None,
+    source_candidate: object | None = None,
 ) -> None:
     """Bind build processes and the artifact tree's metadata-only transition."""
 
@@ -1733,7 +1741,15 @@ def verify_qualification_build(
             )
 
             verify_qualification_cargo_build(
-                reader, plan=plan, observation=value, files=artifact_tree()
+                reader,
+                plan=plan,
+                observation=value,
+                files=artifact_tree(),
+                provider_exports=provider_exports,
+                current_commands=current_commands,
+                component_lock=component_lock,
+                source_candidate=source_candidate,
+                realized_exports=build.exports,
             )
             return
         if value.get("schema") == "literate-ai/mix-build-evidence@1":
@@ -2413,6 +2429,7 @@ def reopen_qualification_run(
     run: QualificationLifecycleRunEvidence,
     *,
     current_commands: Mapping | None = None,
+    component_lock: ComponentLock | None = None,
 ) -> QualificationLifecycleExecution:
     """Reopen the complete typed lifecycle membership claimed by one run.
 
@@ -2428,6 +2445,11 @@ def reopen_qualification_run(
 
     if not isinstance(run, QualificationLifecycleRunEvidence):
         raise QualificationCaptureError("qualification.capture.records-invalid")
+    if (
+        component_lock is not None
+        and component_lock.identity != run.component_lock_identity
+    ):
+        raise QualificationCaptureError("qualification.capture.current-lock-mismatch")
     lifecycle = reopen_qualification_lifecycle(reader, run.lifecycle_result_identity)
     root = reopen_qualification_root(reader, run)
     receipt = ProjectTestReceipt.from_dict(
@@ -2517,6 +2539,8 @@ def reopen_qualification_run(
                 for export in member.exports
             },
             current_commands=current_commands,
+            component_lock=component_lock,
+            source_candidate=node.source_output.candidate,
         )
         verify_qualification_generated_tests(
             reader,
@@ -2648,6 +2672,8 @@ def verify_qualification_library_acceptance(
     product: LibraryArtifactProduct,
     component_lock: ComponentLock,
     oracle: LibraryAcceptance,
+    current_commands=None,
+    lifecycle=None,
 ) -> None:
     """Reopen exact library oracle cases and matching retained observations.
 
@@ -2796,12 +2822,26 @@ def verify_qualification_library_acceptance(
             rust_execution = ContentIdentity.parse_uri(
                 actual["rust_harness_execution_identity"]
             )
+            qualified_context = None
+            if oracle.rust_harness.qualified_providers:
+                from literate_ai.adapters.rust_library_harness_providers import (
+                    reopen_rust_qualified_providers,
+                )
+
+                qualified_context = reopen_rust_qualified_providers(
+                    reader,
+                    root=root,
+                    component_lock=component_lock,
+                    current_commands=current_commands,
+                    lifecycle=lifecycle,
+                )
             verify_rust_harness_execution(
                 reader,
                 rust_execution,
                 oracle=oracle,
                 library_alias=surface.package,
                 surface=surface,
+                qualified_context=qualified_context,
             )
         except (KeyError, TypeError, ValueError, OSError, RecursionError) as exc:
             raise QualificationCaptureError(

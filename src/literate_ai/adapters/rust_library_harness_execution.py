@@ -101,7 +101,9 @@ def _require_results(raw, oracle):
         _refuse("result_mismatch")
 
 
-def _manifest(oracle, *, library_alias, library_directory):
+def _manifest(
+    oracle, *, library_alias, library_directory, qualified_context=None, export=None
+):
     declaration = oracle.rust_harness
     declaration.require_library_alias(library_alias)
     library = next(
@@ -119,6 +121,24 @@ def _manifest(oracle, *, library_alias, library_directory):
             "features": list(library.features),
         }
     }
+    if declaration.qualified_providers:
+        from literate_ai.adapters.rust_library_harness_providers import (
+            RustQualifiedProviderContext,
+        )
+
+        if (
+            type(qualified_context) is not RustQualifiedProviderContext
+            or export is None
+        ):
+            _refuse("qualified_context")
+        for row, _source, manifest in qualified_context.selections(declaration):
+            if row.alias is not None:
+                dependencies[row.alias] = {
+                    "package": row.package,
+                    "path": str(export.joinpath(*manifest.parts).parent),
+                    "default-features": False,
+                    "features": list(row.features),
+                }
     for row in declaration.dependencies:
         dependencies[row.alias] = {
             "package": row.package,
@@ -208,7 +228,14 @@ def _require_source_configuration(workspace, home, roots):
 
 
 def observe_rust_harness_resolution(
-    raw, *, declaration, harness, export, roots, current_paths=True
+    raw,
+    *,
+    declaration,
+    harness,
+    export,
+    roots,
+    current_paths=True,
+    qualified_context=None,
 ):
     """Project actual Cargo identities to exact captured, portable owners.
 
@@ -249,6 +276,15 @@ def observe_rust_harness_resolution(
         ("library", export),
         *(("input:" + name, root) for name, root in roots),
     )
+    provider_manifests = {}
+    if declaration.qualified_providers:
+        if qualified_context is None:
+            _refuse("qualified_context")
+        for row, source, manifest in qualified_context.selections(declaration):
+            provider_manifests[export.joinpath(*manifest.parts)] = (
+                row.scope,
+                source.manifest,
+            )
     for package in packages:
         if type(package) is not dict or type(package.get("id")) is not str:
             _refuse("metadata_package")
@@ -260,13 +296,21 @@ def observe_rust_harness_resolution(
             or (current_paths and path.resolve(strict=True) != path)
         ):
             _refuse("metadata_path")
-        matches = [(scope, root) for scope, root in owners if path.is_relative_to(root)]
-        if len(matches) != 1 or coordinate in selected:
+        if coordinate in selected:
             _refuse("metadata_owner")
-        scope, root = matches[0]
+        if path in provider_manifests:
+            scope, manifest_name = provider_manifests[path]
+        else:
+            matches = [
+                (scope, root) for scope, root in owners if path.is_relative_to(root)
+            ]
+            if len(matches) != 1:
+                _refuse("metadata_owner")
+            scope, root = matches[0]
+            manifest_name = path.relative_to(root).as_posix()
         selected[coordinate] = RustHarnessResolvedPackage(
             scope,
-            path.relative_to(root).as_posix(),
+            manifest_name,
             package.get("name"),
             package.get("version"),
             package.get("source"),
@@ -345,11 +389,20 @@ def execute_rust_library_harness(
     record_bytes,
     evidence_root,
     allow_host_execution,
+    qualified_context=None,
 ):
     """Run only under the caller's current Standard acceptance authorization."""
     if allow_host_execution is not True or type(oracle) is not RustLibraryAcceptance:
         _refuse("authority_unavailable")
     declaration = oracle.rust_harness
+    if declaration.qualified_providers:
+        from literate_ai.adapters.rust_library_harness_providers import (
+            RustQualifiedProviderContext,
+        )
+
+        if type(qualified_context) is not RustQualifiedProviderContext:
+            _refuse("qualified_context")
+        qualified_context.selections(declaration)
     cargo_owner = getattr(cargo._authority_guard, "__self__", None)
     rust_owner = getattr(rustc._authority_guard, "__self__", None)
     if (
@@ -455,6 +508,8 @@ def execute_rust_library_harness(
             oracle,
             library_alias=library_alias,
             library_directory=library_manifest.parent,
+            qualified_context=qualified_context,
+            export=export,
         )
         (stage / "src").mkdir(mode=0o700)
         for path, content in (
@@ -577,6 +632,7 @@ def execute_rust_library_harness(
                 harness=stage,
                 export=export,
                 roots=roots,
+                qualified_context=qualified_context,
             )
 
         resolution = metadata("metadata_before")
@@ -615,7 +671,16 @@ def execute_rust_library_harness(
         native.require_unchanged()
         current()
         observation = {
-            "schema": "literate-ai/rust-library-harness-execution@1",
+            "schema": (
+                "literate-ai/rust-library-harness-execution@2"
+                if declaration.qualified_providers
+                else "literate-ai/rust-library-harness-execution@1"
+            ),
+            **(
+                {"qualified_providers": qualified_context.observation(declaration)}
+                if declaration.qualified_providers
+                else {}
+            ),
             "oracle_identity": oracle.identity.uri,
             "declaration_identity": canonical_identity(declaration.to_dict()).uri,
             "verifier_inputs_identity": inputs.identity.uri,
@@ -650,7 +715,9 @@ def execute_rust_library_harness(
         current()
 
 
-def verify_rust_harness_execution(reader, identity, *, oracle, library_alias, surface):
+def verify_rust_harness_execution(
+    reader, identity, *, oracle, library_alias, surface, qualified_context=None
+):
     """Reopen exact v2 command assertions against current verifier custody.
 
     Historical paths are coordinates for pure graph comparison only. No archived
@@ -676,6 +743,23 @@ def verify_rust_harness_execution(reader, identity, *, oracle, library_alias, su
         "rust_observation",
         "commands",
     }
+    if type(document) is not dict:
+        _refuse("archive_invalid")
+    if (
+        type(oracle) is RustLibraryAcceptance
+        and oracle.rust_harness.qualified_providers
+    ):
+        fields.add("qualified_providers")
+        from literate_ai.adapters.rust_library_harness_providers import (
+            RustQualifiedProviderContext,
+        )
+
+        if type(qualified_context) is not RustQualifiedProviderContext:
+            _refuse("qualified_context")
+        if document.get("qualified_providers") != qualified_context.observation(
+            oracle.rust_harness
+        ):
+            _refuse("qualified_context")
     if (
         type(oracle) is not RustLibraryAcceptance
         or type(document) is not dict
@@ -723,6 +807,8 @@ def verify_rust_harness_execution(reader, identity, *, oracle, library_alias, su
         library_directory=export.joinpath(
             *PurePosixPath(library.manifest).parts
         ).parent,
+        qualified_context=qualified_context,
+        export=export,
     )
     commands = document["commands"]
     phases = ("metadata_before", "build", "metadata_after", "execute")
@@ -860,7 +946,12 @@ def verify_rust_harness_execution(reader, identity, *, oracle, library_alias, su
     ]
     with capture_loaded_rust_library_verifier_inputs(oracle) as current:
         if (
-            document["schema"] != "literate-ai/rust-library-harness-execution@1"
+            document["schema"]
+            != (
+                "literate-ai/rust-library-harness-execution@2"
+                if declaration.qualified_providers
+                else "literate-ai/rust-library-harness-execution@1"
+            )
             or document["oracle_identity"] != oracle.identity.uri
             or document["declaration_identity"]
             != canonical_identity(declaration.to_dict()).uri
@@ -918,6 +1009,7 @@ def verify_rust_harness_execution(reader, identity, *, oracle, library_alias, su
                         (row["scope"], path_type(row["root"])) for row in inputs
                     ),
                     current_paths=False,
+                    qualified_context=qualified_context,
                 )
             elif index == 3:
                 _require_results(stdout, oracle)

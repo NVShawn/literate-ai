@@ -92,6 +92,7 @@ def _fixture(
     library_names: frozenset[str] = frozenset(),
     dependency_kind: DependencyKind = DependencyKind.GENERATION,
     root_name: str = "application",
+    diamond: bool = False,
 ):
     component_models = component_models or {}
     implementation_skill_content = (
@@ -175,6 +176,16 @@ def _fixture(
         "service": ("service-api", b'{"interface":"service-public"}'),
         "storage": ("storage-api", b'{"interface":"storage-public"}'),
     }
+    if diamond:
+        if root_name != "application":
+            raise ValueError("diamond fixture requires the three-node root")
+        requirements["application"] += (
+            CapabilityRequirement("storage", "storage-api", ">=1,<2", dependency_kind),
+        )
+        interfaces["application"] = (
+            "application-api",
+            b'{"interface":"application-public"}',
+        )
     authorings = {}
     for name in names:
         authoring = component_authoring(
@@ -345,12 +356,17 @@ def _fixture(
     for consumer_name, provider_name in (
         ("application", "service"),
         ("service", "storage"),
+        *((("application", "storage"),) if diamond else ()),
     ):
         if consumer_name not in nodes:
             continue
         consumer = nodes[consumer_name]
         provider = nodes[provider_name]
-        requirement = requirements[consumer_name][0]
+        requirement = next(
+            item
+            for item in requirements[consumer_name]
+            if item.requirement_id == provider_name
+        )
         edge = ExecutableComponentEdge(
             consumer.revision.identity,
             provider.revision.identity,
@@ -366,6 +382,7 @@ def _fixture(
         nodes[consumer_name] = replace(
             consumer,
             requirement_constraint_satisfactions=(
+                *consumer.requirement_constraint_satisfactions,
                 RequirementConstraintSatisfaction(
                     consumer.revision.identity,
                     provider.revision.identity,

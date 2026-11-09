@@ -1039,10 +1039,15 @@ class QualificationLifecycleRunner:
                 for node in nodes
             ),  # type: ignore[union-attr]
             ordered(node.generated_test_evidence.identity for node in nodes),  # type: ignore[union-attr]
+            # One raw content record may be exercised by several distinct node
+            # suites. Keep its inventory unique; all executions remain counted
+            # above and bound by their per-node suite/process evidence.
             ordered(
-                case.case_identity
-                for node in nodes
-                for case in node.generated_test_evidence.cases  # type: ignore[union-attr]
+                {
+                    case.case_identity
+                    for node in nodes
+                    for case in node.generated_test_evidence.cases  # type: ignore[union-attr]
+                }
             ),
             ordered(node.acceptance_evidence.identity for node in nodes),  # type: ignore[union-attr]
             ordered(item.identity for item in membership.cache_decisions),

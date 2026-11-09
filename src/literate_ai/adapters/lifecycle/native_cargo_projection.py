@@ -437,7 +437,14 @@ def project_native_cargo_graph(*, graph, root_manifest, root_manifest_path, sour
 
 
 def validate_native_cargo_metadata(
-    *, graph, root_manifest, root_manifest_path, sources, projection_root, metadata
+    *,
+    graph,
+    root_manifest,
+    root_manifest_path,
+    sources,
+    projection_root,
+    metadata,
+    current_paths=True,
 ):
     """Join actual Cargo path packages and aliases to the admitted shared graph.
 
@@ -445,11 +452,12 @@ def validate_native_cargo_metadata(
     accepted from metadata. Registry nodes remain subject to normal lock/SBOM
     validation; this function never admits an additional path package.
     """
-    from pathlib import Path
+    from pathlib import Path, PurePosixPath, PureWindowsPath
 
     _require(type(graph) is NativeCargoProviderGraph, "graph")
+    coordinate_type = Path if current_paths else (PurePosixPath, PureWindowsPath)
     _require(
-        isinstance(projection_root, Path) and projection_root.is_absolute(),
+        isinstance(projection_root, coordinate_type) and projection_root.is_absolute(),
         "projection_root",
     )
     _path(root_manifest_path)

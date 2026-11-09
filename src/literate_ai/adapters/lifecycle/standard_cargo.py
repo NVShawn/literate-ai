@@ -306,6 +306,50 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         validate_native_cargo_provider_locks(graph=native[0], sources=native[1])
         return native
 
+    def _rust_harness_provider_context(
+        self, component_lock, custody, package_plan, package_result
+    ):
+        """Reopen original current finalized plan, bindings and package custody."""
+        from literate_ai.adapters.directory_artifacts import read_directory_export
+        from literate_ai.adapters.rust_library_harness_providers import (
+            RustQualifiedProviderContext,
+        )
+
+        from .native_cargo_projection import MAX_PROJECTION_BYTES, MAX_PROJECTION_FILES
+
+        if self.project_package_custody(package_plan, package_result) is not custody:
+            raise LocalStandardLifecycleError("qualified Rust package custody changed")
+        plan = custody.root_plan
+        root = self._planned_exports.get(component_lock.root_revision.uri)
+        if (
+            plan.component_revision != component_lock.root_revision
+            or root is None
+            or package_plan.root_artifact_identity != root.identity
+            or package_plan.target_identity != root.target_identity
+        ):
+            raise LocalStandardLifecycleError("qualified Rust root plan differs")
+        providers = tuple(
+            self._exports_by_identity[item.uri]
+            for item in plan.provider_artifact_identities
+        )
+        native = self._current_native_cargo_inputs(plan, providers)
+        if native is None:
+            raise LocalStandardLifecycleError("qualified Rust graph unavailable")
+        content = self.read_artifact_blob(root.blob)
+        files = read_directory_export(
+            content,
+            root.blob,
+            max_bytes=MAX_PROJECTION_BYTES,
+            max_entries=MAX_PROJECTION_FILES,
+        )
+        return RustQualifiedProviderContext.bind(
+            root_export=root,
+            graph=native[0],
+            sources=native[1],
+            files=files,
+            manifest=self.cargo_targets[plan.component_revision.uri].manifest,
+        )
+
     def _cargo_workspace_identity(self, plan, providers, contract, native):
         compatibility = self.cargo_targets[
             plan.component_revision.uri

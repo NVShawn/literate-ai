@@ -354,6 +354,65 @@ _MAX_NPM_INSTALLED_FILE_BYTES = 128 * 1024 * 1024
 _MAX_NPM_INSTALLED_TREE_BYTES = 1024 * 1024 * 1024
 
 
+def project_library_consumer_bindings(
+    *, consumer_revision, direct_generation_edges, target_identity, providers, contracts
+):
+    """Project exact caller-owned generation edges; values grant no admission."""
+    from literate_ai.contracts.capabilities import DependencyKind
+    from literate_ai.contracts.executable_components import ExecutableComponentEdge
+
+    if type(direct_generation_edges) is not tuple or any(
+        type(edge) is not ExecutableComponentEdge
+        or edge.consumer_revision != consumer_revision
+        or edge.kind != DependencyKind.GENERATION
+        for edge in direct_generation_edges
+    ):
+        raise LocalStandardLifecycleError(
+            "library import generation edges differ from the exact consumer"
+        )
+    library_bindings: list[LibraryConsumerBinding] = []
+    for artifact in providers:
+        provider_contract = contracts.get(artifact.component_revision.uri)
+        if provider_contract is None or not provider_contract.is_library:
+            continue
+        surface = provider_contract.library_import_surface
+        assert surface is not None
+        if artifact.target_identity != target_identity:
+            raise LocalStandardLifecycleError(
+                "library import target differs from the exact consumer target"
+            )
+        edges = tuple(
+            edge
+            for edge in direct_generation_edges
+            if edge.provider_revision == artifact.component_revision
+        )
+        if not edges:
+            raise LocalStandardLifecycleError(
+                "imported library artifact lacks a direct generation interface edge"
+            )
+        for edge in edges:
+            capability = surface.capability(edge.capability)
+            if capability.interface_identity != edge.public_interface_identity:
+                raise LocalStandardLifecycleError(
+                    "library import interface differs from the exact consumer edge"
+                )
+            library_bindings.append(
+                LibraryConsumerBinding(
+                    consumer_component_revision=consumer_revision,
+                    provider_component_revision=artifact.component_revision,
+                    capability=edge.capability,
+                    interface_identity=capability.interface_identity,
+                    artifact_identity=artifact.identity,
+                    import_surface_identity=surface.identity,
+                    target_identity=artifact.target_identity,
+                    dependency_artifact_identities=(
+                        artifact.dependency_artifact_identities
+                    ),
+                )
+            )
+    return tuple(sorted(library_bindings, key=lambda item: item.identity.uri))
+
+
 @dataclass(frozen=True, slots=True)
 class LocalProjectPackageCustody:
     package_plan: PackagePlan
@@ -1330,47 +1389,13 @@ class LocalStandardLifecyclePorts:
         contract = inputs.contract
         provider_artifacts = inputs.providers
         package_artifacts = inputs.packages
-        library_bindings: list[LibraryConsumerBinding] = []
-        for artifact in provider_artifacts:
-            provider_contract = self.contracts.get(artifact.component_revision.uri)
-            if provider_contract is None or not provider_contract.is_library:
-                continue
-            surface = provider_contract.library_import_surface
-            assert surface is not None
-            if artifact.target_identity != contract.artifact_export.target_identity:
-                raise LocalStandardLifecycleError(
-                    "library import target differs from the exact consumer target"
-                )
-            edges = tuple(
-                edge
-                for edge in generation_plan.direct_generation_edges
-                if edge.provider_revision == artifact.component_revision
-            )
-            if not edges:
-                raise LocalStandardLifecycleError(
-                    "imported library artifact lacks a direct generation interface edge"
-                )
-            for edge in edges:
-                capability = surface.capability(edge.capability)
-                if capability.interface_identity != edge.public_interface_identity:
-                    raise LocalStandardLifecycleError(
-                        "library import interface differs from the exact consumer edge"
-                    )
-                library_bindings.append(
-                    LibraryConsumerBinding(
-                        consumer_component_revision=generation_plan.component_revision,
-                        provider_component_revision=artifact.component_revision,
-                        capability=edge.capability,
-                        interface_identity=capability.interface_identity,
-                        artifact_identity=artifact.identity,
-                        import_surface_identity=surface.identity,
-                        target_identity=artifact.target_identity,
-                        dependency_artifact_identities=(
-                            artifact.dependency_artifact_identities
-                        ),
-                    )
-                )
-        bindings = tuple(sorted(library_bindings, key=lambda item: item.identity.uri))
+        bindings = project_library_consumer_bindings(
+            consumer_revision=generation_plan.component_revision,
+            direct_generation_edges=generation_plan.direct_generation_edges,
+            target_identity=contract.artifact_export.target_identity,
+            providers=provider_artifacts,
+            contracts=self.contracts,
+        )
         if self._evidence_recorder is not None:
             self._record_evidence(intent.to_dict())
             self._record_evidence(intent.build_request.to_dict())
@@ -8247,6 +8272,16 @@ class LocalStandardLifecyclePorts:
             # probes or temporary verifier output. The selected original owner
             # is checked again under the executor's actual child environment.
             original_rust_compiler = original_compilers.require_compiler(rust_target)
+        qualified_context = None
+        if rust_v2 and oracle.rust_harness.qualified_providers:
+            context_owner = getattr(self, "_rust_harness_provider_context", None)
+            if not callable(context_owner):
+                raise LocalStandardLifecycleError(
+                    "qualified Rust provider authority unavailable"
+                )
+            qualified_context = context_owner(
+                component_lock, custody, package_plan, package_result
+            )
         acceptance_toolchain = contract.library_acceptance_toolchain_identity
         assert acceptance_toolchain is not None
         binding = self.tool_bindings[acceptance_toolchain.uri]
@@ -8343,6 +8378,16 @@ class LocalStandardLifecyclePorts:
                             raise LocalStandardLifecycleError(
                                 "Rust verifier oracle changed"
                             )
+                        if (
+                            qualified_context is not None
+                            and self._rust_harness_provider_context(
+                                component_lock, custody, package_plan, package_result
+                            )
+                            != qualified_context
+                        ):
+                            raise LocalStandardLifecycleError(
+                                "qualified Rust provider authority changed"
+                            )
 
                     def record_rust_bytes(content):
                         if self._evidence_recorder is not None:
@@ -8370,6 +8415,7 @@ class LocalStandardLifecyclePorts:
                             evidence_root=self.object_root
                             / "rust-library-acceptance-evidence",
                             allow_host_execution=True,
+                            qualified_context=qualified_context,
                         )
                     )
                 else:

@@ -35,8 +35,8 @@ from tests.support.standard_source_evidence_fixture import register_strict_sourc
     shutil.which("cargo") and shutil.which("rustc"), "native Rust tools unavailable"
 )
 class NativeCargoStandardTests(unittest.TestCase):
-    def system(self, root):
-        snapshot, execution = _fixture(
+    def system(self, root, *, prepared=None):
+        snapshot, execution = prepared or _fixture(
             root_name="service", library_names=frozenset({"service", "storage"})
         )
         cargo, rustc = (
@@ -49,8 +49,11 @@ class NativeCargoStandardTests(unittest.TestCase):
         }
         for generation in execution.generation_plans:
             revision = generation.component_revision
-            alpha = revision == snapshot.authority.lock.root_revision
-            name = "alpha" if alpha else "beta"
+            coordinate = by_revision[revision].revision.coordinate.name
+            name = {"service": "alpha", "storage": "beta", "application": "gamma"}[
+                coordinate
+            ]
+            alpha = name == "alpha"
             target = StandardCargoTarget(
                 revision,
                 fixture._identity("resolver"),
@@ -97,7 +100,7 @@ class NativeCargoStandardTests(unittest.TestCase):
                                 public.capability,
                                 public.interface_identity,
                                 name,
-                                ("read" if alpha else "Event",),
+                                ("Event" if name == "beta" else "read",),
                             ),
                         ),
                     ),
@@ -111,7 +114,11 @@ class NativeCargoStandardTests(unittest.TestCase):
             (source / "source/src/lib.rs").write_text(
                 "pub fn read(event: &beta::Event) -> u32 { event.value }\n"
                 if alpha
-                else "pub struct Event { pub value: u32 }\n"
+                else (
+                    "pub fn read(event: &beta::Event) -> u32 { alpha::read(event) }\n"
+                    if name == "gamma"
+                    else "pub struct Event { pub value: u32 }\n"
+                )
             )
             candidates[revision] = register_strict_source(
                 registry,

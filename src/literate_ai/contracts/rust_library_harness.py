@@ -182,6 +182,71 @@ class RustHarnessRegistryDependency:
 
 
 @dataclass(frozen=True, slots=True)
+class RustHarnessQualifiedProvider:
+    """An authored locked interface selector, never generated-material authority."""
+
+    component_revision: ContentIdentity
+    import_surface_identity: ContentIdentity
+    package: str
+    version: str
+    features: tuple[str, ...]
+    alias: str | None = None
+
+    FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            "component_revision",
+            "import_surface_identity",
+            "package",
+            "version",
+            "features",
+            "alias",
+        }
+    )
+
+    def __post_init__(self) -> None:
+        for name in ("component_revision", "import_surface_identity"):
+            if type(getattr(self, name)) is not ContentIdentity:
+                fail("RustHarnessQualifiedProvider." + name, "exact identity required")
+        if (
+            _PACKAGE.fullmatch(
+                _text(self.package, "RustHarnessQualifiedProvider.package", 64)
+            )
+            is None
+        ):
+            fail("RustHarnessQualifiedProvider.package", "requires one package name")
+        semantic_version(self.version, "RustHarnessQualifiedProvider.version")
+        rust_features(self.features, "RustHarnessQualifiedProvider.features")
+        if self.alias is not None:
+            rust_dependency_alias(self.alias, "RustHarnessQualifiedProvider.alias")
+
+    @property
+    def scope(self) -> str:
+        return "qualified:" + self.component_revision.uri
+
+    def to_dict(self):
+        return {
+            "component_revision": self.component_revision.to_dict(),
+            "import_surface_identity": self.import_surface_identity.to_dict(),
+            "package": self.package,
+            "version": self.version,
+            "features": list(self.features),
+            "alias": self.alias,
+        }
+
+    @classmethod
+    def from_dict(cls, value):
+        data = fields(value, path=cls.__name__, required=cls.FIELDS)
+        return cls(
+            ContentIdentity.from_dict(data["component_revision"]),
+            ContentIdentity.from_dict(data["import_surface_identity"]),
+            data["package"],
+            data["version"],
+            tuple(list_value(data["features"], cls.__name__ + ".features")),
+            data["alias"],
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class RustHarnessLockfile:
     file: str
     identity: ContentIdentity
@@ -354,7 +419,9 @@ class RustHarnessResolvedPackage:
 
     def __post_init__(self) -> None:
         scope = _text(self.scope, "RustHarnessResolvedPackage.scope", 256)
-        if scope not in {"harness", "library"} and not scope.startswith("input:"):
+        if scope.startswith("qualified:"):
+            ContentIdentity.parse_uri(scope.removeprefix("qualified:"))
+        elif scope not in {"harness", "library"} and not scope.startswith("input:"):
             fail("RustHarnessResolvedPackage.scope", "requires an explicit owner")
         canonical_relative_posix_path(
             self.manifest, label="RustHarnessResolvedPackage.manifest"
@@ -365,7 +432,7 @@ class RustHarnessResolvedPackage:
         if _PACKAGE.fullmatch(name) is None:
             fail("RustHarnessResolvedPackage.name", "requires one package name")
         semantic_version(self.version, "RustHarnessResolvedPackage.version")
-        if scope in {"harness", "library"}:
+        if scope in {"harness", "library"} or scope.startswith("qualified:"):
             if self.source is not None:
                 fail(
                     "RustHarnessResolvedPackage.source", "sealed local package required"
@@ -560,6 +627,7 @@ class RustLibraryHarnessDependencies:
     timeout_seconds: int
     stdout_limit_bytes: int
     stderr_limit_bytes: int
+    qualified_providers: tuple[RustHarnessQualifiedProvider, ...] = ()
 
     SCHEMA: ClassVar[str] = "literate-ai/rust-library-harness-dependencies@1"
     FIELDS: ClassVar[frozenset[str]] = frozenset(
@@ -577,6 +645,28 @@ class RustLibraryHarnessDependencies:
     )
 
     def __post_init__(self) -> None:
+        from .native_cargo_provider_graph import MAX_PROVIDER_NODES
+
+        if (
+            type(self.qualified_providers) is not tuple
+            or len(self.qualified_providers) > MAX_PROVIDER_NODES
+            or any(
+                type(row) is not RustHarnessQualifiedProvider
+                for row in self.qualified_providers
+            )
+        ):
+            fail(
+                "RustLibraryHarnessDependencies.qualified_providers",
+                "bounded exact provider selectors required",
+            )
+        revisions = tuple(
+            row.component_revision.uri for row in self.qualified_providers
+        )
+        if revisions != tuple(sorted(set(revisions))):
+            fail(
+                "RustLibraryHarnessDependencies.qualified_providers",
+                "uniquely sorted provider revisions required",
+            )
         if (
             not isinstance(self.dependencies, tuple)
             or len(self.dependencies) > MAX_DIRECT_DEPENDENCIES
@@ -597,7 +687,24 @@ class RustLibraryHarnessDependencies:
                 "RustLibraryHarnessDependencies.dependencies",
                 "unique canonical Rust aliases required",
             )
-        if sum(len(row.features) for row in self.dependencies) > MAX_SELECTED_FEATURES:
+        all_aliases = (
+            *aliases,
+            *(row.alias for row in self.qualified_providers if row.alias is not None),
+        )
+        if len(all_aliases) > MAX_DIRECT_DEPENDENCIES or len(
+            {alias.replace("-", "_") for alias in all_aliases}
+        ) != len(all_aliases):
+            fail(
+                "RustLibraryHarnessDependencies.dependencies",
+                "unique bounded direct aliases required",
+            )
+        if (
+            sum(
+                len(row.features)
+                for row in (*self.dependencies, *self.qualified_providers)
+            )
+            > MAX_SELECTED_FEATURES
+        ):
             fail(
                 "RustLibraryHarnessDependencies.dependencies",
                 "aggregate selected feature limit exceeded",
@@ -623,13 +730,29 @@ class RustLibraryHarnessDependencies:
                 )
         owner_scopes = {"input:" + scope for scope, _ in self.inputs.roots}
         if any(
-            row.scope not in {"harness", "library"} | owner_scopes
+            row.scope
+            not in {"harness", "library"}
+            | owner_scopes
+            | {provider.scope for provider in self.qualified_providers}
             for row in self.resolution.packages
         ):
             fail(
                 "RustLibraryHarnessDependencies.resolution",
                 "resolved package has no declared source owner",
             )
+        for provider in self.qualified_providers:
+            matches = tuple(
+                row for row in self.resolution.packages if row.scope == provider.scope
+            )
+            if len(matches) != 1 or (
+                matches[0].name,
+                matches[0].version,
+                matches[0].features,
+            ) != (provider.package, provider.version, provider.features):
+                fail(
+                    "RustLibraryHarnessDependencies.resolution",
+                    "exact qualified provider package required",
+                )
         for name in ("cargo_toolchain", "rust_toolchain"):
             if type(getattr(self, name)) is not ContentIdentity:
                 fail(
@@ -654,7 +777,11 @@ class RustLibraryHarnessDependencies:
         """Join declared root edges; no native graph or currentness is inferred."""
         rust_dependency_alias(alias, "RustLibraryHarnessDependencies.library_alias")
         library_alias = alias.replace("-", "_")
-        if library_alias in {row.alias.replace("-", "_") for row in self.dependencies}:
+        if library_alias in {
+            row.alias.replace("-", "_")
+            for row in (*self.dependencies, *self.qualified_providers)
+            if row.alias is not None
+        }:
             fail(
                 "RustLibraryHarnessDependencies.dependencies",
                 "dependency alias collides with the qualified library",
@@ -668,6 +795,11 @@ class RustLibraryHarnessDependencies:
             != {
                 library_alias,
                 *(row.alias.replace("-", "_") for row in self.dependencies),
+                *(
+                    row.alias.replace("-", "_")
+                    for row in self.qualified_providers
+                    if row.alias is not None
+                ),
             }
             or edges[library_alias].provider != self.resolution.library
             or any(
@@ -691,6 +823,14 @@ class RustLibraryHarnessDependencies:
                     "RustLibraryHarnessDependencies.resolution",
                     "reviewed registry dependency resolution differs",
                 )
+        for provider in self.qualified_providers:
+            if provider.alias is not None:
+                package = selected[edges[provider.alias.replace("-", "_")].provider]
+                if package.scope != provider.scope:
+                    fail(
+                        "RustLibraryHarnessDependencies.resolution",
+                        "qualified direct edge differs",
+                    )
 
     def to_dict(self):
         return {
@@ -704,24 +844,53 @@ class RustLibraryHarnessDependencies:
             "timeout_seconds": self.timeout_seconds,
             "stdout_limit_bytes": self.stdout_limit_bytes,
             "stderr_limit_bytes": self.stderr_limit_bytes,
+            **(
+                {
+                    "qualified_providers": [
+                        row.to_dict() for row in self.qualified_providers
+                    ]
+                }
+                if self.qualified_providers
+                else {}
+            ),
         }
 
     @classmethod
     def from_dict(cls, value):
         _document_budget(value, cls.__name__)
-        data = fields(value, path=cls.__name__, required=cls.FIELDS | {"schema"})
+        data = fields(
+            value,
+            path=cls.__name__,
+            required=cls.FIELDS | {"schema"},
+            optional=frozenset({"qualified_providers"}),
+        )
         if data["schema"] != cls.SCHEMA:
             fail(cls.__name__, "exact Rust verifier declaration schema required")
         dependencies = list_value(data["dependencies"], cls.__name__ + ".dependencies")
+        qualified = list_value(
+            data.get("qualified_providers", []), cls.__name__ + ".qualified_providers"
+        )
+        from .native_cargo_provider_graph import MAX_PROVIDER_NODES
+
+        if len(qualified) > MAX_PROVIDER_NODES or (
+            "qualified_providers" in data and not qualified
+        ):
+            fail(
+                cls.__name__ + ".qualified_providers",
+                "nonempty bounded canonical provider declaration required",
+            )
         if len(dependencies) > MAX_DIRECT_DEPENDENCIES:
             fail(cls.__name__ + ".dependencies", "direct dependency limit exceeded")
         # Charge direct feature rows before constructing another nested declaration.
         selected_features = 0
-        for row in dependencies:
+        for row, row_type in [
+            *((row, RustHarnessRegistryDependency) for row in dependencies),
+            *((row, RustHarnessQualifiedProvider) for row in qualified),
+        ]:
             declaration = fields(
                 row,
-                path="RustHarnessRegistryDependency",
-                required=RustHarnessRegistryDependency.FIELDS,
+                path=row_type.__name__,
+                required=row_type.FIELDS,
             )
             selected_features += len(
                 list_value(
@@ -743,4 +912,5 @@ class RustLibraryHarnessDependencies:
             data["timeout_seconds"],
             data["stdout_limit_bytes"],
             data["stderr_limit_bytes"],
+            tuple(RustHarnessQualifiedProvider.from_dict(row) for row in qualified),
         )

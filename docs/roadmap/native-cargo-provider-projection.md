@@ -499,3 +499,56 @@ checks. Full current-source validation, genuine two-clean model-backed graph
 qualification, independent verifier/provider alias support, sealed public replay
 and actual retained check/materialize/admit remain mandatory. An ordinary native
 consumer diamond or transported contract fixture alone does not complete them.
+
+
+## Stable independent native-provider selection
+
+The v2 Rust harness may opt in through the closed `qualified_providers` records
+in the [public authoring contract](../user/retained-cargo.md#author-independent-acceptance-for-native-provider-types).
+The declaration names every native graph node by locked Component revision and
+import surface, package/version and expected features. Direct aliases are optional
+per node; the declaration itself is required even for a purely transitive logical
+scope. Physical generated-material coordinates never become authored oracle
+expectations. The stable `qualified:<revision-URI>` resolution scope retains the
+original provider-relative manifest and the unchanged independent oracle.
+
+Current finalized plan inputs and LibraryConsumerBindings, the exact root export,
+qualified provider export closure and original package custody select material.
+The live boundary rechecks those owners around native execution; a decoded graph
+value cannot mint custody. Versioned acceptance retains each run's actual graph,
+exports, source/original-manifest and projection identities. Both clean runs must
+regenerate every node while the same independent oracle continues to exercise the
+original shared nominal type through both Alpha/Beta and diamond graphs.
+
+Closed Cargo replay receives an independently supplied current ComponentLock and
+complete current command contracts. One shared typed join reprojects the lock's
+exact generation edges and plan-declared exports into current bindings. Dependent
+Cargo builds require exactly Cargo.lock, metadata.json, evidence-manifest.json and
+native-provider-graph.json in their reserved dependency evidence directory; leaves
+retain the previous exact three-file shape. The native record's complete schema,
+graph, original manifest, metadata binding and provider-lock resolutions must
+match recomputed values. Original source comes from the independently verified,
+bounded source bundle; only its exact bounded Cargo manifest is read again.
+Library projection bytes are joined to the exact realized export and build tree.
+
+Historical Cargo paths are canonical absolute per-platform coordinates under one
+common projection root. Replay rejects relative/mixed/escaping coordinates and
+never stats, resolves or opens them. Missing current authority, foreign exports,
+wrong graph/schema/manifest/lock/metadata or unrelated evidence refuses. Neither
+replay nor a matching content inventory grants execution, provider qualification
+or importer admission.
+
+## Current successor preparation boundary
+
+A private controlled-source three-library graph completes two all-node clean runs
+with nine actual generated test executions and three shared raw case-content
+identities per run. The case inventory is canonically unique; all per-node suites,
+observations and totals remain retained. The original aggregation and archive
+reader failures remain failed historical observations. A corrected private reader
+reopens both complete archives after original transport deletion, rejects fifteen
+missing/foreign authority and material cases, and preserves dependency-free replay.
+Forty-three native Cargo regressions, three inert-coordinate and four inventory
+controls pass without skips. These facts qualify only that private preparation
+subject. The canonical successor still requires its own exact full source gates,
+genuine model-backed two-clean generation, sealed relocation and real public
+retained check/materialize/admit. No downstream pin or source retirement follows.
