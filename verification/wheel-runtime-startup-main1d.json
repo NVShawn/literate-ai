@@ -1,0 +1,635 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "WHEEL-RUNTIME-ENV-001",
+  "scope": "Native installed-wheel startup-policy isolation regression; final release qualification remains separate",
+  "implementation_review": {
+    "revision": "2b9c392d9bb869f31f95a04a4a7a867456dbc58e",
+    "independent_reviewer": "/root/review_worktree_discovery",
+    "source_packet_sha256": "e9f461ceee144d6d0b19524555e835eef9f7df9fc0d48d9b98618504c1aa860c",
+    "authority": "Implementation commit records independent source review and canonical review gates",
+    "current_environment_boundary_functions_and_record_probe_match_reviewed_source": true
+  },
+  "source_sha256": {
+    "scripts/wheel_smoke.py": "ac330eb8842e9dacf4891fa4ee2bf57b65f55046ffc4c1772097b0fb8a952fb1",
+    "scripts/install_litai.py": "11e9e967b5b7d4d8dcce1428d9de468becbea517843a3283b21e0eb626f31b6b",
+    "tests/smoke/test_wheel_smoke.py": "5f17e6431a3a3e17e75612b020f63878cc4419e59937a0336b67c4bbf90d9232",
+    "src/literate_ai/remote_worker_bootstrap.py": "448cd18dc180fe3734aa37a34020a56e4c15ab6f45c05cbf069eff0b118e8cab"
+  },
+  "full_source_gate": {
+    "revision": "c5dc8f25aea9658e9bf7e0b0e038363736a52984",
+    "summary": {
+      "executed": 2639,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2639,
+      "selected": 2758,
+      "skipped": 119
+    },
+    "report_sha256": "c878df68a0963c7d38e5530a48e47f72ed06d93f9a7a20973fad9b62d1d04980"
+  },
+  "qualified_main": {
+    "revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+    "run": 42449444068,
+    "conclusion": "success",
+    "all_27_jobs_succeeded": true,
+    "boundary_source_and_tests_unchanged_on_evidence_branch": true
+  },
+  "native_cells": [
+    {
+      "cell": "linux311",
+      "job": 128635384246,
+      "provider_artifact": 13605673772,
+      "archive_sha256": "28f29ade70b9326d58716e141d5f4d2768adde1ae8f0ab5569fd9831cd625000",
+      "archive_matches_provider_digest": true,
+      "manifest_sha256": "42acc84423813e97d0bbd58ac4e820f06d0bafe9acaa0f892d6af3145d9eee86",
+      "manifest_revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+      "wheel_identity": "sha256:42e4a616381c1e0088cdc88e35877ff9adcd1b7d054abd8361d4a2bb39d325a5",
+      "wheel_bytes": 4249524,
+      "raw_job_log_sha256": "a258a97ec2e15b474777de32b6ba32a9e17fa8421d32c81a8bb9af9c445ea26b",
+      "runtime_environment": {
+        "counterexample": {
+          "all_record_paths_contained": false,
+          "canonical_escape_refused": true,
+          "distributions_checked": 3,
+          "mode": "unsafe-framework",
+          "outside_record_counts": {
+            "literate-ai": 975,
+            "pip": 495,
+            "setuptools": 357
+          },
+          "records_checked": 4248,
+          "seeded_pip_record_checked": true
+        },
+        "counterexample_seed": {
+          "all_record_paths_contained": false,
+          "distributions_checked": 2,
+          "mode": "unsafe-seed",
+          "outside_record_counts": {
+            "pip": 495,
+            "setuptools": 357
+          },
+          "records_checked": 1897,
+          "seeded_pip_record_checked": true
+        },
+        "isolated": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 40,
+          "framework_distribution": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+          "mode": "framework",
+          "outside_record_counts": {},
+          "records_checked": 6234,
+          "seeded_pip_record_checked": true
+        },
+        "seeded": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 2,
+          "mode": "seed",
+          "outside_record_counts": {},
+          "records_checked": 1897,
+          "seeded_pip_record_checked": true
+        }
+      }
+    },
+    {
+      "cell": "linux314",
+      "job": 128635384316,
+      "provider_artifact": 13606941604,
+      "archive_sha256": "981d5d82a84199198ad510ffcb9167c80fc777328454192be373b0ee683c6c16",
+      "archive_matches_provider_digest": true,
+      "manifest_sha256": "b6e127cf978f831669db6543dfc3fa215b2aaa25904f1eff8d8381aac2582f0a",
+      "manifest_revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+      "wheel_identity": "sha256:502e7ce44168d3392f98e745d049c3405cfddeb69e604857545a2f899d196943",
+      "wheel_bytes": 4249524,
+      "raw_job_log_sha256": "c979667eb6c7cbef4a9b9b9cd1e110062006a1f26edf969558ee7fbeff222707",
+      "runtime_environment": {
+        "counterexample": {
+          "all_record_paths_contained": false,
+          "canonical_escape_refused": true,
+          "distributions_checked": 2,
+          "mode": "unsafe-framework",
+          "outside_record_counts": {
+            "literate-ai": 975,
+            "pip": 406
+          },
+          "records_checked": 3240,
+          "seeded_pip_record_checked": true
+        },
+        "counterexample_seed": {
+          "all_record_paths_contained": false,
+          "distributions_checked": 1,
+          "mode": "unsafe-seed",
+          "outside_record_counts": {
+            "pip": 406
+          },
+          "records_checked": 889,
+          "seeded_pip_record_checked": true
+        },
+        "isolated": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 38,
+          "framework_distribution": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+          "mode": "framework",
+          "outside_record_counts": {},
+          "records_checked": 5219,
+          "seeded_pip_record_checked": true
+        },
+        "seeded": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 1,
+          "mode": "seed",
+          "outside_record_counts": {},
+          "records_checked": 889,
+          "seeded_pip_record_checked": true
+        }
+      }
+    },
+    {
+      "cell": "mac311",
+      "job": 128635384278,
+      "provider_artifact": 13606132666,
+      "archive_sha256": "2030ddaad8938a8383aa89531abfe32ddb130cf519b5b5d23e2cf5db3e2cae13",
+      "archive_matches_provider_digest": true,
+      "manifest_sha256": "e765ac415d6740c1339cd710e2ba41e266113943d83f56c08e8d5ea1de99e16b",
+      "manifest_revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+      "wheel_identity": "sha256:089e3952f01ee90c2fa75f824f0a87abbe65575978efb8df68ee3c99a4f90ac3",
+      "wheel_bytes": 4249524,
+      "raw_job_log_sha256": "bad26cf964984adbb0e6a5868348c951df16560479566db397df80576f3b177b",
+      "runtime_environment": {
+        "counterexample": {
+          "all_record_paths_contained": false,
+          "canonical_escape_refused": true,
+          "distributions_checked": 3,
+          "mode": "unsafe-framework",
+          "outside_record_counts": {
+            "literate-ai": 975,
+            "pip": 495,
+            "setuptools": 223
+          },
+          "records_checked": 3841,
+          "seeded_pip_record_checked": true
+        },
+        "counterexample_seed": {
+          "all_record_paths_contained": false,
+          "distributions_checked": 2,
+          "mode": "unsafe-seed",
+          "outside_record_counts": {
+            "pip": 495,
+            "setuptools": 223
+          },
+          "records_checked": 1490,
+          "seeded_pip_record_checked": true
+        },
+        "isolated": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 40,
+          "framework_distribution": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+          "mode": "framework",
+          "outside_record_counts": {},
+          "records_checked": 5827,
+          "seeded_pip_record_checked": true
+        },
+        "seeded": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 2,
+          "mode": "seed",
+          "outside_record_counts": {},
+          "records_checked": 1490,
+          "seeded_pip_record_checked": true
+        }
+      }
+    },
+    {
+      "cell": "mac314",
+      "job": 128635384149,
+      "provider_artifact": 13606038545,
+      "archive_sha256": "bb4dc4b2e23076aac26662b6c2bbd087805d9347dbceada6c4f06ee45d5ff118",
+      "archive_matches_provider_digest": true,
+      "manifest_sha256": "cfa27a4830192addbee162e006067516386ef792f860781f68714bbc10543e3d",
+      "manifest_revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+      "wheel_identity": "sha256:25be6597932b0f23d58c22688fa7d1c62cf83efbdc8637bcb8666a467d992563",
+      "wheel_bytes": 4249524,
+      "raw_job_log_sha256": "9d34047771d6ab814e7486d04f7818ffb23246720f25d6222274f270ae9b30aa",
+      "runtime_environment": {
+        "counterexample": {
+          "all_record_paths_contained": false,
+          "canonical_escape_refused": true,
+          "distributions_checked": 2,
+          "mode": "unsafe-framework",
+          "outside_record_counts": {
+            "literate-ai": 975,
+            "pip": 406
+          },
+          "records_checked": 3240,
+          "seeded_pip_record_checked": true
+        },
+        "counterexample_seed": {
+          "all_record_paths_contained": false,
+          "distributions_checked": 1,
+          "mode": "unsafe-seed",
+          "outside_record_counts": {
+            "pip": 406
+          },
+          "records_checked": 889,
+          "seeded_pip_record_checked": true
+        },
+        "isolated": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 38,
+          "framework_distribution": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+          "mode": "framework",
+          "outside_record_counts": {},
+          "records_checked": 5219,
+          "seeded_pip_record_checked": true
+        },
+        "seeded": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 1,
+          "mode": "seed",
+          "outside_record_counts": {},
+          "records_checked": 889,
+          "seeded_pip_record_checked": true
+        }
+      }
+    },
+    {
+      "cell": "windows312",
+      "job": 128635384295,
+      "provider_artifact": 13605474089,
+      "archive_sha256": "2cacb2a86494155de15f83a7dc661601e83cc06354070d504f80655070bad81c",
+      "archive_matches_provider_digest": true,
+      "manifest_sha256": "9b4bc4af4e5d7ac04b17bf99ca80279486fcfc3e8033f34eced9ba12b067a7b7",
+      "manifest_revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+      "wheel_identity": "sha256:d19364422da5d8e3fb0b271607622fb9f4c8f21e0061dd6596335ecbb7df077e",
+      "wheel_bytes": 4249644,
+      "raw_job_log_sha256": "14127105ef59b673936176f654490562e115f580273c9f7c9af0b664d6fbd8dc",
+      "runtime_environment": {
+        "counterexample": {
+          "all_record_paths_contained": false,
+          "canonical_escape_refused": true,
+          "distributions_checked": 2,
+          "mode": "unsafe-framework",
+          "outside_record_counts": {
+            "literate-ai": 975,
+            "pip": 411
+          },
+          "records_checked": 3205,
+          "seeded_pip_record_checked": true
+        },
+        "counterexample_seed": {
+          "all_record_paths_contained": false,
+          "distributions_checked": 1,
+          "mode": "unsafe-seed",
+          "outside_record_counts": {
+            "pip": 411
+          },
+          "records_checked": 854,
+          "seeded_pip_record_checked": true
+        },
+        "isolated": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 39,
+          "framework_distribution": "sha256:b6e6659257935367c993dd6d99ddc7ddc5fe73f00e0fee56e475143ea751b314",
+          "mode": "framework",
+          "outside_record_counts": {},
+          "records_checked": 5191,
+          "seeded_pip_record_checked": true
+        },
+        "seeded": {
+          "all_record_paths_contained": true,
+          "distributions_checked": 1,
+          "mode": "seed",
+          "outside_record_counts": {},
+          "records_checked": 854,
+          "seeded_pip_record_checked": true
+        }
+      }
+    }
+  ],
+  "preserved_original_failure": {
+    "revision": "426b71ec4e56afb5d041df8ed0995c09bb20aae5",
+    "run": 41943200622,
+    "conclusion": "failure",
+    "failure": "worker.bootstrap_install_invalid: installed RECORD path escapes the isolated environment",
+    "failed_job_logs": [
+      {
+        "file": "original-linux314.log",
+        "bytes": 558710,
+        "sha256": "9acdaf920f12eead9f470d1dbb0d262a6c8b48804f25d597041c11ff2d8a0085",
+        "canonical_escape_refusal_present": true
+      },
+      {
+        "file": "original-linux311.log",
+        "bytes": 561916,
+        "sha256": "13dd140ed123d4427fb165fe80c26b53c4b2b9b2b7765c0bd5b5ece30ad24b93",
+        "canonical_escape_refusal_present": true
+      },
+      {
+        "file": "original-mac311.log",
+        "bytes": 425795,
+        "sha256": "488860ddd3d11d1bc96270231351bd753713c8de843466e0ad810ac333948101",
+        "canonical_escape_refusal_present": true
+      },
+      {
+        "file": "original-mac314.log",
+        "bytes": 419282,
+        "sha256": "5826ae06feed790317461dec2f73fa172b24682a16ad588b72cf5cc357ea1696",
+        "canonical_escape_refusal_present": true
+      }
+    ],
+    "all_original_job_outcomes": [
+      {
+        "name": "profile",
+        "job": 126969173191,
+        "conclusion": "success"
+      },
+      {
+        "name": "macos-latest / Python 3.14 (smoke)",
+        "job": 126969270982,
+        "conclusion": "failure"
+      },
+      {
+        "name": "macos-latest / Python 3.11 (2 of 4)",
+        "job": 126969271009,
+        "conclusion": "success"
+      },
+      {
+        "name": "FreeBSD POSIX.1e ACL preflight",
+        "job": 126969271033,
+        "conclusion": "success"
+      },
+      {
+        "name": "macos-latest / Python 3.11 (4 of 4)",
+        "job": 126969271080,
+        "conclusion": "success"
+      },
+      {
+        "name": "macos-latest / Python 3.11 (3 of 4)",
+        "job": 126969271169,
+        "conclusion": "success"
+      },
+      {
+        "name": "macos-latest / Python 3.11 (1 of 4)",
+        "job": 126969271174,
+        "conclusion": "failure"
+      },
+      {
+        "name": "Windows / Python 3.12 / PR smoke (not release qualification)",
+        "job": 126969271310,
+        "conclusion": "success"
+      },
+      {
+        "name": "ubuntu-latest / Python 3.11",
+        "job": 126969271322,
+        "conclusion": "failure"
+      },
+      {
+        "name": "macOS / Python 3.14 / PR smoke (not release qualification)",
+        "job": 126969271339,
+        "conclusion": "success"
+      },
+      {
+        "name": "Windows / Python 3.12 / lint, OpenSpec, wheel",
+        "job": 126969271356,
+        "conclusion": "success"
+      },
+      {
+        "name": "Elixir 1.18.0 / OTP 27.0 / windows-2022",
+        "job": 126969271366,
+        "conclusion": "success"
+      },
+      {
+        "name": "Elixir 1.20.4 / OTP 29.1.1 / ubuntu-24.04",
+        "job": 126969271374,
+        "conclusion": "success"
+      },
+      {
+        "name": "Sample composition / ubuntu-latest",
+        "job": 126969271375,
+        "conclusion": "success"
+      },
+      {
+        "name": "Windows / Python 3.12 / tests (2 of 3)",
+        "job": 126969271384,
+        "conclusion": "success"
+      },
+      {
+        "name": "Native C++ library / ubuntu-latest",
+        "job": 126969271399,
+        "conclusion": "success"
+      },
+      {
+        "name": "Windows / Python 3.12 / tests (1 of 3)",
+        "job": 126969271413,
+        "conclusion": "success"
+      },
+      {
+        "name": "Changed skill admission",
+        "job": 126969271418,
+        "conclusion": "success"
+      },
+      {
+        "name": "Sample composition / macos-latest",
+        "job": 126969271457,
+        "conclusion": "success"
+      },
+      {
+        "name": "Elixir 1.18.0 / OTP 27.0 / ubuntu-24.04",
+        "job": 126969271479,
+        "conclusion": "success"
+      },
+      {
+        "name": "Elixir 1.20.4 / OTP 29.1.1 / macos-15",
+        "job": 126969271491,
+        "conclusion": "success"
+      },
+      {
+        "name": "Elixir 1.18.0 / OTP 27.0 / macos-15",
+        "job": 126969271494,
+        "conclusion": "success"
+      },
+      {
+        "name": "Windows / Python 3.12 / tests (3 of 3)",
+        "job": 126969271514,
+        "conclusion": "success"
+      },
+      {
+        "name": "Sample composition / windows-latest",
+        "job": 126969271517,
+        "conclusion": "success"
+      },
+      {
+        "name": "Native C++ library / windows-latest",
+        "job": 126969271541,
+        "conclusion": "success"
+      },
+      {
+        "name": "ubuntu-latest / Python 3.14",
+        "job": 126969271578,
+        "conclusion": "failure"
+      },
+      {
+        "name": "Elixir 1.20.4 / OTP 29.1.1 / windows-2022",
+        "job": 126969271685,
+        "conclusion": "success"
+      }
+    ],
+    "provider_artifact_inventory": [
+      {
+        "id": 13380636608,
+        "name": "windows-conformance-profile-2",
+        "bytes": 438,
+        "provider_digest": "sha256:0cf512472bf93eabc2d597c881bb92ea4dad3d72e4690353e3ab4751a4ccbbc9",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13380572260,
+        "name": "macos-qualification-3.11-1",
+        "bytes": 85293,
+        "provider_digest": "sha256:26f5fed06ce81bded439a6380624254d9d6fe459b07fd911d7163a1043fcd3a2",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13380488815,
+        "name": "macos-qualification-3.14-0",
+        "bytes": 82210,
+        "provider_digest": "sha256:dfaa9f548b69d8da28ea3fe2053f3204aac8c5fac3a4389ef2f2ddde91303782",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13380310162,
+        "name": "release-evidence-ubuntu-latest-3.14",
+        "bytes": 98980,
+        "provider_digest": "sha256:89d0417d9afd3412d860a3bf63dff9c167aeea9d43c47fa1ef20408323e61182",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13379955256,
+        "name": "windows-conformance-profile-3",
+        "bytes": 890,
+        "provider_digest": "sha256:b66366a987a9e011429100e69db23d7f127fdb4028fb50f58f057fb90f2947e7",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13379670940,
+        "name": "elixir-macos-15-1.20.4",
+        "bytes": 14141,
+        "provider_digest": "sha256:cfc0104a7cd62b6cc44db2cb905aa932842165adb421e464bb99203b924cdc84",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13379547858,
+        "name": "windows-conformance-profile-1",
+        "bytes": 438,
+        "provider_digest": "sha256:78120298623645b06ee4837c87095bf7f6aa9ba7d2adbef78bc0e1eed66b809e",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13379101915,
+        "name": "elixir-windows-2022-1.18.0",
+        "bytes": 14199,
+        "provider_digest": "sha256:d9ce91092afccda9b808078643725e463a72d6e7ae177a8ee244f8c6295cb29f",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13379059919,
+        "name": "release-evidence-ubuntu-latest-3.11",
+        "bytes": 98870,
+        "provider_digest": "sha256:71c9afeb5af640650d63ceb4f978518fc6b7a7efba6017c5c9d0dc53825eac7b",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13378563825,
+        "name": "elixir-macos-15-1.18.0",
+        "bytes": 14165,
+        "provider_digest": "sha256:d604dc6db53a18c768bbafef21a89d202373125eb914a0117ae049b286c6273a",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13378504299,
+        "name": "qualified-wheel-windows-3.12",
+        "bytes": 4075745,
+        "provider_digest": "sha256:ba3e01c8d0473dabddf4527ce9f4621a27e8a8a524dcc7b0ef3de33b62e29717",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13378348629,
+        "name": "elixir-ubuntu-24.04-1.18.0",
+        "bytes": 14128,
+        "provider_digest": "sha256:18161833237fb5b3d0e7d3cdc76bce9531c314c0d9cc872ff90b9b7f17ba7e6a",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13378152850,
+        "name": "macos-qualification-3.11-3",
+        "bytes": 22952,
+        "provider_digest": "sha256:f39dcd77a0f468ebc52fa55eae951b5aa63de8e54429459190e8890a2e13bcf9",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13378105165,
+        "name": "platform-smoke-diagnostics-macos-latest",
+        "bytes": 5730,
+        "provider_digest": "sha256:59647e81f2bd382e520abb32fc3af11b7f6192f1184b226de0f5d00d89b815e4",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13377933963,
+        "name": "elixir-windows-2022-1.20.4",
+        "bytes": 14195,
+        "provider_digest": "sha256:1a67ac9a4092897c92c09d4735c1dc9c45ea6ded1a315bdeb04dbc7380075e5e",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13377478227,
+        "name": "macos-qualification-3.11-2",
+        "bytes": 11286,
+        "provider_digest": "sha256:f65cea916d8d0eb5b93350fab24e8aaaaa5c4eed779a392460a459dc6357b61d",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13377471474,
+        "name": "macos-qualification-3.11-4",
+        "bytes": 6340,
+        "provider_digest": "sha256:7861fcf1a4f200635c5e549bc66da7c471408611003c6ed754180f9aa0ed3278",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13377339001,
+        "name": "elixir-ubuntu-24.04-1.20.4",
+        "bytes": 14138,
+        "provider_digest": "sha256:826c858d783987e7b2a15a0fca29ff9eaac6d07afa2b8a56c8db55cdb07adb69",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13377332000,
+        "name": "native-cpp-qualification-windows-latest",
+        "bytes": 686,
+        "provider_digest": "sha256:7717edaf43b7a8b8b99b27ee56d8c03d2c5124ac935d49f65fce3f9045756bbb",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13377132714,
+        "name": "native-cpp-qualification-ubuntu-latest",
+        "bytes": 644,
+        "provider_digest": "sha256:b4fe0ba7fc525b389bde5a887a0716fff8368f40b4397161abee6627f75d6db7",
+        "expired_at_observation": false
+      },
+      {
+        "id": 13376249941,
+        "name": "platform-smoke-diagnostics-windows-latest",
+        "bytes": 5736,
+        "provider_digest": "sha256:c16f4eb90b3994e9ee45ee4fcfeeb4cecf854af4b9477f0ef2b3ffb245708afa",
+        "expired_at_observation": false
+      }
+    ],
+    "artifact_inventory_scope": "Original provider artifact hashes retained; unrelated original artifacts are not claimed locally rehashed. Corrected five wheel archives above were downloaded and rehashed."
+  },
+  "constraints_preserved": [
+    "No process-global environment mutation",
+    "Canonical copied-runtime builder and installed RECORD reader unchanged",
+    "Package-index and proxy policy retained",
+    "Same exact candidate wheel used in each safe/unsafe pair",
+    "Canonical unsafe installed RECORD refusal remains required"
+  ],
+  "release_attestation": false
+}

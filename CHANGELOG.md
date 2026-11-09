@@ -12,6 +12,28 @@
   source/graph/authority binding. These choices grant intent review, not host
   execution or regenerative qualification.
 
+- Complete current-main native qualification of retained Windows system context,
+  base/private interpreter DLL capture, and the five-minute C++ discovery bound;
+  preserve command drift, missing-sidecar and guarded native build refusals (#102, #103).
+
+- Record the included Codex runtime-state and remote file-ceiling work as explicit
+  1.4 roadmap and release-manifest gates; both remain incomplete pending their
+  existing implementation, review and native qualification.
+- Retain standalone Windows MSVC setup and C++ discovery timings in native qualification while preserving the five-minute default and caller-selected bounds.
+- Renew retained Windows command, source/context drift and missing native sidecar checks through the noneditable wheel on base and private interpreters (#102, #103).
+
+- Add reviewed identity migration for original-source converted projects, preserving immutable rename lineage and requiring fresh qualification under the new project ID.
+
+- Qualify native Windows CPU pressure with all eight native controls and the noneditable local/standalone-receiver acceptance case; preserve required-pressure refusal and explicit unsupported processor groups (#348).
+- Initial tree HTML publication retains bounded private transaction records before output mutation and through index commit, preserving interrupted attempts and foreign journal changes (#279). Recovery and rerender remain unfinished.
+- Cross-platform worker wheelhouse export considers compatible older glibc-2 floors for an explicit PEP 600 target, preserving architecture, target identity and offline closure verification (#356).
+
+- Go applications compile their native behavior tests from `source/tests/litai_runtime.go`; the guarded builder binds the actual offline compiler-consumed source graph (#324).
+- Inert conversion recognizes JavaScript/TypeScript module and JSX suffixes while preserving sensitive, binary, generated, large, minified and test precedence (#328).
+- Large library import commands retain every declared mapping and bind the complete typed surface identity within the finite argument limit (#330).
+- Repository checkout checks Git LFS JSON-inventory support before configuring a remote. FreeBSD SDK staging propagates exact source-only Git trust to the clone child through a disposable config (#305).
+
+- Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
 
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,
@@ -23,7 +45,7 @@
   all direct byte, dependency, SDK, tool, revocation and deadline checks. Custom
   callbacks retain independent replanning; plan values grant no execution.
 
-- Host bootstrap requires Git 2.47 or newer and Git LFS 3.2 or newer for
+- Host bootstrap requires Git 2.43 or newer and Git LFS 3.2 or newer for
   scoped ownership checks and complete JSON LFS inventories. Worker alignment
   reports incompatible selected Git/LFS tools and rechecks declared repairs.
 
@@ -43,7 +65,8 @@
 - Add installed-wheel adoption coverage for retained third-party Component-shaped
   files, using real unittest, build, package and parity controls. Exercise public
   status with an explicitly selected local shim and preserve native/Python
-  requirements and adopted-project inputs.
+  requirements and adopted-project inputs. Installed macOS and Linux adoption
+  journeys preserve retained dependency files named like framework authority (#212).
 
 - Native x64 MSVC setup preserves the selected toolset's complete version option
   across CMD argument parsing, while retaining required compiler variables.
@@ -133,6 +156,8 @@
 - Adopted-project status resolves selected project-local Flavors by canonical
   identity. Toolchain-free shims add no requirements; custom local observation
   probes refuse explicitly, and copied framework Flavors retain their host tools.
+  Installed macOS, Linux and Windows status journeys preserve actual host-readiness
+  results (#268).
 
 - C++ toolchain discovery, including MSVC environment initialization, now defaults
   to a finite five-minute budget instead of one minute.

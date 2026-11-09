@@ -1,0 +1,178 @@
+{
+  "architecture": "x86_64",
+  "authenticated_phase_execution": false,
+  "budget_semantics": {
+    "cleanup_drain_deadline_seconds": 5,
+    "note": "The limit bounds retained stream payload and triggers kernel tree termination. Already buffered bytes may exceed that limit and are discarded under separate cleanup bounds; it is not a claim that the workload emitted at most 65536 bytes.",
+    "overflow_detection_extra_byte": 1,
+    "retained_stdout_stderr_combined_bytes": 65536,
+    "unretained_cleanup_drain_max_bytes": 1048576
+  },
+  "cases": [
+    {
+      "case": "legitimate",
+      "cgroup_node": [
+        28,
+        8181595
+      ],
+      "combined_stream_limit": 65536,
+      "config_sha256": "1cf567e6d28827205a37b8fc732fa6c7a4d548e60bf3b395e314319c848efb13",
+      "deadline_seconds": 5,
+      "discarded_after_termination": 0,
+      "exit": 0,
+      "kernel_tree_kill_used": false,
+      "observed_bytes": 24,
+      "original_cgroup_empty": true,
+      "reason": null,
+      "retained_bytes": 24,
+      "stream_sha256": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "d275cfbcf445ffd07f687538daec556d365e25042563bdce50dcf66a3539a8a1"
+      },
+      "surviving_original_processes": 0,
+      "tracked_process_count": 1,
+      "wall_seconds": 0.5870858510024846
+    },
+    {
+      "case": "deadline",
+      "cgroup_node": [
+        28,
+        8181660
+      ],
+      "combined_stream_limit": 65536,
+      "config_sha256": "fcff28eebcfb91db8434c597da3aa99fd15c153defb945373f292a9f306a9480",
+      "deadline_seconds": 5,
+      "discarded_after_termination": 0,
+      "exit": 137,
+      "kernel_tree_kill_used": true,
+      "observed_bytes": 14,
+      "original_cgroup_empty": true,
+      "reason": "deadline",
+      "retained_bytes": 14,
+      "stream_sha256": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "a8a3cb53b10acff61d54810d7036132a96619c501de8b003f8887844d38d0736"
+      },
+      "surviving_original_processes": 0,
+      "tracked_process_count": 2,
+      "wall_seconds": 5.003051413688809
+    },
+    {
+      "case": "stdout-limit",
+      "cgroup_node": [
+        28,
+        8181725
+      ],
+      "combined_stream_limit": 65536,
+      "config_sha256": "e14a54fc6ad1133210993eaac7ff6361104fe2df9fc5cdd1c107ab387e27d33c",
+      "deadline_seconds": 5,
+      "discarded_after_termination": 147469,
+      "exit": 137,
+      "kernel_tree_kill_used": true,
+      "observed_bytes": 65537,
+      "original_cgroup_empty": true,
+      "reason": "combined-stream-limit",
+      "retained_bytes": 65536,
+      "stream_sha256": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "29998021df066f18064a32a660ee0f2583d0d5377ff4fed30dae9bf2ed4f31e3"
+      },
+      "surviving_original_processes": 0,
+      "tracked_process_count": 2,
+      "wall_seconds": 0.9000613489188254
+    },
+    {
+      "case": "stderr-limit",
+      "cgroup_node": [
+        28,
+        8181790
+      ],
+      "combined_stream_limit": 65536,
+      "config_sha256": "acdf57f4d97d5d9d5db0b5611010fc4cdce1e9fdde907ed2146cd42f8250b71a",
+      "deadline_seconds": 5,
+      "discarded_after_termination": 147469,
+      "exit": 137,
+      "kernel_tree_kill_used": true,
+      "observed_bytes": 65537,
+      "original_cgroup_empty": true,
+      "reason": "combined-stream-limit",
+      "retained_bytes": 65536,
+      "stream_sha256": {
+        "stderr": "a2f26f3fe4f8336cc0909b3728254de5004657db73ac0ea1e702bebb7567f18b",
+        "stdout": "a8a3cb53b10acff61d54810d7036132a96619c501de8b003f8887844d38d0736"
+      },
+      "surviving_original_processes": 0,
+      "tracked_process_count": 2,
+      "wall_seconds": 0.7869331082329154
+    },
+    {
+      "case": "combined-stream-limit",
+      "cgroup_node": [
+        28,
+        8181855
+      ],
+      "combined_stream_limit": 65536,
+      "config_sha256": "5e79fc94f1687d68c10cd7f192cb5ac7d465f80acbc1179c80a29b5b3d128cc7",
+      "deadline_seconds": 5,
+      "discarded_after_termination": 294925,
+      "exit": 137,
+      "kernel_tree_kill_used": true,
+      "observed_bytes": 65537,
+      "original_cgroup_empty": true,
+      "reason": "combined-stream-limit",
+      "retained_bytes": 65536,
+      "stream_sha256": {
+        "stderr": "f8530e2c4406c98f1f71726da747312992aee30ac901a904583eb1a47ccfea29",
+        "stdout": "5f0f181ed2c7ddd114d1cfb711f42739b10eaf96a7b43fa1ed291ad76f759f31"
+      },
+      "surviving_original_processes": 0,
+      "tracked_process_count": 2,
+      "wall_seconds": 0.757988603785634
+    }
+  ],
+  "date_utc": "2026-11-08",
+  "framework_phase_adapter_qualified": false,
+  "kernel": "5.15.0-1117-azure",
+  "kind": "independent-native-stream-deadline-development-probe",
+  "maintained_profile_record_sha256": "6e76cb082b0d6d8fdf271cdab43801575966a70c17279ecd2138ee528b8f8308",
+  "ok": true,
+  "operator_probe_script_sha256": "a043f531e1e48fbc0e01c88ea102bb066ceacce18d16a7d95dac253c7cf9593d",
+  "preserved_initial_failure": {
+    "failure": "After stdout overflow, the cgroup workload was killed, but waiting without draining runtime pipes timed out. This initial attempt was quarantined and is not a passing stream-control result.",
+    "operator_probe_script_sha256": "8bb112bc33b93330a82fb61dafe5c8c76ee6d4a384f0bd79909f80ab76e38fc1",
+    "operator_recovery": {
+      "cgroup_empty_before_delete": true,
+      "original_failure_preserved": true,
+      "original_workload_stopped": true,
+      "owned_runtime_state_deleted": true,
+      "quarantine_recovered_by_operator": true,
+      "runtime_cli_absent": true
+    },
+    "repair": "After kernel termination, discard pending pipe bytes with independent finite byte/time bounds before waiting for the runtime CLI. Preserve retained stream limits.",
+    "stderr_sha256": "f2a6a19791ec29a5f6e4c99a747a2073510a029d58775969869b70e99c680220"
+  },
+  "production_grant_consumed": false,
+  "raw_native_summary_encoding": "Raw JSON stdout includes its trailing newline; retained archive complete.json omits that newline. Both decode to the exact same complete native summary.",
+  "raw_native_summary_sha256": "e4d8f0a570b0fb42e27bb0d7c32a10c1186a40305cb22d10a49331b70b7aa118",
+  "release_attestation": false,
+  "remaining": [
+    "Reviewed framework phase-runner adapter with immutable runtime/image/profile admission",
+    "Exact live grant validation and single-use consumption before launch",
+    "Authenticated observations, issuer trust, freshness, revocation and complete retention binding",
+    "Every required phase/provider binding and connection-loss quarantine policy",
+    "Native macOS and Windows VM qualification",
+    "Independent enterprise security review and exact release-candidate qualification"
+  ],
+  "retained_archive_summary_sha256": "716b22aceca41050c2bbdd122a2cf593e88e96212a411b47ad324c0c25d3450c",
+  "retained_evidence": {
+    "all_case_bytes_rehashed": true,
+    "all_owned_runtime_and_cgroup_states_removed": true,
+    "bytes": 20899,
+    "contents": "Exact native complete/case records, OCI configurations and bounded stdout/stderr bytes; rehashed on the native host and again after local download.",
+    "sha256": "a956745dfe557d4804ff9d2b12353c6847ac5c8fee5aac74a0419efd99abf8ff"
+  },
+  "rootfs_archive_sha256": "f30d685f6d9a5e9909d24ca8e170c257c9ef5efb972ec621ba42b8c8a200aa0c",
+  "runtime_sha256": "1248fee8f9a0dc5382f888990d669e2bd225045869b9246f848a1681161abc96",
+  "runtime_version": "runc version 1.5.2\ncommit: v1.5.2-0-g29dd3dc2\nspec: 1.3.0\ngo: go1.27.3\nlibseccomp: 2.5.5\n",
+  "scope": "Five fixed independent Linux OCI probes, outside generated workload authority; development enforcement evidence only. No framework phase admission or release attestation."
+}

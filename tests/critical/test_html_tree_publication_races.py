@@ -4,6 +4,7 @@ No installed-distribution, SDK, browser, scale or complete-ADR admission is clai
 All capture, CAS, output-custody and publication paths are the production owners.
 """
 
+import hashlib
 import json
 import os
 import tempfile
@@ -15,6 +16,7 @@ from unittest.mock import patch
 
 from literate_ai.adapters import html_tree_apply as apply
 from literate_ai.adapters import html_tree_inputs as inputs
+from literate_ai.adapters import html_tree_journal as journal
 from literate_ai.adapters import html_tree_output_initialization as output
 from literate_ai.adapters import html_tree_render as render
 from literate_ai.adapters import native_sdk_tree_custody as capture
@@ -266,6 +268,76 @@ class HtmlTreePublicationRaceTests(unittest.TestCase):
             (bounded.source / "payload.txt").read_bytes(), b"original payload\n"
         )
         self.require_unpublished(bounded)
+
+    def test_journal_precedes_first_output_mutation_and_retains_interruption(self):
+        case = self.case("journal-before-output")
+
+        def interrupt(*args, **options):
+            journals = list((case.state / "tree-html").glob("*/journal"))
+            self.assertEqual(len(journals), 1)
+            records = list(journals[0].iterdir())
+            self.assertEqual([path.name for path in records], ["0000.json"])
+            record = json.loads(records[0].read_bytes())
+            self.assertEqual(record["phase"], "prepared")
+            self.assertFalse(record["grants_output_ownership"])
+            self.assertEqual(record["data"]["plan_identity"], case.acknowledgement.uri)
+            self.assertFalse(case.namespace.exists())
+            self.assertFalse(case.index.exists())
+            raise InterruptedError("test-owned interruption before output")
+
+        with (
+            patch.object(apply, "initialize_html_tree_output", interrupt),
+            self.assertRaises(InterruptedError),
+        ):
+            self.publish(case)
+        original = next((case.state / "tree-html").glob("*/journal/0000.json"))
+        retained = original.read_bytes()
+        with self.assertRaises(FileExistsError):
+            self.publish(case)
+        self.assertEqual(original.read_bytes(), retained)
+        self.assertFalse(case.namespace.exists())
+
+    def test_success_records_complete_phase_chain_after_index_commit(self):
+        case = self.case("journal-success")
+        published = self.publish(case)
+        paths = sorted((case.state / "tree-html").glob("*/journal/*.json"))
+        self.assertEqual(len(paths), 4)
+        previous = None
+        records = []
+        for index, path in enumerate(paths):
+            raw = path.read_bytes()
+            record = json.loads(raw)
+            self.assertEqual(record["sequence"], index)
+            self.assertEqual(record["previous"], previous)
+            self.assertFalse(record["grants_output_ownership"])
+            previous = "sha256:" + hashlib.sha256(raw).hexdigest()
+            records.append(record)
+        self.assertEqual(
+            [record["phase"] for record in records],
+            ["prepared", "output-reserved", "generation-staged", "published"],
+        )
+        self.assertEqual(records[-1]["data"], published)
+        self.assertEqual(
+            records[-1]["data"]["index_identity"],
+            "sha256:" + hashlib.sha256(case.index.read_bytes()).hexdigest(),
+        )
+
+    def test_journal_storage_reservation_refuses_before_output_mutation(self):
+        maximum = journal.JOURNAL_STORAGE_RESERVATION + 4096
+        case = self.case(
+            "journal-budget",
+            limits=replace(
+                self.limits,
+                max_page_bytes=4096,
+                max_total_generated_bytes=maximum,
+                max_retained_generation_bytes=maximum,
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "journal-reservation-policy-exceeded"):
+            self.publish(case)
+        self.assertFalse(case.namespace.exists())
+        self.assertFalse(case.index.exists())
+        self.assertEqual(list((case.state / "tree-html").glob("*/journal")), [])
 
 
 if __name__ == "__main__":

@@ -108,6 +108,7 @@ litai project convert-stage show
 litai project convert-stage advance
 litai project source-intelligence sync
 litai project source-intelligence check
+litai project identity migrate
 litai project retained-scope refresh
 litai project retained-harness readmit
 litai project retained-cargo check
@@ -547,6 +548,7 @@ root-integration acceptance still remain.
 | `project convert-stage show [--project PATH]` | Read the canonical evidence-bound conversion authority state for an adopted project. |
 | `project convert-stage advance --to retained\|drafted\|qualified [--project PATH]` | Advance exactly one adjacent stage after independently verifying the current receipt or Component-promotion evidence. No command silently promotes a tree. |
 | `project retained-scope refresh [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review exact added/removed retained-source paths and input identities, then revalidate and rebind scope and receipt policy without changing source or historical conversion evidence. |
+| `project identity migrate --from-project-id OLD [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Reconcile an explicitly authored new project ID with original-source conversion authority, preserving hash-linked rename history and requiring fresh qualification. |
 | `project retained-harness readmit [--project PATH] [--retain-stage STAGE_ID ...] [--apply --acknowledge --expected-plan-identity SHA256] [--worker-id ID] [--worker-config PATH] [--timeout-seconds N]` | Re-inspect a retained implementation while original source still owns release authority, including at the `retained` conversion stage. A repeated `--retain-stage` carries the exact named stage from the current admitted inventory when inspection cannot rediscover it; the stage IDs and complete records are part of the reviewed plan and must be repeated unchanged on apply. The command binds the selected worker, timeout, and supported pinned runtime-tool requirements into that plan, then qualifies the corrected direct commands and generated wrapper locally or on one exact POSIX SSH worker before atomically replacing inventory, baseline, parity, wrapper/shim authority, Component lock, and receipt policy. Prior lift-and-shift and conversion evidence and the current conversion stage remain immutable. Specification-authoritative projects fail closed. |
 | `project retained-cargo check --binding PATH --plan PATH --gates PATH ...` | Verify reviewed Cargo bindings, current provider authority, an explicit local or HTTPS archive, and any present packages. Report missing packages without provisioning them. See [retained Cargo provisioning](retained-cargo.md) for required review and delivery inputs. |
 | `project retained-cargo materialize --binding PATH --plan PATH --gates PATH ...` | Verify the same authority and exclusively publish or reuse exact retained packages under the reviewed disposable paths. This command does not execute consumer gates or admit a receipt. |
@@ -830,7 +832,7 @@ reinstall a tool merely to run that check. Inspection is
 read-only; findings carry remediations and the exit status is nonzero until every
 worker is aligned. When a platform declares Git or Git LFS, including `git.exe` or
 `git-lfs.exe`, alignment checks both tools against the packaged os-base requirements:
-Git >=2.47,<3 and Git LFS >=3.2,<4. It probes each selected executable with a five-minute
+Git >=2.43,<3 and Git LFS >=3.2,<4. It probes each selected executable with a five-minute
 budget; failed or unreadable versions remain incompatible. Templates that declare
 only a coding CLI do not add repository tools. `--apply` runs only your declared
 installs for missing commands or incompatible repository tools and replaces only
@@ -2349,6 +2351,29 @@ the converter does not silently run the old broad test command afterwards.
 Detected phases without an override remain required. The plan and inventory
 record the selected command and its detector predecessor. A scoped test command
 qualifies that scope only; other upstream tests remain unqualified.
+
+### Renaming an adopted project
+
+After deliberately changing the authored `project_id`, an original-source
+converted project needs an explicit identity migration. The initial mismatch is
+a refusal, not permission for ordinary operations to adopt the new name:
+
+```console
+litai project identity migrate --project PATH --from-project-id OLD
+litai project identity migrate --project PATH --from-project-id OLD --apply --acknowledge --expected-plan-identity sha256:REVIEWED_DIGEST
+```
+
+Review the new ID, exact source/authority bindings, prior conversion state and
+two-file write set. Apply rechecks those inputs under the lifecycle lock, retains
+immutable hash-linked rename history, and atomically changes conversion identity
+without advancing its stage. Existing history and receipts are never relabelled.
+Readers refuse missing or altered rename history. A history-only interruption
+can be retried against a fresh reviewed plan; it grants no new authority.
+
+The command supports wrapped, retained and drafted converted projects. It refuses
+original-unconverted and specification-qualified authority. After migration,
+refresh retained membership below and run/adopt a fresh retained receipt under
+the new project identity. The rename itself never proves qualification.
 
 ### Refreshing retained source membership
 

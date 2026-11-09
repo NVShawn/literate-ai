@@ -245,16 +245,46 @@
         "id": "LIBRARY-IMPORT-ISOLATION-001"
       },
       {
+        "id": "SOURCE-MODULE-VARIANTS-001"
+      },
+      {
+        "id": "LIBRARY-IMPORT-COMMAND-001"
+      },
+      {
         "id": "QUALIFIED-CHILD-ADD-001"
       },
       {
         "id": "SHADOW-001"
       },
       {
+        "id": "GO-001"
+      },
+      {
         "id": "RELEASE-COLLATERAL-001"
       },
       {
         "id": "QUALIFIED-CHILD-REVISION-001"
+      },
+      {
+        "id": "WORKER-CPU-001"
+      },
+      {
+        "id": "WORKER-WHEELHOUSE-GLIBC-001"
+      },
+      {
+        "id": "REVIEW-AUTHORITY-CLI-001"
+      },
+      {
+        "id": "PROJECT-ID-001"
+      },
+      {
+        "id": "CODEX-STATE-001"
+      },
+      {
+        "id": "REMOTE-FILE-CEILING-001"
+      },
+      {
+        "id": "QUALIFICATION-DIAGNOSTICS-001"
       }
     ]
   }

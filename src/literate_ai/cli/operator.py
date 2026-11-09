@@ -92,6 +92,34 @@ def conversion_authority_from_args(args: Namespace) -> dict[str, Any]:
     return _conversion_authority_from_args(args)
 
 
+def project_identity_from_args(args: Namespace) -> dict[str, Any]:
+    from literate_ai.adapters.project_identity_migration import (
+        apply_project_identity_migration,
+        plan_project_identity_migration,
+    )
+
+    try:
+        if args.apply:
+            if not args.expected_plan_identity:
+                raise CliFailure(
+                    "project_identity.plan_required",
+                    "apply requires the reviewed --expected-plan-identity",
+                )
+            return apply_project_identity_migration(
+                Path(args.project),
+                from_project_id=args.from_project_id,
+                expected_plan_identity=args.expected_plan_identity,
+                acknowledge=args.acknowledge,
+            )
+        return plan_project_identity_migration(
+            Path(args.project), from_project_id=args.from_project_id
+        )
+    except CliFailure:
+        raise
+    except (ValueError, RuntimeError, OSError) as exc:
+        raise _translate_error(exc) from exc
+
+
 def retained_scope_from_args(args: Namespace) -> dict[str, Any]:
     from literate_ai.adapters.retained_scope_refresh import (
         apply_retained_scope_refresh,

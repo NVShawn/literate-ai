@@ -1,0 +1,157 @@
+{
+  "kind": "human-authored integration review; original machine reports remain authoritative",
+  "runtime_source_revision": "308f98efd7ec9a04075f0907415ab49ce0055725",
+  "scope": {
+    "reviews": [
+      325,
+      329,
+      331,
+      336
+    ],
+    "issues": [
+      324,
+      328,
+      330,
+      305
+    ],
+    "release_qualification": false,
+    "publication": false,
+    "native_freebsd_scale_or_two_physical_hosts": false
+  },
+  "source_review": {
+    "go": "Required compiled local runtime-test package, offline real compiler graph, immutable export after source removal and real assertion mutations; no external/unsafe source admission.",
+    "library_import": "Every capability/module/symbol mapping remains present; full typed surface identity still changes the finite command after interface-only drift; all existing import/export/dependency/path checks remain.",
+    "source_inventory": "Only module/JSX language classification and matching test/minified suffixes change; sensitive, binary, large and generated precedence remains.",
+    "git_staging": "Exact source and .git trust reaches upload-pack via one disposable configuration; unrelated ownership and operator configuration remain protected."
+  },
+  "python": {
+    "argv": "make python-check",
+    "interpreter": "system Python 3.12.3 in Make-managed session environment",
+    "exit_status": 0,
+    "fresh_from_first_test": true,
+    "report_schema": "urn:literate-ai:schema:v2:known-test-failure-report",
+    "report_sha256": "aed6d1999cd0e14e662b979f2d770ce7c9ad55ac1429244ba5eec2874fb2fc39",
+    "report_release_evidence": false,
+    "summary": {
+      "executed": 2621,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2621,
+      "selected": 2739,
+      "skipped": 118
+    },
+    "independent_worker_event_audit": {
+      "selected": 2739,
+      "outcomes": {
+        "passed": 2621,
+        "skipped": 118
+      },
+      "starts": 2710,
+      "module_groups": 594,
+      "fixture_skip_events": 8,
+      "fixture_skipped_cases": 29,
+      "missing": 0,
+      "report_matches": true
+    },
+    "text_runner_count_note": "2710 start events; eight class/module skip events cover 29 additional selected cases. The typed report expands all declared fixture skips."
+  },
+  "wheel": {
+    "ok": true,
+    "version": "1.4.0",
+    "wheel_identity": "sha256:1da32ef33901c73a8d92b1d1b2ca4f57997fda4304b1053fcd19a54f7d25008b",
+    "retained_manifest": "_build/ci-wheels/run-v_pcabgj/manifest.json",
+    "operator_golden_paths": {
+      "adopt": {
+        "host_toolchain_resolved": true,
+        "host_tools_ready": true,
+        "receipt": "current",
+        "release_authority": "original-source",
+        "stage": "retained"
+      },
+      "create": {
+        "hello": true,
+        "kind": "created",
+        "validated": true
+      },
+      "source": "release-candidate-wheel"
+    },
+    "rust_library_harness": {
+      "framework_distribution": "sha256:75c286f0139c29481560be3f29fe8ea88f4548243656dff4adfffbefe882377f",
+      "native_cargo_identity": "sha256:36a4020b383a53137c702d2c7ad5bed6bf3cc9b44d3b8e9fd4a985129fb23fc4",
+      "native_rust_identity": "sha256:53d6ae8c2b0bdd7465c3af5197a0302239def36d92b003bbf5b0d5e568b8a38f",
+      "oracle_identity": "sha256:8bbc4b5bc6d8667ca3154ac9341cfc964657f556a7f4e6910171a129ceb0fceb",
+      "ordinary_rustup_isolated_home": "not-qualified",
+      "public_cli_calls": 3,
+      "qualified": true,
+      "receipt_committed": true,
+      "receipt_sha256": "63a58b71bf824b3ef5ff4e368e970b48e23e22c278b3881dd5d7f056805e3d85",
+      "scope": "installed-public-library-offline-serde-json",
+      "synthetic_framework_observers": false,
+      "whole_ADR0056": "not-qualified"
+    }
+  },
+  "installed_focused_controls": {
+    "wheel_sha256": "1da32ef33901c73a8d92b1d1b2ca4f57997fda4304b1053fcd19a54f7d25008b",
+    "noneditable": true,
+    "controls": [
+      {
+        "module": "test_source_inventory_modules.py",
+        "source_sha256": "e60045eaf25e23a24b835c87191a945e7044578aa7061caaad525407c8e5f446",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "module": "test_library_import_command.py",
+        "source_sha256": "72929c81036b87ee3e46d0d673ba6f967970f7d48527489eb8ddcda10d9c1c68",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "module": "test_go_runtime_source.py",
+        "source_sha256": "bcbc87325b1448538e2d350e65b344727229b698d498595bcfbecacd9ffdd3c2",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    ]
+  },
+  "static_checks": [
+    "Ruff lint and format",
+    "lifecycle-driver review",
+    "repository layout",
+    "public export",
+    "documentation including Mermaid rendering",
+    "changed-skill evaluation against origin/main"
+  ],
+  "successor_boundary": "Normal main integration records accepted ADRs 0062 and 0066. Runtime source, scripts, Flavors, skills and packaged template remain byte-identical to the frozen qualified revision. One later Go test-fixture correction canonicalizes its temporary root after an actual native macOS refusal; original reports retain their exact source and are not relabeled.",
+  "remaining": [
+    "Exact consolidated-head supported-platform CI before guarded landing",
+    "Post-merge main verification and scoped issue/roadmap closure",
+    "Every other 1.4 milestone requirement, native gate, collateral refresh and full release workflow",
+    "Renewed exact-head full qualification after the native Go fixture correction"
+  ],
+  "preserved_failures": [
+    "Earlier local sccache 0.14 rejection",
+    "Broken host Bazel embedded archive",
+    "Rejected empty loader-path segment",
+    "Homebrew Python linked base-prefix refusal; repaired gates do not replace a fresh run",
+    "Native macOS ARM64/Python 3.14.7 full source at c072d74a313a25eabe5004cb41b9567ac231bf59: 744 starts, 35 reported skips, one Go control error from an unresolved temporary fixture root. All 5,286 tracked source inputs and metadata independently unchanged."
+  ],
+  "native_fixture_replay": {
+    "platform": "macOS ARM64",
+    "python": "3.14.7",
+    "production_source_revision": "c072d74a313a25eabe5004cb41b9567ac231bf59",
+    "fixture_change": "Canonicalize temporary root with Path.resolve before source creation",
+    "tests": 7,
+    "passed": 7,
+    "skipped": 0,
+    "duration_seconds": 9.848,
+    "qualification": "Focused corrected fixture copied into ignored build space against frozen production; not full successor qualification",
+    "source_snapshot_after_replay": "5286 tracked inputs unchanged; inventory sha256 113f9c644549d1b6777771f8eba3f680b111cd2345f954da4db7af1f4acd2941"
+  }
+}

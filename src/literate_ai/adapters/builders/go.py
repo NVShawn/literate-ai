@@ -320,15 +320,89 @@ def _require_generated_files_covered(
         )
 
 
-class GuardedGoBuilder:
-    """Compile a generated single-file Go binary after build authorization checks.
+def _go_compiled_source_files(
+    toolchain: GoToolchain,
+    source_root: Path,
+    environment: Mapping[str, str],
+    *,
+    timeout_seconds: float,
+) -> tuple[str, ...]:
+    """Read Go's real package graph and bind every non-standard source file."""
 
-    The selected language skill confines generated Go source to one standard-library
-    file at ``source/main.go`` with no external module dependency, mirroring the Rust
-    Flavor's single crate-root constraint. That closed input surface makes per-file
-    dependency-manifest parsing unnecessary: the sole consumed source file is always
-    the entrypoint itself.
-    """
+    result = _run_bounded_process(
+        [*toolchain.command, "list", "-deps", "-json", "source/main.go"],
+        cwd=source_root,
+        environment=environment,
+        timeout_seconds=timeout_seconds,
+        stdout_limit_bytes=8 * 1024 * 1024,
+        stderr_limit_bytes=DEFAULT_GO_STDERR_LIMIT_BYTES,
+        error_prefix="builder.go_source_inventory",
+    )
+    if result.returncode:
+        raise BuildError(
+            "builder.go_source_inventory_failed",
+            "Go could not resolve the generated package graph offline",
+        )
+    try:
+        report = result.stdout.decode("utf-8")
+        decoder = json.JSONDecoder()
+        offset = 0
+        consumed: set[str] = set()
+        while offset < len(report):
+            while offset < len(report) and report[offset].isspace():
+                offset += 1
+            if offset == len(report):
+                break
+            package, offset = decoder.raw_decode(report, offset)
+            if not isinstance(package, dict):
+                raise ValueError("Go package report must contain objects")
+            if package.get("Standard") is True:
+                continue
+            directory = package.get("Dir")
+            files = package.get("GoFiles")
+            imports = package.get("Imports", [])
+            if not isinstance(imports, list) or any(
+                name in {"unsafe", "C"} for name in imports
+            ):
+                raise ValueError("Generated Go package imported unsafe or cgo")
+            if (
+                not isinstance(directory, str)
+                or not isinstance(files, list)
+                or not files
+            ):
+                raise ValueError("Non-standard Go package has no source files")
+            if package.get("CgoFiles"):
+                raise ValueError("Generated Go package requested cgo")
+            package_root = Path(directory).resolve(strict=True)
+            if not package_root.is_relative_to(source_root):
+                raise ValueError("Go resolved a package outside generated source")
+            for name in files:
+                if not isinstance(name, str):
+                    raise ValueError("Go source inventory contains an invalid filename")
+                path = package_root / name
+                if (
+                    path.is_symlink()
+                    or not path.is_file()
+                    or path.resolve(strict=True).parent != package_root
+                ):
+                    raise ValueError("Go source inventory contains redirected source")
+                consumed.add(path.relative_to(source_root).as_posix())
+    except (UnicodeError, json.JSONDecodeError, OSError, ValueError) as exc:
+        raise BuildError(
+            "builder.go_source_inventory_invalid",
+            "Go source inventory was incomplete or escaped generated source",
+        ) from exc
+    required = {"source/main.go", "source/tests/litai_runtime.go"}
+    if not required.issubset(consumed):
+        raise BuildError(
+            "builder.go_runtime_tests_uncompiled",
+            "The native Go runtime tests were not compiled into the artifact",
+        )
+    return tuple(sorted(consumed))
+
+
+class GuardedGoBuilder:
+    """Compile indexed Go source with an included native behavior-test package."""
 
     builder_id = "builder:go-native@1"
 
@@ -422,11 +496,26 @@ class GuardedGoBuilder:
             "source/main.go",
         ]
         build_environment = dict(os.environ)
+        build_environment.pop("GOROOT", None)
         build_environment["GO111MODULE"] = "off"
         build_environment["GOFLAGS"] = "-mod=mod"
-        build_environment.setdefault("GOCACHE", str(compiler_output / "go-build-cache"))
+        build_environment["GOCACHE"] = str(compiler_output / "go-build-cache")
+        build_environment["GOPATH"] = str(compiler_output / "gopath")
+        build_environment["GOMODCACHE"] = str(compiler_output / "module-cache")
+        build_environment["GOWORK"] = "off"
+        build_environment["GOENV"] = "off"
+        build_environment["GOTOOLCHAIN"] = "local"
+        build_environment["GOPROXY"] = "off"
+        build_environment["GOSUMDB"] = "off"
+        build_environment["CGO_ENABLED"] = "0"
         try:
             try:
+                consumed_source_files = _go_compiled_source_files(
+                    self.toolchain,
+                    resolved_source,
+                    build_environment,
+                    timeout_seconds=self.timeout_seconds,
+                )
                 completed = _run_bounded_process(
                     command,
                     cwd=resolved_source,
@@ -447,7 +536,6 @@ class GuardedGoBuilder:
                     "builder.go_compile_failed", "Go compilation failed: " + detail
                 )
 
-            consumed_source_files = ("source/main.go",)
             shutil.copy2(compiled_executable, executable)
             _require_generated_files_covered(
                 resolved_source,

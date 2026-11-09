@@ -187,6 +187,9 @@ class RustVerifierDependencyExecutionTests(unittest.TestCase):
             )
         )
         prepare_seed(cls.seed, archives, cls.cargo, cls.environment)
+        # Later native checks and public rebuilds share the prepared fixture home;
+        # retain the operator HOME and exact native tool bindings unchanged.
+        cls.environment["CARGO_HOME"] = str(cls.seed / "cargo-home")
 
     def test_real_extra_crates_and_selected_features_reopen_and_refuse_drift(self):
         import re
@@ -618,6 +621,7 @@ class RustVerifierDependencyExecutionTests(unittest.TestCase):
         from contextlib import redirect_stderr, redirect_stdout
         from unittest.mock import patch
 
+        from literate_ai.adapters.builders._process import run_bounded_process
         from literate_ai.adapters.standard_lifecycle_binding import (
             InstalledFrameworkDistribution,
             InstalledFrameworkDistributionMember,
@@ -685,6 +689,81 @@ class RustVerifierDependencyExecutionTests(unittest.TestCase):
                 "CODING_CLI": "claude",
             }
         )
+
+        # A synthetic operator home proves that the fixture does not pick up
+        # ambient Cargo configuration. No real operator files are changed.
+        operator_home = root / "synthetic operator"
+        operator_cargo = operator_home / ".cargo"
+        operator_cargo.mkdir(parents=True)
+        marker = root / "hostile-wrapper-invoked"
+        wrapper_source = root / "rejecting-wrapper.rs"
+        wrapper_source.write_text(
+            'fn main() { std::fs::write(std::env::var_os("FIXTURE_WRAPPER_MARKER")'
+            '.unwrap(), b"invoked").unwrap(); eprintln!("fixture-hostile-wrapper");'
+            " std::process::exit(91); }\n",
+            encoding="utf-8",
+        )
+        wrapper = root / (
+            "rejecting wrapper é😀.exe" if os.name == "nt" else "rejecting wrapper é😀"
+        )
+        configuration = operator_cargo / "config.toml"
+        configuration_bytes = (
+            "[build]\nrustc-wrapper="
+            + json.dumps(str(wrapper), ensure_ascii=False)
+            + "\n"
+        ).encode()
+        configuration.write_bytes(configuration_bytes)
+        environment.update(
+            HOME=str(operator_home),
+            USERPROFILE=str(operator_home),
+            FIXTURE_WRAPPER_MARKER=str(marker),
+        )
+
+        def run_native(arguments, values, label):
+            result = run_bounded_process(
+                tuple(arguments),
+                cwd=root,
+                environment=values,
+                timeout_seconds=60,
+                stdout_limit_bytes=1024**2,
+                stderr_limit_bytes=1024**2,
+                terminate_descendants=True,
+                trace=False,
+                error_prefix="fixture.cargo_isolation_" + label,
+            )
+            (evidence / (label + ".stdout")).write_bytes(result.stdout)
+            (evidence / (label + ".stderr")).write_bytes(result.stderr)
+            return result
+
+        compiled = run_native(
+            (*self.rustc.command, str(wrapper_source), "-o", str(wrapper)),
+            environment,
+            "compile-wrapper",
+        )
+        self.assertEqual(compiled.returncode, 0, compiled.stderr)
+        control = root / "control"
+        (control / "src").mkdir(parents=True)
+        (control / "Cargo.toml").write_text(
+            '[package]\nname="cargo-isolation-control"\nversion="0.0.0"\n'
+            'edition="2021"\n[workspace]\n',
+            encoding="utf-8",
+        )
+        (control / "src/lib.rs").write_text("pub fn value() {}\n", encoding="utf-8")
+        negative = run_native(
+            (
+                *self.cargo.command,
+                "check",
+                "--offline",
+                "--manifest-path",
+                str(control / "Cargo.toml"),
+            ),
+            {**environment, "CARGO_HOME": str(operator_cargo)},
+            "hostile-home-control",
+        )
+        self.assertNotEqual(negative.returncode, 0)
+        self.assertIn(b"fixture-hostile-wrapper", negative.stderr)
+        self.assertEqual(marker.read_bytes(), b"invoked")
+        marker.unlink()
 
         def invoke(arguments):
             output, errors = io.StringIO(), io.StringIO()
@@ -805,6 +884,10 @@ class RustVerifierDependencyExecutionTests(unittest.TestCase):
         self.assertEqual(
             (project / "verification/current.json").read_bytes(), receipt_bytes
         )
+        self.assertFalse(
+            marker.exists(), "public rebuild selected the hostile Cargo wrapper"
+        )
+        self.assertEqual(configuration.read_bytes(), configuration_bytes)
         succeeded[0] = True
 
 

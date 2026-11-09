@@ -7,4 +7,4 @@ independent browser acceptance are required; the UI must not invent generated
 provenance, dependencies or receipts. All runtime inputs are local to this project.
 
 
-<!-- literate-ai:authority-reviewed sha256:ec735b5d1e7a67c7b8a7ab52db5f659819050cfa6f8a7e7859efd6269463e189 -->
+<!-- literate-ai:authority-reviewed sha256:6ac7b27432de88ca6e85b4b0a88ecf15ab18bed2296ccab135215b83d892c725 -->

@@ -1,0 +1,1168 @@
+{
+  "kind": "independent-native-runtime-development-verification",
+  "release_attestation": false,
+  "platform": {
+    "architecture": "x86_64",
+    "docker_version": "29.9.3",
+    "image": "python@sha256:e064671ca452259bab50e8e2c7bd896e39e9a343bb06ca25234adf6fe18d0fc7",
+    "image_id": "sha256:4076016aea5420e5c87eb52280edfc527ace1ce31dc1c9288b1cc4ef9a0e8905",
+    "kernel": "5.15.0-1117-azure",
+    "runc_version": "runc version 1.5.2\ncommit: v1.5.2-0-g29dd3dc2\nspec: 1.3.0\ngo: go1.27.3\nlibseccomp: 2.5.5\n"
+  },
+  "framework_wheel_revision": "97e71a233765d4e26b2d6802942a2d7b808133dd",
+  "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+  "maintained_seccomp_profile_sha256": "52a73ffbf99223798f280d3e980a52452c05920d110cd0c84e7996a473aaa04c",
+  "pinned_rootfs": {
+    "archive_bytes": 50913792,
+    "archive_sha256": "f30d685f6d9a5e9909d24ca8e170c257c9ef5efb972ec621ba42b8c8a200aa0c",
+    "image": "python@sha256:e064671ca452259bab50e8e2c7bd896e39e9a343bb06ca25234adf6fe18d0fc7"
+  },
+  "operator_probe_script_sha256": "e25b720fc39499b6cb3fa5cab15e553db53d6090e20a4fce193a4dc6cb881671",
+  "raw_native_records_sha256": "ed3c4472a263865f15cd06a579930d70c1cfb0454f5752da402454a457f99c67",
+  "retained_phase_records": [
+    {
+      "phase": "platform",
+      "record_sha256": "e3609e5f6490bbae28750f3cf26e06249b45a6e75fa8cabd542bc4a6c5a9e262"
+    },
+    {
+      "phase": "maintained-oci-profile",
+      "record_sha256": "6e76cb082b0d6d8fdf271cdab43801575966a70c17279ecd2138ee528b8f8308"
+    },
+    {
+      "phase": "rootfs-custody",
+      "record_sha256": "a5dcc3bbe5a483f1dd0c2243d8db66a2389808e13f0df76def4291b9a30c5b22"
+    },
+    {
+      "phase": "controls-prepared",
+      "record_sha256": "32a3c5175e4c66d13d0ef85505e79339bcd5976f40b09851f9538c62b8a548db"
+    },
+    {
+      "phase": "controls-completed",
+      "record_sha256": "b4b14c7a658746871e31244527cafff5ea0a481102fb89abe2ffffaed5653f31"
+    },
+    {
+      "phase": "pids-prepared",
+      "record_sha256": "8a1a8c1414885635fd382fa6fa9b79f22a5a91dbb9cefcb041ab9e0e0280184a"
+    },
+    {
+      "phase": "pids-completed",
+      "record_sha256": "facf740d77816c335ac0e07c281ae0b6d448730b818bc5bbbadae79b9a04e15f"
+    },
+    {
+      "phase": "cpu-prepared",
+      "record_sha256": "4dfdebc99b6afe0efcaad14421dc88ead9c81690aa27bad20d2f7c9483a0e016"
+    },
+    {
+      "phase": "cpu-completed",
+      "record_sha256": "ce0ebabdde8c6929d0ce907f44dfec9e34728d8d7a1c955eeef5294227a58006"
+    },
+    {
+      "phase": "oom-prepared",
+      "record_sha256": "50a571f4e5169b9836d967d32f52b1e5269071c059cb9df132b83331d181d605"
+    },
+    {
+      "phase": "oom-completed",
+      "record_sha256": "a1a60599048ceea82e216f1f015e2b042197f4a3cdc93796d97a88f55dbb5a77"
+    },
+    {
+      "phase": "timeout-prepared",
+      "record_sha256": "8d0da45f95595a86fdb45f8eb6861c78a83effcbc48d3e2b19415726ad423d18"
+    },
+    {
+      "phase": "timeout-completed",
+      "record_sha256": "820be6fdbd649c7c0fc89459af0190200ed38236117b15727e4876a3bddfb841"
+    }
+  ],
+  "cases": [
+    {
+      "case": "controls",
+      "exit": 0,
+      "kernel_memory_events": {
+        "high": "0",
+        "low": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0"
+      },
+      "stdout_records": [
+        {
+          "ready": true,
+          "uid": 65534,
+          "pid": 1,
+          "oom_group": 1
+        },
+        {
+          "controls": true,
+          "input_errno": 30,
+          "root_errno": 30,
+          "cgroup_errno": 30,
+          "network_errno": 101,
+          "symlink_errno": 30,
+          "output_bytes_before_enospc": 1044480
+        }
+      ],
+      "stderr": "",
+      "original_cgroup_node_preserved": true,
+      "cgroup_empty_after": true,
+      "tracked_host_process_count": 0,
+      "tracked_host_processes_remaining": 0,
+      "kernel_tree_kill_used": false,
+      "input_sha256_after": "45274030f9640fc93ac6e237365d847367ef61a894db396d75cc5ffd510c76bb",
+      "native_framework_preflight": {
+        "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+        "identity": "sha256:3eef1499eb0c9b6ca9da6a4af053091fe119d875d0f37a75ff7b9d1a5fdfc7ec",
+        "snapshot": {
+          "device": 28,
+          "inode": 8116093,
+          "mount_id": 6632,
+          "observations": [
+            [
+              "cgroup.controllers",
+              "cpuset cpu io memory hugetlb pids rdma misc\n"
+            ],
+            [
+              "cgroup.events",
+              "populated 0\nfrozen 0\n"
+            ],
+            [
+              "cgroup.procs",
+              ""
+            ],
+            [
+              "cgroup.subtree_control",
+              ""
+            ],
+            [
+              "cgroup.type",
+              "domain\n"
+            ],
+            [
+              "cpu.max",
+              "25000 100000\n"
+            ],
+            [
+              "cpu.max.burst",
+              "0\n"
+            ],
+            [
+              "memory.max",
+              "67108864\n"
+            ],
+            [
+              "memory.oom.group",
+              "1\n"
+            ],
+            [
+              "memory.swap.max",
+              "0\n"
+            ],
+            [
+              "pids.max",
+              "16\n"
+            ]
+          ]
+        }
+      },
+      "oci_config_sha256": "02425d0808e8280bd56486417ab6c2137f7f27d13d1ae972eb4874f15f4a9ce7",
+      "resource_configuration": {
+        "blockIO": {},
+        "cpu": {
+          "period": 100000,
+          "quota": 25000
+        },
+        "devices": [
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          }
+        ],
+        "memory": {
+          "limit": 67108864,
+          "swap": 67108864
+        },
+        "pids": {
+          "limit": 16
+        },
+        "unified": {
+          "cpu.max.burst": "0",
+          "memory.oom.group": "1"
+        }
+      }
+    },
+    {
+      "case": "pids",
+      "exit": 0,
+      "kernel_memory_events": {
+        "high": "0",
+        "low": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0"
+      },
+      "stdout_records": [
+        {
+          "ready": true,
+          "uid": 65534,
+          "pid": 1,
+          "oom_group": 1
+        },
+        {
+          "pids_limited": true,
+          "children": 15,
+          "pids_events": {
+            "max": "2"
+          }
+        }
+      ],
+      "stderr": "",
+      "original_cgroup_node_preserved": true,
+      "cgroup_empty_after": true,
+      "tracked_host_process_count": 0,
+      "tracked_host_processes_remaining": 0,
+      "kernel_tree_kill_used": false,
+      "input_sha256_after": "45274030f9640fc93ac6e237365d847367ef61a894db396d75cc5ffd510c76bb",
+      "native_framework_preflight": {
+        "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+        "identity": "sha256:539c08594dc8d9d762530614b2238e3b2d42cf1cd0e6e44a7c12ebf96e73d32f",
+        "snapshot": {
+          "device": 28,
+          "inode": 8116158,
+          "mount_id": 6632,
+          "observations": [
+            [
+              "cgroup.controllers",
+              "cpuset cpu io memory hugetlb pids rdma misc\n"
+            ],
+            [
+              "cgroup.events",
+              "populated 0\nfrozen 0\n"
+            ],
+            [
+              "cgroup.procs",
+              ""
+            ],
+            [
+              "cgroup.subtree_control",
+              ""
+            ],
+            [
+              "cgroup.type",
+              "domain\n"
+            ],
+            [
+              "cpu.max",
+              "25000 100000\n"
+            ],
+            [
+              "cpu.max.burst",
+              "0\n"
+            ],
+            [
+              "memory.max",
+              "67108864\n"
+            ],
+            [
+              "memory.oom.group",
+              "1\n"
+            ],
+            [
+              "memory.swap.max",
+              "0\n"
+            ],
+            [
+              "pids.max",
+              "16\n"
+            ]
+          ]
+        }
+      },
+      "oci_config_sha256": "e82d68b21698a5f6d47e8fb5bce4fb7319f0e6e07ac56a899efa57056aa1aab0",
+      "resource_configuration": {
+        "blockIO": {},
+        "cpu": {
+          "period": 100000,
+          "quota": 25000
+        },
+        "devices": [
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          }
+        ],
+        "memory": {
+          "limit": 67108864,
+          "swap": 67108864
+        },
+        "pids": {
+          "limit": 16
+        },
+        "unified": {
+          "cpu.max.burst": "0",
+          "memory.oom.group": "1"
+        }
+      }
+    },
+    {
+      "case": "cpu",
+      "exit": 0,
+      "kernel_memory_events": {
+        "high": "0",
+        "low": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0"
+      },
+      "stdout_records": [
+        {
+          "ready": true,
+          "uid": 65534,
+          "pid": 1,
+          "oom_group": 1
+        },
+        {
+          "cpu_throttled": true,
+          "cpu_stat": {
+            "usage_usec": "991277",
+            "user_usec": "955157",
+            "system_usec": "36119",
+            "nr_periods": "41",
+            "nr_throttled": "39",
+            "throttled_usec": "2871982"
+          }
+        }
+      ],
+      "stderr": "",
+      "original_cgroup_node_preserved": true,
+      "cgroup_empty_after": true,
+      "tracked_host_process_count": 0,
+      "tracked_host_processes_remaining": 0,
+      "kernel_tree_kill_used": false,
+      "input_sha256_after": "45274030f9640fc93ac6e237365d847367ef61a894db396d75cc5ffd510c76bb",
+      "native_framework_preflight": {
+        "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+        "identity": "sha256:467817c4ca983d0b332111562747344bf6da62e0a3661e3576b12c59d5c0f719",
+        "snapshot": {
+          "device": 28,
+          "inode": 8116223,
+          "mount_id": 6632,
+          "observations": [
+            [
+              "cgroup.controllers",
+              "cpuset cpu io memory hugetlb pids rdma misc\n"
+            ],
+            [
+              "cgroup.events",
+              "populated 0\nfrozen 0\n"
+            ],
+            [
+              "cgroup.procs",
+              ""
+            ],
+            [
+              "cgroup.subtree_control",
+              ""
+            ],
+            [
+              "cgroup.type",
+              "domain\n"
+            ],
+            [
+              "cpu.max",
+              "25000 100000\n"
+            ],
+            [
+              "cpu.max.burst",
+              "0\n"
+            ],
+            [
+              "memory.max",
+              "67108864\n"
+            ],
+            [
+              "memory.oom.group",
+              "1\n"
+            ],
+            [
+              "memory.swap.max",
+              "0\n"
+            ],
+            [
+              "pids.max",
+              "16\n"
+            ]
+          ]
+        }
+      },
+      "oci_config_sha256": "91239d20e83343da5ba7ea5131002a9adeafb37b5465fd4866fe9c8a0f367c37",
+      "resource_configuration": {
+        "blockIO": {},
+        "cpu": {
+          "period": 100000,
+          "quota": 25000
+        },
+        "devices": [
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          }
+        ],
+        "memory": {
+          "limit": 67108864,
+          "swap": 67108864
+        },
+        "pids": {
+          "limit": 16
+        },
+        "unified": {
+          "cpu.max.burst": "0",
+          "memory.oom.group": "1"
+        }
+      }
+    },
+    {
+      "case": "oom",
+      "exit": 137,
+      "kernel_memory_events": {
+        "high": "0",
+        "low": "0",
+        "max": "20",
+        "oom": "1",
+        "oom_kill": "3"
+      },
+      "stdout_records": [
+        {
+          "ready": true,
+          "uid": 65534,
+          "pid": 1,
+          "oom_group": 1
+        },
+        {
+          "oom_child_created": 6
+        }
+      ],
+      "stderr": "",
+      "original_cgroup_node_preserved": true,
+      "cgroup_empty_after": true,
+      "tracked_host_process_count": 0,
+      "tracked_host_processes_remaining": 0,
+      "kernel_tree_kill_used": false,
+      "input_sha256_after": "45274030f9640fc93ac6e237365d847367ef61a894db396d75cc5ffd510c76bb",
+      "native_framework_preflight": {
+        "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+        "identity": "sha256:072b3d0282e434b051a1bcf871f9f980a0daba42845fc4a368908c46726e53a3",
+        "snapshot": {
+          "device": 28,
+          "inode": 8116288,
+          "mount_id": 6632,
+          "observations": [
+            [
+              "cgroup.controllers",
+              "cpuset cpu io memory hugetlb pids rdma misc\n"
+            ],
+            [
+              "cgroup.events",
+              "populated 0\nfrozen 0\n"
+            ],
+            [
+              "cgroup.procs",
+              ""
+            ],
+            [
+              "cgroup.subtree_control",
+              ""
+            ],
+            [
+              "cgroup.type",
+              "domain\n"
+            ],
+            [
+              "cpu.max",
+              "25000 100000\n"
+            ],
+            [
+              "cpu.max.burst",
+              "0\n"
+            ],
+            [
+              "memory.max",
+              "67108864\n"
+            ],
+            [
+              "memory.oom.group",
+              "1\n"
+            ],
+            [
+              "memory.swap.max",
+              "0\n"
+            ],
+            [
+              "pids.max",
+              "16\n"
+            ]
+          ]
+        }
+      },
+      "oci_config_sha256": "3904bdb9c851c4b1a6f266169264d6b5ac8c1e89a0c3f31538d870ffd507d975",
+      "resource_configuration": {
+        "blockIO": {},
+        "cpu": {
+          "period": 100000,
+          "quota": 25000
+        },
+        "devices": [
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          }
+        ],
+        "memory": {
+          "limit": 67108864,
+          "swap": 67108864
+        },
+        "pids": {
+          "limit": 16
+        },
+        "unified": {
+          "cpu.max.burst": "0",
+          "memory.oom.group": "1"
+        }
+      }
+    },
+    {
+      "case": "timeout",
+      "exit": 137,
+      "kernel_memory_events": {
+        "high": "0",
+        "low": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0"
+      },
+      "stdout_records": [
+        {
+          "ready": true,
+          "uid": 65534,
+          "pid": 1,
+          "oom_group": 1
+        },
+        {
+          "timeout_child_created": 7
+        }
+      ],
+      "stderr": "",
+      "original_cgroup_node_preserved": true,
+      "cgroup_empty_after": true,
+      "tracked_host_process_count": 2,
+      "tracked_host_processes_remaining": 0,
+      "kernel_tree_kill_used": true,
+      "input_sha256_after": "45274030f9640fc93ac6e237365d847367ef61a894db396d75cc5ffd510c76bb",
+      "native_framework_preflight": {
+        "framework_distribution_identity": "sha256:3e23f9f9b63e3e41ca4b3005a3611b68eb8714ae07c8439fac409b3fb67f4d8a",
+        "identity": "sha256:ddb7f4eb9972ca0ad3bdbc0a486327dfc5d6bdc962c5b19da587b1e156f546dd",
+        "snapshot": {
+          "device": 28,
+          "inode": 8116353,
+          "mount_id": 6632,
+          "observations": [
+            [
+              "cgroup.controllers",
+              "cpuset cpu io memory hugetlb pids rdma misc\n"
+            ],
+            [
+              "cgroup.events",
+              "populated 0\nfrozen 0\n"
+            ],
+            [
+              "cgroup.procs",
+              ""
+            ],
+            [
+              "cgroup.subtree_control",
+              ""
+            ],
+            [
+              "cgroup.type",
+              "domain\n"
+            ],
+            [
+              "cpu.max",
+              "25000 100000\n"
+            ],
+            [
+              "cpu.max.burst",
+              "0\n"
+            ],
+            [
+              "memory.max",
+              "67108864\n"
+            ],
+            [
+              "memory.oom.group",
+              "1\n"
+            ],
+            [
+              "memory.swap.max",
+              "0\n"
+            ],
+            [
+              "pids.max",
+              "16\n"
+            ]
+          ]
+        }
+      },
+      "oci_config_sha256": "09e9dce3999ed368ececa956c5933fea934c5885b834a76680be9864bda74a83",
+      "resource_configuration": {
+        "blockIO": {},
+        "cpu": {
+          "period": 100000,
+          "quota": 25000
+        },
+        "devices": [
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 5,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 3,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 9,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 1,
+            "minor": 8,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 0,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": true,
+            "major": 5,
+            "minor": 1,
+            "type": "c"
+          },
+          {
+            "access": "rwm",
+            "allow": false,
+            "major": 10,
+            "minor": 229,
+            "type": "c"
+          }
+        ],
+        "memory": {
+          "limit": 67108864,
+          "swap": 67108864
+        },
+        "pids": {
+          "limit": 16
+        },
+        "unified": {
+          "cpu.max.burst": "0",
+          "memory.oom.group": "1"
+        }
+      }
+    }
+  ],
+  "preserved_antecedents": [
+    "Docker create refused an unsupported cgroup flag before launch.",
+    "The first direct OCI attempt refused a private rootfs directory permission.",
+    "The next probe exposed sched_getscheduler denial under the maintained seccomp policy; kernel procfs scheduling state was used without changing that policy.",
+    "A private cgroup directory prevented read-only budget observation; operator-owned directory traversal was enabled while control files remained root-owned and the container mount read-only."
+  ],
+  "limits": {
+    "trusted_framework_launcher_implemented": false,
+    "authenticated_phase_execution": false,
+    "production_grant_consumed": false,
+    "native_vm_qualification": false,
+    "enterprise_security_acceptance": false,
+    "generated_application_launched": false,
+    "wall_time_deadline_qualified": false,
+    "stdout_stderr_budget_qualified": false,
+    "runtime_binary_identity_qualified": false
+  }
+}

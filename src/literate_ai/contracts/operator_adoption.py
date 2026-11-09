@@ -38,11 +38,16 @@ class ConversionAuthorityState:
     stage: ConversionAuthorityStage
     evidence_identities: tuple[ContentIdentity, ...]
     prior_state_identity: ContentIdentity | None = None
+    identity_migration_identity: ContentIdentity | None = None
 
     SCHEMA: ClassVar[str] = CONVERSION_AUTHORITY_SCHEMA
 
     def __post_init__(self) -> None:
         string_value(self.project_id, "ConversionAuthorityState.project_id")
+        if self.identity_migration_identity is not None and not isinstance(
+            self.identity_migration_identity, ContentIdentity
+        ):
+            raise ValueError("identity migration must use a content identity")
         if not isinstance(self.stage, ConversionAuthorityStage):
             raise ValueError("conversion authority stage must be typed")
         if any(
@@ -89,7 +94,7 @@ class ConversionAuthorityState:
         return canonical_identity(self.to_dict())
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "schema": self.SCHEMA,
             "project_id": self.project_id,
             "stage": self.stage.value,
@@ -101,6 +106,9 @@ class ConversionAuthorityState:
                 else None
             ),
         }
+        if self.identity_migration_identity is not None:
+            value["identity_migration_identity"] = self.identity_migration_identity.uri
+        return value
 
     @classmethod
     def from_dict(cls, value: Any) -> ConversionAuthorityState:
@@ -117,12 +125,17 @@ class ConversionAuthorityState:
                     "prior_state_identity",
                 }
             ),
-            optional=frozenset(),
+            optional=frozenset({"identity_migration_identity"}),
         )
         raw_evidence = data["evidence_identities"]
         if not isinstance(raw_evidence, list):
             raise ValueError("conversion authority evidence identities must be a list")
         state = cls(
+            identity_migration_identity=(
+                ContentIdentity.parse_uri(data["identity_migration_identity"])
+                if "identity_migration_identity" in data
+                else None
+            ),
             project_id=string_value(
                 data["project_id"], "ConversionAuthorityState.project_id"
             ),
@@ -178,6 +191,7 @@ def advance_conversion_authority(
             sorted(evidence_identities, key=lambda item: item.uri)
         ),
         prior_state_identity=current.identity,
+        identity_migration_identity=current.identity_migration_identity,
     )
 
 

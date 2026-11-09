@@ -1,0 +1,95 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "LIBRARY-IMPORT-COMMAND-001",
+  "issue": 330,
+  "scope": "Complete bounded library import surface projection; source and installed native controls, not final release qualification",
+  "implementation_revision": "f3f3fe294d94d495861ee6f12ccb0116d8e632cf",
+  "merged_revision": "b19125a4cf5e1453ca4e7bfb9171d211c9267571",
+  "source_review": {
+    "url": "https://github.com/jordanhubbard/literate-ai/pull/353#issuecomment-6717549295",
+    "reviewed_revision": "2f4faf253e135ff3b8e4f59512cbe874c30f64e0",
+    "coverage": "Complete surface identity remains bound and every verifier mapping retained"
+  },
+  "source_sha256": {
+    "src/literate_ai/adapters/standard_project.py": "0d98b7dd3eb83a67d7d1696159fcc35f20c364285f2b1933c682c5526fc4404c",
+    "tests/critical/test_library_import_command.py": "72929c81036b87ee3e46d0d673ba6f967970f7d48527489eb8ddcda10d9c1c68"
+  },
+  "fresh_full_source_gate": {
+    "revision": "c5dc8f25aea9658e9bf7e0b0e038363736a52984",
+    "report_sha256": "c878df68a0963c7d38e5530a48e47f72ed06d93f9a7a20973fad9b62d1d04980",
+    "summary": {
+      "executed": 2639,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2639,
+      "selected": 2758,
+      "skipped": 119
+    },
+    "maintained_large_import_controls": [
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_library_import_command.LibraryImportCommandTests.test_interface_only_change_still_invalidates_execute_command"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_library_import_command.LibraryImportCommandTests.test_large_package_checks_every_export_and_retains_path_checks"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_library_import_command.LibraryImportCommandTests.test_many_interfaces_fit_without_omitting_any_verifier_input"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.critical.test_library_import_command.LibraryImportCommandTests.test_oversized_import_mappings_still_fail_closed"
+      }
+    ]
+  },
+  "exact_postmerge_platform_ci": {
+    "run": 42449444068,
+    "revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+    "conclusion": "success",
+    "all_27_jobs_succeeded": true
+  },
+  "noneditable_wheel": {
+    "source_revision": "1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d",
+    "sha256": "42e4a616381c1e0088cdc88e35877ff9adcd1b7d054abd8361d4a2bb39d325a5",
+    "native_result": {
+      "errors": 0,
+      "execution": "Maintained complete 51-capability import controls; real native Node positive and seven corruption/dependency/path refusals",
+      "failures": 0,
+      "framework_distribution_identity_after": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+      "framework_distribution_identity_before": "sha256:c10c24467a314433feb002e5c71f1b56cdf635502e196b23d628038dfb577e74",
+      "installed_module_inside_environment": true,
+      "installed_standard_project_sha256": "0d98b7dd3eb83a67d7d1696159fcc35f20c364285f2b1933c682c5526fc4404c",
+      "ok": true,
+      "python": [
+        3,
+        12,
+        3
+      ],
+      "release_attestation": false,
+      "skips": 0,
+      "test_module_sha256": "72929c81036b87ee3e46d0d673ba6f967970f7d48527489eb8ddcda10d9c1c68",
+      "tests": 4
+    },
+    "retained_proof_sha256": {
+      "library-import-installed.stdout": "e5102d2296b197b39fb0585360c5a1b6c946a5e1414a0887e2dd106e9634c3d7",
+      "library-import-installed.stderr": "bfa8cec6e041209ff48327f096dd41fa79fd5a37ac8fe1525b93be94420eebdd",
+      "library-import-installed-driver.py": "759535df3ff54d08dc6b5892016beb813369c2c60f40baa039baed0d6fdf4778"
+    }
+  },
+  "behavior": "All 51 mappings retained; interface-only change changes command identity; oversized input still refused. Native package success and reordered exports pass; missing/wrong/extra/substituted exports, missing symbol, dependency and escaped target refuse.",
+  "release_attestation": false
+}

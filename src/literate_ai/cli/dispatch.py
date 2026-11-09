@@ -424,6 +424,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             from .operator import retained_scope_from_args
 
             return retained_scope_from_args(args), 0
+        if args.project_command == "identity":
+            from .operator import project_identity_from_args
+
+            return project_identity_from_args(args), 0
         if args.project_command == "retained-harness":
             from .operator import retained_harness_from_args
 
@@ -2228,6 +2232,18 @@ def _parser() -> JsonArgumentParser:
         "--to", required=True, choices=("retained", "drafted", "qualified")
     )
     project_convert_stage_advance.add_argument("--project", default=".")
+    project_identity = project_commands.add_parser(
+        "identity", help="review migration of an adopted project's authored identity"
+    )
+    identity_commands = project_identity.add_subparsers(
+        dest="project_identity_command", required=True, parser_class=JsonArgumentParser
+    )
+    identity_migrate = identity_commands.add_parser("migrate")
+    identity_migrate.add_argument("--project", default=".")
+    identity_migrate.add_argument("--from-project-id", required=True)
+    identity_migrate.add_argument("--apply", action="store_true")
+    identity_migrate.add_argument("--acknowledge", action="store_true")
+    identity_migrate.add_argument("--expected-plan-identity")
     project_retained_scope = project_commands.add_parser(
         "retained-scope", help="review and refresh retained source membership"
     )
@@ -3543,7 +3559,7 @@ def main(
         performance_span = (
             nullcontext({})
             if (
-                getattr(args, "project_command", None) == "retained-scope"
+                getattr(args, "project_command", None) in ("retained-scope", "identity")
                 or scoped_orchestration
                 or args.command in ("render", "verify")
                 # A read-only onboard plan must not create OBJ_DIR in the tree

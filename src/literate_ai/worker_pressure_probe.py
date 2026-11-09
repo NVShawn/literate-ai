@@ -74,7 +74,61 @@ def _freebsd_cpu():
         return _metric("unavailable")
 
 
+def _windows_cpu():
+    """Measure one bounded native window without mistaking one group for all."""
+    try:
+
+        class FileTime(ctypes.Structure):
+            _fields_ = [("low", ctypes.c_uint32), ("high", ctypes.c_uint32)]
+
+            def ticks(self):
+                return (self.high << 32) | self.low
+
+        api = ctypes.WinDLL("kernel32.dll", use_last_error=True, winmode=0x800)
+        api.GetActiveProcessorGroupCount.argtypes = []
+        api.GetActiveProcessorGroupCount.restype = ctypes.c_uint16
+        groups = api.GetActiveProcessorGroupCount()
+        if groups > 1:
+            return _metric("unsupported")
+        if groups != 1:
+            return _metric("unavailable")
+        api.GetSystemTimes.argtypes = [ctypes.POINTER(FileTime)] * 3
+        api.GetSystemTimes.restype = ctypes.c_int
+
+        def counters():
+            idle, kernel, user = FileTime(), FileTime(), FileTime()
+            if not api.GetSystemTimes(
+                ctypes.byref(idle), ctypes.byref(kernel), ctypes.byref(user)
+            ):
+                raise OSError("native CPU observation unavailable")
+            return idle.ticks(), kernel.ticks(), user.ticks()
+
+        before = counters()
+        time.sleep(0.1)
+        after = counters()
+        groups = api.GetActiveProcessorGroupCount()
+        if groups > 1:
+            return _metric("unsupported")
+        if groups != 1:
+            return _metric("unavailable")
+        idle, kernel, user = tuple(
+            end - start for start, end in zip(before, after, strict=True)
+        )
+        total = kernel + user
+        # GetSystemTimes includes idle time in kernel time. Invalid or reset
+        # counters cannot become zero utilization and release admission.
+        if min(idle, kernel, user) < 0 or total <= 0 or idle > kernel:
+            return _metric("unavailable")
+        return _metric("measured", round((total - idle) * 10000 / total))
+    except AttributeError:
+        return _metric("unsupported")
+    except (OSError, ValueError, TypeError):
+        return _metric("unavailable")
+
+
 def _cpu():
+    if sys.platform == "win32":
+        return _windows_cpu()
     if sys.platform.startswith("freebsd"):
         return _freebsd_cpu()
     try:
