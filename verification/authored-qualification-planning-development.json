@@ -1,0 +1,94 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "public read-only authored planning with real graph/model/oracle readers and fixture review/framework/provider admissions",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "development_review": "https://github.com/jordanhubbard/literate-ai/pull/401",
+  "source_base": "db982d5492913bf200c1635def57ab7e4afbc6a9",
+  "source_sha256": {
+    "src/literate_ai/contracts/authored_qualification_plans.py": "0040f16e327ee107467b20a8b3e0b5f5d3b0d873d1c291ac3aa80578ce55b59c",
+    "src/literate_ai/adapters/authored_qualification_planning.py": "e189f859f681ab7bdd12a9d20e808f84430e7f56daea62a0e6c6b1977d22c633",
+    "src/literate_ai/cli/authored_qualification.py": "bf5580a5bc72cfe80639484d6c3eb670a6057dc69466254ddbe3b75b97fa43c0",
+    "src/literate_ai/cli/dispatch.py": "63ae54ef82913dc2d907d2793af5db4ae4d51cdf5453ac225b829ce20bab92ab",
+    "src/literate_ai/schema_catalog.py": "5c8d38b0e51fd11fd251ae1272bbfbc58cad7458f5835ff47379a24863ab9bc5",
+    "schemas/v2/authored-qualification-plan.schema.json": "f8f90df1875bb2a66f3d60cbd77ec4a22a2084da703d2873c41da5cc4bf80ea2",
+    "schemas/v2/index.json": "cc60db93a7025c5efe419a88b1f55d4e1b97ad5c3c9487307f51cb1841af97d6",
+    "schemas/v2/compatibility.json": "8146c187afc209e161c43f04e2b34dfb61421848cdf4365b76f24bd1b18d5f8e",
+    "tests/critical/test_authored_qualification_planning.py": "17a4252f0acb790c263d72c486bcdf76378da2381f1423957f681e9cd0c6c298"
+  },
+  "checks": {
+    "qualification_family": {
+      "summary": {
+        "executed": 78,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 78,
+        "selected": 96,
+        "skipped": 18
+      },
+      "report_sha256": "09637fe3f04f06110099b6d0adeaf848ee75b321c330e251d37af1db6bbc63b3"
+    },
+    "startup_imports": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "report_sha256": "9002e6898b9383b0b3ed385aafbe57e98014dc3609eec5d4f1fbbb7be9e4120c"
+    }
+  },
+  "new_plan_cases": [
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_closed_proposal_rejects_legacy_source_history_and_weakened_runs",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_plan_reads_real_all_node_models_without_allocating_or_executing",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_private_oracle_drift_invalidates_the_live_plan",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_public_cli_plan_is_read_only_through_actual_parser_and_dispatch",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_read_only_cli_refuses_implicit_external_writer_options",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_redirected_output_directory_refuses_without_writing",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_planning.AuthoredQualificationPlanningTests.test_review_or_provider_change_invalidates_plan_and_changes_identity",
+      "status": "passed"
+    }
+  ],
+  "scope": [
+    "Public project qualify plan routes through actual parser/dispatch to the current authored project/lock and all-node private-oracle readers, then the existing Standard model/graph planner.",
+    "A new closed versioned plan binds original authored origin, every selected owning project review, exact private profile/oracle set, complete execution plan/model selection, current coding provider and installed Standard driver/policy/distribution identities.",
+    "Reopen the original current owner, project reviews and provider selection; stale reviews, private inputs, framework/provider drift, redirected output ancestors and weakened or foreign-origin proposals refuse.",
+    "Planning allocates no project output and executes no verifier, model or generated code. The scoped CLI also suppresses implicit host updates, operator catalog writes, event/performance journals, MCP discovery and debug-file output."
+  ],
+  "boundaries": [
+    "The positive controls use real current project/lock/oracle/model planning and actual public CLI parsing and dispatch.",
+    "Project review, installed framework distribution observation and coding provider selection are explicit fixture ports; current installed public qualification has not been established.",
+    "This checkpoint implements public planning, not apply or completed regenerative qualification. The prior complete source gate at 72bb055cd applies to its unchanged per-node verifier checkpoint, not to the newly changed plan/CLI source."
+  ],
+  "remaining": [
+    "Implement acknowledged apply by freshly reopening and comparing the exact current plan, enforcing actual project review and explicit host-execution authorization before allocating or executing.",
+    "Complete versioned authored comparison/run/result records and two genuine clean all-node Standard generations with exact membership, original native verifier/compiler custody, private-answer separation and the nominal shared beta diamond.",
+    "Complete run-output namespace custody and recoverable publication, all required native oracle forms, closed capture/replay after retirement and actual retained Cargo check/materialize/admit.",
+    "Independent source review before any driver pin advance, complete integrated source/native/installed/exact-head/resulting-main qualification, final lifecycle receipts and full release scope."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false,
+  "release_attestation": false
+}

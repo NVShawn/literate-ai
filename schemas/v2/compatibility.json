@@ -286,7 +286,9 @@
     "urn:literate-ai:schema:v2:authored-qualification-oracle-selection",
     "urn:literate-ai:schema:v2:authored-graph-independent-acceptance",
     "urn:literate-ai:schema:v2:authored-node-independent-acceptance",
-    "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request"
+    "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request",
+    "urn:literate-ai:schema:v2:authored-qualification-plan",
+    "urn:literate-ai:schema:v2:authored-qualification-project-review"
   ],
   "read_paths": [
     {

@@ -365,6 +365,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             return component_authoring_from_args(args)
         raise CliFailure("cli.usage", "a component command is required")
     if args.command == "project":
+        if args.project_command == "qualify":
+            from .authored_qualification import authored_qualification_from_args
+
+            return authored_qualification_from_args(args), 0
         from .project import (
             agent_entrypoints_from_args,
             documentation_review_from_args,
@@ -2005,6 +2009,24 @@ def _parser() -> JsonArgumentParser:
     project_commands = project.add_subparsers(
         dest="project_command", required=True, parser_class=JsonArgumentParser
     )
+    project_qualify = project_commands.add_parser(
+        "qualify", help="qualify genuinely authored Component graphs"
+    )
+    project_qualify_commands = project_qualify.add_subparsers(
+        dest="project_qualify_command", required=True, parser_class=JsonArgumentParser
+    )
+    project_qualify_plan = project_qualify_commands.add_parser(
+        "plan", help="inspect the current authored graph without writing or executing"
+    )
+    project_qualify_plan.add_argument(
+        "component", help="root Component path relative to the project root"
+    )
+    project_qualify_plan.add_argument("--project", default=".")
+    project_qualify_plan.add_argument("--target", default="host")
+    project_qualify_plan.add_argument("--flavor", action="append", default=[])
+    project_qualify_plan.add_argument("--profile", default="litai/qualification.json")
+    project_qualify_plan.add_argument("--output-root", default="litai/qualification")
+    project_qualify_plan.add_argument("--model")
     project_validate = project_commands.add_parser("validate")
     project_validate.add_argument("path", nargs="?", default=".")
     project_guidance = project_commands.add_parser(
@@ -3421,11 +3443,13 @@ def main(
     scoped_retained_cargo = command == "project.retained-cargo"
     scoped_worker_health = command == "worker.health"
     scoped_agent_entrypoints = command == "project.agent-entrypoints"
+    scoped_authored_qualification = command == "project.qualify"
     scoped_tree_render = command == "render.tree"
     scoped_orchestration = (
         scoped_orchestration
         or scoped_worker_health
         or scoped_agent_entrypoints
+        or scoped_authored_qualification
         or scoped_tree_render
         or scoped_retained_promotion
     )
@@ -3498,12 +3522,16 @@ def main(
                 "project.agent_entrypoints_read_only_options"
                 if scoped_agent_entrypoints
                 else (
-                    "worker.health_read_only_options"
-                    if scoped_worker_health
+                    "qualification.authored.scoped_options"
+                    if scoped_authored_qualification
                     else (
-                        "render.tree.scoped_options"
-                        if scoped_tree_render
-                        else "orchestration.read_only_options"
+                        "worker.health_read_only_options"
+                        if scoped_worker_health
+                        else (
+                            "render.tree.scoped_options"
+                            if scoped_tree_render
+                            else "orchestration.read_only_options"
+                        )
                     )
                 ),
                 "read-only inspection does not admit MCP discovery "

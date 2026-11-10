@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-qualification-plan",
+  "title": "Read-only authored graph qualification proposal; saved values grant no execution or publication authority",
+  "$defs": {
+    "projectReview": {
+      "$id": "urn:literate-ai:schema:v2:authored-qualification-project-review",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_configuration_identity",
+        "reviewed_authority_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:authored-qualification-project-review"
+        },
+        "project_configuration_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "reviewed_authority_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "origin",
+    "project_reviews",
+    "profile_identity",
+    "oracle_set_identity",
+    "coding_provider_binding_identity",
+    "driver_identity",
+    "lifecycle_policy_identity",
+    "framework_distribution_identity",
+    "execution_plan",
+    "output_root",
+    "minimum_clean_runs"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-qualification-plan"
+    },
+    "origin": {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-origin"
+    },
+    "project_reviews": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:authored-qualification-project-review"
+      }
+    },
+    "profile_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "oracle_set_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "coding_provider_binding_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "driver_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "lifecycle_policy_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "framework_distribution_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "execution_plan": {
+      "$ref": "urn:literate-ai:schema:v2:component-execution-plan"
+    },
+    "output_root": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^litai/qualification(?:/(?!\\.{1,2}(?:/|$))[^\\\\/\\x00]+)*$"
+    },
+    "minimum_clean_runs": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 9223372036854775807
+    }
+  }
+}
