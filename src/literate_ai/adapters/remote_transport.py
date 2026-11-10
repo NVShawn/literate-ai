@@ -71,9 +71,14 @@ class BoundedRemoteProcessRunner:
                 )
             # Apply the hard bound in a fresh trusted process, avoiding a Python
             # preexec_fn in a controller that may have concurrent worker threads.
+            # The allowance is an upper bound, never permission to increase a
+            # stricter inherited soft or hard ceiling (including a zero bound).
             limiter = (
                 "import os,resource,sys;limit=int(sys.argv[1]);"
-                "resource.setrlimit(resource.RLIMIT_FSIZE,(limit,limit));"
+                "soft,hard=resource.getrlimit(resource.RLIMIT_FSIZE);"
+                "soft=limit if soft==resource.RLIM_INFINITY else min(soft,limit);"
+                "hard=limit if hard==resource.RLIM_INFINITY else min(hard,limit);"
+                "resource.setrlimit(resource.RLIMIT_FSIZE,(soft,hard));"
                 "os.execvpe(sys.argv[2],sys.argv[2:],os.environ)"
             )
             argv = (
