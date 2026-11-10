@@ -1169,6 +1169,11 @@
       "public_ids": [
         "urn:literate-ai:schema:v2:authored-node-independent-acceptance"
       ]
+    },
+    {
+      "file": "authored-qualification-request.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request",
+      "public_ids": []
     }
   ]
 }

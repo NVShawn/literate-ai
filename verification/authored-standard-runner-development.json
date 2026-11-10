@@ -1,0 +1,61 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "authored request/current-owner/clean-workspace composition around an injected Standard execution boundary",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "source_base": "72bb055cd",
+  "source_sha256": {
+    "src/literate_ai/contracts/authored_qualification_requests.py": "adf5c131183edc18b120d4225c1865603b93c91c18b4843958ce3e24ad3d061b",
+    "src/literate_ai/adapters/qualification.py": "c8bc64f336ef2d5464cfba67574757d102b9c9471bc4619e9c0a48333dffb5f2",
+    "schemas/v2/authored-qualification-request.schema.json": "258369ea4756f9af7db04b244ef84bd8efdaa7bbe8267c5c4856d42ab00156a0",
+    "schemas/v2/index.json": "beb7517251c04eaa264f6d525ff33398e2ab680cb1b1fc076be256f5e23337f1",
+    "schemas/v2/compatibility.json": "3469ee9eb747576cca61450bdda6857f59c8435684b7fd114d148c28b3683bda",
+    "src/literate_ai/schema_catalog.py": "98de246845f7d322f9c4c0fe59adbba6e1954018fcd6905e662e96a0301d935d",
+    "tests/critical/test_authored_qualification_runner_boundary.py": "74a536262a87a6e0194f55bd31e174ef155eaf271d1a279b70ed643c7fa2e33f"
+  },
+  "checks": {
+    "qualification_family": {
+      "summary": {
+        "executed": 71,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 71,
+        "selected": 89,
+        "skipped": 18
+      },
+      "report_sha256": "5ee041f17aa8358b3fef8456c7037982661332fa96f7131a09db9f1b5768a891"
+    },
+    "schema_catalog": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "report_sha256": "1f05b4ff9c64f7c8cfd3d3d53d2349f58af68d24aa658db1c38df872e4768661"
+    }
+  },
+  "scope": [
+    "New closed authored clean-run request binds the original authored origin, plan, oracle set, run and workspace without source history placeholders.",
+    "The shared Standard lifecycle port admits either its existing source-derived profile or the original current authored oracle owner, with explicit origin-specific request checks.",
+    "Original current project/graph and verifier guards enclose Standard execution and reject late drift before returning success.",
+    "Each authored run claims its own still-empty allocator workspace once; borrowed, prefilled and previously attempted allocations refuse."
+  ],
+  "boundaries": [
+    "Project/lock/profile/oracle admission and workspace allocation are real in the new controls.",
+    "Prepared recipes and driver are explicit fixtures, and downstream Standard execution is injected. These controls establish no genuine model generation or native lifecycle execution.",
+    "Prior per-node isolated Python controls remain separately scoped; this record does not upgrade those fixture package/tool admissions."
+  ],
+  "remaining": [
+    "Compose and qualify public read-only plan and acknowledged apply with actual current project review, complete target/model/toolchain/output custody and explicit host execution permission.",
+    "Complete typed authored comparison/run/results and two genuine clean all-node Standard generations with every required native verifier.",
+    "Recoverable publication, closed capture/replay after retirement, real retained Cargo check/materialize/admit and all failure controls.",
+    "Independent source review before driver repin and full source/native/installed/exact-head/resulting-main acceptance."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false,
+  "release_attestation": false
+}

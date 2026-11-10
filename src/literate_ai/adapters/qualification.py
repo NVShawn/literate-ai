@@ -7,8 +7,11 @@ import json
 import os
 import subprocess
 import tempfile
+import threading
 from collections.abc import Callable, Mapping, Sequence
+from contextlib import nullcontext
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from literate_ai._filesystem import (
     UnsafeFilesystemPathError,
@@ -88,6 +91,14 @@ from literate_ai.source_to_specification.qualification_lifecycle import (
 from literate_ai.storage import FileSystemCAS
 
 from .standard_rebuild import FilesystemStandardRebuildError
+
+if TYPE_CHECKING:
+    from literate_ai.adapters.authored_qualification_oracles import (
+        CurrentAuthoredQualificationOracles,
+    )
+    from literate_ai.contracts.authored_qualification_requests import (
+        AuthoredQualificationLifecycleRequest,
+    )
 
 
 class FilesystemQualificationError(RuntimeError):
@@ -195,6 +206,8 @@ class FilesystemQualificationWorkspaceAllocator:
             }
         )
         self._paths: dict[str, Path] = {}
+        self._claimed: set[str] = set()
+        self._claim_lock = threading.Lock()
 
     def allocate(
         self, run_identity: ContentIdentity
@@ -231,6 +244,42 @@ class FilesystemQualificationWorkspaceAllocator:
                 "lifecycle requested an unknown qualification workspace",
             ) from exc
         return path.resolve(strict=True)
+
+    def claim_authored_run(
+        self, allocation_identity: ContentIdentity, run_identity: ContentIdentity
+    ) -> Path:
+        """Admit this allocator's exact, still-empty, single-use run workspace."""
+
+        expected = canonical_identity(
+            {
+                "schema": "literate-ai/qualification-workspace-allocation@1",
+                "session_identity": self.session_identity.uri,
+                "run_identity": run_identity.uri,
+            }
+        )
+        with self._claim_lock:
+            if (
+                expected != allocation_identity
+                or allocation_identity.uri in self._claimed
+            ):
+                raise FilesystemQualificationError(
+                    "qualification.authored.workspace_mismatch",
+                    "an authored run requires its own unused workspace allocation",
+                )
+            path = self._paths.get(allocation_identity.uri)
+            if path is None:
+                raise FilesystemQualificationError(
+                    "qualification.workspace_unknown",
+                    "authored workspace must belong to the current allocator",
+                )
+            require_safe_directory(path)
+            if any(path.iterdir()):
+                raise FilesystemQualificationError(
+                    "qualification.workspace_not_empty",
+                    "authored qualification requires a still-empty run workspace",
+                )
+            self._claimed.add(allocation_identity.uri)
+            return path
 
 
 class FilesystemQualificationAcceptanceOracle:
@@ -320,7 +369,9 @@ class FilesystemStandardQualificationLifecyclePort:
         binding: ResolvedStandardProjectLifecycleDriver,
         invalidation: ComponentInvalidationDecision,
         workspaces: FilesystemQualificationWorkspaceAllocator,
-        profile: LocalQualificationProfile,
+        profile: LocalQualificationProfile | None = None,
+        authored_oracles: CurrentAuthoredQualificationOracles | None = None,
+        authored_plan_identity: ContentIdentity | None = None,
         max_parallelism: int = 1,
         retain_library_products: bool = False,
         pipeline_model: str | None = None,
@@ -338,9 +389,23 @@ class FilesystemStandardQualificationLifecyclePort:
             str, tuple[QualificationLifecycleExecution, LocalStandardLifecyclePorts]
         ] = {}
         self.profile = profile
-        self.acceptance_oracle: LocalIndependentAcceptanceOracle | LibraryAcceptance = (
-            _qualification_acceptance_oracle(project, prepared, profile)
-        )
+        self.authored_oracles = authored_oracles
+        self.authored_plan_identity = authored_plan_identity
+        if authored_oracles is not None:
+            if profile is not None or not isinstance(
+                authored_plan_identity, ContentIdentity
+            ):
+                raise FilesystemQualificationError(
+                    "qualification.authored.composition_invalid",
+                    "authored qualification requires its own plan and current oracle "
+                    "owner, without a source-derived profile",
+                )
+        elif profile is None or authored_plan_identity is not None:
+            raise FilesystemQualificationError(
+                "qualification.source_profile_required",
+                "source-derived qualification requires its original profile",
+            )
+        self.acceptance_oracle = self._current_acceptance_oracle()
         expected = {
             item.revision.identity.uri
             for item in prepared.locked_authority_snapshot.authority.lock.nodes
@@ -355,6 +420,35 @@ class FilesystemStandardQualificationLifecyclePort:
         self.root_generated_roots: dict[str, Path] = {}
         self.run_roots: dict[str, Path] = {}
 
+    def _current_acceptance_oracle(self):
+        if self.authored_oracles is None:
+            return _qualification_acceptance_oracle(
+                self.project, self.prepared, self.profile
+            )
+        from literate_ai.adapters.authored_qualification_oracles import (
+            CurrentAuthoredQualificationOracles,
+        )
+
+        owner = self.authored_oracles
+        if not isinstance(owner, CurrentAuthoredQualificationOracles):
+            raise FilesystemQualificationError(
+                "qualification.authored.current_owner_required",
+                "an authored origin reference cannot replace its current owner",
+            )
+        owner.require_unchanged()
+        snapshot = self.prepared.locked_authority_snapshot
+        if (
+            owner.authority.project.root != self.project.root
+            or owner.authority.project.definition != self.project.definition
+            or owner.authority.locked.authority.identity != snapshot.authority.identity
+        ):
+            raise FilesystemQualificationError(
+                "qualification.authored.prepared_authority_mismatch",
+                "prepared generation must select the original authored "
+                "project and graph",
+            )
+        return owner
+
     def require_current_authority(self) -> None:
         """Reopen provider authority before retained capture or final admission."""
 
@@ -368,9 +462,7 @@ class FilesystemStandardQualificationLifecyclePort:
                 "qualification.standard_binding_changed",
                 "configured Standard lifecycle driver changed during qualification",
             )
-        current = _qualification_acceptance_oracle(
-            self.project, self.prepared, self.profile
-        )
+        current = self._current_acceptance_oracle()
         if current.identity != self.acceptance_oracle.identity:
             raise FilesystemQualificationError(
                 "qualification.acceptance_oracle_changed",
@@ -378,8 +470,44 @@ class FilesystemStandardQualificationLifecyclePort:
             )
 
     def execute(
-        self, request: QualificationLifecycleRequest
+        self,
+        request: QualificationLifecycleRequest | AuthoredQualificationLifecycleRequest,
     ) -> QualificationLifecycleExecution:
+        from literate_ai.contracts.authored_qualification_requests import (
+            AuthoredQualificationLifecycleRequest,
+        )
+
+        self.require_current_authority()
+        if self.authored_oracles is not None:
+            if (
+                not isinstance(request, AuthoredQualificationLifecycleRequest)
+                or request.origin != self.authored_oracles.authority.origin
+                or request.oracle_set_identity != self.authored_oracles.identity
+                or request.plan_identity != self.authored_plan_identity
+            ):
+                raise FilesystemQualificationError(
+                    "qualification.authored.request_mismatch",
+                    "authored execution requires the exact current plan, "
+                    "origin and oracles",
+                )
+            scope = self.authored_oracles.capture_current()
+        else:
+            if isinstance(request, AuthoredQualificationLifecycleRequest):
+                raise FilesystemQualificationError(
+                    "qualification.source_request_required",
+                    "authored requests cannot enter source-derived qualification",
+                )
+            scope = nullcontext()
+        with scope:
+            if self.authored_oracles is not None:
+                self.workspaces.claim_authored_run(
+                    request.workspace_allocation_identity, request.run_identity
+                )
+            result = self._execute_current(request)
+        self.require_current_authority()
+        return result
+
+    def _execute_current(self, request) -> QualificationLifecycleExecution:
         if request.force_regeneration is not True:
             raise FilesystemQualificationError(
                 "qualification.cache_bypass_required",
@@ -393,7 +521,11 @@ class FilesystemStandardQualificationLifecyclePort:
                 "qualification.component_lock_mismatch",
                 "qualification request differs from the prepared Component lock",
             )
-        root = self.workspaces.resolve(request.workspace.allocation_identity)
+        root = self.workspaces.resolve(
+            request.workspace_allocation_identity
+            if self.authored_oracles is not None
+            else request.workspace.allocation_identity
+        )
         self.run_roots[request.run_identity.uri] = root
         adapter = assemble_filesystem_standard_rebuild_adapter(
             project=self.project,

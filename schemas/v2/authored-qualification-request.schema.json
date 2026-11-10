@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request",
+  "title": "Authored clean-run references; current owners and execution permission are separate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "origin",
+    "plan_identity",
+    "oracle_set_identity",
+    "run_identity",
+    "workspace_allocation_identity",
+    "force_regeneration"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request"
+    },
+    "origin": {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-origin"
+    },
+    "plan_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "oracle_set_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "run_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "workspace_allocation_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "force_regeneration": {
+      "const": true
+    }
+  }
+}
