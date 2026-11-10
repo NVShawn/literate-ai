@@ -1,6 +1,7 @@
 # ADR 0072: Qualify genuinely authored native Component graphs
 
-- Status: Proposed
+- Status: Accepted
+- Acceptance: The directing user explicitly accepted ADR 0072 on 2026-11-10 ("Accept ADR 0072").
 - Date: 2026-11-10
 - Decision owners: directing user and literate-ai maintainers
 - Release target: 1.4.0
@@ -30,7 +31,7 @@ The nominally shared Rust provider in the beta/alpha/gamma diamond is the requir
 bounded fixture. Provider projection (#345), shared raw-case inventory (#392) and
 retained-host authoring selection (#379) keep their own ownership and acceptance.
 
-## Proposed decision
+## Decision
 
 ### Admit authored intent through an explicit public route
 
@@ -143,4 +144,5 @@ Genuinely authored graphs can earn the same evidence-bearing library qualificati
 without pretending to have been reverse-engineered. Versioned origin-specific
 admission and receiving validation are required; relaxing the current source-derived
 front door is insufficient. This is included 1.4.0 work, with no release goal
-deferred. Explicit directing-user acceptance remains required before implementation.
+deferred. The directing user accepted this design on 2026-11-10; implementation
+and its complete native/installed/integration acceptance remain open.

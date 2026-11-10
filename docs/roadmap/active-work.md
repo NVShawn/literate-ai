@@ -34343,8 +34343,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Release target:** 1.4.0
 - **GitHub issue:** [#393](https://github.com/jordanhubbard/literate-ai/issues/393)
 
-- **Proposed design:** [ADR 0072](../decisions/0072-authored-native-graph-qualification.md) defines public authored admission, truthful versioned origin, unchanged oracle custody, complete regeneration and closed retained consumption. Directing-user acceptance is pending under ADR 0006.
-- **Next action:** Review and obtain acceptance of ADR 0072 before implementing the authored qualification route; preserve the source-derived front door and coordinate provider/inventory contributions without duplicating them.
+- **Accepted design:** [ADR 0072](../decisions/0072-authored-native-graph-qualification.md) defines public authored admission, truthful versioned origin, unchanged oracle custody, complete regeneration and closed retained consumption. The directing user explicitly accepted ADR 0072 on 2026-11-10; implementation and qualification remain open.
+- **Next action:** Implement the origin-specific authored authority owner and versioned qualification contracts, then compose the public plan/apply route with the shared Standard runner and retained receiving validation. Preserve the source-derived front door and coordinate provider/inventory contributions without duplicating them.
 - **Priority:** P1 (blocking 1.4.0 release goal)
 - **Owner:** Framework authored authority and qualification admission; PROJECT Goals 1, 2, 4 and 6
 - **Direction:** Include issue #393 in 1.4.0: provide a supported public qualification route for genuinely authored native dependency graphs.
@@ -34352,6 +34352,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Draft and obtain acceptance of an authored-graph admission ADR, then implement the public front door and current authored/lock/export custody using existing qualification and retained-library owners.
+  - [x] Draft and obtain directing-user acceptance of ADR 0072 (2026-11-10).
+  - [ ] Implement truthful origin-specific authority, versioned profiles/plans/requests/results and the public acknowledged plan/apply route with current authored/lock/export custody.
+  - [ ] Compose complete shared Standard regeneration, unchanged independent-oracle custody, recoverable publication, closed capture/replay and ordinary retained Cargo receiving/admission.
 - **Evidence:**
   - [ ] Qualify a genuine three-library diamond through installed public admission, two clean all-node runs, closed relocatable replay and retained Cargo check/materialize/admit; refuse stale, substituted, missing or failed evidence and preserve source-derived admission.
