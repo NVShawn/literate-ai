@@ -57,5 +57,10 @@
     "Final configured lifecycle/receipt and complete release acceptance remain separately open"
   ],
   "goal_complete": false,
-  "release_attestation": false
+  "release_attestation": false,
+  "counterexample": {
+    "subject": "Existing managed editable source environment, isolated child and separate ignored working directory",
+    "result": "refused by actual startup probe imported framework outside installation guard",
+    "scope": "Direct canonical wheel helper control; not an installed-wheel acceptance or release attestation"
+  }
 }

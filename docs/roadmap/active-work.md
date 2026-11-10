@@ -31236,13 +31236,13 @@ repair scope and makes no claim that the complete provided native gate passed.
   - [x] Measure native import startup: one baseline/deferred pair took 7.48/2.91 seconds;
         installed bytes stayed unchanged. See [the diagnostic record](../../verification/optional-project-import-development.json).
   - [ ] Run both maintained startup/MAC controls from the noneditable installed wheel with verified module origins and no checkout imports, then renew exact-candidate native wheel/full qualification.
-- **Next action:** Add the maintained lazy-import and strict MAC-dispatch controls
-  to the canonical installed-wheel gate, asserting actual installed module origins
-  and preserving both checks on every supported native platform. Then qualify the
-  exact candidate wheel and full native gates without discarding previous evidence.
-  Two focused tests and
-  seven CycloneDX tests pass through `make python-check`; the fresh-process regression
-  fails against the original eager import. Catalog costs and full-gate renewal remain open.
+- **Next action:** Qualify macOS and Windows through the new canonical installed
+  startup/MAC hook, then complete exact-head/resulting-main full qualification and
+  final configured lifecycle/receipt renewal. Preserve the previous gate's evidence.
+- **Original focused development:** Two import controls and seven CycloneDX tests
+  pass through `make python-check`; the fresh-process regression fails against the
+  original eager import. Catalog costs and complete native renewal remain separate
+  open requirements.
 
 - **Renewal evidence retention:** Before another full Windows renewal, replace the gate's destructive startup cleanup of the legacy temporary tree with a fresh short per-invocation sibling directory. Retain failed fixtures, both per-run JUnit reports and prior timing evidence; preserve Git-discovery isolation, the complete test inventory and unchanged deadlines. Qualify repeated real child failures without deleting either earlier-run or legacy evidence. This harness repair does not complete native wheel/full qualification.
 
@@ -31250,7 +31250,7 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 
 
-- **Installed candidate renewal (2026-11-10):** Exact `2085db22b` passes both maintained source controls and the complete native Linux ARM64/Python 3.12 noneditable wheel gate. The canonical wheel runner now executes both maintained startup/MAC cases in an isolated installed interpreter, rejects skipped or changed case inventories, verifies all 500 imported framework-module origins, and joins dispatcher/MAC adapter hashes to candidate source bytes. Both cases pass with zero skips in wheel `sha256:79a9859a95aa9fa3a038c346aae7b659bbe527fadd9fd93a8d08e7db6417c397`; the complete existing wheel gate also passes. [Retained installed proof](../../verification/project-command-imports-installed-linux.json) binds the source, fixture, module, wheel and original result identities. macOS/Windows candidate qualification, exact-head/main integration and final lifecycle/receipt renewal remain open. No performance speedup, full native program completion or release readiness is inferred from this Linux gate.
+- **Installed candidate renewal (2026-11-10):** Exact `2085db22b` passes both maintained source controls and the complete native Linux ARM64/Python 3.12 noneditable wheel gate. The canonical wheel runner now executes both maintained startup/MAC cases in an isolated installed interpreter, rejects skipped or changed case inventories, verifies all 500 imported framework-module origins, and joins dispatcher/MAC adapter hashes to candidate source bytes. A direct counterexample using the managed editable source environment is refused by the actual installed-origin guard. Both cases pass with zero skips in wheel `sha256:79a9859a95aa9fa3a038c346aae7b659bbe527fadd9fd93a8d08e7db6417c397`; the complete existing wheel gate also passes. [Retained installed proof](../../verification/project-command-imports-installed-linux.json) binds the source, fixture, module, wheel and original result identities. macOS/Windows candidate qualification, exact-head/main integration and final lifecycle/receipt renewal remain open. No performance speedup, full native program completion or release readiness is inferred from this Linux gate.
 
 ### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
 
