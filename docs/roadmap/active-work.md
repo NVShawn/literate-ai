@@ -34280,15 +34280,18 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Implementation:**
   - [x] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
 - **Evidence:**
-  - [ ] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling.
+  - [x] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling. Both maintained controls also pass without skips from the qualified noneditable Linux wheel.
   - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
 
 
 - **Current-main source qualification (2026-11-10):** The unchanged contributor repair applied to main base `8b83f5b96` passes a fresh native Linux ARM64/Python 3.12 gate: 2,777 selected, 2,657 passed, 120 declared skips, zero failed or known failed. Every selected instance matches the raw terminal events across all 598 completed worker groups, including occurrence-qualified repeated discovery names. Both native ceiling controls and all six unchanged transport controls pass without skips. The initial invalid-system-Bazel failure remains preserved; the successful run uses the existing digest-verified toolchain. Normal integration retains main `8489a4c4b` and all 68 release goals. [Sanitized source evidence](../../verification/file-ceiling-source-current-main.json) retains source and original report identities. This is source-development evidence; independent review before driver repin, noneditable installed/native controls and exact-head/resulting-main CI remain open.
-- **Next action:** Obtain independent review of the existing limiter change, record the supported driver pin only after approval, then qualify the clean installed candidate and exact integration.
+- **Next action:** Obtain independent review of the existing limiter change, record the supported driver pin only after approval, then complete required native and exact-head/resulting-main integration. The whole Linux installed gate and both explicit installed ceiling controls now pass.
 
 
 - **Whole installed candidate gate (2026-11-10):** Exact `b23ae877a` passes the complete canonical native Linux ARM64/Python 3.12 noneditable wheel gate. Its retained archive independently rehashes, and the packaged remote-transport module matches the source-qualified repair exactly. This proves the whole installed candidate gate, not yet direct execution of the explicit inherited-ceiling fixture from that installation. Specific installed controls, independent review before driver repin and exact-head/resulting-main CI remain required; no old pin or source-only outcome is promoted into approval.
+
+
+- **Explicit installed ceiling controls (2026-11-10):** Both unchanged native cases pass without skips in a fresh environment created and verified by the canonical wheel helpers, using the exact archive from the completed whole wheel gate. All 241 imported framework modules resolve inside the noneditable prefix; the loaded limiter bytes match the source-qualified module and retained wheel. The maintained tests perform real nested-process RLIMIT_FSIZE controls and the complete finite-parent command-route custody scenario. Runtime identity is checked before and after, and both fixture files and archive bytes remain unchanged. This is native Linux installed acceptance, not external-worker qualification or independent source review; final integration and configured lifecycle/receipt remain open.
 
 ### [ ] QUALIFICATION-DIAGNOSTICS-001 — Retain original bounded observations when native qualification fails
 
