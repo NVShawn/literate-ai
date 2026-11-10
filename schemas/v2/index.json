@@ -1162,6 +1162,13 @@
       "public_ids": [
         "urn:literate-ai:schema:v2:authored-qualification-oracle-selection"
       ]
+    },
+    {
+      "file": "authored-qualification-acceptance.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:authored-graph-independent-acceptance",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:authored-node-independent-acceptance"
+      ]
     }
   ]
 }

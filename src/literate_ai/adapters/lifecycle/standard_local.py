@@ -7779,6 +7779,46 @@ class LocalStandardLifecyclePorts:
         _selected_oracle: object | None = None,
     ) -> ContentIdentity:
         self._require_full_command_scope()
+        from literate_ai.adapters.authored_qualification_oracles import (
+            CurrentAuthoredQualificationOracles,
+        )
+
+        if isinstance(
+            self.independent_acceptance_oracle, CurrentAuthoredQualificationOracles
+        ):
+            from literate_ai.adapters.authored_graph_acceptance import (
+                accept_authored_graph,
+            )
+
+            if _selected_entrypoint is not None or _selected_oracle is not None:
+                raise LocalStandardLifecycleError(
+                    "authored graph acceptance requires its complete original owner"
+                )
+            custody = self.project_package_custody(package_plan, package_result)
+
+            def accept_node(binding):
+                return self._accept_library(
+                    component_lock,
+                    custody,
+                    package_plan,
+                    package_result,
+                    binding.oracle,
+                    root_integration_test_identity,
+                    packaged_execution_identity,
+                    component_revision=binding.component_revision_identity,
+                )
+
+            return accept_authored_graph(
+                self.independent_acceptance_oracle,
+                component_lock,
+                execution_plan,
+                package_plan,
+                package_result,
+                root_integration_test_identity,
+                packaged_execution_identity,
+                accept_node=accept_node,
+                record=self._record_evidence,
+            )
         from literate_ai.adapters.component_acceptance import (
             INDEPENDENT_ACCEPTANCE_EXEMPT_SCHEMA,
             ComponentAcceptanceError,
@@ -8115,6 +8155,8 @@ class LocalStandardLifecyclePorts:
         oracle,
         root_integration_test_identity,
         packaged_execution_identity,
+        *,
+        component_revision=None,
     ):
         # The original v2 capture remains live through the actual case decision
         # and evidence publication; neither an archive nor a returned DTO owns it.
@@ -8128,6 +8170,7 @@ class LocalStandardLifecyclePorts:
                 root_integration_test_identity,
                 packaged_execution_identity,
                 contexts,
+                component_revision=component_revision,
             )
 
     def _accept_library_observed(
@@ -8140,6 +8183,8 @@ class LocalStandardLifecyclePorts:
         root_integration_test_identity: ContentIdentity,
         packaged_execution_identity: ContentIdentity,
         verifier_contexts: ExitStack,
+        *,
+        component_revision: ContentIdentity | None = None,
     ) -> ContentIdentity:
         """Run one verifier-owned in-language harness against the sealed package."""
 
@@ -8158,12 +8203,20 @@ class LocalStandardLifecyclePorts:
                     "library acceptance harness differs from its bound identity"
                 )
             self._record_product_evidence(oracle.identity_document())
+        selected_revision = component_revision or component_lock.root_revision
         root_node = next(
-            item
-            for item in component_lock.nodes
-            if item.revision.identity == component_lock.root_revision
+            (
+                item
+                for item in component_lock.nodes
+                if item.revision.identity == selected_revision
+            ),
+            None,
         )
-        contract = self._contract(component_lock.root_revision)
+        if root_node is None:
+            raise LocalStandardLifecycleError(
+                "independent library acceptance requires a selected graph node"
+            )
+        contract = self._contract(selected_revision)
         surface = contract.library_import_surface
         assert surface is not None
         if self._evidence_recorder is not None:
@@ -8190,7 +8243,7 @@ class LocalStandardLifecyclePorts:
             raise LocalStandardLifecycleError(
                 "library acceptance oracle names an undeclared capability"
             )
-        root_export = self._planned_exports[component_lock.root_revision.uri]
+        root_export = self._planned_exports[selected_revision.uri]
         try:
             export = custody.artifact_paths[root_export.identity.uri].resolve(
                 strict=True
@@ -8227,9 +8280,7 @@ class LocalStandardLifecyclePorts:
         rust_target = None
         original_rust_compiler = None
         if rust_v2:
-            rust_target = getattr(self, "cargo_targets", {}).get(
-                component_lock.root_revision.uri
-            )
+            rust_target = getattr(self, "cargo_targets", {}).get(selected_revision.uri)
             original_compilers = getattr(self, "_rust_harness_compilers", None)
             if (
                 rust_target is None
@@ -8370,7 +8421,7 @@ class LocalStandardLifecyclePorts:
                     )
                 else:
                     targets = getattr(self, "cargo_targets", {})
-                    target = targets.get(component_lock.root_revision.uri)
+                    target = targets.get(selected_revision.uri)
                     if target is None or not target.library:
                         raise LocalStandardLifecycleError(
                             "Rust library acceptance requires exact Cargo authority"

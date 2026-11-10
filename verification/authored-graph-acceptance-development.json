@@ -1,0 +1,83 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "all-node isolated Python verifier composition with fixture package/tool admission; public qualification remains open",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "source_base": "386f9338e846847692d714792eb1a4dfc0f74bb9",
+  "source_sha256": {
+    "src/literate_ai/contracts/authored_qualification_acceptance.py": "bdc2b28fa7555bdb7443c0a13ac265a23ef49e43ca320e5747e80e2e988058e9",
+    "src/literate_ai/adapters/authored_graph_acceptance.py": "04c8ddf4fdc7e042203c76d0935fb58accbb6814e91753f45534f22cbdf0e927",
+    "src/literate_ai/adapters/lifecycle/standard_local.py": "8924ca5b3400d70d0927f310bb2013f1500bc7134842168d5de5e0799f3f514d",
+    "src/literate_ai/schema_catalog.py": "0c39e3a0d54869ee0b905a0de5d7339e727389e80617cdd242bcca0b6a9514d1",
+    "schemas/v2/authored-qualification-acceptance.schema.json": "34cfdbf51ea30dbaa69e2337bb9637b98e1d35962ccce1096b8d291cf1277d7f",
+    "schemas/v2/index.json": "7c4f33dcc2b57474d6768f49c5b28bab0f3185a7ee3204e6983ab2acb648e654",
+    "schemas/v2/compatibility.json": "4e5e99f41852f40f88442731687b6e442c670c199827ef0018db4e2263c5d969",
+    "tests/critical/test_authored_graph_acceptance.py": "ffb7a5a7533b7ac8911d718cb1f61ac3f4fddb4b0528586958789899c6fbc8be"
+  },
+  "checks": {
+    "native-schema": {
+      "summary": {
+        "executed": 5,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 5,
+        "selected": 5,
+        "skipped": 0
+      },
+      "report_sha256": "c38c618403a0071fed9047db145dc12e7ae0b81f5faf05ad00ca70f112284d8d"
+    },
+    "legacy-python": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "report_sha256": "f2ab971161da2daf02a976505c91f8c75493ef8b9b76c7d8d70e92ba3695e45e"
+    },
+    "legacy-javascript": {
+      "summary": {
+        "executed": 3,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 3,
+        "selected": 3,
+        "skipped": 0
+      },
+      "report_sha256": "063059cbbb456430e8fc7811ad139531a0d76c23e259d244ef163057e09a6a7b"
+    },
+    "schema-catalog": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "report_sha256": "521432a1dff2d62ba12df2c691b4c6abc61ca55f1a16871f9ae22873cbd8f824"
+    }
+  },
+  "scope": [
+    "Invoke existing native library acceptance once for every exact selected node under the original complete Component lock.",
+    "Retain original current authored/oracle owners and their closing guards; a failed provider or stale private harness cannot publish positive graph acceptance.",
+    "Record a new closed authored graph observation without invented source baseline or promotion identities; preserve legacy root defaults and wire records."
+  ],
+  "boundaries": [
+    "Project, lock, profile and oracle admission are real in the graph controls, and both actual isolated Python child processes run.",
+    "Package custody and native tool observations are fixture admissions; model identities and generated fixture modules do not establish genuine Standard generation or retained admission.",
+    "The observations are passive records; archive receiving still must reopen complete actual evidence and current importer trust."
+  ],
+  "remaining": [
+    "Complete current reviewed public plan/apply and versioned request/comparison/run/result contracts.",
+    "Qualify two genuine clean all-node Standard generations, every supported native oracle, private expected-answer separation and complete output custody.",
+    "Recoverable publication, closed origin-aware archive replay after retirement, and real retained Cargo check/materialize/admit.",
+    "Full source/native/installed/exact-head/resulting-main acceptance and independent source review before any driver repin."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false,
+  "release_attestation": false
+}

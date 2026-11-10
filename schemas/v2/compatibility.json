@@ -283,7 +283,9 @@
     "urn:literate-ai:schema:v2:authored-qualification-origin",
     "urn:literate-ai:schema:v2:source-derived-qualification-origin",
     "urn:literate-ai:schema:v2:authored-qualification-profile",
-    "urn:literate-ai:schema:v2:authored-qualification-oracle-selection"
+    "urn:literate-ai:schema:v2:authored-qualification-oracle-selection",
+    "urn:literate-ai:schema:v2:authored-graph-independent-acceptance",
+    "urn:literate-ai:schema:v2:authored-node-independent-acceptance"
   ],
   "read_paths": [
     {

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-graph-independent-acceptance",
+  "title": "Authored graph independent observations; receiving reopens actual native records",
+  "$defs": {
+    "node": {
+      "$id": "urn:literate-ai:schema:v2:authored-node-independent-acceptance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision_identity",
+        "oracle_identity",
+        "case_map_identity",
+        "observation_identity",
+        "case_count"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:authored-node-independent-acceptance"
+        },
+        "component_revision_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "oracle_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "case_map_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "observation_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "case_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "origin",
+    "oracle_set_identity",
+    "execution_plan_identity",
+    "package_plan_identity",
+    "package_result_identity",
+    "root_integration_test_identity",
+    "packaged_execution_identity",
+    "nodes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-graph-independent-acceptance"
+    },
+    "origin": {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-origin"
+    },
+    "oracle_set_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "execution_plan_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "package_plan_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "package_result_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "root_integration_test_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "packaged_execution_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:authored-node-independent-acceptance"
+      }
+    }
+  }
+}
