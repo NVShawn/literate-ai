@@ -12,7 +12,10 @@
     "framework_distribution": "sha256:b2b4ca398e2d898657496063d7ebbad6f143cf83b85ad6d9fea549f6cfd27b3f",
     "canonical_gate_exit_code": 0,
     "entire_wheel_gate_ok": true,
-    "retained_manifest_sha256": "490a56317f027565e886be811f3710114d82059d8943277d39c7f5519f31fa27"
+    "retained_manifest_sha256": "490a56317f027565e886be811f3710114d82059d8943277d39c7f5519f31fa27",
+    "archive_bytes": 4234510,
+    "archive_and_source_manifest_independently_rehashed": true,
+    "installed_dispatcher_and_mac_bytes_match_archive": true
   },
   "installed_project_commands": {
     "cases": [
