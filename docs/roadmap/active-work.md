@@ -31235,9 +31235,12 @@ repair scope and makes no claim that the complete provided native gate passed.
   - [x] Prove MAC command dispatch and strict malformed-BOM rejection remain intact.
   - [x] Measure native import startup: one baseline/deferred pair took 7.48/2.91 seconds;
         installed bytes stayed unchanged. See [the diagnostic record](../../verification/optional-project-import-development.json).
-  - [ ] Renew exact-candidate native wheel/full qualification.
-- **Next action:** qualify a wheel built from the exact candidate in a fresh native
-  checkout, preserving the previous gate's temporary evidence. Two focused tests and
+  - [ ] Run both maintained startup/MAC controls from the noneditable installed wheel with verified module origins and no checkout imports, then renew exact-candidate native wheel/full qualification.
+- **Next action:** Add the maintained lazy-import and strict MAC-dispatch controls
+  to the canonical installed-wheel gate, asserting actual installed module origins
+  and preserving both checks on every supported native platform. Then qualify the
+  exact candidate wheel and full native gates without discarding previous evidence.
+  Two focused tests and
   seven CycloneDX tests pass through `make python-check`; the fresh-process regression
   fails against the original eager import. Catalog costs and full-gate renewal remain open.
 

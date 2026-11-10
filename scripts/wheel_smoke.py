@@ -111,6 +111,61 @@ print(json.dumps({
 }))
 """
 
+INSTALLED_PROJECT_COMMAND_IMPORT_PROBE = """
+import hashlib
+import json
+import runpy
+import sys
+import unittest
+from pathlib import Path
+
+prefix = Path(sys.prefix).resolve(strict=True)
+if not sys.flags.isolated or sys.prefix == sys.base_prefix:
+    raise RuntimeError("isolated installed interpreter required")
+fixture = Path(sys.argv[1]).resolve(strict=True)
+fixture_digest = hashlib.sha256(fixture.read_bytes()).hexdigest()
+loaded = runpy.run_path(str(fixture))
+case_type = loaded['ProjectCommandImportTests']
+inventory = unittest.defaultTestLoader.getTestCaseNames(case_type)
+required = {
+    'test_project_import_does_not_initialize_optional_schema_parsers',
+    'test_mac_command_still_rejects_strict_schema_violation',
+}
+if set(inventory) != required:
+    raise RuntimeError("installed project startup case inventory changed")
+suite = unittest.TestSuite(case_type(name) for name in inventory)
+result = unittest.TextTestRunner(verbosity=2).run(suite)
+if result.testsRun != len(required) or not result.wasSuccessful() or result.skipped:
+    raise RuntimeError("installed project startup/MAC controls failed or skipped")
+modules = {}
+for name, module in tuple(sys.modules.items()):
+    if name == 'literate_ai' or name.startswith('literate_ai.'):
+        path = getattr(module, '__file__', None)
+        if path is None or not Path(path).resolve(strict=True).is_relative_to(prefix):
+            raise RuntimeError("startup probe imported framework outside installation")
+        modules[name] = Path(path).resolve(strict=True)
+selected = ('literate_ai.cli.project', 'literate_ai.adapters.mac_project_contract')
+if not set(selected) <= modules.keys():
+    raise RuntimeError("startup probe did not execute the installed command adapter")
+if hashlib.sha256(fixture.read_bytes()).hexdigest() != fixture_digest:
+    raise RuntimeError("startup fixture changed during installed execution")
+print(json.dumps({
+    'status': 'passed',
+    'platform': sys.platform,
+    'selected': len(inventory),
+    'passed': result.testsRun,
+    'skipped': 0,
+    'cases': inventory,
+    'fixture_sha256': fixture_digest,
+    'installed_module_origins_verified': True,
+    'framework_module_count': len(modules),
+    'modules': {name: {
+        'relative_path': modules[name].relative_to(prefix).as_posix(),
+        'sha256': hashlib.sha256(modules[name].read_bytes()).hexdigest(),
+    } for name in selected},
+}, sort_keys=True))
+"""
+
 INSTALLED_WINDOWS_RETAINED_PROBE = """
 import importlib
 import json
@@ -565,6 +620,42 @@ def _subprocess_environment() -> dict[str, str]:
     }
     sanitized["NO_COLOR"] = "1"
     return sanitized
+
+
+def qualify_installed_project_command_imports(repository, python, cwd):
+    fixture = repository / "tests/smoke/test_project_command_imports.py"
+    expected_fixture = hashlib.sha256(fixture.read_bytes()).hexdigest()
+    observed = json.loads(
+        run(
+            str(python),
+            "-I",
+            "-c",
+            INSTALLED_PROJECT_COMMAND_IMPORT_PROBE,
+            str(fixture),
+            cwd=cwd,
+        ).stdout
+    )
+    if (
+        observed["status"] != "passed"
+        or observed["selected"] != 2
+        or observed["passed"] != 2
+        or observed["skipped"] != 0
+        or observed["fixture_sha256"] != expected_fixture
+        or hashlib.sha256(fixture.read_bytes()).hexdigest() != expected_fixture
+        or observed["installed_module_origins_verified"] is not True
+    ):
+        raise RuntimeError("installed startup/MAC evidence mismatch")
+    for name, relative in (
+        ("literate_ai.cli.project", "src/literate_ai/cli/project.py"),
+        (
+            "literate_ai.adapters.mac_project_contract",
+            "src/literate_ai/adapters/mac_project_contract.py",
+        ),
+    ):
+        expected = hashlib.sha256((repository / relative).read_bytes()).hexdigest()
+        if observed["modules"][name]["sha256"] != expected:
+            raise RuntimeError("installed startup module differs from candidate source")
+    return observed
 
 
 def qualify_installed_windows_retained_context(repository, installation, python, cwd):
@@ -2201,6 +2292,9 @@ def _main() -> int:
         installed_evidence_signatures = json.loads(
             run(str(python), "-c", INSTALLED_EVIDENCE_SIGNATURE_PROBE, cwd=root).stdout
         )
+        project_command_imports = qualify_installed_project_command_imports(
+            repository, python, root
+        )
         installed_worker_cpu = json.loads(
             run(
                 str(python),
@@ -3061,6 +3155,7 @@ def _main() -> int:
                     "runtime_resources": installed_runtime_resources,
                     "runtime_environment": runtime_environment,
                     "evidence_signature_primitives": installed_evidence_signatures,
+                    "project_command_imports": project_command_imports,
                     "worker_cpu": installed_worker_cpu,
                     "windows_retained_context": windows_retained_context,
                     "schema_catalog_versions": sorted(
