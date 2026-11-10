@@ -1,0 +1,57 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "read-only authored oracle/profile source development; full public qualification open",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "source_base": "8fb925b57",
+  "source_sha256": {
+    "src/literate_ai/contracts/authored_qualification_profiles.py": "249fd4c164a942681c7c80cada7e918fa6e1560fc5bb4d2eac16fb6e1c9b469f",
+    "src/literate_ai/adapters/authored_qualification_oracles.py": "8e3582a0795a1e75b9107f3cbbfd6dbffee92b0a78f80114ee82aa57a6c5c054",
+    "src/literate_ai/schema_catalog.py": "6ed3ed022395ce4ffe5b61afafc457e67788ef34e6fb2a6a223c450197ba4131",
+    "schemas/v2/authored-qualification-profile.schema.json": "89eedc484edb7008028fcb3b8beb43e901772b0d02d823da90c476d793deb9c3",
+    "schemas/v2/index.json": "e97e7c338c2a6f2a0b910373b7caac596f3dd16087a697f0f059ed93bb13aea2",
+    "schemas/v2/compatibility.json": "9e57a39528c2316e50e218be6bff0c4031ccba14f1117cc674fe1ec44fb7c11a",
+    "tests/critical/test_authored_qualification_oracles.py": "9299696f4ac953b259c7c986900e762d67ee0eeec38be37926f0c15047bbdd17"
+  },
+  "qualification_family": {
+    "executed": 65,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 65,
+    "selected": 83,
+    "skipped": 18
+  },
+  "new_oracle_cases": [
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_all_nodes_are_bound_read_only_and_answers_are_not_in_profile_or_map",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_bounded_profile_reads_refuse_before_loading_or_running_a_harness",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_changed_expected_answers_or_import_surface_refuse_new_admission",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_changed_oracle_and_profile_require_a_different_plan_identity",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_duplicate_profile_or_oracle_keys_cannot_choose_private_answers",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_mutating_decoded_expected_results_does_not_replace_the_sealed_oracle",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_profile_is_closed_and_requires_two_real_clean_runs",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_profile_must_be_under_litai_and_origin_dto_is_not_a_current_owner",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_profile_or_harness_byte_drift_invalidates_the_saved_owner",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_root_only_or_extra_oracle_selection_refuses",
+    "tests.critical.test_authored_qualification_oracles.AuthoredQualificationOracleTests.test_unknown_or_uncovered_capability_cannot_claim_independent_coverage"
+  ],
+  "new_oracle_cases_all_passed": true,
+  "profile_and_schema_checked": true,
+  "new_owned_inputs": "litai/qualification.json and litai/verification/acceptance/<namespace>/<component>.json",
+  "scope": [
+    "Closed authored profile pins every exact selected oracle and requires at least two clean runs without any original-source command or source-promotion fields.",
+    "Real current project/lock admission and versioned library oracle loading bind the complete two-node graph, exact interfaces/import surfaces and private case maps before any generation or harness execution.",
+    "Private original oracle instances and exact profile/harness bytes remain current; Rust v2 composition retains original loaded instances and enters its existing provisioned-input custody boundary.",
+    "Refuse root-only selection, changed private answers/profile/harness/import surface, unknown capabilities, duplicate authority fields, insufficient bounds and DTO-only authority; project-declared input budgets remain enforced.",
+    "New authored inputs use litai/; legacy source-derived readers, wire schemas and locations remain unchanged."
+  ],
+  "remaining": [
+    "Compose complete public plan/apply with current review, host-execution acknowledgment, framework/target/toolchain/output custody and versioned request/comparison/run/result contracts.",
+    "Execute every selected node through genuine clean Standard generation and independent acceptance, preserving original Rust native compiler/verifier custody.",
+    "Complete other supported native oracle forms, recoverable publication, origin-aware closed capture/replay, retained Cargo receiving and public native/installed/integration qualification.",
+    "Independent source review before driver repin and complete source/native/installed and exact-head/resulting-main acceptance."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false,
+  "release_attestation": false
+}

@@ -39,6 +39,8 @@ _MAXIMUM_MANIFEST_BYTES = 1024 * 1024
 _COMPATIBILITY_READ_PATH_KEYS = frozenset({"input", "status", "adapter", "output"})
 _COMPATIBILITY_WRITE_CONTRACT_ALLOWLIST = frozenset(
     {
+        "urn:literate-ai:schema:v2:authored-qualification-profile",
+        "urn:literate-ai:schema:v2:authored-qualification-oracle-selection",
         "urn:literate-ai:schema:v2:qualification-origin",
         "urn:literate-ai:schema:v2:authored-qualification-origin",
         "urn:literate-ai:schema:v2:source-derived-qualification-origin",

@@ -281,7 +281,9 @@
     "literate-ai/project-tree-html@1",
     "urn:literate-ai:schema:v2:qualification-origin",
     "urn:literate-ai:schema:v2:authored-qualification-origin",
-    "urn:literate-ai:schema:v2:source-derived-qualification-origin"
+    "urn:literate-ai:schema:v2:source-derived-qualification-origin",
+    "urn:literate-ai:schema:v2:authored-qualification-profile",
+    "urn:literate-ai:schema:v2:authored-qualification-oracle-selection"
   ],
   "read_paths": [
     {

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-qualification-profile",
+  "title": "Authored qualification profile without an original-source baseline",
+  "$defs": {
+    "oracleSelection": {
+      "$id": "urn:literate-ai:schema:v2:authored-qualification-oracle-selection",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component",
+        "oracle_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:authored-qualification-oracle-selection"
+        },
+        "component": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "namespace",
+            "name"
+          ],
+          "properties": {
+            "namespace": {
+              "type": "string",
+              "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+            },
+            "name": {
+              "type": "string",
+              "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"
+            }
+          }
+        },
+        "oracle_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "profile_id",
+    "oracles",
+    "minimum_clean_runs"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-qualification-profile"
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+    },
+    "minimum_clean_runs": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 9223372036854775807
+    },
+    "oracles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:authored-qualification-oracle-selection"
+      }
+    }
+  }
+}

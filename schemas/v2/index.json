@@ -1155,6 +1155,13 @@
         "urn:literate-ai:schema:v2:authored-qualification-origin",
         "urn:literate-ai:schema:v2:source-derived-qualification-origin"
       ]
+    },
+    {
+      "file": "authored-qualification-profile.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:authored-qualification-profile",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:authored-qualification-oracle-selection"
+      ]
     }
   ]
 }
