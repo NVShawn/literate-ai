@@ -285,6 +285,15 @@
       },
       {
         "id": "QUALIFICATION-DIAGNOSTICS-001"
+      },
+      {
+        "id": "PROJECT-LAYOUT-001"
+      },
+      {
+        "id": "QUALIFICATION-CASE-INVENTORY-001"
+      },
+      {
+        "id": "AUTHORED-GRAPH-QUALIFICATION-001"
       }
     ]
   }

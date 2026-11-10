@@ -34300,3 +34300,56 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reproduce nonzero parity exit and invalid JSON, verify original marker/exit identities and private durable diagnostics, and reject diagnostic evidence as qualified products.
   - [ ] Exercise a later failure after an earlier success; renew independent review, full source, installed/native and exact-head integration gates.
+
+### [ ] PROJECT-LAYOUT-001 — Contain derived-project Literate AI files under litai/
+
+- **Release target:** 1.4.0
+- **Completion prerequisites:** none
+- **Proposed design:** [ADR 0071](../decisions/0071-derived-project-litai-directory.md) specifies the shared project context, finite root integrations and recoverable migration. Explicit directing-user design acceptance remains pending under ADR 0006.
+- **Next action:** Obtain acceptance of ADR 0071, then complete the owned-path inventory and shared resolver before migration implementation.
+- **Priority:** P1 (blocking 1.4.0 release goal)
+- **Owner:** Framework core: derived-project layout, onboarding, lifecycle, templates and documentation; PROJECT Goals 1, 4 and 6
+- **Direction:** Require all Literate AI files in every derived project to live beneath a project-local litai/ subdirectory; include this requirement in the release currently in progress (1.4.0).
+- **Conclusion:** Make litai/ the canonical home of framework-owned derived-project configuration, authority and state. Cover project and release manifests, Components, Flavors, skills, workflow/routing declarations, locks, receipts, framework documentation and framework-managed runtime/cache/build state. Keep application-owned source, assets and documentation in their native layout. Where an external tool requires a root discovery file, retain only a minimal delegate to litai/, with no duplicated authority. This goal is not implemented by recording it.
+- **Depends on:** Inventory framework-owned path consumers and root discovery constraints; define migration and canonical resolution; implement and qualify before 1.4.0 publication. Coordinate retained implementation placement with ADOPT-RELOCATE-001 without moving application source merely to satisfy framework containment.
+- **Implementation:**
+  - [ ] Inventory all framework-owned derived-project files and directories, classify shared root integrations, and specify their canonical litai/ paths and minimal required delegates.
+  - [ ] Update shared path resolution, create/adopt/init/update/reparent, templates, inheritance, validation, CLI discovery, agent entrypoints and lifecycle/release consumers to use the canonical litai/ authority without duplicate root copies.
+  - [ ] Provide reviewed plan/apply migration for existing derived projects with collision and stale-plan refusal, interruption recovery, preserved custom files and source custody, and explicit evidence invalidation/renewal where path-bound identities change.
+  - [ ] Update generated-project guidance, examples and release collateral; retain framework-repository authoring layout separately from the derived-project requirement.
+- **Evidence:**
+  - [ ] Qualify fresh creation, adoption, existing-project migration, update and reparent through the installed public CLI on supported platforms; assert framework-owned files remain under litai/ except enumerated required root delegates.
+  - [ ] Exercise verify, lock, plan, rebuild and release discovery from the repository root and subdirectories, inheritance and agent entrypoints; require fresh path-bound evidence after migration.
+  - [ ] Prove collisions, aliases, stale plans and interrupted migration preserve application bytes, custom root instructions and recoverability; reject ambiguous dual authority and prevent migration from reusing invalid receipts.
+
+### [ ] QUALIFICATION-CASE-INVENTORY-001 — Canonicalize shared case inventory across qualified graph nodes
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#392](https://github.com/jordanhubbard/literate-ai/issues/392)
+
+- **Priority:** P1 (blocking 1.4.0 release goal)
+- **Owner:** Framework qualification derivation and captured evidence; PROJECT Goals 1 and 4
+- **Direction:** Include issue #392 in 1.4.0: identical valid raw generated cases across distinct Components must not reject a complete all-node run.
+- **Conclusion:** Retain unique content-addressed raw case membership while preserving all node suites, execution observations and actual test counts. The reporter is preparing this bounded fix alongside #345; do not duplicate that contribution.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Reconcile the contributor fix in derivation and capture membership without weakening per-suite uniqueness, node completeness, failed-suite refusal or existing unique-run identities.
+- **Evidence:**
+  - [ ] Reproduce the nine-execution/three-raw-case diamond and qualify capture/replay, missing or failed provider refusal, per-suite duplicate refusal, installed/native and integrated gates.
+
+### [ ] AUTHORED-GRAPH-QUALIFICATION-001 — Admit genuinely authored native graphs to public qualification
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#393](https://github.com/jordanhubbard/literate-ai/issues/393)
+
+- **Priority:** P1 (blocking 1.4.0 release goal)
+- **Owner:** Framework authored authority and qualification admission; PROJECT Goals 1, 2, 4 and 6
+- **Direction:** Include issue #393 in 1.4.0: provide a supported public qualification route for genuinely authored native dependency graphs.
+- **Conclusion:** Define reviewed authored admission independently of source-derived authority; never fabricate source promotion, inverse evidence or historical audits. A significant public admission design needs an ADR and directing-user acceptance before implementation. Preserve complete two-clean-run all-node generation, unchanged independent oracle, typed shared-provider identity and closed retained replay.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Draft and obtain acceptance of an authored-graph admission ADR, then implement the public front door and current authored/lock/export custody using existing qualification and retained-library owners.
+- **Evidence:**
+  - [ ] Qualify a genuine three-library diamond through installed public admission, two clean all-node runs, closed relocatable replay and retained Cargo check/materialize/admit; refuse stale, substituted, missing or failed evidence and preserve source-derived admission.
