@@ -288,7 +288,8 @@
     "urn:literate-ai:schema:v2:authored-node-independent-acceptance",
     "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request",
     "urn:literate-ai:schema:v2:authored-qualification-plan",
-    "urn:literate-ai:schema:v2:authored-qualification-project-review"
+    "urn:literate-ai:schema:v2:authored-qualification-project-review",
+    "urn:literate-ai:schema:v2:authored-qualification-comparison"
   ],
   "read_paths": [
     {

@@ -57,9 +57,11 @@ print(json.dumps({'schema':'literate-ai/library-acceptance-results@1','cases':ob
 
 class AuthoredGraphAcceptanceTests(unittest.TestCase):
     def setUp(self):
-        fixture = oracle_fixtures.AuthoredQualificationOracleTests("runTest")
-        fixture.setUp()
-        self.addCleanup(fixture.doCleanups)
+        fixture = getattr(self, "provided_fixture", None)
+        if fixture is None:
+            fixture = oracle_fixtures.AuthoredQualificationOracleTests("runTest")
+            fixture.setUp()
+            self.addCleanup(fixture.doCleanups)
         self.fixture = fixture
         self.root = fixture.root
         harness = fixture.oracle_root / "harness.py"
@@ -139,7 +141,9 @@ class AuthoredGraphAcceptanceTests(unittest.TestCase):
         )
         self.records = {}
 
-    def accept(self):
+    def accept(self, *, evidence_recorder=None):
+        if evidence_recorder is not None:
+            self.ports.retain_evidence_with(evidence_recorder)
         custody = SimpleNamespace(
             root=self.package_root,
             artifact_paths=self.artifact_paths,
@@ -149,6 +153,8 @@ class AuthoredGraphAcceptanceTests(unittest.TestCase):
         def record(value):
             identity = canonical_identity(value)
             self.records[identity] = value
+            if evidence_recorder is not None:
+                self.assertEqual(evidence_recorder.remember_json(value), identity)
             return identity
 
         with (

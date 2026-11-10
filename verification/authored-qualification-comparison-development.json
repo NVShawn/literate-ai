@@ -1,0 +1,103 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "all-node authored behavioral comparison over actual isolated Python observations and typed package data; review/provider/tool/custody admissions are fixtures",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "development_review": "https://github.com/jordanhubbard/literate-ai/pull/401",
+  "source_base": "360c249b8cd0f5e768dad73b5e483ecb9421be76",
+  "source_sha256": {
+    "src/literate_ai/contracts/authored_qualification_comparisons.py": "081ade483bf0f207cc3f83e29092b9914ff40fc8a679af8359a8748dba24ea4f",
+    "src/literate_ai/adapters/authored_qualification_comparison.py": "5f4ccb88aceaff70c3da6c2e2c7a9ebb3ed022873e53d26055d6ed72a0eb349d",
+    "src/literate_ai/adapters/qualification_capture.py": "91b4c0908565328f56212ed713c801162bfa101761f5cd087b315400693fe94b",
+    "src/literate_ai/schema_catalog.py": "f2f19fa2565ff6603b7552f3a2070757505e3909380a94616e88c97f96d93998",
+    "schemas/v2/authored-qualification-comparison.schema.json": "98f0ca39e542233c9cff66c0c937e047ab279b5c32f166322b4584ed775a76ce",
+    "schemas/v2/index.json": "72bb8dc73b80c90835f0f1f049b2f461c9139d349b64755b8241fff7c2f23f2a",
+    "schemas/v2/compatibility.json": "cfb29bd6212b7ae3e3d668c5d1526ccb58c6d4d162252832b6dbd7d1bd18ad60",
+    "tests/critical/test_authored_graph_acceptance.py": "68f934d3b286f1d9ff69e5628fcac04d935fbd625d9d105e94cb852623c582d4",
+    "tests/critical/test_authored_qualification_comparison.py": "deb207be00fdc286a2a1db96ec48cdd8a837cccfa89bd7f7eb20bb567717a237"
+  },
+  "checks": {
+    "qualification_family": {
+      "summary": {
+        "executed": 86,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 86,
+        "selected": 104,
+        "skipped": 18
+      },
+      "report_sha256": "a548af02fa200b2b675e46b6d2ae5ead86d60a5e3b99f102789ea07a71997ddf"
+    },
+    "existing_graph_controls": {
+      "summary": {
+        "executed": 5,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 5,
+        "selected": 5,
+        "skipped": 0
+      },
+      "report_sha256": "81d1b72e783597d23b956d88eeeccc06760c907fd54901ed6bfdf3e0e81b2698"
+    },
+    "legacy_native_sdk_relocation": {
+      "summary": {
+        "executed": 1,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 1,
+        "selected": 1,
+        "skipped": 0
+      },
+      "report_sha256": "32e7ab5b2fa70e51e1203dfbeea4aedd9c384d43677b9d6ca6de44a84b8a768b"
+    }
+  },
+  "comparison_cases": [
+    {
+      "test": "tests.critical.test_authored_qualification_comparison.AuthoredQualificationComparisonTests.test_closed_comparison_does_not_accept_source_history_or_empty_nodes",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_comparison.AuthoredQualificationComparisonTests.test_every_node_reopens_real_native_results_under_the_original_root",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_comparison.AuthoredQualificationComparisonTests.test_missing_provider_observation_cannot_be_replaced_by_aggregate_counts",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_comparison.AuthoredQualificationComparisonTests.test_provider_cannot_borrow_another_nodes_artifact",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_comparison.AuthoredQualificationComparisonTests.test_rehashed_wrong_result_or_missing_case_refuses_comparison",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_comparison.AuthoredQualificationComparisonTests.test_stale_original_oracle_and_dto_only_owner_refuse",
+      "status": "passed"
+    }
+  ],
+  "scope": [
+    "A new closed authored comparison binds the original authored plan, run, sealed oracle set and each exact native observation/case map without source snapshot, original-source baseline or promotion fields.",
+    "Reopen every actual node observation and private expected-result record under the complete original root/package context; preserve original selected library export, target, package membership and oracle/case-map identity.",
+    "Use the same existing Python/SDK/Rust native result, process and compiler verification predicates through a shared internal helper. The source-derived reader keeps its signature and authority/membership checks.",
+    "Refuse missing provider observations, self-consistently rehashed wrong results, missing cases, forged counts, cross-node artifacts, stale private inputs and DTO-only current authority.",
+    "One shared raw expected-case payload retains two distinct native node observation contexts and two real isolated Python verifier calls; this does not implement or close contributor-owned generated-case inventory issue392."
+  ],
+  "boundaries": [
+    "Current project/lock/oracle/model planning, actual isolated Python verifier children, bounded record capture and typed package-byte verification are real.",
+    "Project review, installed framework/provider selection, model generation and native package/tool custody admission remain explicit fixture boundaries.",
+    "The real existing native SDK library verifier/retained relocation test passes after helper extraction. This is legacy compatibility evidence, not complete authored native/installed qualification.",
+    "Comparison is an integrity predicate; successful genuine Standard execution, complete trusted closed receiving and importer authorization remain separate mandatory obligations."
+  ],
+  "remaining": [
+    "Implement current-plan acknowledged public apply and genuine host authorization, with actual review of the sealed independent verifier inputs; a content hash or decoded record must not stand in for approval.",
+    "Complete truthful versioned run/result records and two real clean all-node Standard model generations, exact node/workspace/test membership, every required native oracle form, original compiler custody and private-answer separation.",
+    "Close original namespace owners successfully before recoverable positive publication; complete origin-aware closed capture/replay after resources retire and actual retained Cargo check/materialize/admit with current importer trust.",
+    "Independent source review before driver repin, full integrated source/native/installed/exact-head/resulting-main acceptance, final lifecycle receipts and the entire 1.4 release scope."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false,
+  "release_attestation": false
+}

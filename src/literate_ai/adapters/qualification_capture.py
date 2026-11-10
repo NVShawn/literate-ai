@@ -2667,6 +2667,27 @@ def verify_qualification_library_acceptance(
         raise QualificationCaptureError(
             "qualification.capture.oracle-authority-mismatch"
         )
+    _verify_library_acceptance_observation(
+        reader,
+        root=root,
+        export=export,
+        surface=surface,
+        oracle=oracle,
+        observation_identity=root.independent_acceptance_identity,
+    )
+
+
+def _verify_library_acceptance_observation(
+    reader, *, root, export, surface, oracle, observation_identity
+):
+    """Reopen native records after the origin-specific caller admits authority.
+
+    Reuse exact Python/SDK/Rust case, process and compiler evidence checks. An
+    authored provider supplies its own exact native observation while retaining
+    the real whole-graph root/package context; no root or lock is rewritten.
+    This integrity predicate itself grants no execution or importer trust.
+    """
+
     oracle_bytes = product_json_bytes(oracle.identity_document())
     oracle_identity = ContentIdentity.parse_uri(
         "sha256:" + hashlib.sha256(oracle_bytes).hexdigest()
@@ -2688,7 +2709,7 @@ def verify_qualification_library_acceptance(
         or any(case["capability"] not in capabilities for case in cases)
     ):
         raise QualificationCaptureError("qualification.capture.oracle-cases-invalid")
-    actual = reader.read_json(root.independent_acceptance_identity)
+    actual = reader.read_json(observation_identity)
     observed = actual.get("observations") if isinstance(actual, dict) else None
     if not isinstance(observed, list) or len(observed) != len(cases):
         raise QualificationCaptureError(
