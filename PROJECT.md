@@ -119,7 +119,8 @@ QUALIFICATION-CASE-INVENTORY-001 and AUTHORED-GRAPH-QUALIFICATION-001 record
 issues #392 and #393 as blocking 1.4.0 work under Goals 1, 2, 4 and 6. Shared raw
 case inventory must preserve every actual node execution; genuinely authored graph
 qualification must not manufacture source-promotion or inverse evidence. The first
-fix is contributor-owned; authored admission design and both acceptance gates remain open.
+fix is contributor-owned; [ADR 0072](docs/decisions/0072-authored-native-graph-qualification.md)
+is proposed for authored admission, and both acceptance gates remain open.
 
 PROJECT-LAYOUT-001 extends Goals 1, 4, 6 and 8 as a blocking 1.4.0 requirement.
 [ADR 0071](docs/decisions/0071-derived-project-litai-directory.md) is proposed;
