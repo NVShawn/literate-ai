@@ -1147,6 +1147,14 @@
         "literate-ai/retained-tree-html-check-result@1",
         "literate-ai/project-tree-html@1"
       ]
+    },
+    {
+      "file": "qualification-origin.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:qualification-origin",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:authored-qualification-origin",
+        "urn:literate-ai:schema:v2:source-derived-qualification-origin"
+      ]
     }
   ]
 }

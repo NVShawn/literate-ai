@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:qualification-origin",
+  "title": "Qualification origin references; decoding does not establish authority",
+  "$defs": {
+    "authored": {
+      "$id": "urn:literate-ai:schema:v2:authored-qualification-origin",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "origin",
+        "project_configuration_identity",
+        "locked_generation_authority_identity",
+        "component_lock_identity",
+        "authored_input_closure_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:authored-qualification-origin"
+        },
+        "origin": {
+          "const": "authored"
+        },
+        "project_configuration_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "locked_generation_authority_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "component_lock_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "authored_input_closure_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    },
+    "source-derived": {
+      "$id": "urn:literate-ai:schema:v2:source-derived-qualification-origin",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "origin",
+        "authority_projection_identity",
+        "source_snapshot_identity",
+        "generation_input_audit_identity",
+        "promotion_tree_identity",
+        "promotion_audit_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:source-derived-qualification-origin"
+        },
+        "origin": {
+          "const": "source-derived"
+        },
+        "authority_projection_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "source_snapshot_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_input_audit_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "promotion_tree_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "promotion_audit_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-origin"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:source-derived-qualification-origin"
+    }
+  ]
+}

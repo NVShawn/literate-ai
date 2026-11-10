@@ -1,0 +1,59 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "development source foundation; not release attestation",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "source_base": "e0da1b883cced1e6420967122598d07509b5f1f7",
+  "source_sha256": {
+    "src/literate_ai/contracts/qualification_origins.py": "0aed5dbcc3c00b4a3bac2e16f1b1401e6bfb5e75d5b98ab7d66f1b020bb2710e",
+    "src/literate_ai/adapters/authored_qualification_authority.py": "3e56fed0cfb8ba976f39ccc3341c57f6a35c150787ea4ddf492594964a767408",
+    "src/literate_ai/adapters/component_lock_planning.py": "9da33a26dbc0cc6f55e5a2b5fa9d45e041fdcdf2e1b87670bb2d8458a686f68a",
+    "src/literate_ai/adapters/locked_generation_authority.py": "e95ea78023b54e4b7961bda9f8d14526e410704db468de75f465817dcd8e008a",
+    "src/literate_ai/schema_catalog.py": "fba917a1fc0f318546e110b74c2fba14ffd9aeb8b10d0e57c8a55be4620538db",
+    "schemas/v2/qualification-origin.schema.json": "6f71c0a4a069d63aa61857f1042cb30ec0c664c1674e60f21ed458e327c34076",
+    "schemas/v2/index.json": "058dd9b5a6eacc5babbee653a3ec0befa31e42f49fa86d6feaf4369260b012a9",
+    "schemas/v2/compatibility.json": "9e95afe2ff9ae4d3d21749190336ad649ec08617991eb31ad63e7a4e946b48af",
+    "tests/critical/test_qualification_origins.py": "be2a9bc54462d68cb3576f201937b5005683c4df2c63126223a9733dbab1d64b",
+    "tests/critical/test_authored_qualification_authority.py": "4cde8d3247dc6de8c05fe2eb8c3cc6fea24624f4f26dcf71a2deb8c7db476c1b"
+  },
+  "checks": {
+    "qualification_family": {
+      "executed": 54,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 54,
+      "selected": 72,
+      "skipped": 18
+    },
+    "current_authored_owner": {
+      "executed": 9,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 9,
+      "selected": 9,
+      "skipped": 0
+    },
+    "locked_generation_regression": {
+      "executed": 2,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2,
+      "selected": 2,
+      "skipped": 0
+    }
+  },
+  "scope": [
+    "Closed origin records bind truthful authored references or genuine source-derived references without converting legacy source evidence.",
+    "Canonical project and lock readers reopen every selected Component and exact selected input closure without allocating or executing host code.",
+    "Current owner refuses source authority on root or dependency, changed project ownership, stale selected bytes, corrupt projection state and unselected locations.",
+    "Returned origin DTOs do not restore current authority, independent review, verifier custody or execution permission."
+  ],
+  "remaining": [
+    "Origin-specific reviewed profile, unchanged independent oracle closure, versioned plans, requests, comparisons, run/results and public acknowledged plan/apply.",
+    "Complete all-node clean Standard model-forward runs, recoverable publication, origin-aware closed archive reopening and ordinary retained Cargo admission.",
+    "Independent source review before any driver pin advance, complete source/native/installed and exact-head/resulting-main gates."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false
+}

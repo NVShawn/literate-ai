@@ -224,6 +224,11 @@ class ComponentCatalogSnapshot:
             )
         return content
 
+    def component_root(self, authoring_identity: ContentIdentity) -> Path:
+        """Locate an admitted authoring through its canonical catalog owner."""
+
+        return self._component_entry(authoring_identity).root
+
     def retained_memory_estimate(self) -> int:
         """Conservatively account for retaining this parsed catalog graph.
 
