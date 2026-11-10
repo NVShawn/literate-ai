@@ -4,6 +4,8 @@
 
 - Remote evidence transfer preserves stricter inherited POSIX soft and hard
   file-size ceilings, including zero limits (#372).
+- Installed-wheel qualification exercises lazy project startup and strict MAC BOM
+  rejection, verifying installed module origins and exact candidate bytes (#121).
 
 - Complete current-main native qualification of retained Windows system context,
   base/private interpreter DLL capture, and the five-minute C++ discovery bound;
