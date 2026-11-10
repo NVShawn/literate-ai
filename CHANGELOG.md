@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Installed-wheel qualification exercises lazy project startup and strict MAC BOM
+  rejection, verifying installed module origins and exact candidate bytes (#121).
+
 - Complete current-main native qualification of retained Windows system context,
   base/private interpreter DLL capture, and the five-minute C++ discovery bound;
   preserve command drift, missing-sidecar and guarded native build refusals (#102, #103).
