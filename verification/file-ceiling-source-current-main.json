@@ -75,5 +75,20 @@
   "installed_native_qualification": "pending",
   "exact_head_and_resulting_main_ci": "pending",
   "goal_complete": false,
-  "release_attestation": false
+  "release_attestation": false,
+  "whole_native_installed_wheel": {
+    "source_revision": "b23ae877adb71d66b6ee871e4357b5ce45c4e891",
+    "platform": "linux-aarch64",
+    "python": "3.12.3",
+    "canonical_gate_exit_code": 0,
+    "entire_wheel_gate_ok": true,
+    "wheel": "literate_ai-1.4.0-py3-none-any.whl",
+    "wheel_identity": "sha256:f1c34e499968def8d941e5c72d4520d68cae3b637095a1fb84a73b4d8d96e356",
+    "wheel_bytes": 4234632,
+    "framework_distribution": "sha256:b20ca5e343ee6e802efa8a67561c3688eaed47ac7a5b262b035886970f4428d6",
+    "retained_manifest_sha256": "837c12ebb2adfe91b09b792181e86b57abf1eedf632527ed069a4ff43da36d34",
+    "repaired_module_matches_archive": true,
+    "original_result_sha256": "bd4662544f4b577c7437de0db988925d349278a5c89297b5d8aef7e669827c74",
+    "scope": "Complete canonical noneditable wheel acceptance; this runner does not yet invoke the explicit inherited-ceiling fixture from the installed module. Specific installed ceiling controls and independent review remain pending."
+  }
 }
