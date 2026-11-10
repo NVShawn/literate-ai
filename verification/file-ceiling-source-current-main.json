@@ -1,0 +1,79 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "REMOTE-FILE-CEILING-001",
+  "issue": 372,
+  "classification": "native source-development qualification; independent review and installed integration pending",
+  "source_base": "8b83f5b967a3abfcd92bfbc93704f30c740718c4",
+  "integration_revision": "692012c763ea0cb334b7a93796a5be604cba322a",
+  "platform": "linux-aarch64",
+  "python": "3.12.3",
+  "source_sha256": {
+    "src/literate_ai/adapters/remote_transport.py": "f20259482269f1041251851d087cbd6ed50c633fa3c2515ad9fd52c28363b8a4",
+    "tests/critical/test_remote_file_ceiling.py": "7426ee8e31074427bef615e91872b40a1d29f56ca55b282039ed464d6f5352a9"
+  },
+  "source_gate": {
+    "root_exit_code": 0,
+    "fresh_checkpoint": true,
+    "summary": {
+      "executed": 2657,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2657,
+      "selected": 2777,
+      "skipped": 120
+    },
+    "worker_groups": 598,
+    "every_scheduled_instance_matches_terminal_events": true,
+    "repeated_discovery_names_preserved": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "7e9f35a40eaefd276a23ca16a80da9f53f92394d1406a9e513b69999c651cd17",
+    "event_audit_sha256": "0a2cfa0a1e59b5ac9bcfb9b94fcdce9cfde4c098709fed8f693d3368792057bb"
+  },
+  "native_controls": [
+    {
+      "case": "tests.critical.test_remote_file_ceiling.RemoteFileCeilingTests.test_limiter_preserves_stricter_inherited_soft_and_hard_bounds",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_remote_file_ceiling.RemoteFileCeilingTests.test_real_download_custody_survives_a_finite_inherited_ceiling",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_command_route_transfers_refuse_corruption_and_preserve_destination",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_remote_connector_keeps_bounded_diagnostics_and_stops_owned_descendants",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_runner_times_out_and_bounds_both_output_streams",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_scp_routes_upload_and_download_through_the_selected_ssh_program",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_ssh_and_scp_keep_long_control_channels_alive",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_ssh_argv_rejects_an_unsafe_transport_name",
+      "status": "passed"
+    }
+  ],
+  "behavior": "The fresh trusted child clamps soft and hard RLIMIT_FSIZE independently against the inherited ceilings; an evidence allowance grants no increase. Native controls preserve parent limits and the complete command-route transfer custody behavior.",
+  "preserved_predecessors": [
+    "The original native limiter refuses under a stricter inherited hard ceiling before connector execution. Its retained original source-development report remains in the original contributor worktree.",
+    "The first current-base whole-source attempt selected an invalid system Bazel executable and failed its native cache control. Its report and raw failure remain retained; the fresh successful run selects a digest-verified existing Bazel and native sccache."
+  ],
+  "independent_review": "pending; implementation identity has not been advanced",
+  "installed_native_qualification": "pending",
+  "exact_head_and_resulting_main_ci": "pending",
+  "goal_complete": false,
+  "release_attestation": false
+}

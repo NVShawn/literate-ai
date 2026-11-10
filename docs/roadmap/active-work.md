@@ -34274,14 +34274,18 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Priority:** P1
 - **Owner:** Framework core remote transport and native resource boundary
 - **Direction:** Fix issue #372, which blocks included Cargo qualification #347: an evidence allowance must never raise a caller file-size ceiling.
-- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. Pending implementation and qualification remain in the existing worktree.
+- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. The pre-existing repair is integrated with current main; independent review, installed/native and forge qualification remain pending.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
+  - [x] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
 - **Evidence:**
   - [ ] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling.
   - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
+
+
+- **Current-main source qualification (2026-11-10):** The unchanged contributor repair applied to main base `8b83f5b96` passes a fresh native Linux ARM64/Python 3.12 gate: 2,777 selected, 2,657 passed, 120 declared skips, zero failed or known failed. Every selected instance matches the raw terminal events across all 598 completed worker groups, including occurrence-qualified repeated discovery names. Both native ceiling controls and all six unchanged transport controls pass without skips. The initial invalid-system-Bazel failure remains preserved; the successful run uses the existing digest-verified toolchain. Normal integration retains main `8489a4c4b` and all 68 release goals. [Sanitized source evidence](../../verification/file-ceiling-source-current-main.json) retains source and original report identities. This is source-development evidence; independent review before driver repin, noneditable installed/native controls and exact-head/resulting-main CI remain open.
+- **Next action:** Obtain independent review of the existing limiter change, record the supported driver pin only after approval, then qualify the clean installed candidate and exact integration.
 
 ### [ ] QUALIFICATION-DIAGNOSTICS-001 — Retain original bounded observations when native qualification fails
 
