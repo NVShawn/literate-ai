@@ -34353,3 +34353,20 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Draft and obtain acceptance of an authored-graph admission ADR, then implement the public front door and current authored/lock/export custody using existing qualification and retained-library owners.
 - **Evidence:**
   - [ ] Qualify a genuine three-library diamond through installed public admission, two clean all-node runs, closed relocatable replay and retained Cargo check/materialize/admit; refuse stale, substituted, missing or failed evidence and preserve source-derived admission.
+
+### [ ] SOURCE-TARGET-SIGNALS-001 — Distinguish CUDA evidence from copyright attribution
+
+- **GitHub issue:** [#396](https://github.com/jordanhubbard/literate-ai/issues/396)
+
+- **Priority:** P1
+- **Owner:** Source-to-specification static source inventory
+- **Direction:** A portable Rust library with an NVIDIA SPDX copyright header must not acquire a CUDA accelerator requirement.
+- **Conclusion:** Vendor attribution alone is not target evidence. Preserve exact source bytes and actual CUDA source/compiler/API signals; keep inventory inert and do not relax promotion or source custody.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Narrow CUDA target detection to actual CUDA source/toolchain/API evidence rather than vendor-only copyright or license text.
+  - [x] Add source-preserving regressions for portable SPDX/vendor-only libraries and positive CUDA source, compiler and API evidence.
+- **Evidence:**
+  - [x] Focused inventory and static-derivation controls: old detector fails ten subcases; corrected detector passes both methods and all thirteen input subcases without changing input bytes.
+  - [ ] Run applicable maintained framework Python, lint and formatting checks locally before PR CI.

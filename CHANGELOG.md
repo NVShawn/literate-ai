@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Source inventory no longer infers CUDA from NVIDIA copyright/vendor attribution; explicit CUDA source, compiler, headers and runtime/driver API signals remain detectable (#396).
+
 - Complete current-main native qualification of retained Windows system context,
   base/private interpreter DLL capture, and the five-minute C++ discovery bound;
   preserve command drift, missing-sidecar and guarded native build refusals (#102, #103).
