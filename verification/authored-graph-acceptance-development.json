@@ -79,5 +79,22 @@
   ],
   "driver_pin_advanced": false,
   "goal_complete": false,
-  "release_attestation": false
+  "release_attestation": false,
+  "complete_source_gate": {
+    "source_revision": "72bb055cd",
+    "summary": {
+      "executed": 2686,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2686,
+      "selected": 2806,
+      "skipped": 120
+    },
+    "worker_groups": 601,
+    "every_selected_instance_reconciled": true,
+    "report_sha256": "034402f3eb2f05001cafc4c3ea7ecccd682a6c13c1fbb4e359228d9fd7feff04",
+    "event_audit_sha256": "8bc5f7deae8d5bbdbcc7369d24893a7a56a9919c68f5454edd3bc3146a537ad9",
+    "exit_code": 0,
+    "release_attestation": false
+  }
 }
