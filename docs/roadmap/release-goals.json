@@ -294,6 +294,9 @@
       },
       {
         "id": "AUTHORED-GRAPH-QUALIFICATION-001"
+      },
+      {
+        "id": "CUDA-SIGNAL-001"
       }
     ]
   }
