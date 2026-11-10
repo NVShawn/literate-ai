@@ -6,6 +6,7 @@
   `spec accept --project-target ... --root-project`; default inheritance and
   retained-host integration remain unchanged (#402).
 
+- Source inventory no longer infers CUDA from NVIDIA copyright/vendor attribution; explicit CUDA source, compiler, headers and runtime/driver API signals remain detectable (#396).
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 

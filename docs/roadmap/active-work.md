@@ -34399,3 +34399,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] Six public-CLI controls pass, including actual root external acceptance and its locks/audit/lineage, default-parent failure, invalid public combinations, and direct namespace defense before target effects; twelve related controls and strict lint/format/layout/public-export gates pass.
   - [x] The maintained checkpointed Python gate passes with 2,777 selected cases, 2,613 passed, 164 declared skips and no failures or known failures. Independent controller-agent source review precedes the lifecycle-driver repin; runner and documentation authority remain current. The ordinary worker documentation gate passes 22 tooling controls and renders 181 diagrams from 1,950 Markdown files with normal browser sandboxing; four strict OpenSpec items pass.
   - [ ] Complete exact-candidate noneditable installed-wheel qualification and confirming CI before upstream landing. No generated-provider or downstream source-retirement authority is claimed.
+### [ ] SOURCE-TARGET-SIGNALS-001 — Distinguish CUDA evidence from copyright attribution
+
+- **GitHub issue:** [#396](https://github.com/jordanhubbard/literate-ai/issues/396)
+
+- **Priority:** P1
+- **Owner:** Source-to-specification static source inventory
+- **Direction:** A portable Rust library with an NVIDIA SPDX copyright header must not acquire a CUDA accelerator requirement.
+- **Conclusion:** Vendor attribution alone is not target evidence. Preserve exact source bytes and actual CUDA source/compiler/API signals; keep inventory inert and do not relax promotion or source custody.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Narrow CUDA target detection to actual CUDA source/toolchain/API evidence rather than vendor-only copyright or license text.
+  - [x] Add source-preserving regressions for portable SPDX/vendor-only libraries and positive CUDA source, compiler and API evidence.
+- **Evidence:**
+  - [x] Focused inventory and static-derivation controls: old detector fails ten subcases; corrected detector passes both methods and all thirteen input subcases without changing input bytes.
+  - [x] Maintained source/derivation/export/projection and qualification/capture checks: 161 observed method successes with eight optional-tool skips (seven unchanged Go-backend controls and one external CodeGraph control). The four initially fixture-skipped source-projection methods passed after supplying the declared pip 26.2.1 wheel. Full strict Ruff and formatting pass across 1,890 files; original negative and setup outcomes remain preserved.
+- **Confirming CI / review renewal:** The first PR run passed all 2,744 Python test executions (110 declared skips), lint, formatting and documentation, then correctly refused the stale lifecycle-driver review for the single changed inventory file. That applicable local review gate was omitted before the first push. The maintained local review reproduces the refusal; the reviewed detector delta is now re-pinned through `driver-review-record`, with unchanged runner review and renewed documentation-authority review. The original failed run remains failed; corrected-head CI and installed-wheel qualification remain pending.
+- **Next action:** Upstream PR review and confirming CI. This classifier correction does not itself qualify generated code, a GPU target or a retained consumer.

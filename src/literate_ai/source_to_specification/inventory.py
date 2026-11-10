@@ -113,7 +113,16 @@ _TARGET_PATTERNS = (
     ("linux", "platform.os", re.compile(r"(?i)\blinux\b")),
     ("macos", "platform.os", re.compile(r"(?i)\b(?:macos|darwin)\b")),
     ("windows", "platform.os", re.compile(r"(?i)\bwindows\b|\bwin32\b")),
-    ("cuda", "accelerator", re.compile(r"(?i)\b(?:cuda|nvidia|nvcc)\b")),
+    # A vendor name (including SPDX copyright attribution) is not a CUDA
+    # requirement. Keep explicit toolkit, header and runtime/driver API evidence.
+    (
+        "cuda",
+        "accelerator",
+        re.compile(
+            r"(?i)\b(?:cuda|nvcc)\b|\bcuda(?:_runtime(?:_api)?)?\.h\b|"
+            r"\b(?:cuda[A-Z]\w*|cuInit|cuDeviceGet|cuMemAlloc|cuLaunchKernel)\s*\("
+        ),
+    ),
     ("metal", "accelerator", re.compile(r"(?i)\b(?:metal|metalperformance)\b")),
 )
 
@@ -310,6 +319,8 @@ def _signals(path: str, text: str, language: str | None) -> tuple[FlavorSignal, 
         for flavor_id, axis, pattern in _TARGET_PATTERNS
         if pattern.search(searchable)
     }
+    if PurePosixPath(path).suffix.lower() in {".cu", ".cuh"}:
+        result.add(FlavorSignal("cuda", "accelerator"))
     if language is not None:
         result.add(FlavorSignal(language, "implementation.language-ecosystem"))
     return tuple(sorted(result, key=lambda item: (item.axis, item.flavor_id)))
