@@ -34369,4 +34369,5 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] Add source-preserving regressions for portable SPDX/vendor-only libraries and positive CUDA source, compiler and API evidence.
 - **Evidence:**
   - [x] Focused inventory and static-derivation controls: old detector fails ten subcases; corrected detector passes both methods and all thirteen input subcases without changing input bytes.
-  - [ ] Run applicable maintained framework Python, lint and formatting checks locally before PR CI.
+  - [x] Maintained source/derivation/export/projection and qualification/capture checks: 161 observed method successes with eight optional-tool skips (seven unchanged Go-backend controls and one external CodeGraph control). The four initially fixture-skipped source-projection methods passed after supplying the declared pip 26.2.1 wheel. Full strict Ruff and formatting pass across 1,890 files; original negative and setup outcomes remain preserved.
+- **Next action:** Upstream PR review and confirming CI. This classifier correction does not itself qualify generated code, a GPU target or a retained consumer.
