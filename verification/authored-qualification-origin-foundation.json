@@ -52,8 +52,30 @@
   "remaining": [
     "Origin-specific reviewed profile, unchanged independent oracle closure, versioned plans, requests, comparisons, run/results and public acknowledged plan/apply.",
     "Complete all-node clean Standard model-forward runs, recoverable publication, origin-aware closed archive reopening and ordinary retained Cargo admission.",
-    "Independent source review before any driver pin advance, complete source/native/installed and exact-head/resulting-main gates."
+    "Independent source review before any driver pin advance, further source/native/installed and exact-head/resulting-main gates."
   ],
   "driver_pin_advanced": false,
-  "goal_complete": false
+  "goal_complete": false,
+  "whole_source_gate": {
+    "source_revision": "783a624bda3d542bee09e6de554fd76b0eddaa58",
+    "root_exit_code": 0,
+    "summary": {
+      "executed": 2670,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2670,
+      "selected": 2790,
+      "skipped": 120
+    },
+    "worker_groups": 599,
+    "every_indexed_instance_matches_terminal_events": true,
+    "source_schema_test_hashes_unchanged": true,
+    "repeated_discovery_names_preserved": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "9de9de55c7731475e057d4b7af9038ef101630f8d9912f8735e5ed7a434e7f85",
+    "event_audit_sha256": "a5851e916cef601dc3710710134d1c6a44a2399268955a5cdefa0c95a94d15f1"
+  }
 }
