@@ -31235,16 +31235,22 @@ repair scope and makes no claim that the complete provided native gate passed.
   - [x] Prove MAC command dispatch and strict malformed-BOM rejection remain intact.
   - [x] Measure native import startup: one baseline/deferred pair took 7.48/2.91 seconds;
         installed bytes stayed unchanged. See [the diagnostic record](../../verification/optional-project-import-development.json).
-  - [ ] Renew exact-candidate native wheel/full qualification.
-- **Next action:** qualify a wheel built from the exact candidate in a fresh native
-  checkout, preserving the previous gate's temporary evidence. Two focused tests and
-  seven CycloneDX tests pass through `make python-check`; the fresh-process regression
-  fails against the original eager import. Catalog costs and full-gate renewal remain open.
+  - [ ] Run both maintained startup/MAC controls from the noneditable installed wheel with verified module origins and no checkout imports, then renew exact-candidate native wheel/full qualification.
+- **Next action:** Qualify macOS and Windows through the new canonical installed
+  startup/MAC hook, then complete exact-head/resulting-main full qualification and
+  final configured lifecycle/receipt renewal. Preserve the previous gate's evidence.
+- **Original focused development:** Two import controls and seven CycloneDX tests
+  pass through `make python-check`; the fresh-process regression fails against the
+  original eager import. Catalog costs and complete native renewal remain separate
+  open requirements.
 
 - **Renewal evidence retention:** Before another full Windows renewal, replace the gate's destructive startup cleanup of the legacy temporary tree with a fresh short per-invocation sibling directory. Retain failed fixtures, both per-run JUnit reports and prior timing evidence; preserve Git-discovery isolation, the complete test inventory and unchanged deadlines. Qualify repeated real child failures without deleting either earlier-run or legacy evidence. This harness repair does not complete native wheel/full qualification.
 
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
 
+
+
+- **Installed candidate renewal (2026-11-10):** Exact `2085db22b` passes both maintained source controls and the complete native Linux ARM64/Python 3.12 noneditable wheel gate. The canonical wheel runner now executes both maintained startup/MAC cases in an isolated installed interpreter, rejects skipped or changed case inventories, verifies all 500 imported framework-module origins, and joins dispatcher/MAC adapter hashes to candidate source bytes. A direct counterexample using the managed editable source environment is refused by the actual installed-origin guard. Both cases pass with zero skips in wheel `sha256:79a9859a95aa9fa3a038c346aae7b659bbe527fadd9fd93a8d08e7db6417c397`; the complete existing wheel gate also passes. [Retained installed proof](../../verification/project-command-imports-installed-linux.json) binds the source, fixture, module, wheel and original result identities. macOS/Windows candidate qualification, exact-head/main integration and final lifecycle/receipt renewal remain open. No performance speedup, full native program completion or release readiness is inferred from this Linux gate.
 
 ### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
 
@@ -34343,6 +34349,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Release target:** 1.4.0
 - **GitHub issue:** [#393](https://github.com/jordanhubbard/literate-ai/issues/393)
 
+- **Accepted design:** [ADR 0072](../decisions/0072-authored-native-graph-qualification.md) defines public authored admission, truthful versioned origin, unchanged oracle custody, complete regeneration and closed retained consumption. The directing user explicitly accepted ADR 0072 on 2026-11-10; implementation and qualification remain open.
+- **Next action:** Implement the origin-specific authored authority owner and versioned qualification contracts, then compose the public plan/apply route with the shared Standard runner and retained receiving validation. Preserve the source-derived front door and coordinate provider/inventory contributions without duplicating them.
 - **Priority:** P1 (blocking 1.4.0 release goal)
 - **Owner:** Framework authored authority and qualification admission; PROJECT Goals 1, 2, 4 and 6
 - **Direction:** Include issue #393 in 1.4.0: provide a supported public qualification route for genuinely authored native dependency graphs.
@@ -34350,7 +34358,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Draft and obtain acceptance of an authored-graph admission ADR, then implement the public front door and current authored/lock/export custody using existing qualification and retained-library owners.
+  - [x] Draft and obtain directing-user acceptance of ADR 0072 (2026-11-10).
+  - [ ] Implement truthful origin-specific authority, versioned profiles/plans/requests/results and the public acknowledged plan/apply route with current authored/lock/export custody.
+  - [ ] Compose complete shared Standard regeneration, unchanged independent-oracle custody, recoverable publication, closed capture/replay and ordinary retained Cargo receiving/admission.
 - **Evidence:**
   - [ ] Qualify a genuine three-library diamond through installed public admission, two clean all-node runs, closed relocatable replay and retained Cargo check/materialize/admit; refuse stale, substituted, missing or failed evidence and preserve source-derived admission.
 

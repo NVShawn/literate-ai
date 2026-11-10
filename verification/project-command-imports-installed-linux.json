@@ -1,0 +1,66 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "CLI-IMPORT-001",
+  "issue": 121,
+  "classification": "native Linux noneditable installed-wheel qualification; remaining native platforms and integration open",
+  "source_revision": "2085db22b9f1c518a1fed03c5be3f6d46d20d894",
+  "platform": "linux-aarch64",
+  "python": "3.12.3",
+  "wheel": {
+    "name": "literate_ai-1.4.0-py3-none-any.whl",
+    "identity": "sha256:79a9859a95aa9fa3a038c346aae7b659bbe527fadd9fd93a8d08e7db6417c397",
+    "framework_distribution": "sha256:b2b4ca398e2d898657496063d7ebbad6f143cf83b85ad6d9fea549f6cfd27b3f",
+    "canonical_gate_exit_code": 0,
+    "entire_wheel_gate_ok": true,
+    "retained_manifest_sha256": "490a56317f027565e886be811f3710114d82059d8943277d39c7f5519f31fa27",
+    "archive_bytes": 4234510,
+    "archive_and_source_manifest_independently_rehashed": true,
+    "installed_dispatcher_and_mac_bytes_match_archive": true
+  },
+  "installed_project_commands": {
+    "cases": [
+      "test_mac_command_still_rejects_strict_schema_violation",
+      "test_project_import_does_not_initialize_optional_schema_parsers"
+    ],
+    "fixture_sha256": "0f635e7b33c44c8af298663f816f04074ed835495bd465fbc36cc9e37d0ff9d4",
+    "framework_module_count": 500,
+    "installed_module_origins_verified": true,
+    "modules": {
+      "literate_ai.adapters.mac_project_contract": {
+        "relative_path": "lib/python3.12/site-packages/literate_ai/adapters/mac_project_contract.py",
+        "sha256": "3fb7589df2cb74a76b7def10abf5d4fab6b4000fb4e0f0056b9720f6fb28aed0"
+      },
+      "literate_ai.cli.project": {
+        "relative_path": "lib/python3.12/site-packages/literate_ai/cli/project.py",
+        "sha256": "2297a793e5bc61cd1ee053eb463f697a6267c0626c52b420cef94a7aba71670d"
+      }
+    },
+    "passed": 2,
+    "platform": "linux",
+    "selected": 2,
+    "skipped": 0,
+    "status": "passed"
+  },
+  "source_control_report": {
+    "executed": 2,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2,
+    "selected": 2,
+    "skipped": 0
+  },
+  "full_wheel_result_sha256": "1873472db22b93ca652b1df586144d79c2e36df0040094059e7839ed15f90ecd",
+  "scope": "Fresh interpreter refuses optional MAC/schema imports for ordinary startup; maintained MAC dispatch still rejects an invalid CycloneDX BOM. All imported framework modules remain inside the actual noneditable wheel prefix; dispatcher and MAC adapter bytes match the candidate. The complete canonical wheel gate also passes.",
+  "remaining": [
+    "Native macOS and Windows installed-wheel controls and the required full candidate qualification",
+    "Exact-head and resulting-main integration gates",
+    "Final configured lifecycle/receipt and complete release acceptance remain separately open"
+  ],
+  "goal_complete": false,
+  "release_attestation": false,
+  "counterexample": {
+    "subject": "Existing managed editable source environment, isolated child and separate ignored working directory",
+    "result": "refused by actual startup probe imported framework outside installation guard",
+    "scope": "Direct canonical wheel helper control; not an installed-wheel acceptance or release attestation"
+  }
+}
