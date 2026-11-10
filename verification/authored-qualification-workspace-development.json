@@ -1,0 +1,80 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "classification": "live authored run-directory custody on the controller host around an injected Standard execution boundary",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "adr": "0072",
+  "development_review": "https://github.com/jordanhubbard/literate-ai/pull/401",
+  "source_base": "7227348a8552f0a49381a54562b95ebd025d3789",
+  "source_sha256": {
+    "src/literate_ai/adapters/qualification.py": "f777b74af3597dae8aa10e622b118c81928af0c84784beabc4136950394ba810",
+    "src/literate_ai/adapters/qualification_workspace_namespace.py": "926026d1089923cbba49c1e8096ab5c279fdf7065293644c97fe7277debf224a",
+    "src/literate_ai/adapters/retained_project_inputs.py": "6dfdcae5128efbb822465e545a406412cc396ae523d29b7cbc74d38ecf672f24",
+    "src/literate_ai/_cache_lock.py": "f3f353261783bdee578baa1da632bae7591afbfcd6943bebe010f4e88ebc0838",
+    "src/literate_ai/_filesystem.py": "48372e2df82da255222607c4e916fb60cff11ccdcf303cfaadd4961a31e1f1c6",
+    "tests/critical/test_authored_qualification_runner_boundary.py": "3cb050abc0fd17441ce480158840b54a0e466fd41d1cfd8922e67730241f55a1"
+  },
+  "qualification_family": {
+    "executed": 80,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 80,
+    "selected": 98,
+    "skipped": 18
+  },
+  "report_sha256": "5875eb1dc9f945251db7a7eb21253d670870776089065e375f7ebf28d64a7113",
+  "runner_cases": [
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_closed_request_round_trips_without_source_history_or_authority",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_exact_current_owner_wraps_the_standard_execution_once",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_origin_dto_and_mixed_profiles_cannot_replace_the_current_owner",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_plan_origin_or_oracle_substitution_cannot_enter_standard_execution",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_private_input_drift_during_execution_cannot_return_success",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_replaced_workspace_cannot_enter_or_return_standard_execution",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_unheld_or_expired_namespace_cannot_be_restored_from_request",
+      "status": "passed"
+    },
+    {
+      "test": "tests.critical.test_authored_qualification_runner_boundary.AuthoredQualificationRunnerBoundaryTests.test_workspace_cannot_be_borrowed_prefilled_or_reused_after_failure",
+      "status": "passed"
+    }
+  ],
+  "scope": [
+    "Authored allocation retains original directory/ancestor handles before returning, and its request must join that original live namespace owner. Legacy source-derived allocation remains unchanged.",
+    "Enclose Standard execution with original run-directory currentness guards; borrowed, prefilled, reused, unheld, closed or replaced workspaces refuse.",
+    "On POSIX reuse the existing retained-input directory owner without its optional handle-free fallback. On Windows retain native handles with deletion sharing disabled and compare current names through the same native identity API.",
+    "After owner closure, a saved request or allocation identity cannot restore its handles or enter execution. Failed directories remain available for diagnostics; no cleanup or qualified publication occurs here."
+  ],
+  "boundaries": [
+    "The eight runner controls use real project/lock/oracle/namespace admission and actual controller-host filesystem replacement, while prepared recipes, driver and downstream Standard execution are fixtures.",
+    "Actual controller host is Linux. Windows native handle behavior and the integrated native/installed product flow remain unqualified.",
+    "This source family does not establish two genuine Standard model runs, closed retained replay or release acceptance."
+  ],
+  "remaining": [
+    "Compose public exact-plan acknowledged apply with genuine review and explicit host execution authorization, and close all original namespace owners successfully before positive publication.",
+    "Complete typed authored comparison/run/results, genuine two-run all-node generation and unchanged native independent acceptance for every required node, including nominal shared beta identity.",
+    "Finish recoverable publication, closed archive capture/replay after original resources retire and real retained Cargo check/materialize/admit.",
+    "Independent source review before driver pin advancement and complete integrated source/native/installed/exact-head/resulting-main qualification; retain the full 1.4 release scope."
+  ],
+  "driver_pin_advanced": false,
+  "goal_complete": false,
+  "release_attestation": false
+}

@@ -5,6 +5,7 @@ and allocator admission are real; prepared recipe, driver and Standard execution
 are explicit fixtures, so this is not complete lifecycle qualification.
 """
 
+import os
 import unittest
 from dataclasses import replace
 from types import SimpleNamespace
@@ -32,6 +33,7 @@ class AuthoredQualificationRunnerBoundaryTests(unittest.TestCase):
         self.oracles = fixture.read()
         self.plan = canonical_identity({"fixture-acknowledged-plan": True})
         self.allocator = FilesystemQualificationWorkspaceAllocator(fixture.root)
+        self.addCleanup(self.allocator.close)
         self.arguments = {
             "project": fixture.authority.project,
             "prepared": SimpleNamespace(
@@ -53,7 +55,7 @@ class AuthoredQualificationRunnerBoundaryTests(unittest.TestCase):
         }
         self.port = FilesystemStandardQualificationLifecyclePort(**self.arguments)
         run = canonical_identity({"fixture-run": 1})
-        workspace = self.allocator.allocate(run)
+        workspace = self.allocator.allocate_authored(run)
         self.request = AuthoredQualificationLifecycleRequest(
             fixture.authority.origin,
             self.plan,
@@ -155,3 +157,57 @@ class AuthoredQualificationRunnerBoundaryTests(unittest.TestCase):
                     FilesystemStandardQualificationLifecyclePort(
                         **(self.arguments | fields)
                     )
+
+    def test_replaced_workspace_cannot_enter_or_return_standard_execution(self):
+        path = self.allocator.resolve(self.request.workspace_allocation_identity)
+        retired = path.with_name("retired-" + path.name)
+        if os.name == "nt":
+            # The actual held native handles refuse renaming while custody lives.
+            with self.assertRaises(OSError):
+                path.rename(retired)
+            return
+
+        def substitute():
+            path.rename(retired)
+            path.mkdir()
+
+        def restore():
+            path.rmdir()
+            retired.rename(path)
+
+        with patch.object(self.port, "_execute_current") as run:
+            substitute()
+            try:
+                with self.assertRaises(ValueError):
+                    self.port.execute(self.request)
+                run.assert_not_called()
+            finally:
+                restore()
+
+        def late_substitute(_request):
+            substitute()
+            return "fixture-success"
+
+        with patch.object(self.port, "_execute_current", side_effect=late_substitute):
+            try:
+                with self.assertRaises(ValueError):
+                    self.port.execute(self.request)
+            finally:
+                restore()
+
+    def test_unheld_or_expired_namespace_cannot_be_restored_from_request(self):
+        other_run = canonical_identity({"unheld-run": True})
+        allocation = self.allocator.allocate(other_run)
+        unheld = replace(
+            self.request,
+            run_identity=other_run,
+            workspace_allocation_identity=allocation.allocation_identity,
+        )
+        with patch.object(self.port, "_execute_current") as run:
+            with self.assertRaisesRegex(FilesystemQualificationError, "live namespace"):
+                self.port.execute(unheld)
+            run.assert_not_called()
+            self.allocator.close()
+            with self.assertRaisesRegex(ValueError, "workspace_owner_expired"):
+                self.port.execute(self.request)
+            run.assert_not_called()

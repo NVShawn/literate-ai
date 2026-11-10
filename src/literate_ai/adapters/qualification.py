@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 import threading
 from collections.abc import Callable, Mapping, Sequence
-from contextlib import nullcontext
+from contextlib import ExitStack, contextmanager, nullcontext
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -208,6 +208,9 @@ class FilesystemQualificationWorkspaceAllocator:
         self._paths: dict[str, Path] = {}
         self._claimed: set[str] = set()
         self._claim_lock = threading.Lock()
+        self._authored_namespaces = ExitStack()
+        self._authored_guards = {}
+        self._closed = False
 
     def allocate(
         self, run_identity: ContentIdentity
@@ -236,6 +239,9 @@ class FilesystemQualificationWorkspaceAllocator:
         return QualificationWorkspaceAllocation(identity, True)
 
     def resolve(self, allocation_identity: ContentIdentity) -> Path:
+        guard = self._authored_guards.get(allocation_identity.uri)
+        if guard is not None:
+            guard()
         try:
             path = self._paths[allocation_identity.uri]
         except KeyError as exc:
@@ -244,6 +250,36 @@ class FilesystemQualificationWorkspaceAllocator:
                 "lifecycle requested an unknown qualification workspace",
             ) from exc
         return path.resolve(strict=True)
+
+    def allocate_authored(self, run_identity):
+        """Allocate and retain the actual physical namespace before returning it."""
+
+        from literate_ai.adapters.qualification_workspace_namespace import (
+            hold_qualification_workspace_namespace,
+        )
+
+        if self._closed:
+            raise ValueError("qualification.authored.workspace_owner_expired")
+        allocation = self.allocate(run_identity)
+        guard = self._authored_namespaces.enter_context(
+            hold_qualification_workspace_namespace(
+                self._paths[allocation.allocation_identity.uri]
+            )
+        )
+        self._authored_guards[allocation.allocation_identity.uri] = guard
+        return allocation
+
+    def close(self):
+        self._closed = True
+        self._authored_namespaces.close()
+
+    @contextmanager
+    def capture_authored_run(self, allocation_identity, run_identity):
+        root = self.claim_authored_run(allocation_identity, run_identity)
+        guard = self._authored_guards[allocation_identity.uri]
+        guard()
+        yield root
+        guard()
 
     def claim_authored_run(
         self, allocation_identity: ContentIdentity, run_identity: ContentIdentity
@@ -258,6 +294,13 @@ class FilesystemQualificationWorkspaceAllocator:
             }
         )
         with self._claim_lock:
+            guard = self._authored_guards.get(allocation_identity.uri)
+            if guard is None:
+                raise FilesystemQualificationError(
+                    "qualification.authored.workspace_owner_required",
+                    "an authored allocation requires its original live namespace owner",
+                )
+            guard()
             if (
                 expected != allocation_identity
                 or allocation_identity.uri in self._claimed
@@ -498,10 +541,12 @@ class FilesystemStandardQualificationLifecyclePort:
                     "authored requests cannot enter source-derived qualification",
                 )
             scope = nullcontext()
-        with scope:
+        with scope, ExitStack() as namespaces:
             if self.authored_oracles is not None:
-                self.workspaces.claim_authored_run(
-                    request.workspace_allocation_identity, request.run_identity
+                namespaces.enter_context(
+                    self.workspaces.capture_authored_run(
+                        request.workspace_allocation_identity, request.run_identity
+                    )
                 )
             result = self._execute_current(request)
         self.require_current_authority()
