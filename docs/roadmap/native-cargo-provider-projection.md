@@ -552,3 +552,24 @@ controls pass without skips. These facts qualify only that private preparation
 subject. The canonical successor still requires its own exact full source gates,
 genuine model-backed two-clean generation, sealed relocation and real public
 retained check/materialize/admit. No downstream pin or source retirement follows.
+
+
+## Structural SDK projection compatibility correction
+
+The exact `7fab630a` full native macOS source aggregate failed in the existing
+linked-provider SDK E2E test: extracting the binding projection had added a
+nominal `ExecutableComponentEdge` restriction absent from the prior inline
+implementation. The SDK supplies structural generation-edge values. The failed
+aggregate remains failed, with unchanged source/tool closure and complete raw
+records retained separately from its successor.
+
+Restore only the projection's prior structural edge behavior. It still requires
+an exact provider, target and public interface before constructing binding values;
+those values grant no execution or admission. Archived replay continues to require
+the independently supplied typed current lock, exact current command membership,
+consumer-specific generation edges, current exports and native input validation.
+The corrected production helper passes the actual SDK E2E, the 45 native Cargo
+controls and both closed all-node archive replays with fifteen authority/material
+refusals. Formatting-only changes to the added tests receive their own focused
+successor run. A fresh full maintained successor aggregate remains required; no
+model generation, importer admission, source retirement or downstream pin follows.

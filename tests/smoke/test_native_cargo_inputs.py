@@ -6,8 +6,13 @@ import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 from literate_ai.adapters.lifecycle.native_cargo_inputs import bind_native_cargo_inputs
+from literate_ai.adapters.lifecycle.standard_local import (
+    LocalStandardLifecycleError,
+    project_library_consumer_bindings,
+)
 from literate_ai.contracts import LibraryConsumerBinding, canonical_identity
 from literate_ai.contracts.native_cargo_provider_graph import (
     NativeCargoProviderGraphError,
@@ -51,6 +56,47 @@ class NativeCargoInputsTests(unittest.TestCase):
         )
         args.update(changes)
         return bind_native_cargo_inputs(**args)
+
+    def project(self, **changes):
+        args = dict(
+            consumer_revision=self.consumer,
+            direct_generation_edges=(
+                SimpleNamespace(
+                    provider_revision=self.binding.provider_component_revision,
+                    capability=self.binding.capability,
+                    public_interface_identity=self.binding.interface_identity,
+                ),
+            ),
+            target_identity=self.artifact.target_identity,
+            providers=(self.artifact,),
+            contracts=self.ports.contracts,
+        )
+        args.update(changes)
+        return project_library_consumer_bindings(**args)
+
+    def test_structural_sdk_generation_edge_projects_exact_binding(self):
+        self.assertEqual(self.project(), (self.binding,))
+        graph, _ = self.bind(current_bindings=self.project())
+        self.assertEqual(graph.edges[0].consumer_revision, self.consumer)
+
+    def test_structural_projection_preserves_target_edge_and_interface_refusals(self):
+        wrong = canonical_identity({"wrong": "structural-edge"})
+        with self.assertRaisesRegex(
+            LocalStandardLifecycleError, "exact consumer target"
+        ):
+            self.project(target_identity=wrong)
+        with self.assertRaisesRegex(LocalStandardLifecycleError, "direct generation"):
+            self.project(direct_generation_edges=())
+        with self.assertRaisesRegex(LocalStandardLifecycleError, "exact consumer edge"):
+            self.project(
+                direct_generation_edges=(
+                    SimpleNamespace(
+                        provider_revision=self.binding.provider_component_revision,
+                        capability=self.binding.capability,
+                        public_interface_identity=wrong,
+                    ),
+                )
+            )
 
     def test_exact_export_contract_blob_and_library_binding_join(self):
         graph, sources = self.bind()

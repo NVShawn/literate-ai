@@ -358,18 +358,6 @@ def project_library_consumer_bindings(
     *, consumer_revision, direct_generation_edges, target_identity, providers, contracts
 ):
     """Project exact caller-owned generation edges; values grant no admission."""
-    from literate_ai.contracts.capabilities import DependencyKind
-    from literate_ai.contracts.executable_components import ExecutableComponentEdge
-
-    if type(direct_generation_edges) is not tuple or any(
-        type(edge) is not ExecutableComponentEdge
-        or edge.consumer_revision != consumer_revision
-        or edge.kind != DependencyKind.GENERATION
-        for edge in direct_generation_edges
-    ):
-        raise LocalStandardLifecycleError(
-            "library import generation edges differ from the exact consumer"
-        )
     library_bindings: list[LibraryConsumerBinding] = []
     for artifact in providers:
         provider_contract = contracts.get(artifact.component_revision.uri)
