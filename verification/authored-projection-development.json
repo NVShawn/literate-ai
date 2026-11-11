@@ -26,11 +26,59 @@
     "scope": "Before original-object guard and portable interpreter-copy refinement; current 12 projection controls pass afterward"
   },
   "authored_family": {
-    "state": "pending",
-    "expected_selected": 107
+    "state": "pass",
+    "selected": 107,
+    "passed": 107,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Every authored outcome selected and reconciled in the complete source report",
+    "full_source_report_sha256": "d6893765fc3ad3e1fa767ba32b5582dfaff7d8974636243a5d2c5887aa361e3a"
   },
   "current_full_source_and_wheel": {
-    "state": "pending"
+    "state": "pass",
+    "subject": "3b0cefd25cc43404e0db8f5f31a9faefd7b499e5",
+    "interpreter": {
+      "version": "3.12.3",
+      "implementation": "cpython",
+      "architecture": "aarch64",
+      "platform": "linux"
+    },
+    "source": {
+      "summary": {
+        "executed": 2796,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2796,
+        "selected": 2896,
+        "skipped": 100
+      },
+      "worker_groups": 613,
+      "every_selected_instance_reconciled": true,
+      "report_sha256": "d6893765fc3ad3e1fa767ba32b5582dfaff7d8974636243a5d2c5887aa361e3a"
+    },
+    "wheel": {
+      "wheel_identity": "sha256:f5ca8b53e4dd3cb49b1895641bdcbeb18d7a903d0ea6ccc8ca88b52091593210",
+      "retained_manifest": "_build/ci-wheels/run-3c0hl9rt/manifest.json",
+      "standard_binding": {
+        "distribution": "sha256:3810330d7cfd45ba4f87312255a5999b4147863bdffb5724c937f7caed89c477",
+        "members": 1401,
+        "policy": "sha256:a5ca0d6d13daff0199f218c5e4af723a2cec87b927e75dd3a731c511b5d85ac7"
+      }
+    },
+    "retained_artifact_rehash_passed": true,
+    "offline_workers": {
+      "worker_runtime": {
+        "installed_distributions": 38,
+        "dependency_closure_identity": "sha256:50031aac4b2e9109cc38db993a93ee4e41ab5a7202bd02dd15ab143d3d6f8ace",
+        "framework_distribution": "sha256:3810330d7cfd45ba4f87312255a5999b4147863bdffb5724c937f7caed89c477"
+      },
+      "uv_tool_worker_runtime": {
+        "installed_distributions": 38,
+        "dependency_closure_identity": "sha256:50031aac4b2e9109cc38db993a93ee4e41ab5a7202bd02dd15ab143d3d6f8ace",
+        "framework_distribution": "sha256:3810330d7cfd45ba4f87312255a5999b4147863bdffb5724c937f7caed89c477"
+      }
+    },
+    "scope": "Complete ordinary source and noneditable wheel/worker gates; not genuine authored model-run, public apply, full public publication/receiving integration or retained receiving acceptance"
   },
   "driver_review": {
     "schema": "literate-ai/lifecycle-driver-review@1",
@@ -100,5 +148,13 @@
       "Resource retirement and closed native replay",
       "Independent driver review and exact-head/resulting-main release acceptance"
     ]
+  },
+  "documentation_and_export": {
+    "state": "pass",
+    "mermaid_diagrams": 181,
+    "markdown_files": 1950,
+    "openspec_changes_passed": 4,
+    "public_export": "pass",
+    "canonical_project_validation_before_full": "pass"
   }
 }
