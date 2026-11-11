@@ -1,0 +1,41 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "WHEEL-PYTHON-BINDING-001",
+  "classification": "installed fixture repair verified; source integration and confirming CI pending",
+  "installed_framework_revision": "e7a96c26982aae9639cfa1677e0a74a293279ede",
+  "distribution": "sha256:8045927725ea1f07300d83270363dd4fef50454b88eb0215f1982875b2e65d77",
+  "installed_python": "3.12.3",
+  "original_path_native_python": "3.15.2",
+  "original_expected_pyc_magic": "cb0d0d0a",
+  "original_artifact_pyc_magic": "520e0d0a",
+  "original_failure": "installed exact selection exported different bytes",
+  "original_failure_log_sha256": "27a508c79245473306d8ba762c5ea4cba912732d0d1799eb91f1ac060e779e7e",
+  "fixed_fixture_sha256": "9efe7751baf84c8b7c805fd185dc00c867d5a90829e8d490e0791cb13b066527",
+  "installed_wheel_sha256": "007859931035cd784f0e5f1471ca3c06c78f39fa84e6fa1b229db278c1f4552c",
+  "installed_origin_and_wheel_root_bytes_verified": true,
+  "original_path_unchanged": true,
+  "fixed_result": {
+    "distribution": "sha256:8045927725ea1f07300d83270363dd4fef50454b88eb0215f1982875b2e65d77",
+    "scenarios": {
+      "default": {
+        "admissions": 2,
+        "exact_builds": 2,
+        "history_unchanged": true,
+        "runs": 2
+      },
+      "project-relative": {
+        "admissions": 2,
+        "exact_builds": 2,
+        "history_unchanged": true,
+        "runs": 2
+      }
+    }
+  },
+  "fixed_stdout_sha256": "62c5364abd5ce045d4160cd25ef7e0cc5fd6ebdbf49822e71966d5b6d63350b2",
+  "related_smoke_methods": {
+    "passed": 7,
+    "skipped": 0
+  },
+  "full_wheel_gate": "separate run remains pending",
+  "preserved_setup_failure": "initial direct fixture invocation lacked its output parent; repeated with the required existing parent and a fresh target"
+}

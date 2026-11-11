@@ -115,6 +115,12 @@ development (2026-09-10):
 
 ## Current work
 
+WHEEL-PYTHON-BINDING-001 closes a qualification-fixture gap under Goals 1 and 4:
+installed continuation must bind its bytecode oracle and native build to the same
+explicit interpreter even when PATH contains another supported Python. Mixed-runtime
+reproduction and passing installed repair are retained; integration acceptance remains
+open.
+
 CUDA-SIGNAL-001 records issue #396 as blocking 1.4.0 work under Goals 1, 2, 4
 and 5. Inert source inventory must preserve original bytes and propose CUDA only
 from CUDA-specific evidence; vendor attribution alone must not add an accelerator
