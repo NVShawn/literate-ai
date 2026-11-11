@@ -34382,3 +34382,22 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
+
+### [ ] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
+
+- **Release target:** 1.4.0
+
+- **Priority:** P1
+- **Owner:** Installed-wheel continuation qualification fixture
+- **Direction:** Repair the mixed-interpreter failure observed during 1.4 installed-wheel qualification without weakening byte-exact artifact comparison.
+- **Conclusion:** The fixture computes expected bytecode with its installed Python, but sanitized subprocess policy removes PYTHON and native discovery may select another supported interpreter from PATH. Explicitly select the fixture interpreter for its own native builds; keep the exact output oracle, immutable history, public CLI and installed-origin controls unchanged.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Select the installed fixture interpreter through the public PYTHON operator binding before either continuation scenario.
+- **Evidence:**
+  - [ ] Confirm exact-head and resulting-main integration before closing this goal.
+  - [x] Reproduce differing expected/artifact bytecode on the original mixed 3.12/3.15 setup; pass both installed continuation scenarios with the same original PATH after the fix and verify wheel/module identities.
+
+- **Installed evidence:** [Retained repair proof](../../verification/wheel-continuation-python-binding.json) binds the original Python 3.12 oracle (`cb0d0d0a`) and discovered 3.15 artifact (`520e0d0a`) mismatch. With the unchanged original PATH, the repaired fixture passes both default and project-relative cache scenarios against the same noneditable framework: four distinct admissions, four exact builds, four public runs, immutable historical cache bytes, and unchanged distribution identity. Seven maintained wheel-smoke methods pass without skips. The original failure and one missing-output-parent setup error remain preserved.
+- **Next action:** Land through confirming CI; the separate whole-wheel run and consuming release lifecycle remain required and are not claimed by this fixture result.

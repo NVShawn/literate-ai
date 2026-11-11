@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Installed continuation qualification binds native builds to its installed Python,
+  preserving exact bytecode checks when PATH contains a different supported runtime.
+
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 
