@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Wheel qualification accepts a complete reviewed dependency wheel directory for
+  offline binary-only installs and both worker bootstrap paths, preserving pinned
+  dependencies on targets without published binary wheels (#418).
+
+- Capability deadline qualification observes actual original child cleanup, including
+  expiry before a receiver writes its PID file, without extending caller budgets (#420).
+
 - Standalone source promotion can explicitly select root repository lineage with
   `spec accept --project-target ... --root-project`; default inheritance and
   retained-host integration remain unchanged (#402).
@@ -44,7 +51,8 @@
 - Source promotion exposes explicit `authorized-policy` reviews and a separate
   operator acceptance opt-in while preserving human-only defaults and signed
   source/graph/authority binding. These choices grant intent review, not host
-  execution or regenerative qualification.
+  execution or regenerative qualification. Complete source/wheel, installed policy-only
+  console and exact review/resulting-main CI now qualify this CLI boundary (#358).
 
 
 - Generated projects receive the same release-project collateral checklist as the

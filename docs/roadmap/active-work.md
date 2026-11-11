@@ -33681,6 +33681,8 @@ independent review and the complete combined gate from test one.
   - [ ] Try both applicable connector scopes, distinguish authentication failures from absence, and qualify jump/scheduler routing, quoting, configuration drift, transfer corruption/collision, output limits, deadlines and descendant cleanup.
   - [ ] Require complete v1 compatibility, installed non-editable and integrated exact-head checks; obtain native Windows evidence before claiming a Windows connector supported.
 
+- **Capability deadline qualification repair:** Included [#420](https://github.com/jordanhubbard/literate-ai/issues/420) records the exact PR417 macOS/Python3.14 failure: the one-second case incorrectly requires a receiver PID file even if caller expiry precedes launch or the first Python write. Preserve the original deadline and real admission/runner operations, capture actual original Popen handles through the existing process-factory seam, require every launched child to retire, and accept no launch only for typed prelaunch expiry. Keep the long real receiver success and exact whole/integrated gates; the original failed CI remains failed. The [controlled native comparison and current source record](../../verification/capability-deadline-startup-linux.json) reproduces the predecessor assertion and passes the correction without bypassing fresh identity measurement or the actual runner. Current source `fb4d80ac9` passes 2,683 cases with 100 declared skips and no failures; every selected instance reconciles across all 599 worker groups. The original macOS failure is retained; exact confirming native CI remains required.
+
 ### [ ] RETAINED-TREE-EXPLORER-001 — Publish hierarchical retained-tree HTML information cards
 
 - **Publication journal work (in progress):** Before initial output mutation, retain a private, bounded, fsynced transaction intent outside source/output. Append exclusive hash-linked records for the actual live output reservation, staged generation and verified index commit; charge fixed journal memory/storage reservations through the existing output budget owner. Preserve partial records, interrupted attempts and foreign changes. Journal contents remain descriptive and cannot reopen an output writer, admit source, authorize cleanup or substitute for the separately reviewed recovery plan. Complete interruption recovery, rerender, per-unit joins and installed/native/browser scale acceptance remain required and open.
@@ -34218,7 +34220,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 - **Shared 1.4 staging qualification (in progress):** Normal history combines PR #353's Go/import/inventory/Git fixes, PR #354's CPU source and installed acceptance hook, current contributor PR #351 history, PR #355's initial publication journal and PR #357's compatible-floor bootstrap fix. Exact software source `c5dc8f25a` passes the complete Linux gate (2,758 selected; 2,639 passed; 119 skipped; zero failed) with all 596 groups independently reconciled, and its canonical installed-wheel checks pass. All 60 original goals remain retained. The scope audit then identifies the CPU item's missing exact release target; restore `1.4.0` and include newly reported #358 under its active contribution claim, bringing the current manifest to 61 goals. These metadata-only changes do not relabel the earlier source-bound software results. Require current scope/documentation validation and the full remote matrix at the corrected candidate before landing; independent review, post-merge main, full HTML recovery/rerender and all other unchecked goals remain open.
 
-### [ ] REVIEW-AUTHORITY-CLI-001 — Expose truthful policy review authority with explicit acceptance opt-in
+### [x] REVIEW-AUTHORITY-CLI-001 — Expose truthful policy review authority with explicit acceptance opt-in
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#358](https://github.com/jordanhubbard/literate-ai/issues/358)
@@ -34233,21 +34235,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Implementation:**
   - [x] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
 - **Evidence:**
-  - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
+  - [x] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
 
 
 - **Contributor reconciliation:** Preserve PR360 `382cf69c` and its original REVIEW-AUTHORITY-001 intake as this canonical REVIEW-AUTHORITY-CLI-001 goal. The contributor records three public CLI controls and nine existing inverse controls with zero skips at their original subject; an earlier borrowed-editable origin refusal stays historical. This integration preserves the exact runtime contribution through an ordinary merge with the reviewed transport/error batch; no contributor checkout or branch is edited.
 - **Current predecessor control:** In a fresh task-owned Make environment, the three maintained authority controls select one failing first method before fail-fast: the old CLI rejects `--authority authorized-policy` as `cli.usage`. No origin guard was relaxed; later selected methods were not executed and are not counted as failed.
-- **Next action:** Complete independent composition review and current focused/source/noneditable installed qualification, then exact-head and resulting-main gates. Keep actual qualification fixtures policy-labeled and retain human defaults only as contract-test data.
+- **Completion:** Independent composition review, complete source/wheel qualification, installed policy-only public-console journey and exact-head/resulting-main gates are complete. Actual qualification fixtures remain policy-labeled; human defaults remain contract-test data only.
 
 
-- **Independent current composition review:** [Source composition record](../../verification/policy-review-source-composition.json) confirms every added/removed runtime line exactly matches NVShawn's contributed patch, combined with unchanged reviewed root/transport/error behavior. All three maintained public CLI controls pass in the current task-owned Make environment, including signing/identity, default denial, separate opt-in and tampering refusal. Supported driver renewal follows this non-author review; full and installed qualification remain open.
+- **Independent current composition review:** [Source composition record](../../verification/policy-review-source-composition.json) confirms every added/removed runtime line exactly matches NVShawn's contributed patch, combined with unchanged reviewed root/transport/error behavior. All three maintained public CLI controls pass in the current task-owned Make environment, including signing/identity, default denial, separate opt-in and tampering refusal. Supported driver renewal follows this non-author review; full and installed qualification subsequently passed as recorded below.
 
 
-- **Current installed/public qualification:** [Exact Linux integration evidence](../../verification/policy-review-integration-linux.json) binds `309f850b1`, 2,783 selected source cases (2,683 passed, 100 declared skips, no failed/known-failed), every terminal event across 599 worker groups and the complete noneditable wheel gate. All three maintained installed authority controls pass without skips; all 488 framework-module origins are noneditable and the CLI bytes match source/archive. A separate actual installed-console journey signs a policy-labeled review, refuses acceptance without opt-in before target effects, accepts only after explicit opt-in, and rejects authority tampering without changing source, trust inputs or the successful target. Stored review data matches the exact signed decision; no actual human approval or host application execution is claimed. Independent review/driver renewal and fast/docs gates pass; exact-head/resulting-main integration remains open.
+- **Current installed/public qualification:** [Exact Linux integration evidence](../../verification/policy-review-integration-linux.json) binds `309f850b1`, 2,783 selected source cases (2,683 passed, 100 declared skips, no failed/known-failed), every terminal event across 599 worker groups and the complete noneditable wheel gate. All three maintained installed authority controls pass without skips; all 488 framework-module origins are noneditable and the CLI bytes match source/archive. A separate actual installed-console journey signs a policy-labeled review, refuses acceptance without opt-in before target effects, accepts only after explicit opt-in, and rejects authority tampering without changing source, trust inputs or the successful target. Stored review data matches the exact signed decision; no actual human approval or host application execution is claimed. Independent review/driver renewal and fast/docs gates pass; exact-head/resulting-main integration subsequently passed as recorded below.
 
 
-- **Open pull-request landing queue:** [PR #415](https://github.com/jordanhubbard/literate-ai/pull/415) preserves PR360 and the now-landed PR411 ancestry. Merge `29922e49c` of exact main `25bf15477` changes no files relative to its first parent `244b418b2`. Qualified source, test and script bytes remain identical to runtime subject `309f850b1`; subsequent changes record qualification and ancestry only. Confirm current-head full remote CI before landing.
+- **Verified landing:** [Resulting-main record](../../verification/policy-review-resulting-main.json) binds PR #415 review head `6b9e69d33` and resulting main `69cb8eb03` to all 27 successful jobs in each full remote matrix. Source, scripts, tests and schemas are byte-identical to qualified runtime `309f850b1`. Issue #358 is closed with the exact evidence. This completes this CLI goal only; the full 1.4 release and all other unchecked goals remain open.
 
 ### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
 
@@ -34292,7 +34294,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Retain the original finite-file-limit failure and prove supported CLI configuration, native private state routing, process lifetime and unchanged parent environment.
   - [ ] Pass focused and full source gates, independent review before driver repin, installed/native finite-profile generation with an explicit operator model, and current-head integration gates.
 
-### [ ] REMOTE-FILE-CEILING-001 — Preserve inherited file-size ceilings in remote evidence transport
+### [x] REMOTE-FILE-CEILING-001 — Preserve inherited file-size ceilings in remote evidence transport
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#372](https://github.com/jordanhubbard/literate-ai/issues/372)
@@ -34300,18 +34302,18 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Priority:** P1
 - **Owner:** Framework core remote transport and native resource boundary
 - **Direction:** Fix issue #372, which blocks included Cargo qualification #347: an evidence allowance must never raise a caller file-size ceiling.
-- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. The pre-existing repair is integrated with current main; independent review, installed/native and forge qualification remain pending.
+- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. The pre-existing repair is integrated with current main; independent review, installed/native controls and exact-head/resulting-main qualification are recorded below.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
 - **Evidence:**
   - [x] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling. Both maintained controls also pass without skips from the qualified noneditable Linux wheel.
-  - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
+  - [x] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
 
 
 - **Current-main source qualification (2026-11-10):** The unchanged contributor repair applied to main base `8b83f5b96` passes a fresh native Linux ARM64/Python 3.12 gate: 2,777 selected, 2,657 passed, 120 declared skips, zero failed or known failed. Every selected instance matches the raw terminal events across all 598 completed worker groups, including occurrence-qualified repeated discovery names. Both native ceiling controls and all six unchanged transport controls pass without skips. The initial invalid-system-Bazel failure remains preserved; the successful run uses the existing digest-verified toolchain. Normal integration retains main `8489a4c4b` and all 68 release goals. [Sanitized source evidence](../../verification/file-ceiling-source-current-main.json) retains source and original report identities. This is source-development evidence; independent review before driver repin, noneditable installed/native controls and exact-head/resulting-main CI remain open.
-- **Next action:** Complete confirming CI on the reviewed candidate and resulting-main integration. The whole Linux installed gate and both explicit installed ceiling controls pass; independent source review and the supported lifecycle-driver renewal are now recorded below.
+- **Current status:** Functional integration gates are complete in the closure below. The consuming release lifecycle/receipt and full remaining 1.4 scope stay required.
 
 
 - **Whole installed candidate gate (2026-11-10):** Exact `b23ae877a` passes the complete canonical native Linux ARM64/Python 3.12 noneditable wheel gate. Its retained archive independently rehashes, and the packaged remote-transport module matches the source-qualified repair exactly. This proves the whole installed candidate gate, not yet direct execution of the explicit inherited-ceiling fixture from that installation. Specific installed controls, independent review before driver repin and exact-head/resulting-main CI remain required; no old pin or source-only outcome is promoted into approval.
@@ -34320,6 +34322,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Explicit installed ceiling controls (2026-11-10):** Both unchanged native cases pass without skips in a fresh environment created and verified by the canonical wheel helpers, using the exact archive from the completed whole wheel gate. All 241 imported framework modules resolve inside the noneditable prefix; the loaded limiter bytes match the source-qualified module and retained wheel. The maintained tests perform real nested-process RLIMIT_FSIZE controls and the complete finite-parent command-route custody scenario. Runtime identity is checked before and after, and both fixture files and archive bytes remain unchanged. This is native Linux installed acceptance, not external-worker qualification or independent source review; final integration and configured lifecycle/receipt remain open.
 
 - **Independent limiter review (2026-11-10):** The release controller, which did not author the limiter repair, reviewed the sole changed TCB file against main. Applying the same positive cap independently to inherited soft and hard limits preserves `soft <= hard`, never raises either finite limit, preserves zero, and replaces infinity with the requested cap. The fresh trusted process, isolated interpreter, deadline, process-tree cleanup and transport custody remain unchanged. After a normal merge of main `69bb7b92a`, both real native ceiling controls and all six unchanged transport controls pass again through the maintained Make harness without skips. The earlier bare-system-Python attempt could not import the declared CycloneDX dependency; the canonical managed environment resolves that setup failure. The supported review command renews the driver identity to `sha256:26a4bf2f555acf1740f1d7c525f48e895ca5b0b0043f39d0c01de76d6b6a50f0`, followed by documentation-authority renewal. The original failed CI run `42892873778` remains preserved; confirming CI and resulting-main acceptance are still required.
+
+- **Resulting-main closure (2026-11-11):** PR411 lands the reviewed composition at `25bf154778bb163e7447a1191acffe92e08acbe4`. All 27 full CI jobs pass both at exact review head `d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2` and resulting main. Source, scripts, tests and schemas are byte-identical from the fully source/wheel-qualified runtime `c7a8d308bb7b1eff9eb3900c202a265b50a563d9`; production modules match their reviewed/installed bytes, and the repository-side continuation fixture matches its qualified source. [Terminal integration evidence](../../verification/transport-error-resulting-main.json) binds the native source and whole-wheel gates, 26 installed controls and actual terminal job records. Earlier pending statements above are historical checkpoints superseded by this closure. This completes only this functional goal; native-result repair, FreeBSD product evidence, the consuming release lifecycle and every other remaining 1.4 goal stay required.
 
 ### [ ] QUALIFICATION-DIAGNOSTICS-001 — Retain original bounded observations when native qualification fails
 
@@ -34438,7 +34442,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [x] Pass exact resulting-main integration and record its outcome.
 
-### [ ] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
+### [x] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
 
 - **Release target:** 1.4.0
 
@@ -34451,13 +34455,15 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Implementation:**
   - [x] Select the installed fixture interpreter through the public PYTHON operator binding before either continuation scenario.
 - **Evidence:**
-  - [ ] Confirm exact-head and resulting-main integration before closing this goal.
+  - [x] Confirm exact-head and resulting-main integration before closing this goal.
   - [x] Reproduce differing expected/artifact bytecode on the original mixed 3.12/3.15 setup; pass both installed continuation scenarios with the same original PATH after the fix and verify wheel/module identities.
 
 - **Installed evidence:** [Retained repair proof](../../verification/wheel-continuation-python-binding.json) binds the original Python 3.12 oracle (`cb0d0d0a`) and discovered 3.15 artifact (`520e0d0a`) mismatch. With the unchanged original PATH, the repaired fixture passes both default and project-relative cache scenarios against the same noneditable framework: four distinct admissions, four exact builds, four public runs, immutable historical cache bytes, and unchanged distribution identity. Seven maintained wheel-smoke methods pass without skips. The original failure and one missing-output-parent setup error remain preserved.
-- **Next action:** Land through confirming CI; the separate whole-wheel run and consuming release lifecycle remain required and are not claimed by this fixture result.
+- **Current status:** The whole-wheel gate and exact-head/resulting-main integration now pass as recorded below. The consuming release lifecycle remains a separate required release gate.
 
-### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+- **Resulting-main closure (2026-11-11):** PR411 lands the reviewed composition at `25bf154778bb163e7447a1191acffe92e08acbe4`. All 27 full CI jobs pass both at exact review head `d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2` and resulting main. Source, scripts, tests and schemas are byte-identical from the fully source/wheel-qualified runtime `c7a8d308bb7b1eff9eb3900c202a265b50a563d9`; production modules match their reviewed/installed bytes, and the repository-side continuation fixture matches its qualified source. [Terminal integration evidence](../../verification/transport-error-resulting-main.json) binds the native source and whole-wheel gates, 26 installed controls and actual terminal job records. Earlier pending statements above are historical checkpoints superseded by this closure. This completes only this functional goal; native-result repair, FreeBSD product evidence, the consuming release lifecycle and every other remaining 1.4 goal stay required.
+
+### [x] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
@@ -34465,16 +34471,18 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Priority:** P1
 - **Owner:** Framework qualification CLI; PROJECT Goals 1 and 4
 - **Direction:** Include issue 404: typed independent native acceptance rejection must not become a retained archive publication error.
-- **Conclusion:** PR406 preserves known ComponentAcceptanceError codes and messages while leaving actual archive I/O failure handling unchanged. Admission, source custody and repair eligibility remain unchanged; contributor full/installed and resulting-main qualification remain open.
+- **Conclusion:** PR406 preserves known ComponentAcceptanceError codes and messages while leaving actual archive I/O failure handling unchanged. Admission, source custody and repair eligibility remain unchanged; the complete source/installed and resulting-main qualification are recorded below.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Handle typed independent acceptance rejection separately from actual archive publication failures.
-  - [ ] Review and integrate PR406 without changing native acceptance or archive authority.
+  - [x] Review and integrate PR406 without changing native acceptance or archive authority.
 - **Evidence:**
-  - [ ] Pass maintained public qualification CLI controls with and without retention, actual archive write failure, whole candidate source/installed checks and exact-head/resulting-main integration.
+  - [x] Pass maintained public qualification CLI controls with and without retention, actual archive write failure, whole candidate source/installed checks and exact-head/resulting-main integration.
 
 - **QUALIFICATION-ERROR-001 review progress:** Independent release-controller source review approves PR406 `a5fc16c3f`: only the typed acceptance failure mapping changes. The maintained public CLI module passes all 16 methods from source and again from its exact noneditable Linux wheel, with zero skips, all 544 imported framework-module origins verified, and the CLI module matched to candidate bytes. [Installed diagnostic proof](../../verification/qualification-error-installed-linux.json) retains the exact wheel and module identities. Full contributor/installed and exact-main qualification remain open; no native-result repair is inferred.
+
+- **Resulting-main closure (2026-11-11):** PR411 lands the reviewed composition at `25bf154778bb163e7447a1191acffe92e08acbe4`. All 27 full CI jobs pass both at exact review head `d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2` and resulting main. Source, scripts, tests and schemas are byte-identical from the fully source/wheel-qualified runtime `c7a8d308bb7b1eff9eb3900c202a265b50a563d9`; production modules match their reviewed/installed bytes, and the repository-side continuation fixture matches its qualified source. [Terminal integration evidence](../../verification/transport-error-resulting-main.json) binds the native source and whole-wheel gates, 26 installed controls and actual terminal job records. Earlier pending statements above are historical checkpoints superseded by this closure. This completes only this functional goal; native-result repair, FreeBSD product evidence, the consuming release lifecycle and every other remaining 1.4 goal stay required.
 
 ### [ ] NATIVE-ACCEPTANCE-REPAIR-001 — Bind generated native-library acceptance rejection to bounded candidate repair
 
@@ -34492,3 +34500,28 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Implement only the reviewed generated native-library root route with sanitized feedback, preserved rejected evidence and the existing shared finite retry budget.
 - **Evidence:**
   - [ ] Prove same-authority fresh-request/workspace repair, complete validation/build/test/execution/acceptance replay, retry exhaustion, terminal custody/original-source failures and no admission on failure through installed public qualification.
+
+### [ ] PYTHON-BINARY-CLOSURE-001 — Qualify binary framework dependency closure for every supported Python runtime
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#418](https://github.com/jordanhubbard/literate-ai/issues/418)
+
+- **Priority:** P1
+- **Owner:** Framework Python support policy and remote worker bootstrap
+- **Direction:** Reconcile the documented Python 3.11-or-newer runtime with the actual native Python 3.15 pinned binary closure failure before 1.4 publication.
+- **Conclusion:** The native Python 3.15 whole-wheel gate fails obtaining pinned PyYAML 6.0.3 while Python 3.12 succeeds separately. Preserve both exact results and determine the supported policy; source controls alone cannot establish a usable offline installed-worker closure. No dependency pin, binary-only custody or supported runtime boundary may be silently weakened.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Reconcile package, installer, bootstrap, release profile and documentation support authority; implement an explicit reviewed dependency-wheel input for the complete gate, preserving existing offline export authority and dependency pins.
+- **Evidence:**
+  - [ ] Preserve the original native Python 3.15 failure and pass the complete canonical whole-wheel and offline installed-worker paths for the affected supported runtime/target, minimum-runtime compatibility, meaningful refusals and exact integration gates.
+
+- **Retained failure:** The actual canonical whole-wheel run at software `77353a8d6` under native Linux ARM64/Python 3.15.2 fails with `worker.wheelhouse_download_failed`; the isolated binary download exits1 with `No matching distribution found for PyYAML==6.0.3`. All 80 focused source controls pass on that interpreter. The separately selected Python 3.12.3 whole-wheel gate succeeds with archive `eb39d3f57b828a729e758fd22eaf4453a0a9c4b1c262dfd5e16dea9b5a9c3551`. Neither the source controls nor the other interpreter qualify the failed Python 3.15 closure.
+- **Selected repair:** Preserve the documented Python floor and exact dependency pins. Use the existing reviewed local-wheel export boundary for targets without published binaries; expose that same complete offline input in `make wheel-check` for all dependency installations and both ordinary/uv worker export/bootstrap paths. Snapshot and validate before installation and retain exact input identities. No worker source build, automatic interpreter fallback or source-build fallback is added.
+- **Current development proof:** The unchanged official PyYAML 6.0.3 sdist rehashes to `d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f`. Two fresh upstream pure Python builds with pinned setuptools 83.0.0 are byte-identical; all 1,283 upstream legacy pure Python tests pass from its noneditable wheel on Python 3.15.2. Its source modules, RECORD and license match the reviewed source. Existing canonical offline export and bootstrap succeed with all 37 distributions and unchanged framework identity. These are dependency construction/bootstrap observations, not the still-required complete current wheel gate or release acceptance.
+- **Next action:** Qualify the new complete-wheel input projection, negative custody checks, complete source/wheel and exact integrated gates. Preserve the original unconfigured Python 3.15 failure.
+
+- **Dependency development evidence:** [Source/build/installed and canonical offline bootstrap record](../../verification/python315-worker-dependency-development.json) retains exact artifact identities. Its existing framework artifact is bound to `7078bc96b`; it does not qualify the later new wheel-gate projection or a final release candidate.
+
+- **Current complete local qualification:** [Minimum/current Python source and whole-wheel record](../../verification/python-worker-wheel-inputs-linux.json) binds software `c733d96f80cd80b802e7aa4387cab2d7740e219a`. Both native Python 3.11.14 and 3.15.2 select 2,783 source cases: 2,683 pass, 100 retain declared skips, and all 599 raw groups reconcile with no failed or known-failed cases. Both complete noneditable wheel gates pass with the same framework distribution identity and exact reviewed pure PyYAML bytes; ordinary and uv worker paths install respectively 38 and 37 distributions with matching framework identities. Real empty/redirected input refusals precede installation. The earlier source-prefix failure and unconfigured binary-export failure remain preserved separately. Parent completion and issue closure await independent/exact integrated acceptance; no release acceptance is claimed.
