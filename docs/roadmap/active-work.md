@@ -32228,6 +32228,11 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
 
+- **Transport/error integration in progress:** Preserve reviewed PR400 and PR406 runtime bytes and PR407 installed continuation fixture through ordinary histories in [PR #411](https://github.com/jordanhubbard/literate-ai/pull/411) on `integrate/14-transport-errors`, based on landed root-promotion main `274b35f9d`. [Independent composition review](../../verification/transport-error-integration-review.json) confirms only the contributed remote runner and typed error mapping differ from main, both byte-identical to their reviewed historical source. Require fresh complete source/noneditable wheel, installed controls and exact-head/resulting-main gates. CUDA attribution repair remains required separately in draft PR410 with independent source review pending; no release goal is deferred.
+
+- **Current Linux batch qualification:** [Sanitized source/installed proof](../../verification/transport-error-integration-linux.json) binds source `c7a8d308b`, 2,780 selected cases (2,680 passed, 100 declared skips, no failed/known-failed), all raw worker terminal events, the complete noneditable wheel gate and 26 maintained installed controls with zero skips. All 568 imported framework origins are noneditable; checked runtime module bytes match source and archive, distribution identity stays unchanged, and both continuation scenarios preserve historical cache bytes across four admissions, builds and runs. Strict fast gates, 22 documentation tooling methods, four OpenSpec items and 181 rendered diagrams pass. Exact-head CI and resulting-main qualification remain open.
+
+
 - **2026-11-07 reviewed fix integration:** The combined Go runtime-test, bounded library-import, module-source inventory and Git 2.43 staging repairs are retained at runtime source `308f98efd7ec9a04075f0907415ab49ce0055725`. A fresh managed full run independently accounts for all 2,739 selected cases: 2,621 passed, 118 explicit skips and zero missing outcomes. The canonical noneditable wheel journey passes, and all 15 focused controls pass against the exact installed wheel outside the checkout with no skips. The accepted ADR 0062/0066 main integration changes only documentation and roadmap authority; runtime, tests, Flavors, skills and template bytes remain identical. See [the bounded source/artifact review](../../verification/1.4-fix-integration-review.json). Exact combined-head platform CI, main verification, remaining milestone features/native gates and publication remain open.
 
 - **2026-11-04 current-source forward integration (in progress):** Preserve the exact `731c755` Linux validation, installed-wheel and public-export pass (2,581 passed, 100 declared skips, all 5,235 authored inputs unchanged) separately from its full platform CI result: 26 successful jobs and one failing Windows shard, where five model-probe subtests reject a native Windows path as their declared remote SSH workspace. The compiler fixture now builds; do not relabel that source as fully qualified. Collect the independently reviewed receiver-planning and SDK-metadata batches, nine real-CAS contract controls, source-equivalent current MSVC history, the accepted initial retained-tree HTML slice with six POSIX custody controls, and the reviewed setup-uv action pin. Preserve published v1 schemas and both installed catalog/host and tree journeys. Correct only the two test fixtures' declared remote workspace values to explicit home-relative coordinates; preserve native local paths, the strict worker contract, all cases and all guards. A separate native fixture proof stopped before class setup because its isolated existing-Python environment lacked framework dependencies; retain its setup failure and claim no original/corrected native result. Require final source composition review, supported authority records, fresh whole-source qualification and exact required CI before landing. Original native scale/PACKAGE/VERIFY obligations, worktree completeness/retirement and unaccepted ADR decisions remain open; no release publication is claimed.
@@ -32244,7 +32249,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   All 1.4.0 readiness goals, issue/review closure, native qualification and release
   checks remain prerequisites through the release policy. Its own publication
   outcome is recorded after synchronization rather than required before publication.
-- **Next action in progress:** Reconcile the landed Go, import-command, module inventory, Windows CPU and glibc-bootstrap goals against their exact acceptance and the completed post-merge main gate `42449444068` at `1d4238d7ae55a513c3b9e0bf71ffa8553b759e6d` before closing them. Continue the prioritized FreeBSD SDK/PACKAGE qualification and remaining included work; preserve all original native attempts and source-bound evidence.
+- **Next action in progress:** Confirm exact-head full CI for the locally qualified transport/error/continuation batch before guarded landing, then record resulting-main integration. Continue the prioritized native SDK/PACKAGE qualification and every remaining included 1.4 goal; preserve original native attempts and source-bound evidence.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -34281,14 +34286,26 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Priority:** P1
 - **Owner:** Framework core remote transport and native resource boundary
 - **Direction:** Fix issue #372, which blocks included Cargo qualification #347: an evidence allowance must never raise a caller file-size ceiling.
-- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. Pending implementation and qualification remain in the existing worktree.
+- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. The pre-existing repair is integrated with current main; independent review, installed/native and forge qualification remain pending.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
+  - [x] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
 - **Evidence:**
-  - [ ] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling.
+  - [x] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling. Both maintained controls also pass without skips from the qualified noneditable Linux wheel.
   - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
+
+
+- **Current-main source qualification (2026-11-10):** The unchanged contributor repair applied to main base `8b83f5b96` passes a fresh native Linux ARM64/Python 3.12 gate: 2,777 selected, 2,657 passed, 120 declared skips, zero failed or known failed. Every selected instance matches the raw terminal events across all 598 completed worker groups, including occurrence-qualified repeated discovery names. Both native ceiling controls and all six unchanged transport controls pass without skips. The initial invalid-system-Bazel failure remains preserved; the successful run uses the existing digest-verified toolchain. Normal integration retains main `8489a4c4b` and all 68 release goals. [Sanitized source evidence](../../verification/file-ceiling-source-current-main.json) retains source and original report identities. This is source-development evidence; independent review before driver repin, noneditable installed/native controls and exact-head/resulting-main CI remain open.
+- **Next action:** Complete confirming CI on the reviewed candidate and resulting-main integration. The whole Linux installed gate and both explicit installed ceiling controls pass; independent source review and the supported lifecycle-driver renewal are now recorded below.
+
+
+- **Whole installed candidate gate (2026-11-10):** Exact `b23ae877a` passes the complete canonical native Linux ARM64/Python 3.12 noneditable wheel gate. Its retained archive independently rehashes, and the packaged remote-transport module matches the source-qualified repair exactly. This proves the whole installed candidate gate, not yet direct execution of the explicit inherited-ceiling fixture from that installation. Specific installed controls, independent review before driver repin and exact-head/resulting-main CI remain required; no old pin or source-only outcome is promoted into approval.
+
+
+- **Explicit installed ceiling controls (2026-11-10):** Both unchanged native cases pass without skips in a fresh environment created and verified by the canonical wheel helpers, using the exact archive from the completed whole wheel gate. All 241 imported framework modules resolve inside the noneditable prefix; the loaded limiter bytes match the source-qualified module and retained wheel. The maintained tests perform real nested-process RLIMIT_FSIZE controls and the complete finite-parent command-route custody scenario. Runtime identity is checked before and after, and both fixture files and archive bytes remain unchanged. This is native Linux installed acceptance, not external-worker qualification or independent source review; final integration and configured lifecycle/receipt remain open.
+
+- **Independent limiter review (2026-11-10):** The release controller, which did not author the limiter repair, reviewed the sole changed TCB file against main. Applying the same positive cap independently to inherited soft and hard limits preserves `soft <= hard`, never raises either finite limit, preserves zero, and replaces infinity with the requested cap. The fresh trusted process, isolated interpreter, deadline, process-tree cleanup and transport custody remain unchanged. After a normal merge of main `69bb7b92a`, both real native ceiling controls and all six unchanged transport controls pass again through the maintained Make harness without skips. The earlier bare-system-Python attempt could not import the declared CycloneDX dependency; the canonical managed environment resolves that setup failure. The supported review command renews the driver identity to `sha256:26a4bf2f555acf1740f1d7c525f48e895ca5b0b0043f39d0c01de76d6b6a50f0`, followed by documentation-authority renewal. The original failed CI run `42892873778` remains preserved; confirming CI and resulting-main acceptance are still required.
 
 ### [ ] QUALIFICATION-DIAGNOSTICS-001 — Retain original bounded observations when native qualification fails
 
@@ -34383,24 +34400,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
 
-### [ ] CANDIDATE-NATIVE-REPAIR-001 — Bind native-library rejection to existing bounded candidate repair
+### [x] SOURCE-PROMOTION-ROOT-001 — Expose explicit root lineage for standalone source promotion
 
-- **GitHub issue:** [#405](https://github.com/jordanhubbard/literate-ai/issues/405)
-
-- **Priority:** P1
-- **Owner:** Framework Standard candidate repair and root integration; PROJECT Goals1and4
-- **Direction:** Issue405: allow narrowly attributable native result rejection to drive fresh same-authority repair through the existing finite attempt chain.
-- **Conclusion:** Prepare the smallest single-generated-library route preserving exact rejected package/source custody, recipe, changed request, fresh workspace and one shared retry budget; do not add a second retry framework or expose private oracle data.
-- **Depends on:** none
-- **Completion prerequisites:** none
-- **Implementation:**
-  - [x] Specify the fresh single-node Rust-v2 bridge into the existing three-total-candidate loop, with provisional acceptance before cache admission and fixed-category feedback only.
-  - [x] Implement reviewed exact result rejection; join current export bytes to the sealed build blob, retain package custody, and close native executable/tool pins on rejection as well as success.
-- **Evidence:**
-  - [x] Seven real native public-CLI controls pass: fresh same-authority repair, shared generated-test/native budget, exhaustion, command refusal, and actual export-before/export-during/native-executable mutation refusal. Twelve focused contract/lifecycle controls pass; independent source review covers both custody guards and prompt privacy.
-  - [ ] Run the full local source gates and qualify the exact noneditable wheel before treating the implementation as ready for downstream consumption.
-
-### [ ] SOURCE-PROMOTION-ROOT-001 — Expose explicit root lineage for standalone source promotion
+- **Release target:** 1.4.0
 
 - **GitHub issue:** [#402](https://github.com/jordanhubbard/literate-ai/issues/402).
 
@@ -34415,4 +34417,71 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [x] Six public-CLI controls pass, including actual root external acceptance and its locks/audit/lineage, default-parent failure, invalid public combinations, and direct namespace defense before target effects; twelve related controls and strict lint/format/layout/public-export gates pass.
   - [x] The maintained checkpointed Python gate passes with 2,777 selected cases, 2,613 passed, 164 declared skips and no failures or known failures. Independent controller-agent source review precedes the lifecycle-driver repin; runner and documentation authority remain current. The ordinary worker documentation gate passes 22 tooling controls and renders 181 diagrams from 1,950 Markdown files with normal browser sandboxing; four strict OpenSpec items pass.
-  - [ ] Complete exact-candidate noneditable installed-wheel qualification and confirming CI before upstream landing. No generated-provider or downstream source-retirement authority is claimed.
+  - [x] Complete exact-candidate noneditable installed-wheel qualification and confirming CI before upstream landing. No generated-provider or downstream source-retirement authority is claimed.
+
+- **Installed and landing evidence:** [Native Linux qualification](../../verification/source-promotion-root-installed-linux.json) binds the exact noneditable wheel, all 513 imported framework-module origins, both maintained root-option methods with zero skips, and the complete passed wheel gate at `e7a96c269`. PR #403 is merged as `274b35f9d`; issue #402 is closed by that reviewed landing. Earlier Python 3.15 dependency-download and mixed-interpreter fixture failures remain preserved.
+- **Resulting-main evidence:** [Exact main CI run 42954597539](https://github.com/jordanhubbard/literate-ai/actions/runs/42954597539) passes all 27 jobs at landed revision `274b35f9d6e05d51650ba0a9d567c43d02ae1fd0`, including Linux, macOS and Windows development coverage. The installed proof retains the exact revision and every job outcome. This completes this implementation deliverable; the consuming final 1.4 lifecycle and release qualification remain required.
+- **Evidence:**
+  - [x] Pass exact resulting-main integration and record its outcome.
+
+### [ ] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
+
+- **Release target:** 1.4.0
+
+- **Priority:** P1
+- **Owner:** Installed-wheel continuation qualification fixture
+- **Direction:** Repair the mixed-interpreter failure observed during 1.4 installed-wheel qualification without weakening byte-exact artifact comparison.
+- **Conclusion:** The fixture computes expected bytecode with its installed Python, but sanitized subprocess policy removes PYTHON and native discovery may select another supported interpreter from PATH. Explicitly select the fixture interpreter for its own native builds; keep the exact output oracle, immutable history, public CLI and installed-origin controls unchanged.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Select the installed fixture interpreter through the public PYTHON operator binding before either continuation scenario.
+- **Evidence:**
+  - [ ] Confirm exact-head and resulting-main integration before closing this goal.
+  - [x] Reproduce differing expected/artifact bytecode on the original mixed 3.12/3.15 setup; pass both installed continuation scenarios with the same original PATH after the fix and verify wheel/module identities.
+
+- **Installed evidence:** [Retained repair proof](../../verification/wheel-continuation-python-binding.json) binds the original Python 3.12 oracle (`cb0d0d0a`) and discovered 3.15 artifact (`520e0d0a`) mismatch. With the unchanged original PATH, the repaired fixture passes both default and project-relative cache scenarios against the same noneditable framework: four distinct admissions, four exact builds, four public runs, immutable historical cache bytes, and unchanged distribution identity. Seven maintained wheel-smoke methods pass without skips. The original failure and one missing-output-parent setup error remain preserved.
+- **Next action:** Land through confirming CI; the separate whole-wheel run and consuming release lifecycle remain required and are not claimed by this fixture result.
+
+### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
+
+- **Priority:** P1
+- **Owner:** Framework qualification CLI; PROJECT Goals 1 and 4
+- **Direction:** Include issue 404: typed independent native acceptance rejection must not become a retained archive publication error.
+- **Conclusion:** PR406 preserves known ComponentAcceptanceError codes and messages while leaving actual archive I/O failure handling unchanged. Admission, source custody and repair eligibility remain unchanged; contributor full/installed and resulting-main qualification remain open.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Handle typed independent acceptance rejection separately from actual archive publication failures.
+  - [ ] Review and integrate PR406 without changing native acceptance or archive authority.
+- **Evidence:**
+  - [ ] Pass maintained public qualification CLI controls with and without retention, actual archive write failure, whole candidate source/installed checks and exact-head/resulting-main integration.
+
+- **QUALIFICATION-ERROR-001 review progress:** Independent release-controller source review approves PR406 `a5fc16c3f`: only the typed acceptance failure mapping changes. The maintained public CLI module passes all 16 methods from source and again from its exact noneditable Linux wheel, with zero skips, all 544 imported framework-module origins verified, and the CLI module matched to candidate bytes. [Installed diagnostic proof](../../verification/qualification-error-installed-linux.json) retains the exact wheel and module identities. Full contributor/installed and exact-main qualification remain open; no native-result repair is inferred.
+
+<a id="candidate-native-repair-001"></a>
+<a id="candidate-native-repair-001-bind-native-library-rejection-to-existing-bounded-candidate-repair"></a>
+
+### [ ] NATIVE-ACCEPTANCE-REPAIR-001 — Bind generated native-library acceptance rejection to bounded candidate repair
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#405](https://github.com/jordanhubbard/literate-ai/issues/405)
+
+- **Priority:** P1
+- **Owner:** Standard generated-candidate attempt chain and packaged independent acceptance; PROJECT Goals 1 and 4
+- **Direction:** Include issue 405: a generated native-library root result mismatch occurs outside the existing bounded candidate-repair loop.
+- **Contributor alias and history:** `CANDIDATE-NATIVE-REPAIR-001` was the contributor's original work ID in [PR #414](https://github.com/jordanhubbard/literate-ai/pull/414). It is an alias of this current release-goal owner, not a second issue or independently scheduled deliverable. Both IDs retain the same issue #405 scope; the release-goal manifest continues to include NATIVE-ACCEPTANCE-REPAIR-001.
+- **Conclusion:** The reviewed implementation joins exact rejected-package custody to the existing attempt chain only for a fresh single-node Rust-v2 generated root. Reuse the shared three-total-candidate budget and changed-request/fresh-workspace rules; keep private oracle material, arbitrary native stderr, authority/custody/deadline failures and retained/original source outside repair eligibility. Final packaged independent acceptance remains required. Source implementation, candidate qualification and resulting-main delivery remain separate states.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Specify and independently review the exact fresh generated root package-to-attempt custody boundary in the existing repair authority.
+  - [x] Implement only the reviewed generated native-library root route with sanitized feedback, preserved rejected evidence and the existing shared finite retry budget; join actual export bytes to the sealed build blob and close original native executable/tool pins on rejection.
+- **Evidence:**
+  - [x] Seven real native public-CLI source controls prove same-authority fresh repair, the shared generated-test/native budget, exhaustion, command refusal and physical export-before/export-during/native-executable mutation refusal. Twelve focused contract/lifecycle controls pass; independent review covers both custody fixes and prompt privacy. The full local source gate passes 2,640 tests with 144 declared skips and no failures.
+  - [ ] Complete exact final integration source/noneditable-wheel qualification, maintained installed public repair/final-package acceptance and normal exact-head/resulting-main delivery before this release-goal owner closes.
+
+- **Candidate qualification:** The exact reviewed integration `88fd979250a5257bc265aa3cf05fc628315cb986` retains unchanged native repair implementation/test bodies plus the earlier inventory and typed-diagnostic fixes. Its full noneditable-wheel gate and genuine installed Rust acceptance pass; an additional isolated installation passes all sixteen typed-diagnostic boundary controls separately from the actual native-result repair journey. That journey executes two actual fresh source requests/workspaces, observes one native ACCEPT result rejection, repairs within the original budget and commits the final packaged receipt. Original runtime, source authority, custody and private verifier data remain unchanged. The normal merge of newer main's qualified transport/diagnostic cohort is a separate source composition awaiting its overlap checks and supported authority renewal; these candidate results do not claim that resulting-main integration is complete.

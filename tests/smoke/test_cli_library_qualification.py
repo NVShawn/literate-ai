@@ -254,6 +254,33 @@ class PublicLibraryQualificationTests(unittest.TestCase):
         self.retained_scratch = adapter.workspaces.session_root.parent
         return result
 
+    def test_native_acceptance_failure_preserves_code_with_or_without_retention(self):
+        from literate_ai.adapters.component_acceptance import ComponentAcceptanceError
+
+        for retained in (False, True):
+            with self.subTest(retained=retained):
+                self.qualify.side_effect = ComponentAcceptanceError(
+                    "component_acceptance.rust_harness_result_mismatch",
+                    "The reviewed native library results differ",
+                )
+                extra = (
+                    ("--retained-evidence-store", str(self.fixture.root / "evidence"))
+                    if retained
+                    else ()
+                )
+                status, document = self.invoke(*extra)
+                self.assertNotEqual(status, 0, document)
+                self.assertEqual(
+                    document["error"],
+                    {
+                        "code": "component_acceptance.rust_harness_result_mismatch",
+                        "message": "The reviewed native library results differ",
+                    },
+                )
+                self.authority_store.append_qualified.assert_not_called()
+                self.assertFalse(self.output.exists())
+                self.assertFalse((self.fixture.root / "evidence").exists())
+
     def test_retention_write_failure_prevents_qualification_admission(self):
         from literate_ai.security.evidence.storage import EvidenceStorageError
 

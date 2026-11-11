@@ -1,0 +1,138 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "REMOTE-FILE-CEILING-001",
+  "issue": 372,
+  "classification": "native source and Linux noneditable installed development qualification; independent limiter review complete; integration pending",
+  "source_base": "8b83f5b967a3abfcd92bfbc93704f30c740718c4",
+  "integration_revision": "692012c763ea0cb334b7a93796a5be604cba322a",
+  "platform": "linux-aarch64",
+  "python": "3.12.3",
+  "source_sha256": {
+    "src/literate_ai/adapters/remote_transport.py": "f20259482269f1041251851d087cbd6ed50c633fa3c2515ad9fd52c28363b8a4",
+    "tests/critical/test_remote_file_ceiling.py": "7426ee8e31074427bef615e91872b40a1d29f56ca55b282039ed464d6f5352a9"
+  },
+  "source_gate": {
+    "root_exit_code": 0,
+    "fresh_checkpoint": true,
+    "summary": {
+      "executed": 2657,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2657,
+      "selected": 2777,
+      "skipped": 120
+    },
+    "worker_groups": 598,
+    "every_scheduled_instance_matches_terminal_events": true,
+    "repeated_discovery_names_preserved": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "report_sha256": "7e9f35a40eaefd276a23ca16a80da9f53f92394d1406a9e513b69999c651cd17",
+    "event_audit_sha256": "0a2cfa0a1e59b5ac9bcfb9b94fcdce9cfde4c098709fed8f693d3368792057bb"
+  },
+  "native_controls": [
+    {
+      "case": "tests.critical.test_remote_file_ceiling.RemoteFileCeilingTests.test_limiter_preserves_stricter_inherited_soft_and_hard_bounds",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_remote_file_ceiling.RemoteFileCeilingTests.test_real_download_custody_survives_a_finite_inherited_ceiling",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_command_route_transfers_refuse_corruption_and_preserve_destination",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_remote_connector_keeps_bounded_diagnostics_and_stops_owned_descendants",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_runner_times_out_and_bounds_both_output_streams",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_scp_routes_upload_and_download_through_the_selected_ssh_program",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_ssh_and_scp_keep_long_control_channels_alive",
+      "status": "passed"
+    },
+    {
+      "case": "tests.critical.test_ssh_transport.SshTransportTests.test_ssh_argv_rejects_an_unsafe_transport_name",
+      "status": "passed"
+    }
+  ],
+  "behavior": "The fresh trusted child clamps soft and hard RLIMIT_FSIZE independently against the inherited ceilings; an evidence allowance grants no increase. Native controls preserve parent limits and the complete command-route transfer custody behavior.",
+  "preserved_predecessors": [
+    "The original native limiter refuses under a stricter inherited hard ceiling before connector execution. Its retained original source-development report remains in the original contributor worktree.",
+    "The first current-base whole-source attempt selected an invalid system Bazel executable and failed its native cache control. Its report and raw failure remain retained; the fresh successful run selects a digest-verified existing Bazel and native sccache."
+  ],
+  "independent_review": {
+    "reviewer": "release controller, not limiter author",
+    "reviewed_base": "69bb7b92ad08874f3425478abbb0239012a19965",
+    "changed_tcb_paths": [
+      "src/literate_ai/adapters/remote_transport.py"
+    ],
+    "result": "approved",
+    "renewed_driver_identity": "sha256:26a4bf2f555acf1740f1d7c525f48e895ca5b0b0043f39d0c01de76d6b6a50f0",
+    "native_ceiling_controls": {
+      "passed": 2,
+      "skipped": 0
+    },
+    "preserved_failed_ci_run": 42892873778,
+    "confirming_ci": "pending",
+    "unchanged_transport_controls": {
+      "passed": 6,
+      "skipped": 0
+    }
+  },
+  "installed_native_qualification": "Both explicit inherited-ceiling cases pass against the exact previously qualified noneditable Linux ARM64 archive; other required native/integration scope remains open.",
+  "exact_head_and_resulting_main_ci": "pending",
+  "goal_complete": false,
+  "release_attestation": false,
+  "whole_native_installed_wheel": {
+    "source_revision": "b23ae877adb71d66b6ee871e4357b5ce45c4e891",
+    "platform": "linux-aarch64",
+    "python": "3.12.3",
+    "canonical_gate_exit_code": 0,
+    "entire_wheel_gate_ok": true,
+    "wheel": "literate_ai-1.4.0-py3-none-any.whl",
+    "wheel_identity": "sha256:f1c34e499968def8d941e5c72d4520d68cae3b637095a1fb84a73b4d8d96e356",
+    "wheel_bytes": 4234632,
+    "framework_distribution": "sha256:b20ca5e343ee6e802efa8a67561c3688eaed47ac7a5b262b035886970f4428d6",
+    "retained_manifest_sha256": "837c12ebb2adfe91b09b792181e86b57abf1eedf632527ed069a4ff43da36d34",
+    "repaired_module_matches_archive": true,
+    "original_result_sha256": "bd4662544f4b577c7437de0db988925d349278a5c89297b5d8aef7e669827c74",
+    "scope": "Complete canonical noneditable wheel acceptance; this runner does not yet invoke the explicit inherited-ceiling fixture from the installed module. Specific installed ceiling controls and independent review remain pending.",
+    "specific_installed_ceiling_controls": "passed separately in a fresh canonical-helper environment against this identical retained archive; see specific_installed_controls"
+  },
+  "specific_installed_controls": {
+    "source_revision": "b23ae877adb71d66b6ee871e4357b5ce45c4e891",
+    "wheel_identity": "sha256:f1c34e499968def8d941e5c72d4520d68cae3b637095a1fb84a73b4d8d96e356",
+    "framework_distribution_identity": "sha256:b20ca5e343ee6e802efa8a67561c3688eaed47ac7a5b262b035886970f4428d6",
+    "controls": {
+      "selected": 2,
+      "passed": 2,
+      "skipped": 0,
+      "expected_failed": 0,
+      "framework_module_origins_verified": 241,
+      "remote_transport_sha256": "f20259482269f1041251851d087cbd6ed50c633fa3c2515ad9fd52c28363b8a4",
+      "cases": [
+        "test_limiter_preserves_stricter_inherited_soft_and_hard_bounds",
+        "test_real_download_custody_survives_a_finite_inherited_ceiling"
+      ]
+    },
+    "fixture_sha256": {
+      "test_remote_file_ceiling.py": "7426ee8e31074427bef615e91872b40a1d29f56ca55b282039ed464d6f5352a9",
+      "test_ssh_transport.py": "2e78696169bff45f9988fa6d6bd38193ef4075498ebdd7b8f660e50176297918"
+    },
+    "same_archive_as_completed_full_wheel_gate": true,
+    "fresh_runtime_before_and_after_verified": true,
+    "result_sha256": "8011df133b5e8585be54edc04a9df43fee178e8a063beccf566e9d44a4981891",
+    "scope": "Actual native nested-process soft/hard/zero/infinite limit controls and the unchanged complete command-route custody scenario; no external worker or WAN performance claim."
+  }
+}
