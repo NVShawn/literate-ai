@@ -90,6 +90,7 @@ litai render html
 litai render dashboard
 litai render tree
 litai project validate
+litai project qualify plan
 litai project lifecycle rebind-standard
 litai project documentation-update
 litai project documentation-review
@@ -542,6 +543,7 @@ root-integration acceptance still remain.
 | `lock [COMPONENT\|PROJECT] --target NAME [--flavor=+NAME ...] [--check\|--diff]` | Resolve or verify Component locks and catalog audits; an explicitly bound orchestration root also checks its repository lock, without invoking a model. |
 | `lock COMPONENT --large-review start\|status\|acknowledge\|apply\|cleanup [--transaction-id ID] [--page-identity ID]` | Review a genuine lock transition larger than 512 semantic differences in bounded identity-chained pages, then perform one final revalidated atomic replacement. |
 | `project validate [PATH]` | Non-mutating validation of the discovered project, catalogs, pins, skills, and generation inputs. |
+| `project qualify plan COMPONENT [--project PATH] [--target NAME] [--flavor SELECTOR] [--profile FILE] [--output-root PATH] [--model MODEL]` | Plan qualification of a genuinely authored root and its complete locked graph. Bind current project reviews, model selection, Standard framework policy and sealed independent oracles without allocating output, generating source or publishing qualification. Apply and complete authored qualification remain under development (ADR 0072). |
 | `project tracker inspect [PATH]` | Read Git remotes and name `gh` or `glab` plus issue/review/CI/land argv. Unknown hosts skip tracker work fail closed. |
 | `project lifecycle rebind-standard [PLAN] [--project PATH] [--registered-parent PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard first binding or update without mutation, or compare-and-swap an explicitly reviewed plan while preserving project-owned receipt authority and coordinating a registered parent. |
 | `project adopt-original [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review a validated canonical project's clean Git commit/tree and explicitly select original source authority with metadata-only writes. Preserve source layout; refuse stale plans, dirty or unsafe roots, existing evidence/authority and legacy conversion transitions. This grants no execution or release admission. |

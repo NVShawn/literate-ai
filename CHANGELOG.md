@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retain truthful authored all-node clean-run observations and derived per-node
+  test counts, with closed run/result records under accepted ADR 0072. Public
+  acknowledged apply and complete authored retained qualification remain in progress (#393).
+
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test
   and package phases with preserved historical evidence.

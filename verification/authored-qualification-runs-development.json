@@ -1,0 +1,72 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "release_target": "1.4.0",
+  "issue": 393,
+  "review": 401,
+  "software_commit": "de2370fcd",
+  "integrated_main": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+  "source_sha256": {
+    "src/literate_ai/contracts/authored_qualification_runs.py": "5ff9d85369c47b47bb234f1d0617c013275977726a5900c3a21b43923037d6b2",
+    "src/literate_ai/adapters/authored_qualification_runs.py": "fc03fb5c39ad78c20f6fc8d69d772b6effc4758fd8a78bb539b2b8c9aa21d595",
+    "schemas/v2/authored-qualification-node-run.schema.json": "dad46ed99436b3333a8681a39a01e2cd36c8c4c8b302eeb518ba8ba58a6446d3",
+    "schemas/v2/authored-qualification-run.schema.json": "7d2644130c4438d5516613af1b3678bc7252d18d886965db703f46e15f7682ad",
+    "schemas/v2/authored-qualification-result.schema.json": "fbe93c6871e3cc48e1a19bc8ce15ed3aaa6b1142217665077b5ea94c11fba150",
+    "schemas/v2/index.json": "4aeb74ddb9a1427da1062022e494a0dd68caa7fcc3fcffc9cc0c7ffc0d8cd17b",
+    "tests/critical/test_authored_qualification_runs.py": "d8680787892abef460c2ea377b3573be02a273997cb26bef52c8eb01fc747f30",
+    "tests/critical/test_authored_qualification_run_observation.py": "04d2831c847649802a12b068905285e92abf3e94e17a3fdfbec3371578a0bd25"
+  },
+  "initial_authored_family": {
+    "subject": "de2370fcd",
+    "summary": {
+      "executed": 59,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 59,
+      "selected": 59,
+      "skipped": 0
+    }
+  },
+  "new_controls": 13,
+  "whole_wheel_before_command_reference_repair": {
+    "subject": "1f0742aa3ad8e282fe7033f8bbfe290b2d9dbdca",
+    "state": "pass",
+    "wheel_identity": "sha256:de9b7332cf0a2dcb96c54968d2bdf28800d801de86be552597eb64ff0663ea4a",
+    "retained_manifest": "_build/ci-wheels/run-yv4nc_ah/manifest.json",
+    "standard_binding": {
+      "distribution": "sha256:c281f07a48bfb145e54cbcf2345e938265f228075515a5e79e7613b2f7a265be",
+      "members": 1395,
+      "policy": "sha256:a5ca0d6d13daff0199f218c5e4af723a2cec87b927e75dd3a731c511b5d85ac7"
+    },
+    "worker_runtime": {
+      "installed_distributions": 38,
+      "dependency_closure_identity": "sha256:7506528bdd047fc0248a007bb8c5991386db3095dd018b207b06107ae75770c8"
+    },
+    "uv_tool_worker_runtime": {
+      "installed_distributions": 38,
+      "dependency_closure_identity": "sha256:7506528bdd047fc0248a007bb8c5991386db3095dd018b207b06107ae75770c8"
+    }
+  },
+  "current_source_and_wheel": {
+    "state": "pending after command-reference repair; no current acceptance claimed"
+  },
+  "preserved_failed_source": {
+    "subject": "1f0742aa3ad8e282fe7033f8bbfe290b2d9dbdca",
+    "summary": {
+      "executed": 2180,
+      "failed": 1,
+      "known_failed": 0,
+      "passed": 2179,
+      "selected": 2848,
+      "skipped": 88
+    },
+    "cause": "Public authored plan was absent from CLI command reference; retain failure and rerun complete source gate after documentation repair"
+  },
+  "boundaries": [
+    "Actual shared Standard service, typed source/stage/receipt composition, diamond node membership and closed contract/schema decoding execute in the new controls.",
+    "Generation, native commands, installed-framework pins, project-review guard and oracle comparison are explicit fixture boundaries in those controls.",
+    "Existing authored planning and comparison controls retain their real filesystem/private input and isolated verifier coverage.",
+    "No public apply, two genuine all-node authored model runs, recoverable positive publication, closed replay, retained Cargo admission or release acceptance is established.",
+    "No driver or runner pin is renewed; independent non-author review remains required."
+  ]
+}
