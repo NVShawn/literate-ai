@@ -1,0 +1,17 @@
+{
+  "distribution": "sha256:6d81563cd8356af9a1591eb697a35509bfacf75fc98966426f9eb0a4c67fa6ba",
+  "methods": 16,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "framework_modules_checked": 544,
+  "all_framework_imports_noneditable": true,
+  "module_sha256": "72c6ea8f2e1777df7c5edf2502a5ef6daf35062aa94e415821f0565798a3c3d7",
+  "module_matches_candidate": true,
+  "schema": "literate-ai/verification-record@1",
+  "goal": "QUALIFICATION-ERROR-001",
+  "source_revision": "a5fc16c3f622bfc221bf21abbf3a4f8266058bdd",
+  "wheel_identity": "sha256:f766e639b4f02c72c5a19060b7a345ebf820d76995df450524e84db5fb63083a",
+  "whole_wheel_gate": "pending",
+  "classification": "installed public CLI diagnostic controls with injected lifecycle/authority boundaries; no native candidate generation or acceptance qualification claimed"
+}

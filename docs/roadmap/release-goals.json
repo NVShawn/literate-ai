@@ -300,6 +300,15 @@
       },
       {
         "id": "WHEEL-PYTHON-BINDING-001"
+      },
+      {
+        "id": "QUALIFICATION-ERROR-001"
+      },
+      {
+        "id": "NATIVE-ACCEPTANCE-REPAIR-001"
+      },
+      {
+        "id": "SOURCE-PROMOTION-ROOT-001"
       }
     ]
   }

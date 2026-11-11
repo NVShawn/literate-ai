@@ -118,7 +118,19 @@ development (2026-09-10):
 WHEEL-PYTHON-BINDING-001 closes a qualification-fixture gap under Goals 1 and 4:
 installed continuation must bind its bytecode oracle and native build to the same
 explicit interpreter even when PATH contains another supported Python. Mixed-runtime
-reproduction and passing installed repair are retained; integration acceptance remains
+reproduction and passing installed repair are retained; integration acceptance remains open.
+
+SOURCE-PROMOTION-ROOT-001 records the landed explicit standalone root-lineage
+option under Goals 1, 4 and 6. Exact-candidate source and native Linux installed
+qualification pass, and all 27 exact resulting-main CI jobs pass at `274b35f9d`.
+The implementation deliverable is complete; consuming release qualification remains open.
+
+QUALIFICATION-ERROR-001 and NATIVE-ACCEPTANCE-REPAIR-001 include newly observed
+issues #404 and #405 in 1.4 under Goals 1 and 4. Typed native acceptance rejection
+must remain distinct from archive I/O failure. Generated native-library repair
+requires an explicitly reviewed package-to-attempt custody boundary and the existing
+shared finite retry budget; source custody and private verifier authority remain
+unchanged. PR #406 is under qualification; root-repair design and acceptance remain
 open.
 
 CUDA-SIGNAL-001 records issue #396 as blocking 1.4.0 work under Goals 1, 2, 4
