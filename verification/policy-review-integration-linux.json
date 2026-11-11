@@ -1,0 +1,187 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "REVIEW-AUTHORITY-CLI-001",
+  "candidate": "309f850b1df20bfcd22e9193e9e465b96575f794",
+  "base": "d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2",
+  "contribution": "382cf69ceeb4f4460330d63dae311d9f799ba9d5",
+  "platform": "linux-aarch64",
+  "python": "3.12.3",
+  "classification": "complete Linux source/wheel and installed public CLI intent development qualification; exact-head/resulting-main and full release qualification pending",
+  "source": {
+    "schema": "literate-ai/verification-record@1",
+    "candidate": "309f850b1df20bfcd22e9193e9e465b96575f794",
+    "summary": {
+      "executed": 2683,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2683,
+      "selected": 2783,
+      "skipped": 100
+    },
+    "report_sha256": "df23fa449080789c404b2a5f2298471bb803c78c6cc81327f22a3ce18b3935ca",
+    "worker_groups": 599,
+    "event_kind_counts": {
+      "start": 2774,
+      "success": 2683,
+      "done": 599,
+      "skip": 91,
+      "fixture_skip": 1
+    },
+    "individual_started_cases": 2774,
+    "selected_instances_accounted": 2783,
+    "every_request_index_and_occurrence_qualified_report_key_matches_raw_terminal_event": true,
+    "duplicate_discovered_names": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "declared_skip_reasons": {
+      "set LITERATE_AI_LIVE_SAMPLES=1 to invoke the authenticated coding CLI": 5,
+      "requires native FreeBSD root and POSIX ACLs": 13,
+      "set LITERATE_AI_RUN_LIVE_ROUNDTRIP=1 for live coding-agent round-trip": 1,
+      "Actual FreeBSD native proof": 1,
+      "set LITAI_OPENCODE_V1_BINARY to an exact native OpenCode binary": 1,
+      "set LITAI_OPENCODE_V2_BINARY to an exact native OpenCode binary": 1,
+      "fixture selects actual macOS host": 1,
+      "Playwright Chromium is not installed": 2,
+      "no supported C++ compiler was found through CXX or PATH": 3,
+      "requires native FreeBSD root": 2,
+      "requires native FreeBSD reaper": 4,
+      "native FreeBSD retained receiver entry point": 7,
+      "requires native FreeBSD pkg-static": 1,
+      "Requires actual Windows API": 1,
+      "set LITERATE_AI_ELIXIR_QUALIFICATION=1 for native proof": 6,
+      "Native pkg requires FreeBSD": 2,
+      "requires the actual Windows API": 1,
+      "requires native FreeBSD pkg-static and C compiler": 3,
+      "requires the macOS sandbox runtime": 1,
+      "pinned doc-toolchain is not installed; run make doc-toolchain-bootstrap": 1,
+      "Windows portable mode contract": 1,
+      "Elixir is unavailable": 9,
+      "set LITERATE_AI_ELIXIR_MIX_QUALIFICATION=1 for authorized native Mix proof": 12,
+      "requires privileged FreeBSD POSIX ACL fixture": 9,
+      "requires explicit FreeBSD UFS ACL-disabled and ACL-enabled mounts": 2,
+      "requires actual native FreeBSD pkg-static": 1,
+      "Requires native Windows command": 1,
+      "Requires actual Windows PE imports": 1,
+      "requires native FreeBSD": 1,
+      "set LITERATE_AI_NATIVE_TOOLCHAIN_TESTS=1 with Bazel on PATH": 2,
+      "set LITERATE_AI_RUN_LIVE_COMPOSED_ROUNDTRIP=1 for composed live round-trip": 1,
+      "requires an explicitly selected Git source corpus": 1,
+      "native Elixir/OTP runtime is unavailable": 1,
+      "set LITERATE_AI_ELIXIR_QUALIFICATION=1 for native Mix proof": 1
+    }
+  },
+  "wheel": {
+    "state": "passed",
+    "manifest_identity": "sha256:b824671834b541785641ae5bf0e849323691deace69f58c50d1e1ae6256e1e8b",
+    "manifest_sha256": "81de6dc78b5f4ade1efced180e24f4054f0e2476c745f5e202834c87b50353b7",
+    "wheel_sha256": "aa6a9a4234c0f436b64737754c6beb7fed634580afa6fba02a069c70e55aa20a",
+    "archive_bytes": 4235194,
+    "distribution": "sha256:2693c3164d00cd8f8cc9579e0df59798b6b9b64cd5da543cf6a6b21b481d2be0",
+    "full_result_log_sha256": "d09fafa97df6e2bba2e4d7974ce8492c442e92d8148fe6f8acc65e77304ee7b7",
+    "cache_continuation": {
+      "distribution": "sha256:2693c3164d00cd8f8cc9579e0df59798b6b9b64cd5da543cf6a6b21b481d2be0",
+      "platform": "linux",
+      "qualified": true,
+      "scenarios": {
+        "default": {
+          "admissions": 2,
+          "exact_builds": 2,
+          "history_unchanged": true,
+          "runs": 2
+        },
+        "project-relative": {
+          "admissions": 2,
+          "exact_builds": 2,
+          "history_unchanged": true,
+          "runs": 2
+        }
+      }
+    }
+  },
+  "installed_controls": {
+    "schema": "literate-ai/verification-record@1",
+    "goal": "REVIEW-AUTHORITY-CLI-001",
+    "candidate": "309f850b1df20bfcd22e9193e9e465b96575f794",
+    "distribution": "sha256:2693c3164d00cd8f8cc9579e0df59798b6b9b64cd5da543cf6a6b21b481d2be0",
+    "wheel_sha256": "aa6a9a4234c0f436b64737754c6beb7fed634580afa6fba02a069c70e55aa20a",
+    "methods": 3,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "framework_modules_checked": 488,
+    "all_framework_module_origins_noneditable": true,
+    "cli_module_sha256": "86ba83fb2f7dc98f11f93648fcab17467971b673841a5cbe12fc2239bb39bfd5",
+    "cli_module_matches_source_and_archive": true,
+    "distribution_unchanged": true,
+    "scope": "Maintained CLI authority/signature/default-compatibility contract controls use synthetic test-owned trust data; no actual human approval is claimed."
+  },
+  "installed_policy_only_public_journey": {
+    "schema": "literate-ai/verification-record@1",
+    "goal": "REVIEW-AUTHORITY-CLI-001",
+    "candidate": "309f850b1df20bfcd22e9193e9e465b96575f794",
+    "scope": "Actual installed console entrypoint, inert controlled source intent and policy-labeled review only; no human approval, application execution, native-provider or release acceptance claimed.",
+    "phases": [
+      {
+        "name": "policy-native-attest",
+        "exit": 0,
+        "error_code": null
+      },
+      {
+        "name": "policy-native-derive",
+        "exit": 0,
+        "error_code": null
+      },
+      {
+        "name": "policy-native-review",
+        "exit": 0,
+        "error_code": null
+      },
+      {
+        "name": "policy-native-no-opt-in",
+        "exit": 2,
+        "error_code": "promotion.authority_denied"
+      },
+      {
+        "name": "policy-native-explicit-opt-in",
+        "exit": 0,
+        "error_code": null
+      },
+      {
+        "name": "policy-native-authority-tampered",
+        "exit": 2,
+        "error_code": "review.attestation_invalid"
+      }
+    ],
+    "review_authority": "authorized-policy",
+    "explicit_actor": true,
+    "default_policy_denial_before_target_effects": true,
+    "selected_promotion_policy": "signed-local-human-or-authorized-policy-reviewed@1",
+    "stored_review_matches_signed_decision": true,
+    "authority_tamper_refused": true,
+    "successful_target_unchanged_after_tamper_refusal": true,
+    "source_and_trust_key_unchanged": true,
+    "inert_source_contains_execution_refusal": true,
+    "accepted_metadata_files": 6,
+    "distribution": "sha256:2693c3164d00cd8f8cc9579e0df59798b6b9b64cd5da543cf6a6b21b481d2be0",
+    "distribution_unchanged": true,
+    "cli_module_noneditable": true,
+    "cli_module_matches_current_source": true,
+    "cli_module_sha256": "86ba83fb2f7dc98f11f93648fcab17467971b673841a5cbe12fc2239bb39bfd5"
+  },
+  "documentation": {
+    "tooling_methods": 22,
+    "openspec_items": 4,
+    "mermaid_diagrams": 181,
+    "markdown_files": 1950,
+    "full_fast_docs_log_sha256": "b1fca7201fb0c474a15bbfbd29d973669025fed80c2789e7ef1dfdebbfda3c47"
+  },
+  "source_review": "Independent non-author controller review approved original PR360; integrated runtime delta exactly matches original contributor additions/removals. Supported TCB pin renewed after review.",
+  "pending": [
+    "current-head full remote CI",
+    "guarded landing and exact resulting-main qualification",
+    "remaining full1.4goals,finalrelease qualification/publication/readback"
+  ],
+  "scope_limit": "Intent promotion and cryptographic/default-compatibility controls only. Synthetic human-authority test data is not an actual human approval. No generated application, native Cargo/provider, retained import or release acceptance is claimed."
+}
