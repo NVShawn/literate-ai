@@ -34500,14 +34500,14 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 - **Priority:** P1
 - **Owner:** Framework Python support policy and remote worker bootstrap
-- **Direction:** Reconcile the documented Python3.11-or-newer runtime with the actual native Python3.15 pinned binary closure failure before1.4 publication.
-- **Conclusion:** The native Python3.15 whole-wheel gate fails obtaining pinned PyYAML6.0.3 while Python3.12 succeeds separately. Preserve both exact results and determine the supported policy; source controls alone cannot establish a usable offline installed-worker closure. No dependency pin, binary-only custody or supported runtime boundary may be silently weakened.
+- **Direction:** Reconcile the documented Python 3.11-or-newer runtime with the actual native Python 3.15 pinned binary closure failure before 1.4 publication.
+- **Conclusion:** The native Python 3.15 whole-wheel gate fails obtaining pinned PyYAML 6.0.3 while Python 3.12 succeeds separately. Preserve both exact results and determine the supported policy; source controls alone cannot establish a usable offline installed-worker closure. No dependency pin, binary-only custody or supported runtime boundary may be silently weakened.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
   - [ ] Reconcile package, installer, bootstrap, release profile and documentation support authority; implement a reviewed reproducible dependency-closure repair for supported runtime and target identities.
 - **Evidence:**
-  - [ ] Preserve the original native Python3.15 failure and pass the complete canonical whole-wheel and offline installed-worker paths for the affected supported runtime/target, minimum-runtime compatibility, meaningful refusals and exact integration gates.
+  - [ ] Preserve the original native Python 3.15 failure and pass the complete canonical whole-wheel and offline installed-worker paths for the affected supported runtime/target, minimum-runtime compatibility, meaningful refusals and exact integration gates.
 
-- **Retained failure:** The actual canonical whole-wheel run at software `77353a8d6` under native Linux ARM64/Python3.15.2 fails with `worker.wheelhouse_download_failed`; the isolated binary download exits1 with `No matching distribution found for PyYAML==6.0.3`. All80 focused source controls pass on that interpreter. The separately selected Python3.12.3 whole-wheel gate succeeds with archive `eb39d3f57b828a729e758fd22eaf4453a0a9c4b1c262dfd5e16dea9b5a9c3551`. Neither the source controls nor the other interpreter qualify the failed Python3.15 closure.
+- **Retained failure:** The actual canonical whole-wheel run at software `77353a8d6` under native Linux ARM64/Python 3.15.2 fails with `worker.wheelhouse_download_failed`; the isolated binary download exits1 with `No matching distribution found for PyYAML==6.0.3`. All 80 focused source controls pass on that interpreter. The separately selected Python 3.12.3 whole-wheel gate succeeds with archive `eb39d3f57b828a729e758fd22eaf4453a0a9c4b1c262dfd5e16dea9b5a9c3551`. Neither the source controls nor the other interpreter qualify the failed Python 3.15 closure.
 - **Next action:** Inspect the declared Python support and target dependency projection, then reproduce the supported-runtime export with exact selected index/target constraints before selecting the reviewed repair.
