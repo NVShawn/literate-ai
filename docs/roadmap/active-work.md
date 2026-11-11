@@ -32249,7 +32249,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   All 1.4.0 readiness goals, issue/review closure, native qualification and release
   checks remain prerequisites through the release policy. Its own publication
   outcome is recorded after synchronization rather than required before publication.
-- **Next action in progress:** Confirm exact-head full CI for the locally qualified transport/error/continuation batch before guarded landing, then record resulting-main integration. Continue the prioritized native SDK/PACKAGE qualification and every remaining included 1.4 goal; preserve original native attempts and source-bound evidence.
+- **Next action in progress:** Observe exact resulting-main CI 42975999062 at `25bf15477` after PR411, while qualifying the reviewed policy CLI successor in PR415. Reconcile newly arrived native repair PR414 with accepted repair authority and the proposed ADR before acceptance; continue every remaining included 1.4 goal.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -34245,6 +34245,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 
 - **Current installed/public qualification:** [Exact Linux integration evidence](../../verification/policy-review-integration-linux.json) binds `309f850b1`, 2,783 selected source cases (2,683 passed, 100 declared skips, no failed/known-failed), every terminal event across 599 worker groups and the complete noneditable wheel gate. All three maintained installed authority controls pass without skips; all 488 framework-module origins are noneditable and the CLI bytes match source/archive. A separate actual installed-console journey signs a policy-labeled review, refuses acceptance without opt-in before target effects, accepts only after explicit opt-in, and rejects authority tampering without changing source, trust inputs or the successful target. Stored review data matches the exact signed decision; no actual human approval or host application execution is claimed. Independent review/driver renewal and fast/docs gates pass; exact-head/resulting-main integration remains open.
+
+
+- **Open pull-request landing queue:** [PR #415](https://github.com/jordanhubbard/literate-ai/pull/415) preserves PR360 and the now-landed PR411 ancestry. A normal merge of exact main `25bf15477` changes no qualified source, test, script or metadata bytes relative to the tested policy tree; only ancestry advances. Confirm current-head full remote CI before landing.
 
 ### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
 

@@ -38,5 +38,7 @@
     "installed public policy-only journey and maintained controls",
     "exact-head and resulting-main integration",
     "remaining full1.4 release scope"
-  ]
+  ],
+  "current_main_ancestry": "25bf154778bb163e7447a1191acffe92e08acbe4",
+  "main_merge_preserves_entire_qualified_tree": true
 }
