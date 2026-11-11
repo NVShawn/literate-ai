@@ -32249,7 +32249,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   All 1.4.0 readiness goals, issue/review closure, native qualification and release
   checks remain prerequisites through the release policy. Its own publication
   outcome is recorded after synchronization rather than required before publication.
-- **Next action in progress:** Confirm exact-head full CI for the locally qualified transport/error/continuation batch before guarded landing, then record resulting-main integration. Continue the prioritized native SDK/PACKAGE qualification and every remaining included 1.4 goal; preserve original native attempts and source-bound evidence.
+- **Next action in progress:** Observe exact resulting-main CI 42975999062 at `25bf15477` after PR411, while qualifying the reviewed policy CLI successor in PR415. Reconcile newly arrived native repair PR414 with accepted repair authority and the proposed ADR before acceptance; continue every remaining included 1.4 goal.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -34231,9 +34231,23 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
+  - [x] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
 - **Evidence:**
   - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
+
+
+- **Contributor reconciliation:** Preserve PR360 `382cf69c` and its original REVIEW-AUTHORITY-001 intake as this canonical REVIEW-AUTHORITY-CLI-001 goal. The contributor records three public CLI controls and nine existing inverse controls with zero skips at their original subject; an earlier borrowed-editable origin refusal stays historical. This integration preserves the exact runtime contribution through an ordinary merge with the reviewed transport/error batch; no contributor checkout or branch is edited.
+- **Current predecessor control:** In a fresh task-owned Make environment, the three maintained authority controls select one failing first method before fail-fast: the old CLI rejects `--authority authorized-policy` as `cli.usage`. No origin guard was relaxed; later selected methods were not executed and are not counted as failed.
+- **Next action:** Complete independent composition review and current focused/source/noneditable installed qualification, then exact-head and resulting-main gates. Keep actual qualification fixtures policy-labeled and retain human defaults only as contract-test data.
+
+
+- **Independent current composition review:** [Source composition record](../../verification/policy-review-source-composition.json) confirms every added/removed runtime line exactly matches NVShawn's contributed patch, combined with unchanged reviewed root/transport/error behavior. All three maintained public CLI controls pass in the current task-owned Make environment, including signing/identity, default denial, separate opt-in and tampering refusal. Supported driver renewal follows this non-author review; full and installed qualification remain open.
+
+
+- **Current installed/public qualification:** [Exact Linux integration evidence](../../verification/policy-review-integration-linux.json) binds `309f850b1`, 2,783 selected source cases (2,683 passed, 100 declared skips, no failed/known-failed), every terminal event across 599 worker groups and the complete noneditable wheel gate. All three maintained installed authority controls pass without skips; all 488 framework-module origins are noneditable and the CLI bytes match source/archive. A separate actual installed-console journey signs a policy-labeled review, refuses acceptance without opt-in before target effects, accepts only after explicit opt-in, and rejects authority tampering without changing source, trust inputs or the successful target. Stored review data matches the exact signed decision; no actual human approval or host application execution is claimed. Independent review/driver renewal and fast/docs gates pass; exact-head/resulting-main integration remains open.
+
+
+- **Open pull-request landing queue:** [PR #415](https://github.com/jordanhubbard/literate-ai/pull/415) preserves PR360 and the now-landed PR411 ancestry. Merge `29922e49c` of exact main `25bf15477` changes no files relative to its first parent `244b418b2`. Qualified source, test and script bytes remain identical to runtime subject `309f850b1`; subsequent changes record qualification and ancestry only. Confirm current-head full remote CI before landing.
 
 ### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
 

@@ -1,0 +1,47 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "REVIEW-AUTHORITY-CLI-001",
+  "contributor_intake_alias": "REVIEW-AUTHORITY-001",
+  "base": "d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2",
+  "contribution": "382cf69ceeb4f4460330d63dae311d9f799ba9d5",
+  "reviewed_composition": "54a5122ae47fb02905fd7000ef8a1c227d2c2336",
+  "runtime_file": "src/literate_ai/cli/source_to_specification.py",
+  "runtime_sha256": "86ba83fb2f7dc98f11f93648fcab17467971b673841a5cbe12fc2239bb39bfd5",
+  "all_runtime_added_and_removed_lines_exactly_match_contributor_patch": true,
+  "non_author_source_review": "independent release integration review; runtime author NVShawn; no authored runtime resolution",
+  "review_findings": [
+    "Core ReviewAuthority already has human and authorized-policy; no core schema or authority contract changes.",
+    "Explicit policy actor required before bundle processing; actor labels do not select authority.",
+    "Human review ID retains its exact prior canonical fields; policy review ID separately binds actual authority.",
+    "CLI operator opt-in alone expands allowed authorities; signed review/source data cannot self-grant acceptance.",
+    "Default policy IDs, coverage/uncertainty gates, signed source/graph bindings, host-execution authorization and existing root promotion/native acceptance error handling remain intact.",
+    "Human serialization/signature compatibility cases are synthetic test data; actual installed policy-only qualification must not claim human approval."
+  ],
+  "predecessor_control": {
+    "executed": 1,
+    "failed": 1,
+    "known_failed": 0,
+    "passed": 0,
+    "selected": 3,
+    "skipped": 0
+  },
+  "integrated_controls": {
+    "executed": 3,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 3,
+    "selected": 3,
+    "skipped": 0
+  },
+  "pending": [
+    "complete whole source and wheel",
+    "installed public policy-only journey and maintained controls",
+    "exact-head and resulting-main integration",
+    "remaining full1.4 release scope"
+  ],
+  "current_main_ancestry": "25bf154778bb163e7447a1191acffe92e08acbe4",
+  "main_merge": "29922e49c",
+  "main_merge_first_parent": "244b418b266c77f6f05e6d5fd1f59a37f9f973a4",
+  "main_merge_preserves_entire_first_parent_tree": true,
+  "qualified_runtime_subject": "309f850b1df20bfcd22e9193e9e465b96575f794"
+}

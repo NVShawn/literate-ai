@@ -2987,6 +2987,15 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             ),
         }, 0
     if command == "review":
+        authority = ReviewAuthority(args.authority)
+        if authority is ReviewAuthority.POLICY and (
+            args.actor is None or not args.actor.strip()
+        ):
+            raise CliFailure(
+                "cli.review_actor_required",
+                "authorized-policy review requires an explicit non-empty --actor",
+            )
+        actor = "local-human" if args.actor is None else args.actor
         bundle, result = _unwrap_bundle(args.bundle)
         unknown_resolutions = set(args.resolve) - {
             item.uncertainty_id for item in result.uncertainty.items
@@ -3017,21 +3026,24 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             reviewed_artifacts, reviewed_validation = _static_review_artifacts(
                 result, reviewed_graph
             )
-        review = SpecificationReviewDecision(
-            review_id=canonical_digest(
-                {
-                    "draft_id": result.draft.draft_id,
-                    "actor": args.actor,
-                    "resolved": tuple(sorted(args.resolve)),
-                    "component_graph_identity": (
-                        None if reviewed_graph is None else reviewed_graph.identity
-                    ),
-                }
+        review_identity = {
+            "draft_id": result.draft.draft_id,
+            "actor": actor,
+            "resolved": tuple(sorted(args.resolve)),
+            "component_graph_identity": (
+                None if reviewed_graph is None else reviewed_graph.identity
             ),
+        }
+        # Preserve existing human review identities. A new policy review has a
+        # separate identity even for the same actor, draft and resolutions.
+        if authority is not ReviewAuthority.HUMAN:
+            review_identity["authority"] = authority.value
+        review = SpecificationReviewDecision(
+            review_id=canonical_digest(review_identity),
             draft_id=result.draft.draft_id,
             base_specification_set_id=result.request.previous_specification_set_id,
-            actor=args.actor,
-            authority=ReviewAuthority.HUMAN,
+            actor=actor,
+            authority=authority,
             reason=args.reason,
             statement_decisions=tuple(
                 ReviewStatementDecision(
@@ -3354,7 +3366,17 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             result,
             review,
             PromotionPolicy(
-                "signed-local-human-reviewed@1" if standalone else "human-reviewed@1"
+                ("signed-local-" if standalone else "")
+                + (
+                    "human-or-authorized-policy-reviewed@1"
+                    if args.allow_authorized_policy_review
+                    else "human-reviewed@1"
+                ),
+                allowed_authorities=(
+                    (ReviewAuthority.HUMAN, ReviewAuthority.POLICY)
+                    if args.allow_authorized_policy_review
+                    else (ReviewAuthority.HUMAN,)
+                ),
             ),
             expected_base_specification_set_id=result.request.previous_specification_set_id,
         )
@@ -4118,7 +4140,15 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
 
     review = spec_commands.add_parser("review")
     review.add_argument("bundle")
-    review.add_argument("--actor", default="local-human")
+    review.add_argument(
+        "--actor", help="review actor; required for authorized-policy review"
+    )
+    review.add_argument(
+        "--authority",
+        choices=tuple(item.value for item in ReviewAuthority),
+        default=ReviewAuthority.HUMAN.value,
+        help="truthful review authority; does not grant acceptance permission",
+    )
     review.add_argument("--reason", default="reviewed exact source-backed draft")
     review.add_argument("--resolve", action="append", default=[])
     review.add_argument("--key")
@@ -4136,6 +4166,14 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
     accept.add_argument("--review", required=True)
     accept.add_argument("--target", required=True)
     accept.add_argument("--trust-key")
+    accept.add_argument(
+        "--allow-authorized-policy-review",
+        action="store_true",
+        help=(
+            "explicit operator opt-in to accept authorized-policy reviews; "
+            "default accepts human reviews only"
+        ),
+    )
     project_destination = accept.add_mutually_exclusive_group()
     project_destination.add_argument(
         "--project-target",
