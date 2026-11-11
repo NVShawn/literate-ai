@@ -3104,6 +3104,28 @@ def _main() -> int:
                 cwd=root,
             ).stdout
         )
+        identity_migration = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-B",
+                str(
+                    repository / "tests/support/installed_identity_migration_journey.py"
+                ),
+                str(root / "identity-migration"),
+                standard_binding["distribution"],
+                parent_source,
+                cwd=root,
+            ).stdout
+        )
+        if (
+            identity_migration.get("qualified") is not True
+            or identity_migration.get("framework_distribution")
+            != standard_binding["distribution"]
+            or identity_migration.get("renames") != 2
+            or identity_migration.get("synthetic_framework_observers") is not False
+        ):
+            raise RuntimeError("installed project identity migration did not qualify")
         rust_harness = json.loads(
             run(
                 str(python),
@@ -3199,6 +3221,7 @@ def _main() -> int:
                     "html_observability": html_observability,
                     "tree_html": tree_html,
                     "rust_library_harness": rust_harness,
+                    "project_identity_migration": identity_migration,
                     "skills": sorted(installed),
                     "snapshot_replication_schema": replication_schema,
                     "version_contract": version_contract,

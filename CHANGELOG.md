@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Exercise adopted-project identity migration through the installed console in the
+  whole-wheel gate, using two successive renames and real retained build, unit-test
+  and package phases with preserved historical evidence.
+
 - Wheel qualification accepts a complete reviewed dependency wheel directory for
   offline binary-only installs and both worker bootstrap paths, preserving pinned
   dependencies on targets without published binary wheels (#418).
