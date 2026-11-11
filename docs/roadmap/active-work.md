@@ -34235,6 +34235,11 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
 
+
+- **Contributor reconciliation:** Preserve PR360 `382cf69c` and its original REVIEW-AUTHORITY-001 intake as this canonical REVIEW-AUTHORITY-CLI-001 goal. The contributor records three public CLI controls and nine existing inverse controls with zero skips at their original subject; an earlier borrowed-editable origin refusal stays historical. This integration preserves the exact runtime contribution through an ordinary merge with the reviewed transport/error batch; no contributor checkout or branch is edited.
+- **Current predecessor control:** In a fresh task-owned Make environment, the three maintained authority controls select one failing first method before fail-fast: the old CLI rejects `--authority authorized-policy` as `cli.usage`. No origin guard was relaxed; later selected methods were not executed and are not counted as failed.
+- **Next action:** Complete independent composition review and current focused/source/noneditable installed qualification, then exact-head and resulting-main gates. Keep actual qualification fixtures policy-labeled and retain human defaults only as contract-test data.
+
 ### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
 
 - **GitHub issue:** [#361](https://github.com/jordanhubbard/literate-ai/issues/361)
