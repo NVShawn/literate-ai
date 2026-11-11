@@ -2,12 +2,12 @@
 
 ## Unreleased
 
+- Wheel qualification accepts a complete reviewed dependency wheel directory for
+  offline binary-only installs and both worker bootstrap paths, preserving pinned
+  dependencies on targets without published binary wheels (#418).
+
 - Capability deadline qualification observes actual original child cleanup, including
   expiry before a receiver writes its PID file, without extending caller budgets (#420).
-
-- Evidence transfers preserve the caller's inherited POSIX file-size ceiling.
-- Qualification preserves independent acceptance errors and reports archive publication errors only for actual archive I/O failures.
-- Installed cache-continuation verification builds with its selected Python, avoiding cross-version bytecode mismatches.
 
 - Standalone source promotion can explicitly select root repository lineage with
   `spec accept --project-target ... --root-project`; default inheritance and

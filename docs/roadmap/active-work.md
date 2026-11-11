@@ -34500,3 +34500,28 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Implement only the reviewed generated native-library root route with sanitized feedback, preserved rejected evidence and the existing shared finite retry budget.
 - **Evidence:**
   - [ ] Prove same-authority fresh-request/workspace repair, complete validation/build/test/execution/acceptance replay, retry exhaustion, terminal custody/original-source failures and no admission on failure through installed public qualification.
+
+### [ ] PYTHON-BINARY-CLOSURE-001 — Qualify binary framework dependency closure for every supported Python runtime
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#418](https://github.com/jordanhubbard/literate-ai/issues/418)
+
+- **Priority:** P1
+- **Owner:** Framework Python support policy and remote worker bootstrap
+- **Direction:** Reconcile the documented Python 3.11-or-newer runtime with the actual native Python 3.15 pinned binary closure failure before 1.4 publication.
+- **Conclusion:** The native Python 3.15 whole-wheel gate fails obtaining pinned PyYAML 6.0.3 while Python 3.12 succeeds separately. Preserve both exact results and determine the supported policy; source controls alone cannot establish a usable offline installed-worker closure. No dependency pin, binary-only custody or supported runtime boundary may be silently weakened.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Reconcile package, installer, bootstrap, release profile and documentation support authority; implement an explicit reviewed dependency-wheel input for the complete gate, preserving existing offline export authority and dependency pins.
+- **Evidence:**
+  - [ ] Preserve the original native Python 3.15 failure and pass the complete canonical whole-wheel and offline installed-worker paths for the affected supported runtime/target, minimum-runtime compatibility, meaningful refusals and exact integration gates.
+
+- **Retained failure:** The actual canonical whole-wheel run at software `77353a8d6` under native Linux ARM64/Python 3.15.2 fails with `worker.wheelhouse_download_failed`; the isolated binary download exits1 with `No matching distribution found for PyYAML==6.0.3`. All 80 focused source controls pass on that interpreter. The separately selected Python 3.12.3 whole-wheel gate succeeds with archive `eb39d3f57b828a729e758fd22eaf4453a0a9c4b1c262dfd5e16dea9b5a9c3551`. Neither the source controls nor the other interpreter qualify the failed Python 3.15 closure.
+- **Selected repair:** Preserve the documented Python floor and exact dependency pins. Use the existing reviewed local-wheel export boundary for targets without published binaries; expose that same complete offline input in `make wheel-check` for all dependency installations and both ordinary/uv worker export/bootstrap paths. Snapshot and validate before installation and retain exact input identities. No worker source build, automatic interpreter fallback or source-build fallback is added.
+- **Current development proof:** The unchanged official PyYAML 6.0.3 sdist rehashes to `d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f`. Two fresh upstream pure Python builds with pinned setuptools 83.0.0 are byte-identical; all 1,283 upstream legacy pure Python tests pass from its noneditable wheel on Python 3.15.2. Its source modules, RECORD and license match the reviewed source. Existing canonical offline export and bootstrap succeed with all 37 distributions and unchanged framework identity. These are dependency construction/bootstrap observations, not the still-required complete current wheel gate or release acceptance.
+- **Next action:** Qualify the new complete-wheel input projection, negative custody checks, complete source/wheel and exact integrated gates. Preserve the original unconfigured Python 3.15 failure.
+
+- **Dependency development evidence:** [Source/build/installed and canonical offline bootstrap record](../../verification/python315-worker-dependency-development.json) retains exact artifact identities. Its existing framework artifact is bound to `7078bc96b`; it does not qualify the later new wheel-gate projection or a final release candidate.
+
+- **Current complete local qualification:** [Minimum/current Python source and whole-wheel record](../../verification/python-worker-wheel-inputs-linux.json) binds software `c733d96f80cd80b802e7aa4387cab2d7740e219a`. Both native Python 3.11.14 and 3.15.2 select 2,783 source cases: 2,683 pass, 100 retain declared skips, and all 599 raw groups reconcile with no failed or known-failed cases. Both complete noneditable wheel gates pass with the same framework distribution identity and exact reviewed pure PyYAML bytes; ordinary and uv worker paths install respectively 38 and 37 distributions with matching framework identities. Real empty/redirected input refusals precede installation. The earlier source-prefix failure and unconfigured binary-export failure remain preserved separately. Parent completion and issue closure await independent/exact integrated acceptance; no release acceptance is claimed.

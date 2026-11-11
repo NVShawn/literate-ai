@@ -75,6 +75,7 @@ PYTHON_TEST_PATTERN ?= test*.py
 PYTHON_TEST_VERBOSITY ?= 1
 PYTHON_TEST_WORKERS ?= auto
 PYTHON_TEST_WORKER_TIMEOUT ?= 3600
+WHEEL_WORKER_DIRECTORY ?=
 RELEASE_PLAN ?=
 RELEASE_PREPARED ?= $(OBJ_DIR)/release/prepared.json
 
@@ -249,7 +250,7 @@ test-receipt-current: python-version $(RUNTIME_PREREQUISITE) ## Require the curr
 	PYTHONPATH=src $(STEP) test-receipt-current -- $(RUN_PYTHON_COMMAND) -m literate_ai.cli project test-receipt require-current --project .
 
 wheel-check: python-version $(RUNTIME_PREREQUISITE) ## Build and smoke-test the installed wheel outside this checkout.
-	$(STEP) wheel-check -- $(RUN_PYTHON_COMMAND) scripts/wheel_smoke.py
+	$(STEP) wheel-check -- $(RUN_PYTHON_COMMAND) scripts/wheel_smoke.py $(if $(strip $(WHEEL_WORKER_DIRECTORY)),--worker-wheel-directory "$(WHEEL_WORKER_DIRECTORY)",)
 
 format: $(DEV_PREREQUISITE) ## Format Python source and tests.
 	$(RUFF) format src tests scripts $(SAMPLE_PYTHON)
