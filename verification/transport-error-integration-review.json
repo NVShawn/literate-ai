@@ -1,0 +1,30 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "RELEASE-INTEGRATION-005",
+  "candidate": "9c102264b",
+  "scope": "Independent source composition review of contributed remote limit and acceptance-error runtime changes; installed continuation fixture integration. No full candidate qualification or release acceptance claimed.",
+  "base": "274b35f9d6e05d51650ba0a9d567c43d02ae1fd0",
+  "runtime": {
+    "src/literate_ai/adapters/remote_transport.py": {
+      "sha256": "f20259482269f1041251851d087cbd6ed50c633fa3c2515ad9fd52c28363b8a4",
+      "unchanged_from_reviewed_combined_revision": "7c6b0ed46abeb337dae6767e6788d33e8fbb7314"
+    },
+    "src/literate_ai/cli/source_to_specification.py": {
+      "sha256": "240af4c6abcdd35cb4866329f7135cbe62e19e93ab9b2837ee4757b56a6fc26a",
+      "unchanged_from_reviewed_combined_revision": "7c6b0ed46abeb337dae6767e6788d33e8fbb7314"
+    }
+  },
+  "review_findings": [
+    "Only two runtime modules differ from main; both match their independently reviewed contributed bytes.",
+    "Each POSIX resource ceiling is min(requested, inherited) with RLIM_INFINITY replaced by requested, preserving zero and soft<=hard in a fresh trusted process.",
+    "Typed ComponentAcceptanceError is handled before ValueError while archive errors, original exception code/message, no admission/output on rejection and source promotion root controls are preserved.",
+    "The continuation fixture explicitly binds PYTHON to its installed sys.executable; artifact oracle and original PATH remain unchanged.",
+    "CUDA inventory matches main; its complete correction remains required in draft PR410 and is outside this batch."
+  ],
+  "pending": [
+    "fresh complete source gate",
+    "fresh noneditable wheel and installed controls",
+    "exact-head CI and resulting-main integration",
+    "full remaining 1.4 release scope"
+  ]
+}

@@ -32228,6 +32228,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
 
+- **Transport/error integration in progress:** Preserve reviewed PR400 and PR406 runtime bytes and PR407 installed continuation fixture through ordinary histories on `integrate/14-transport-errors`, based on landed root-promotion main `274b35f9d`. [Independent composition review](../../verification/transport-error-integration-review.json) confirms only the contributed remote runner and typed error mapping differ from main, both byte-identical to their reviewed historical source. Require fresh complete source/noneditable wheel, installed controls and exact-head/resulting-main gates. CUDA attribution repair remains required separately in draft PR410 with independent source review pending; no release goal is deferred.
+
 - **2026-11-07 reviewed fix integration:** The combined Go runtime-test, bounded library-import, module-source inventory and Git 2.43 staging repairs are retained at runtime source `308f98efd7ec9a04075f0907415ab49ce0055725`. A fresh managed full run independently accounts for all 2,739 selected cases: 2,621 passed, 118 explicit skips and zero missing outcomes. The canonical noneditable wheel journey passes, and all 15 focused controls pass against the exact installed wheel outside the checkout with no skips. The accepted ADR 0062/0066 main integration changes only documentation and roadmap authority; runtime, tests, Flavors, skills and template bytes remain identical. See [the bounded source/artifact review](../../verification/1.4-fix-integration-review.json). Exact combined-head platform CI, main verification, remaining milestone features/native gates and publication remain open.
 
 - **2026-11-04 current-source forward integration (in progress):** Preserve the exact `731c755` Linux validation, installed-wheel and public-export pass (2,581 passed, 100 declared skips, all 5,235 authored inputs unchanged) separately from its full platform CI result: 26 successful jobs and one failing Windows shard, where five model-probe subtests reject a native Windows path as their declared remote SSH workspace. The compiler fixture now builds; do not relabel that source as fully qualified. Collect the independently reviewed receiver-planning and SDK-metadata batches, nine real-CAS contract controls, source-equivalent current MSVC history, the accepted initial retained-tree HTML slice with six POSIX custody controls, and the reviewed setup-uv action pin. Preserve published v1 schemas and both installed catalog/host and tree journeys. Correct only the two test fixtures' declared remote workspace values to explicit home-relative coordinates; preserve native local paths, the strict worker contract, all cases and all guards. A separate native fixture proof stopped before class setup because its isolated existing-Python environment lacked framework dependencies; retain its setup failure and claim no original/corrected native result. Require final source composition review, supported authority records, fresh whole-source qualification and exact required CI before landing. Original native scale/PACKAGE/VERIFY obligations, worktree completeness/retirement and unaccepted ADR decisions remain open; no release publication is claimed.
@@ -34421,8 +34423,6 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 ### [ ] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
 
-- **Combined qualification:** The exact combined `7c6b0ed46` wheel gate passes both retained continuation scenarios with four distinct admissions, four exact builds, four runs and unchanged historical cache bytes. The [combined proof](../../verification/reviewed-integration-linux.json) joins that whole-gate result to source and installed identities; confirming exact-head/resulting-main integration remains open.
-
 - **Release target:** 1.4.0
 
 - **Priority:** P1
@@ -34442,7 +34442,6 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 ### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
 
-- **Combined qualification:** All 16 maintained public CLI diagnostic methods pass without skips against the combined noneditable wheel at `7c6b0ed46`, including actual archive-write-failure classification and no-admission controls. Complete source/wheel gates pass in the [combined proof](../../verification/reviewed-integration-linux.json). The diagnostic fixture retains its injected lifecycle/authority boundaries; exact-head/resulting-main integration remains open and this does not implement issue #405.
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
