@@ -6,6 +6,8 @@
   `spec accept --project-target ... --root-project`; default inheritance and
   retained-host integration remain unchanged (#402).
 
+- Remote evidence transfer preserves stricter inherited POSIX soft and hard
+  file-size ceilings, including zero limits (#372).
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 
@@ -14,8 +16,8 @@
   preserve command drift, missing-sidecar and guarded native build refusals (#102, #103).
 
 - Record the included Codex runtime-state and remote file-ceiling work as explicit
-  1.4 roadmap and release-manifest gates; both remain incomplete pending their
-  existing implementation, review and native qualification.
+  1.4 roadmap and release-manifest gates; both remain incomplete pending
+  review and native qualification.
 - Retain standalone Windows MSVC setup and C++ discovery timings in native qualification while preserving the five-minute default and caller-selected bounds.
 - Renew retained Windows command, source/context drift and missing native sidecar checks through the noneditable wheel on base and private interpreters (#102, #103).
 
