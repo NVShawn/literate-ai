@@ -2015,18 +2015,27 @@ def _parser() -> JsonArgumentParser:
     project_qualify_commands = project_qualify.add_subparsers(
         dest="project_qualify_command", required=True, parser_class=JsonArgumentParser
     )
-    project_qualify_plan = project_qualify_commands.add_parser(
-        "plan", help="inspect the current authored graph without writing or executing"
-    )
-    project_qualify_plan.add_argument(
-        "component", help="root Component path relative to the project root"
-    )
-    project_qualify_plan.add_argument("--project", default=".")
-    project_qualify_plan.add_argument("--target", default="host")
-    project_qualify_plan.add_argument("--flavor", action="append", default=[])
-    project_qualify_plan.add_argument("--profile", default="litai/qualification.json")
-    project_qualify_plan.add_argument("--output-root", default="litai/qualification")
-    project_qualify_plan.add_argument("--model")
+    for name, description in (
+        ("plan", "inspect the current authored graph without writing or executing"),
+        ("apply", "execute an acknowledged authored plan and publish closed evidence"),
+    ):
+        qualify = project_qualify_commands.add_parser(name, help=description)
+        qualify.add_argument(
+            "component", help="root Component path relative to the project root"
+        )
+        qualify.add_argument("--project", default=".")
+        qualify.add_argument("--target", default="host")
+        qualify.add_argument("--flavor", action="append", default=[])
+        qualify.add_argument("--profile", default="litai/qualification.json")
+        qualify.add_argument("--output-root", default="litai/qualification")
+        qualify.add_argument("--model")
+        if name == "apply":
+            qualify.add_argument("--acknowledge-plan", required=True)
+            qualify.add_argument("--allow-host-execution", action="store_true")
+            qualify.add_argument("--scratch-parent")
+            qualify.add_argument("--recover-attempt")
+            qualify.add_argument("--max-parallelism", type=int, default=1)
+            qualify.add_argument("--max-bytes", type=int, default=256 * 1024 * 1024)
     project_validate = project_commands.add_parser("validate")
     project_validate.add_argument("path", nargs="?", default=".")
     project_guidance = project_commands.add_parser(
@@ -3534,8 +3543,12 @@ def main(
                         )
                     )
                 ),
-                "read-only inspection does not admit MCP discovery "
-                "or debug-file output",
+                "qualification does not admit MCP discovery or debug-file output"
+                if scoped_authored_qualification
+                else (
+                    "read-only inspection does not admit MCP discovery "
+                    "or debug-file output"
+                ),
             )
         if (
             args.command not in {"config", "help", "verify"}

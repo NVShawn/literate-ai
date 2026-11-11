@@ -1208,6 +1208,11 @@
       "public_ids": [
         "urn:literate-ai:schema:v2:authored-qualification-run-products"
       ]
+    },
+    {
+      "file": "authored-qualification-reference.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:authored-qualification-reference",
+      "public_ids": []
     }
   ]
 }
