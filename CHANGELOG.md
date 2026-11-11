@@ -7,6 +7,10 @@
   oracle content stays out of feedback, custody drift remains terminal, and final
   packaged acceptance still runs (#405).
 
+- Standalone source promotion can explicitly select root repository lineage with
+  `spec accept --project-target ... --root-project`; default inheritance and
+  retained-host integration remain unchanged (#402).
+
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 
