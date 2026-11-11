@@ -2822,6 +2822,13 @@ def _complete_standard_lifecycle_qualification(
 
 
 def spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
+    if args.spec_command == "accept" and getattr(args, "root_project", False):
+        if args.project_target is None or args.integrate_project is not None:
+            raise CliFailure(
+                "promotion.root_project_target_required",
+                "--root-project requires a standalone --project-target and "
+                "cannot be used with --integrate-project",
+            )
     if args.spec_command == "accept" and getattr(args, "integrate_project", None):
         from literate_ai.adapters.lifecycle_lock import (
             ProjectLifecycleLockError,
@@ -3052,6 +3059,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             )
         return response, 0
     if command == "accept":
+        root_project = getattr(args, "root_project", False)
         replacement_path = getattr(args, "replace_native_child", None)
         replacement_planning = getattr(args, "plan_native_child_replacement", False)
         replacement_requested = replacement_path is not None or replacement_planning
@@ -3494,7 +3502,9 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         promoted_project = None
         if project_target is not None:
             try:
-                parent_selection = None
+                parent_selection = (
+                    RepositoryParentSelection.root() if root_project else None
+                )
                 if integration_project is not None:
                     from literate_ai.adapters.repository_lineage import (
                         FilesystemRepositoryLineageStore,
@@ -4134,6 +4144,14 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
         help=(
             "atomically create and register a source-free native child project "
             "inside an existing retained adopted project"
+        ),
+    )
+    accept.add_argument(
+        "--root-project",
+        action="store_true",
+        help=(
+            "with --project-target, explicitly create a root project without "
+            "inheriting a repository parent; default inheritance is unchanged"
         ),
     )
     replacement_mode = accept.add_mutually_exclusive_group()

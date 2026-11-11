@@ -165,6 +165,15 @@ contract. It then resolves and persists the exact qualification target/Flavor
 `component.lock.json` without generating source. A missing acceptance profile or failed
 qualification leaves release authority at the source baseline.
 
+For a newly created external `--project-target`, `--root-project` explicitly selects
+root repository lineage before initialization, lock resolution and the promotion
+audit. It avoids implicit release-parent discovery when an independent root is the
+intended project shape. Omitting it preserves default inheritance. The option is
+refused without `--project-target` or with `--integrate-project`; retained-host
+integration continues to inherit its existing reviewed lineage. It does not change
+the installed framework origin, source review, generation authority or qualification
+requirements.
+
 An incremental adopted project keeps each promoted native boundary as a complete
 source-free child beneath `.literate/native-projects/`. Its root registry binds the exact
 relative child path, project identifier, and project-definition identity. Conversion

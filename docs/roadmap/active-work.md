@@ -34382,3 +34382,20 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
+
+### [ ] SOURCE-PROMOTION-ROOT-001 — Expose explicit root lineage for standalone source promotion
+
+- **GitHub issue:** [#402](https://github.com/jordanhubbard/literate-ai/issues/402).
+
+- **Priority:** P1
+- **Owner:** CLI source promotion and repository lineage
+- **Direction:** Issue #402 requests an explicit root-parent selection for newly created standalone source-promotion projects when implicit release-parent discovery cannot resolve usable authority.
+- **Conclusion:** Expose existing typed root lineage before child initialization and audit. Preserve default inheritance, retained-host integration, signed source intent and independent qualification; never rewrite package origin, tags or old projections.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Add --root-project only with --project-target; reject absent external targets and retained integration combinations; document the public route.
+- **Evidence:**
+  - [x] Six public-CLI controls pass, including actual root external acceptance and its locks/audit/lineage, default-parent failure, invalid public combinations, and direct namespace defense before target effects; twelve related controls and strict lint/format/layout/public-export gates pass.
+  - [x] The maintained checkpointed Python gate passes with 2,777 selected cases, 2,613 passed, 164 declared skips and no failures or known failures. Independent controller-agent source review precedes the lifecycle-driver repin; runner and documentation authority remain current. The ordinary worker documentation gate passes 22 tooling controls and renders 181 diagrams from 1,950 Markdown files with normal browser sandboxing; four strict OpenSpec items pass.
+  - [ ] Complete exact-candidate noneditable installed-wheel qualification and confirming CI before upstream landing. No generated-provider or downstream source-retirement authority is claimed.
