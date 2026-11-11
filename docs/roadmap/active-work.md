@@ -34505,7 +34505,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Reconcile package, installer, bootstrap, release profile and documentation support authority; implement a reviewed reproducible dependency-closure repair for supported runtime and target identities.
+  - [x] Reconcile package, installer, bootstrap, release profile and documentation support authority; implement an explicit reviewed dependency-wheel input for the complete gate, preserving existing offline export authority and dependency pins.
 - **Evidence:**
   - [ ] Preserve the original native Python 3.15 failure and pass the complete canonical whole-wheel and offline installed-worker paths for the affected supported runtime/target, minimum-runtime compatibility, meaningful refusals and exact integration gates.
 
@@ -34515,3 +34515,5 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Next action:** Qualify the new complete-wheel input projection, negative custody checks, complete source/wheel and exact integrated gates. Preserve the original unconfigured Python 3.15 failure.
 
 - **Dependency development evidence:** [Source/build/installed and canonical offline bootstrap record](../../verification/python315-worker-dependency-development.json) retains exact artifact identities. Its existing framework artifact is bound to `7078bc96b`; it does not qualify the later new wheel-gate projection or a final release candidate.
+
+- **Current complete local qualification:** [Minimum/current Python source and whole-wheel record](../../verification/python-worker-wheel-inputs-linux.json) binds software `c733d96f80cd80b802e7aa4387cab2d7740e219a`. Both native Python 3.11.14 and 3.15.2 select 2,783 source cases: 2,683 pass, 100 retain declared skips, and all 599 raw groups reconcile with no failed or known-failed cases. Both complete noneditable wheel gates pass with the same framework distribution identity and exact reviewed pure PyYAML bytes; ordinary and uv worker paths install respectively 38 and 37 distributions with matching framework identities. Real empty/redirected input refusals precede installation. The earlier source-prefix failure and unconfigured binary-export failure remain preserved separately. Parent completion and issue closure await independent/exact integrated acceptance; no release acceptance is claimed.
