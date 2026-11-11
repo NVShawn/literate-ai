@@ -1,0 +1,135 @@
+{
+  "schema": "literate-ai/development-installed-qualification@1",
+  "goal": "CLI-IMPORT-001",
+  "issue": 121,
+  "source_revision": "8a57eeb688019f0cf86f5a8af57663ab9adfb55a",
+  "classification": "native macOS and Windows noneditable installed-wheel qualification; source matrix passes; resulting-main and final lifecycle open",
+  "platforms": [
+    {
+      "platform": "macos",
+      "source_revision": "8a57eeb688019f0cf86f5a8af57663ab9adfb55a",
+      "workflow_run": 42873720744,
+      "wheel_identity": "sha256:0a7a7782d5763a45f2617f6bde12521988e10f3ebbc270c9ebe024c8991800c1",
+      "archive_bytes": 4253599,
+      "retained_manifest_sha256": "968610de9b3cf4e163f4c6dc5bfe0e17c3fa135a3b3a52d5ac2ef82dcf989bd3",
+      "full_wheel_gate_ok": true,
+      "installed_project_commands": {
+        "cases": [
+          "test_mac_command_still_rejects_strict_schema_violation",
+          "test_project_import_does_not_initialize_optional_schema_parsers"
+        ],
+        "fixture_sha256": "0f635e7b33c44c8af298663f816f04074ed835495bd465fbc36cc9e37d0ff9d4",
+        "framework_module_count": 500,
+        "installed_module_origins_verified": true,
+        "modules": {
+          "literate_ai.adapters.mac_project_contract": {
+            "relative_path": "lib/python3.14/site-packages/literate_ai/adapters/mac_project_contract.py",
+            "sha256": "3fb7589df2cb74a76b7def10abf5d4fab6b4000fb4e0f0056b9720f6fb28aed0"
+          },
+          "literate_ai.cli.project": {
+            "relative_path": "lib/python3.14/site-packages/literate_ai/cli/project.py",
+            "sha256": "2297a793e5bc61cd1ee053eb463f697a6267c0626c52b420cef94a7aba71670d"
+          }
+        },
+        "passed": 2,
+        "platform": "darwin",
+        "selected": 2,
+        "skipped": 0,
+        "status": "passed"
+      },
+      "archive_manifest_source_and_probe_independently_reconciled": true,
+      "python": "3.14"
+    },
+    {
+      "platform": "windows",
+      "source_revision": "8a57eeb688019f0cf86f5a8af57663ab9adfb55a",
+      "workflow_run": 42873720744,
+      "wheel_identity": "sha256:5e0c2e8b2be0dbfb20a633c1bc6dc47fa67f70bb8fd9dae11a2b4102f5d91ae1",
+      "archive_bytes": 4253718,
+      "retained_manifest_sha256": "01af54d5e740528b711bf5e20ecee90d31fc61f33bbc74494baf48a82080e17f",
+      "full_wheel_gate_ok": true,
+      "installed_project_commands": {
+        "cases": [
+          "test_mac_command_still_rejects_strict_schema_violation",
+          "test_project_import_does_not_initialize_optional_schema_parsers"
+        ],
+        "fixture_sha256": "0f635e7b33c44c8af298663f816f04074ed835495bd465fbc36cc9e37d0ff9d4",
+        "framework_module_count": 500,
+        "installed_module_origins_verified": true,
+        "modules": {
+          "literate_ai.adapters.mac_project_contract": {
+            "relative_path": "Lib/site-packages/literate_ai/adapters/mac_project_contract.py",
+            "sha256": "3fb7589df2cb74a76b7def10abf5d4fab6b4000fb4e0f0056b9720f6fb28aed0"
+          },
+          "literate_ai.cli.project": {
+            "relative_path": "Lib/site-packages/literate_ai/cli/project.py",
+            "sha256": "2297a793e5bc61cd1ee053eb463f697a6267c0626c52b420cef94a7aba71670d"
+          }
+        },
+        "passed": 2,
+        "platform": "win32",
+        "selected": 2,
+        "skipped": 0,
+        "status": "passed"
+      },
+      "archive_manifest_source_and_probe_independently_reconciled": true,
+      "python": "3.12"
+    },
+    {
+      "platform": "macos",
+      "python": "3.11",
+      "source_revision": "8a57eeb688019f0cf86f5a8af57663ab9adfb55a",
+      "workflow_run": 42873720744,
+      "wheel_identity": "sha256:44b9bbc8224b92082101913fc0fed18991b8393b4586fd0a8298b5c688b71094",
+      "archive_bytes": 4253599,
+      "retained_manifest_sha256": "47349b9ad327d80dee11ea655cb2873418e09d4e4daad6ac40f1560423a02fcb",
+      "full_wheel_gate_ok": true,
+      "installed_project_commands": {
+        "cases": [
+          "test_mac_command_still_rejects_strict_schema_violation",
+          "test_project_import_does_not_initialize_optional_schema_parsers"
+        ],
+        "fixture_sha256": "0f635e7b33c44c8af298663f816f04074ed835495bd465fbc36cc9e37d0ff9d4",
+        "framework_module_count": 500,
+        "installed_module_origins_verified": true,
+        "modules": {
+          "literate_ai.adapters.mac_project_contract": {
+            "relative_path": "lib/python3.11/site-packages/literate_ai/adapters/mac_project_contract.py",
+            "sha256": "3fb7589df2cb74a76b7def10abf5d4fab6b4000fb4e0f0056b9720f6fb28aed0"
+          },
+          "literate_ai.cli.project": {
+            "relative_path": "lib/python3.11/site-packages/literate_ai/cli/project.py",
+            "sha256": "2297a793e5bc61cd1ee053eb463f697a6267c0626c52b420cef94a7aba71670d"
+          }
+        },
+        "passed": 2,
+        "platform": "darwin",
+        "selected": 2,
+        "skipped": 0,
+        "status": "passed"
+      },
+      "archive_manifest_source_and_probe_independently_reconciled": true
+    }
+  ],
+  "remaining": [
+    "Resulting-main CI and final configured lifecycle/receipt renewal; retain complete original gate evidence.",
+    "Complete release acceptance and publication remain separate from these native controls."
+  ],
+  "goal_complete": false,
+  "release_attestation": false,
+  "candidate_workflow": {
+    "run": 42873720744,
+    "source_revision": "8a57eeb688019f0cf86f5a8af57663ab9adfb55a",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": 27,
+    "successful_jobs": 27
+  },
+  "pull_request": 395,
+  "merge_revision": "8f01fc77d643ee58359e120945a6f8fea2e5d63a",
+  "resulting_main_ci": {
+    "run": 42887279572,
+    "status": "pending; inspect live provider state"
+  },
+  "linux_record": "verification/project-command-imports-installed-linux.json"
+}
