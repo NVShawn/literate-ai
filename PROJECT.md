@@ -115,6 +115,14 @@ development (2026-09-10):
 
 ## Current work
 
+QUALIFICATION-ERROR-001 and NATIVE-ACCEPTANCE-REPAIR-001 include newly observed
+issues #404 and #405 in 1.4 under Goals 1 and 4. Typed native acceptance rejection
+must remain distinct from archive I/O failure. Generated native-library repair
+requires an explicitly reviewed package-to-attempt custody boundary and the existing
+shared finite retry budget; source custody and private verifier authority remain
+unchanged. PR #406 is under qualification; root-repair design and acceptance remain
+open.
+
 CUDA-SIGNAL-001 records issue #396 as blocking 1.4.0 work under Goals 1, 2, 4
 and 5. Inert source inventory must preserve original bytes and propose CUDA only
 from CUDA-specific evidence; vendor attribution alone must not add an accelerator

@@ -297,6 +297,12 @@
       },
       {
         "id": "CUDA-SIGNAL-001"
+      },
+      {
+        "id": "QUALIFICATION-ERROR-001"
+      },
+      {
+        "id": "NATIVE-ACCEPTANCE-REPAIR-001"
       }
     ]
   }

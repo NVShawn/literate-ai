@@ -34382,3 +34382,36 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
+
+### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
+
+- **Priority:** P1
+- **Owner:** Framework qualification CLI; PROJECT Goals 1 and 4
+- **Direction:** Include issue 404: typed independent native acceptance rejection must not become a retained archive publication error.
+- **Conclusion:** PR406 preserves known ComponentAcceptanceError codes and messages while leaving actual archive I/O failure handling unchanged. Admission, source custody and repair eligibility remain unchanged; contributor full/installed and resulting-main qualification remain open.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Review and integrate PR406 without changing native acceptance or archive authority.
+- **Evidence:**
+  - [ ] Pass maintained public qualification CLI controls with and without retention, actual archive write failure, whole candidate source/installed checks and exact-head/resulting-main integration.
+
+### [ ] NATIVE-ACCEPTANCE-REPAIR-001 — Bind generated native-library acceptance rejection to bounded candidate repair
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#405](https://github.com/jordanhubbard/literate-ai/issues/405)
+
+- **Priority:** P1
+- **Owner:** Standard generated-candidate attempt chain and packaged independent acceptance; PROJECT Goals 1 and 4
+- **Direction:** Include issue 405: a generated native-library root result mismatch occurs outside the existing bounded candidate-repair loop.
+- **Conclusion:** Review the minimal typed boundary joining exact rejected-package custody to its generated root candidate and existing attempt chain before enabling repair. Reuse the shared finite budget and changed-request/fresh-workspace rules; keep private oracle material, arbitrary native stderr, authority/custody/deadline failures and retained/original source outside repair eligibility. New capability design requires ADR review under ADR0006 if the existing accepted repair authority does not cover that boundary.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Audit existing accepted repair authority and specify/review exact root package-to-attempt custody before implementation.
+  - [ ] Implement only the reviewed generated native-library root route with sanitized feedback, preserved rejected evidence and the existing shared finite retry budget.
+- **Evidence:**
+  - [ ] Prove same-authority fresh-request/workspace repair, complete validation/build/test/execution/acceptance replay, retry exhaustion, terminal custody/original-source failures and no admission on failure through installed public qualification.
