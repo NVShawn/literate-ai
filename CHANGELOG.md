@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Derive authored qualification recipes and commands from live canonical project,
+  model and native-tool owners, with bounded scopes that reject copied or expired
+  projections before reopening. Publication and receiving admission remain in progress (#393).
+
 - Reopen authored run evidence through shared Standard provenance, authorization,
   native-stage, receipt and generated-case checks before reading retained products.
   Public apply, recoverable publication and receiving admission remain in progress (#393).
