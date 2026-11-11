@@ -12,7 +12,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from literate_ai.adapters.builders import (
     DEFAULT_ZIG_MINIMUM_VERSION,
@@ -318,6 +318,10 @@ class StandardProjectRuntimeReadiness:
 
     ready: bool
     blockers: tuple[str, ...]
+
+
+if TYPE_CHECKING:
+    from literate_ai.adapters.generation_preparation import PreparedLockedGeneration
 
 
 @dataclass(frozen=True, slots=True)
@@ -3704,6 +3708,7 @@ def assemble_filesystem_standard_project_runtime(
     native_sdk_inputs=None,
     bazel_cache_arguments: tuple[str, ...] = (),
     shared_cache: BoundSharedCache | None = None,
+    candidate_verification_authority: PreparedLockedGeneration | None = None,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> FilesystemStandardProjectRuntime:
     """Wire an explicit component-scoped host runtime, never a default CLI claim."""
@@ -3764,6 +3769,20 @@ def assemble_filesystem_standard_project_runtime(
         FilesystemStandardCandidateRepairAdapter,
     )
 
+    candidate_verifier = None
+    if (
+        candidate_verification_authority is not None
+        and toolchain_closure.cargo_targets
+        and independent_acceptance_oracle is not None
+    ):
+        from literate_ai.adapters.native_candidate_verification import (
+            _native_candidate_verifier,
+        )
+
+        candidate_verifier = _native_candidate_verifier(
+            candidate_verification_authority, ports
+        )
+
     application = assemble_standard_project_application_service(
         ports=ports,
         generator=register_source_generator(generator, registry),
@@ -3774,6 +3793,7 @@ def assemble_filesystem_standard_project_runtime(
         candidate_repair_port=FilesystemStandardCandidateRepairAdapter(
             ports.failure_diagnostics
         ),
+        generated_candidate_verifier=candidate_verifier,
         clock=clock,
     )
     return FilesystemStandardProjectRuntime(
@@ -3857,6 +3877,7 @@ def compose_filesystem_standard_source_cache(
         checkpoint_recorder=runtime.checkpoint_store,
         context_evidence_recorder=runtime.context_evidence_recorder,
         candidate_repair_port=runtime.application.lifecycle.candidate_repair_port,
+        generated_candidate_verifier=runtime.application.lifecycle.generated_candidate_verifier,
         clock=runtime.application.lifecycle.clock,
     )
     return replace(
@@ -3892,6 +3913,7 @@ def compose_filesystem_standard_lifecycle_checkpoints(
         checkpoint_recorder=store,
         context_evidence_recorder=runtime.context_evidence_recorder,
         candidate_repair_port=lifecycle.candidate_repair_port,
+        generated_candidate_verifier=lifecycle.generated_candidate_verifier,
         clock=lifecycle.clock,
     )
     return replace(runtime, application=application, checkpoint_store=store)

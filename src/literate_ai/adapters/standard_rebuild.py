@@ -979,6 +979,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         shared_cache = shared_cache.bind_compiler_tool()
     runtime = assemble_filesystem_standard_project_runtime(
         generator=generator,
+        candidate_verification_authority=prepared,
         object_root=object_root,
         toolchain_closure=closure,
         python_wheelhouse=(

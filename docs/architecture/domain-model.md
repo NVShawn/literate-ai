@@ -430,6 +430,21 @@ claim that contract, perform general compiler/linker repair, or feed diagnostics
 the model. Model selectors attach to stage capability requirements, not four globally
 required names.
 
+The Standard project lifecycle has a separate bounded generated-candidate policy.
+For a fresh single-node Rust library with a version-2 native oracle, the genuine
+prepared snapshot, locked public surface and original Cargo/Rust owners can run
+the independent verifier before provisional node acceptance becomes a cache member.
+Only exact `component_acceptance.rust_harness_result_mismatch` at ACCEPT joins
+the existing three-total-candidate budget. Each replacement uses the same approved
+authority and a fresh source workspace; feedback contains a fixed category and
+identities, never held-out cases, results, harness bytes or raw stderr. Failed
+candidates remain retained and unadmitted. Sealed export bytes, live package
+custody and native executable/tool pins close on rejection as well as success;
+custody, command, timeout, protocol and authority failures remain terminal.
+Cached or retained candidates and broader graphs do not acquire this route.
+Final packaged independent acceptance and clean qualification remain mandatory.
+This Standard policy does not change the conservative sample pilot above.
+
 A `WorkflowRun` separates:
 
 - `RunInputIdentity`: deterministic definition/spec/composition/workflow/policy and

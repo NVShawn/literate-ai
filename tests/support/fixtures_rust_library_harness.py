@@ -9,7 +9,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import shlex
 import shutil
+import subprocess
+import tempfile
+import unittest
 from dataclasses import replace
 from pathlib import Path
 
@@ -63,6 +68,66 @@ HARNESS = b"""fn main() {
   "schema":"literate-ai/library-acceptance-results@1","cases":rows}));
 }
 """
+
+
+def prepare_native_verifier_class(cls):
+    """Provision a genuine direct-native class seed once, before oracle capture."""
+    from literate_ai.adapters.builders.cargo import discover_cargo_toolchain
+    from literate_ai.adapters.builders.rust import discover_rust_toolchain
+    from literate_ai.adapters.lifecycle.standard_local import (
+        LocalComponentToolBinding,
+    )
+    from tests.support.fixtures_rust_harness_vendor import CRATES
+    from tests.support.fixtures_rust_library_harness import prepare_seed
+
+    if not shutil.which("cargo") or not shutil.which("rustc"):
+        raise unittest.SkipTest("native Cargo and rustc are unavailable")
+    candidates = tuple((Path.home() / ".cargo/registry/cache").glob("*"))
+    archives = next(
+        (
+            root
+            for root in candidates
+            if all((root / (name + ".crate")).is_file() for name in CRATES)
+        ),
+        None,
+    )
+    if archives is None:
+        raise unittest.SkipTest("exact real upstream Rust fixture archives unavailable")
+    cls.temporary = tempfile.TemporaryDirectory(prefix="native Rust verifier seed ")
+    cls.addClassCleanup(cls.temporary.cleanup)
+    cls.seed = Path(cls.temporary.name).resolve()
+    cls.environment = {
+        name: value
+        for name, value in os.environ.items()
+        if not name.startswith(("CARGO_", "RUST"))
+    }
+    # This named direct-native profile is selected and measured BEFORE its
+    # oracle is authored. It does not silently replace a pinned shim route.
+    # Ordinary rustup execution under isolated HOME remains unqualified.
+    observed_rust = discover_rust_toolchain(cls.environment)
+    native_rust = Path(observed_rust.compiler_executable)
+    native_cargo = native_rust.with_name("cargo.exe" if os.name == "nt" else "cargo")
+    if not native_cargo.is_file():
+        raise unittest.SkipTest("direct native Cargo/Rust fixture profile unavailable")
+    cls.cargo = LocalComponentToolBinding.from_observed_toolchain(
+        discover_cargo_toolchain(cls.environment, pinned_command=(str(native_cargo),))
+    )
+    cls.rustc = LocalComponentToolBinding.from_observed_toolchain(
+        discover_rust_toolchain(
+            {
+                **cls.environment,
+                "RUSTC": (
+                    subprocess.list2cmdline([str(native_rust)])
+                    if os.name == "nt"
+                    else shlex.quote(str(native_rust))
+                ),
+            }
+        )
+    )
+    prepare_seed(cls.seed, archives, cls.cargo, cls.environment)
+    # Later native checks and public rebuilds share the prepared fixture home;
+    # retain the operator HOME and exact native tool bindings unchanged.
+    cls.environment["CARGO_HOME"] = str(cls.seed / "cargo-home")
 
 
 def prepare_seed(root, archive_directory, cargo, environment):

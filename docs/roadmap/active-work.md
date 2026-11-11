@@ -34417,3 +34417,36 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] Maintained source/derivation/export/projection and qualification/capture checks: 161 observed method successes with eight optional-tool skips (seven unchanged Go-backend controls and one external CodeGraph control). The four initially fixture-skipped source-projection methods passed after supplying the declared pip 26.2.1 wheel. Full strict Ruff and formatting pass across 1,890 files; original negative and setup outcomes remain preserved.
 - **Confirming CI / review renewal:** The first PR run passed all 2,744 Python test executions (110 declared skips), lint, formatting and documentation, then correctly refused the stale lifecycle-driver review for the single changed inventory file. That applicable local review gate was omitted before the first push. The maintained local review reproduces the refusal; the reviewed detector delta is now re-pinned through `driver-review-record`, with unchanged runner review and renewed documentation-authority review. The original failed run remains failed; corrected-head CI and installed-wheel qualification remain pending.
 - **Next action:** Upstream PR review and confirming CI. This classifier correction does not itself qualify generated code, a GPU target or a retained consumer.
+
+### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+
+- **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
+
+- **Priority:** P1
+- **Owner:** Framework qualification CLI; PROJECT Goals1and4
+- **Direction:** Issue404: report typed independent native acceptance rejection truthfully when retained evidence is requested.
+- **Conclusion:** Preserve known acceptance error code/message through the public CLI; retain existing archive I/O failure classification and all authority refusal.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Handle typed acceptance failure separately from archive publication errors.
+- **Evidence:**
+  - [x] Public CLI controls with and without retained store preserve mismatch code, no output/admission; genuine archive write failure remains unchanged. The maintained module passes all16tests after the original public-code failure is preserved.
+  - [ ] Complete independent source review, full contributor/installed gates and exact-head/main integration before closing.
+
+### [ ] CANDIDATE-NATIVE-REPAIR-001 — Bind native-library rejection to existing bounded candidate repair
+
+- **GitHub issue:** [#405](https://github.com/jordanhubbard/literate-ai/issues/405)
+
+- **Priority:** P1
+- **Owner:** Framework Standard candidate repair and root integration; PROJECT Goals1and4
+- **Direction:** Issue405: allow narrowly attributable native result rejection to drive fresh same-authority repair through the existing finite attempt chain.
+- **Conclusion:** Prepare the smallest single-generated-library route preserving exact rejected package/source custody, recipe, changed request, fresh workspace and one shared retry budget; do not add a second retry framework or expose private oracle data.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Specify the fresh single-node Rust-v2 bridge into the existing three-total-candidate loop, with provisional acceptance before cache admission and fixed-category feedback only.
+  - [x] Implement reviewed exact result rejection; join current export bytes to the sealed build blob, retain package custody, and close native executable/tool pins on rejection as well as success.
+- **Evidence:**
+  - [x] Seven real native public-CLI controls pass: fresh same-authority repair, shared generated-test/native budget, exhaustion, command refusal, and actual export-before/export-during/native-executable mutation refusal. Twelve focused contract/lifecycle controls pass; independent source review covers both custody guards and prompt privacy.
+  - [ ] Run the full local source gates and qualify the exact noneditable wheel before treating the implementation as ready for downstream consumption.

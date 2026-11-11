@@ -7,6 +7,15 @@
   retained-host integration remain unchanged (#402).
 
 - Source inventory no longer infers CUDA from NVIDIA copyright/vendor attribution; explicit CUDA source, compiler, headers and runtime/driver API signals remain detectable (#396).
+
+- Preserve independent library-acceptance error codes in `spec qualify`, including
+  retained-evidence runs, while keeping archive I/O failures distinct (#404).
+
+- Fresh single-node Rust libraries can replace a candidate after an exact native
+  public-result rejection within the existing three-candidate budget. Private
+  oracle content stays out of feedback, custody drift remains terminal, and final
+  packaged acceptance still runs (#405).
+
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 

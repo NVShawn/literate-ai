@@ -67,6 +67,7 @@ from literate_ai.application.standard_lifecycle_ports import (
     ComponentLinker,
     ComponentTester,
     ExecutionProviderEvidenceReceiver,
+    GeneratedCandidateVerifier,
     GenerationIndexer,
     IndependentProjectAcceptor,
     PackagedProjectExecutor,
@@ -163,6 +164,12 @@ from literate_ai.contracts.standard_source_admission import (
 )
 from literate_ai.diagnostics import trace_exception
 from literate_ai.security import BuildAuthorization, BuildRequest
+
+
+class _GeneratedCandidateRejected(RuntimeError):
+    def __init__(self, failure: StandardNodeFailureEvidence) -> None:
+        self.failure = failure
+        super().__init__(failure.code)
 
 
 class StandardProjectLifecycleError(RuntimeError):
@@ -1506,6 +1513,7 @@ class StandardProjectLifecycleService:
         checkpoint_recorder: StandardLifecycleCheckpointRecorder | None = None,
         context_evidence_recorder: StandardContextEvidenceRecorder | None = None,
         candidate_repair_port: StandardCandidateRepairPort | None = None,
+        generated_candidate_verifier: GeneratedCandidateVerifier | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.validator = validator
@@ -1532,6 +1540,7 @@ class StandardProjectLifecycleService:
         self.checkpoint_recorder = checkpoint_recorder
         self.context_evidence_recorder = context_evidence_recorder
         self.candidate_repair_port = candidate_repair_port
+        self.generated_candidate_verifier = generated_candidate_verifier
         self.clock = clock
 
     def _record_stage(
@@ -3927,10 +3936,41 @@ class StandardProjectLifecycleService:
                 source_admission_identity=source_admission_identity,
             )
         record_stage(StandardLifecycleStage.EXECUTE, execution)
+
+        def accept_candidate():
+            raw = self.acceptor.accept(plan, test, execution)
+            verifier = self.generated_candidate_verifier
+            if (
+                verifier is not None
+                and source_generation.disposition
+                is SourceGenerationDisposition.GENERATED
+                and source_output.provenance.retained_source_identity is None
+                and source_cache_membership is None
+                and not isinstance(self.acceptor, AdmittedComponentAcceptor)
+            ):
+                if not isinstance(raw, StandardComponentAcceptanceEvidence):
+                    raise StandardProjectLifecycleError(
+                        "standard_lifecycle.candidate_verification_evidence_missing",
+                        "native candidate verification requires strict stage evidence",
+                    )
+                failure = verifier.verify(plan, source_output, raw)
+                if failure is not None:
+                    if (
+                        not isinstance(failure, StandardNodeFailureEvidence)
+                        or failure.component_revision != plan.component_revision
+                        or failure.phase is not StandardNodeFailurePhase.ACCEPT
+                    ):
+                        raise StandardProjectLifecycleError(
+                            "standard_lifecycle.candidate_verification_failure_invalid",
+                            "native candidate rejection must bind its exact Component",
+                        )
+                    raise _GeneratedCandidateRejected(failure)
+            return raw
+
         try:
             raw_acceptance = yield _LifecycleStep(
                 StandardLifecycleStage.ACCEPT,
-                lambda: self.acceptor.accept(plan, test, execution),
+                accept_candidate,
                 require_current_authorization,
                 reserve=(
                     lambda: self.acceptor.try_reserve_accept(plan, test, execution)
@@ -3969,7 +4009,9 @@ class StandardProjectLifecycleService:
                 source_generation,
                 source_output,
                 plan.identity,
-                _failure(
+                exc.failure
+                if isinstance(exc, _GeneratedCandidateRejected)
+                else _failure(
                     plan.component_revision,
                     StandardNodeFailurePhase.ACCEPT,
                     plan.identity,

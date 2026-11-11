@@ -333,6 +333,17 @@ class StandardCandidateRepairPort(Protocol):
     ) -> PreparedComponentGenerationNode[object, object]: ...
 
 
+class GeneratedCandidateVerifier(Protocol):
+    """Check a fresh candidate before its existing bounded attempt is accepted."""
+
+    def verify(
+        self,
+        plan: StandardComponentBuildPlan,
+        output: SourceGenerationRunOutput,
+        evidence: StandardComponentAcceptanceEvidence,
+    ) -> StandardNodeFailureEvidence | None: ...
+
+
 class CompleteAcceptedSourceCachePublisher(Protocol):
     """Persist the complete typed custody needed for a Standard cache round trip."""
 

@@ -611,9 +611,14 @@ def execute_rust_library_harness(
         result = run(
             (str(executable), str(export), surface_document, cases_document), "execute"
         )
-        _require_results(result.stdout, oracle)
-        native.require_unchanged()
-        current()
+        try:
+            _require_results(result.stdout, oracle)
+        finally:
+            # A semantic rejection is actionable only while the exact native
+            # executable, tools and library remain current. Drift overrides a
+            # mismatch rather than escaping these pins via the exception path.
+            native.require_unchanged()
+            current()
         observation = {
             "schema": "literate-ai/rust-library-harness-execution@1",
             "oracle_identity": oracle.identity.uri,
