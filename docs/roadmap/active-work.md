@@ -34411,3 +34411,19 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] Six public-CLI controls pass, including actual root external acceptance and its locks/audit/lineage, default-parent failure, invalid public combinations, and direct namespace defense before target effects; twelve related controls and strict lint/format/layout/public-export gates pass.
   - [x] The maintained checkpointed Python gate passes with 2,777 selected cases, 2,613 passed, 164 declared skips and no failures or known failures. Independent controller-agent source review precedes the lifecycle-driver repin; runner and documentation authority remain current. The ordinary worker documentation gate passes 22 tooling controls and renders 181 diagrams from 1,950 Markdown files with normal browser sandboxing; four strict OpenSpec items pass.
   - [ ] Complete exact-candidate noneditable installed-wheel qualification and confirming CI before upstream landing. No generated-provider or downstream source-retirement authority is claimed.
+
+### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+
+- **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
+
+- **Priority:** P1
+- **Owner:** Framework qualification CLI; PROJECT Goals1and4
+- **Direction:** Issue404: report typed independent native acceptance rejection truthfully when retained evidence is requested.
+- **Conclusion:** Preserve known acceptance error code/message through the public CLI; retain existing archive I/O failure classification and all authority refusal.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Handle typed acceptance failure separately from archive publication errors.
+- **Evidence:**
+  - [x] Public CLI controls with and without retained store preserve mismatch code, no output/admission; genuine archive write failure remains unchanged. The maintained module passes all16tests after the original public-code failure is preserved.
+  - [ ] Complete independent source review, full contributor/installed gates and exact-head/main integration before closing.

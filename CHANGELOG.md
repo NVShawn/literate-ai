@@ -8,6 +8,10 @@
 
 - Remote evidence transfer preserves stricter inherited POSIX soft and hard
   file-size ceilings, including zero limits (#372).
+
+- Preserve independent library-acceptance error codes in `spec qualify`, including
+  retained-evidence runs, while keeping archive I/O failures distinct (#404).
+
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 
