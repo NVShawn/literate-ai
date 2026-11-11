@@ -1714,7 +1714,11 @@ def assert_lifecycle_does_not_require_project_codegraph(
 
 @_timed("scenario.bootstrap_real_worker_runtime")
 def bootstrap_real_worker_runtime(
-    root: Path, wheel: Path, distribution_identity: str
+    root: Path,
+    wheel: Path,
+    distribution_identity: str,
+    *,
+    wheel_directory: Path | None = None,
 ) -> tuple[Path | None, dict[str, object] | None]:
     """Install the real wheel as a Standard worker does."""
 
@@ -1733,6 +1737,7 @@ def bootstrap_real_worker_runtime(
         wheel,
         wheelhouse,
         framework_distribution_identity=distribution_identity,
+        wheel_directory=wheel_directory,
     )
     environment = root / "worker-runtime"
     launcher, installed = bootstrap_worker_wheelhouse(
@@ -1760,7 +1765,11 @@ def bootstrap_real_worker_runtime(
 
 @_timed("scenario.bootstrap_uv_tool_worker_runtime")
 def bootstrap_uv_tool_worker_runtime(
-    root: Path, wheel: Path, distribution_identity: str
+    root: Path,
+    wheel: Path,
+    distribution_identity: str,
+    *,
+    wheel_directory: Path | None = None,
 ) -> dict[str, object] | None:
     """Prove a normal uv tool install can export and bootstrap its exact wheel."""
 
@@ -1783,6 +1792,11 @@ def bootstrap_uv_tool_worker_runtime(
         "--force",
         "--python",
         sys.executable,
+        *(
+            ("--no-index", "--find-links", str(wheel_directory), "--no-build")
+            if wheel_directory is not None
+            else ()
+        ),
         str(wheel),
         cwd=root,
         env=environment,
@@ -1818,6 +1832,7 @@ def bootstrap_uv_tool_worker_runtime(
             distribution_identity,
             "--output",
             str(wheelhouse),
+            *(("--wheel-directory", str(wheel_directory)) if wheel_directory else ()),
             cwd=root,
             env=environment,
         ).stdout
@@ -2179,6 +2194,11 @@ def _main() -> int:
         "--wheel", type=Path, help="qualify these already-built wheel bytes"
     )
     parser.add_argument(
+        "--worker-wheel-directory",
+        type=Path,
+        help="use reviewed dependency wheels for offline installs and worker export",
+    )
+    parser.add_argument(
         "--timing-report",
         type=Path,
         help="retain bounded operation timing spans without command arguments",
@@ -2224,6 +2244,25 @@ def _main() -> int:
         ThreadPoolExecutor(max_workers=1, thread_name_prefix="wheel-html") as fixtures,
     ):
         root = Path(directory)
+        worker_wheel_directory = None
+        worker_dependency_inputs: dict[str, str] = {}
+        dependency_install_arguments: tuple[str, ...] = ()
+        if arguments.worker_wheel_directory is not None:
+            from literate_ai.remote_worker_bootstrap import _stage_local_wheels
+
+            # Validate and snapshot before any dependency installer executes.
+            # Later source changes cannot retarget this owned offline input set.
+            worker_wheel_directory = root / "reviewed-worker-wheels"
+            dependency_install_arguments = (
+                *_stage_local_wheels(
+                    arguments.worker_wheel_directory, worker_wheel_directory
+                ),
+                "--only-binary=:all:",
+            )
+            worker_dependency_inputs = {
+                path.name: file_identity(path)
+                for path in sorted(worker_wheel_directory.iterdir())
+            }
         parent_source = _remotes_stripped_parent(
             repository, root / "parent.git", git_revision
         )
@@ -2269,6 +2308,7 @@ def _main() -> int:
             "-m",
             "pip",
             "install",
+            *dependency_install_arguments,
             str(wheel_files[0]),
             cwd=root,
         )
@@ -2350,10 +2390,16 @@ def _main() -> int:
             )
             cache_continuation.update(qualified=True, platform=sys.platform)
         worker_litai, worker_runtime = bootstrap_real_worker_runtime(
-            root, wheel_files[0], standard_binding["distribution"]
+            root,
+            wheel_files[0],
+            standard_binding["distribution"],
+            wheel_directory=worker_wheel_directory,
         )
         uv_tool_worker_runtime = bootstrap_uv_tool_worker_runtime(
-            root, wheel_files[0], standard_binding["distribution"]
+            root,
+            wheel_files[0],
+            standard_binding["distribution"],
+            wheel_directory=worker_wheel_directory,
         )
         second_environment = root / "environment-two"
         _create_environment(second_environment)
@@ -2368,6 +2414,7 @@ def _main() -> int:
             "-m",
             "pip",
             "install",
+            *dependency_install_arguments,
             str(wheel_files[0]),
             cwd=root,
         )
@@ -2413,6 +2460,7 @@ def _main() -> int:
             "-m",
             "pip",
             "install",
+            *dependency_install_arguments,
             str(repeated_wheel_files[0]),
             cwd=root,
         )
@@ -3056,6 +3104,28 @@ def _main() -> int:
                 cwd=root,
             ).stdout
         )
+        identity_migration = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-B",
+                str(
+                    repository / "tests/support/installed_identity_migration_journey.py"
+                ),
+                str(root / "identity-migration"),
+                standard_binding["distribution"],
+                parent_source,
+                cwd=root,
+            ).stdout
+        )
+        if (
+            identity_migration.get("qualified") is not True
+            or identity_migration.get("framework_distribution")
+            != standard_binding["distribution"]
+            or identity_migration.get("renames") != 2
+            or identity_migration.get("synthetic_framework_observers") is not False
+        ):
+            raise RuntimeError("installed project identity migration did not qualify")
         rust_harness = json.loads(
             run(
                 str(python),
@@ -3079,6 +3149,11 @@ def _main() -> int:
             or rust_harness.get("synthetic_framework_observers") is not False
         ):
             raise RuntimeError("actual installed Rust framework and receipt required")
+        if worker_wheel_directory is not None and worker_dependency_inputs != {
+            path.name: file_identity(path)
+            for path in sorted(worker_wheel_directory.iterdir())
+        }:
+            raise RuntimeError("reviewed worker dependency snapshot changed")
         if (
             run("git", "rev-parse", "HEAD", cwd=repository).stdout.strip()
             != git_revision
@@ -3146,6 +3221,7 @@ def _main() -> int:
                     "html_observability": html_observability,
                     "tree_html": tree_html,
                     "rust_library_harness": rust_harness,
+                    "project_identity_migration": identity_migration,
                     "skills": sorted(installed),
                     "snapshot_replication_schema": replication_schema,
                     "version_contract": version_contract,
@@ -3168,6 +3244,7 @@ def _main() -> int:
                     "project_source_intelligence": source_intelligence,
                     "project_codegraph_lifecycle": lifecycle_codegraph_evidence,
                     "worker_runtime": worker_runtime,
+                    "worker_dependency_inputs": worker_dependency_inputs,
                     "uv_tool_worker_runtime": uv_tool_worker_runtime,
                     "project_update_origin": upstream_origin,
                     "project_reparent_noop": True,

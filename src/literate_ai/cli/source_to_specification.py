@@ -2457,6 +2457,7 @@ def _complete_standard_lifecycle_qualification(
     """Run and admit only the filesystem Standard lifecycle qualification contract."""
 
     from literate_ai.adapters.authority import AuthorityProjectionStoreError
+    from literate_ai.adapters.component_acceptance import ComponentAcceptanceError
     from literate_ai.adapters.generation_preparation import (
         FilesystemLockedGenerationApplicationAdapter,
         GenerationPreparationError,
@@ -2650,7 +2651,11 @@ def _complete_standard_lifecycle_qualification(
                     for capture in adapter.library_captures
                 ],
             }
-    except (FilesystemQualificationError, SourceToSpecificationError) as exc:
+    except (
+        FilesystemQualificationError,
+        SourceToSpecificationError,
+        ComponentAcceptanceError,
+    ) as exc:
         raise CliFailure(
             getattr(exc, "code", "qualification.lifecycle_failed"),
             getattr(exc, "message", str(exc)),
@@ -2822,6 +2827,13 @@ def _complete_standard_lifecycle_qualification(
 
 
 def spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
+    if args.spec_command == "accept" and getattr(args, "root_project", False):
+        if args.project_target is None or args.integrate_project is not None:
+            raise CliFailure(
+                "promotion.root_project_target_required",
+                "--root-project requires a standalone --project-target and "
+                "cannot be used with --integrate-project",
+            )
     if args.spec_command == "accept" and getattr(args, "integrate_project", None):
         from literate_ai.adapters.lifecycle_lock import (
             ProjectLifecycleLockError,
@@ -2975,6 +2987,15 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             ),
         }, 0
     if command == "review":
+        authority = ReviewAuthority(args.authority)
+        if authority is ReviewAuthority.POLICY and (
+            args.actor is None or not args.actor.strip()
+        ):
+            raise CliFailure(
+                "cli.review_actor_required",
+                "authorized-policy review requires an explicit non-empty --actor",
+            )
+        actor = "local-human" if args.actor is None else args.actor
         bundle, result = _unwrap_bundle(args.bundle)
         unknown_resolutions = set(args.resolve) - {
             item.uncertainty_id for item in result.uncertainty.items
@@ -3005,21 +3026,24 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             reviewed_artifacts, reviewed_validation = _static_review_artifacts(
                 result, reviewed_graph
             )
-        review = SpecificationReviewDecision(
-            review_id=canonical_digest(
-                {
-                    "draft_id": result.draft.draft_id,
-                    "actor": args.actor,
-                    "resolved": tuple(sorted(args.resolve)),
-                    "component_graph_identity": (
-                        None if reviewed_graph is None else reviewed_graph.identity
-                    ),
-                }
+        review_identity = {
+            "draft_id": result.draft.draft_id,
+            "actor": actor,
+            "resolved": tuple(sorted(args.resolve)),
+            "component_graph_identity": (
+                None if reviewed_graph is None else reviewed_graph.identity
             ),
+        }
+        # Preserve existing human review identities. A new policy review has a
+        # separate identity even for the same actor, draft and resolutions.
+        if authority is not ReviewAuthority.HUMAN:
+            review_identity["authority"] = authority.value
+        review = SpecificationReviewDecision(
+            review_id=canonical_digest(review_identity),
             draft_id=result.draft.draft_id,
             base_specification_set_id=result.request.previous_specification_set_id,
-            actor=args.actor,
-            authority=ReviewAuthority.HUMAN,
+            actor=actor,
+            authority=authority,
             reason=args.reason,
             statement_decisions=tuple(
                 ReviewStatementDecision(
@@ -3052,6 +3076,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             )
         return response, 0
     if command == "accept":
+        root_project = getattr(args, "root_project", False)
         replacement_path = getattr(args, "replace_native_child", None)
         replacement_planning = getattr(args, "plan_native_child_replacement", False)
         replacement_requested = replacement_path is not None or replacement_planning
@@ -3341,7 +3366,17 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             result,
             review,
             PromotionPolicy(
-                "signed-local-human-reviewed@1" if standalone else "human-reviewed@1"
+                ("signed-local-" if standalone else "")
+                + (
+                    "human-or-authorized-policy-reviewed@1"
+                    if args.allow_authorized_policy_review
+                    else "human-reviewed@1"
+                ),
+                allowed_authorities=(
+                    (ReviewAuthority.HUMAN, ReviewAuthority.POLICY)
+                    if args.allow_authorized_policy_review
+                    else (ReviewAuthority.HUMAN,)
+                ),
             ),
             expected_base_specification_set_id=result.request.previous_specification_set_id,
         )
@@ -3494,7 +3529,9 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         promoted_project = None
         if project_target is not None:
             try:
-                parent_selection = None
+                parent_selection = (
+                    RepositoryParentSelection.root() if root_project else None
+                )
                 if integration_project is not None:
                     from literate_ai.adapters.repository_lineage import (
                         FilesystemRepositoryLineageStore,
@@ -4103,7 +4140,15 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
 
     review = spec_commands.add_parser("review")
     review.add_argument("bundle")
-    review.add_argument("--actor", default="local-human")
+    review.add_argument(
+        "--actor", help="review actor; required for authorized-policy review"
+    )
+    review.add_argument(
+        "--authority",
+        choices=tuple(item.value for item in ReviewAuthority),
+        default=ReviewAuthority.HUMAN.value,
+        help="truthful review authority; does not grant acceptance permission",
+    )
     review.add_argument("--reason", default="reviewed exact source-backed draft")
     review.add_argument("--resolve", action="append", default=[])
     review.add_argument("--key")
@@ -4121,6 +4166,14 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
     accept.add_argument("--review", required=True)
     accept.add_argument("--target", required=True)
     accept.add_argument("--trust-key")
+    accept.add_argument(
+        "--allow-authorized-policy-review",
+        action="store_true",
+        help=(
+            "explicit operator opt-in to accept authorized-policy reviews; "
+            "default accepts human reviews only"
+        ),
+    )
     project_destination = accept.add_mutually_exclusive_group()
     project_destination.add_argument(
         "--project-target",
@@ -4134,6 +4187,14 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
         help=(
             "atomically create and register a source-free native child project "
             "inside an existing retained adopted project"
+        ),
+    )
+    accept.add_argument(
+        "--root-project",
+        action="store_true",
+        help=(
+            "with --project-target, explicitly create a root project without "
+            "inheriting a repository parent; default inheritance is unchanged"
         ),
     )
     replacement_mode = accept.add_mutually_exclusive_group()

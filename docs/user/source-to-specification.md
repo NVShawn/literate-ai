@@ -165,6 +165,19 @@ clear the gate. Update source, scope, evidence, or the review disposition delibe
 The signed review binds the Component graph identity. Editing, replacing, or omitting
 that graph after review invalidates acceptance.
 
+Human review remains the default. An automated reviewer operating under an explicit
+operator policy must identify its actual actor and select
+`--authority authorized-policy`; an actor label alone does not select authority.
+Policy review requires a non-empty explicit `--actor`. Its signature binds the chosen
+authority, source-backed decisions and graph. It does not claim human approval.
+
+Acceptance separately requires the operator's `--allow-authorized-policy-review`
+opt-in for that review. Without the flag, policy review is denied and no accepted
+target is created. Neither source content nor the review artifact supplies this
+permission. The accepted set records the actual selected promotion policy; ordinary
+human reviews retain their existing identities and human-only policy by default.
+These flags do not authorize host execution or waive separately required approvals.
+
 ## 4. Accept into a complete spec-driven project
 
 ```console
@@ -371,6 +384,12 @@ the current pointer atomically from the old qualified projection to the fresh
 qualified projection; retained-source authority is never exposed as current. Use the
 returned archive reference for the reviewed retained-library binding. Archive
 publication alone does not authorize importer admission.
+
+An independent library-acceptance rejection keeps its stable acceptance error
+code and message, including when `--retained-evidence-store` is requested. The
+rejected candidate is not qualified or admitted. Actual retained archive
+publication failures use `qualification.retained_publication_failed`; that code
+does not replace a typed native acceptance mismatch.
 
 If the capture command was introduced by a newer Standard wheel, preserve the exact
 pre-rebind `literate.project.json` before applying the reviewed Standard rebind. Pass

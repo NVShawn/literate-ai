@@ -1,0 +1,17 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "LAB-AUTHORITY-001",
+  "issue": 159,
+  "release_target": "1.4.0",
+  "classification": "Restore an existing current-release requirement omitted from the release manifest",
+  "observed_issue_state": "OPEN",
+  "observed_issue_milestone": "1.4.0",
+  "roadmap_parent_complete": false,
+  "scope_changed": false,
+  "goal_deferred": false,
+  "manifest_goal_count_before": 74,
+  "manifest_goal_count_after": 75,
+  "prior_target_annotation": "1.4.0 (same development curriculum scope as DOCS-LABS-001).",
+  "normalized_target": "1.4.0",
+  "remaining": "Standalone canonical progressively richer lab graphs, actual generation, native/browser lifecycle evidence and all existing acceptance requirements remain open."
+}

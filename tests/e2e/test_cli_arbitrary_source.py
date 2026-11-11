@@ -127,6 +127,197 @@ def reviewed_static_graph(bundle: dict[str, object], *, kind: str = "library") -
 
 
 class ArbitrarySourceCliTests(unittest.TestCase):
+    def signed_root_fixture(self, root: Path) -> tuple[Path, ...]:
+        source = root / "source"
+        source.mkdir()
+        (source / "library.py").write_text("def increment(value): return value + 1\n")
+        key = root / "trust.key"
+        key.write_bytes(KEY)
+        attestation = root / "attestation.json"
+        bundle_path = root / "bundle.json"
+        review_path = root / "review.json"
+        graph_path = root / "graph.json"
+        status, output, errors = invoke(
+            "spec",
+            "attest",
+            str(source),
+            "--signer",
+            "alice",
+            "--machine",
+            "test",
+            "--key",
+            str(key),
+        )
+        self.assertEqual((status, errors), (0, ""))
+        attestation.write_text(output)
+        status, output, errors = invoke(
+            "spec",
+            "derive",
+            str(source),
+            "--attestation",
+            str(attestation),
+            "--trust-key",
+            str(key),
+        )
+        self.assertEqual((status, errors), (0, ""))
+        bundle_path.write_text(output)
+        bundle = json.loads(output)["result"]
+        graph = reviewed_static_graph(bundle)
+        node = graph["nodes"][0]
+        node["provided_capabilities"] = ["sample.increment"]
+        node["capability_contracts"] = [
+            {
+                "name": "sample.increment",
+                "contract": "Expose increment(value), returning value + 1.",
+                "evidence_ids": node["evidence_ids"],
+            }
+        ]
+        graph_path.write_text(json.dumps(graph))
+        arguments = [
+            "spec",
+            "review",
+            str(bundle_path),
+            "--actor",
+            "alice",
+            "--key",
+            str(key),
+            "--component-graph",
+            str(graph_path),
+        ]
+        for uncertainty in bundle["review_gate"]["blocking_uncertainty_ids"]:
+            arguments.extend(("--resolve", uncertainty))
+        status, output, errors = invoke(*arguments)
+        self.assertEqual((status, errors), (0, ""))
+        review_path.write_text(output)
+        return source, bundle_path, review_path, key
+
+    def test_explicit_root_project_bypasses_unusable_default_parent(self):
+        from literate_ai.adapters.project_initialization import (
+            ProjectInitializationError,
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, bundle, review, key = self.signed_root_fixture(root)
+            accepted, promoted = root / "accepted", root / "promoted"
+            arguments = (
+                "spec",
+                "accept",
+                str(source),
+                str(bundle),
+                "--review",
+                str(review),
+                "--trust-key",
+                str(key),
+                "--target",
+                str(accepted),
+                "--project-target",
+                str(promoted),
+            )
+
+            # Call the real CLI: invoke() deliberately replaces default lineage
+            # for older fixtures and would conceal this public-front-door gap.
+            with mock.patch(
+                "literate_ai.adapters.project_initialization._default_repository_parent",
+                side_effect=ProjectInitializationError(
+                    "repository_lineage.authority_missing", "missing parent authority"
+                ),
+            ) as default_parent:
+                output, errors = io.StringIO(), io.StringIO()
+                status = main(arguments, stdout=output, stderr=errors)
+                self.assertEqual(status, 2)
+                self.assertEqual(
+                    json.loads(errors.getvalue())["error"]["code"],
+                    "repository_lineage.authority_missing",
+                )
+                self.assertFalse(accepted.exists())
+                self.assertFalse(promoted.exists())
+                output, errors = io.StringIO(), io.StringIO()
+                status = main(
+                    (*arguments, "--root-project"), stdout=output, stderr=errors
+                )
+                self.assertEqual((status, errors.getvalue()), (0, ""))
+                self.assertEqual(default_parent.call_count, 1)
+            selection = json.loads(
+                (promoted / ".literate/repository-parent.json").read_text()
+            )
+            self.assertEqual(selection["mode"], "root")
+            self.assertEqual(selection["parents"], [])
+            result = json.loads(output.getvalue())["result"]["promoted_project"]
+            self.assertTrue((promoted / result["component"]).is_file())
+            self.assertTrue(
+                list((promoted / "components").glob("*/component.lock.json"))
+            )
+            self.assertGreater(result["generation_input_audit_count"], 0)
+            self.assertEqual(result["authority_state"], "derived-source-retained")
+
+    def test_root_project_requires_external_project_target(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, bundle, review, key = self.signed_root_fixture(root)
+            destinations = [
+                ((), "promotion.root_project_target_required"),
+                (
+                    ("--integrate-project", str(root / "owner")),
+                    "promotion.root_project_target_required",
+                ),
+                (
+                    (
+                        "--project-target",
+                        str(root / "child"),
+                        "--integrate-project",
+                        str(root / "owner"),
+                    ),
+                    "cli.usage",
+                ),
+            ]
+            for destination, expected_code in destinations:
+                with self.subTest(destination=destination):
+                    accepted = root / "accepted"
+                    output, errors = io.StringIO(), io.StringIO()
+                    status = main(
+                        (
+                            "spec",
+                            "accept",
+                            str(source),
+                            str(bundle),
+                            "--review",
+                            str(review),
+                            "--trust-key",
+                            str(key),
+                            "--target",
+                            str(accepted),
+                            "--root-project",
+                            *destination,
+                        ),
+                        stdout=output,
+                        stderr=errors,
+                    )
+                    self.assertEqual(status, 2)
+                    self.assertEqual(
+                        json.loads(errors.getvalue())["error"]["code"],
+                        expected_code,
+                    )
+                    self.assertFalse(accepted.exists())
+                    self.assertFalse((root / "owner").exists())
+                    self.assertFalse((root / "child").exists())
+            # The parser independently rejects both destinations. Direct use-case
+            # dispatch still refuses that invalid state before any path or lock.
+            with self.assertRaises(source_cli.CliFailure) as refused:
+                source_cli.spec_from_args(
+                    source_cli.argparse.Namespace(
+                        spec_command="accept",
+                        root_project=True,
+                        project_target=str(root / "child"),
+                        integrate_project=str(root / "owner"),
+                    )
+                )
+            self.assertEqual(
+                refused.exception.code, "promotion.root_project_target_required"
+            )
+            self.assertFalse((root / "owner").exists())
+            self.assertFalse((root / "child").exists())
+
     def test_signed_static_review_graph_promotes_a_source_free_project(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

@@ -165,6 +165,15 @@ contract. It then resolves and persists the exact qualification target/Flavor
 `component.lock.json` without generating source. A missing acceptance profile or failed
 qualification leaves release authority at the source baseline.
 
+For a newly created external `--project-target`, `--root-project` explicitly selects
+root repository lineage before initialization, lock resolution and the promotion
+audit. It avoids implicit release-parent discovery when an independent root is the
+intended project shape. Omitting it preserves default inheritance. The option is
+refused without `--project-target` or with `--integrate-project`; retained-host
+integration continues to inherit its existing reviewed lineage. It does not change
+the installed framework origin, source review, generation authority or qualification
+requirements.
+
 An incremental adopted project keeps each promoted native boundary as a complete
 source-free child beneath `.literate/native-projects/`. Its root registry binds the exact
 relative child path, project identifier, and project-definition identity. Conversion
@@ -181,8 +190,12 @@ kinds.
 
 When model-backed inverse translation is unavailable, a reviewer may attach one
 source-bound Component graph to a deterministic-static bundle with
-`spec review --component-graph`. The graph is not detector output: it is explicit human
-authority covered by the local review signature. Its root must exactly match the
+`spec review --component-graph`. The graph is not detector output: it is explicit
+review authority covered by the local review signature. Human review is the default;
+an authorized automation actor selects `--authority authorized-policy`, and acceptance
+requires the independent operator opt-in `--allow-authorized-policy-review`. The bundle
+cannot grant that opt-in, and the signed actor is never represented as human by this
+policy path. Its root must exactly match the
 derived Component definition; its one node must assign every observation exactly once;
 all source paths, capability contracts, entrypoints, and edge evidence must close over
 the bundle's exact evidence; and unknown semantics remain blocking. Acceptance renders

@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Exercise adopted-project identity migration through the installed console in the
+  whole-wheel gate, using two successive renames and real retained build, unit-test
+  and package phases with preserved historical evidence.
+
+- Wheel qualification accepts a complete reviewed dependency wheel directory for
+  offline binary-only installs and both worker bootstrap paths, preserving pinned
+  dependencies on targets without published binary wheels (#418).
+
+- Capability deadline qualification observes actual original child cleanup, including
+  expiry before a receiver writes its PID file, without extending caller budgets (#420).
+
+- Standalone source promotion can explicitly select root repository lineage with
+  `spec accept --project-target ... --root-project`; default inheritance and
+  retained-host integration remain unchanged (#402).
+
+- Remote evidence transfer preserves stricter inherited POSIX soft and hard
+  file-size ceilings, including zero limits (#372).
+
+- Preserve independent library-acceptance error codes in `spec qualify`, including
+  retained-evidence runs, while keeping archive I/O failures distinct (#404).
+
+- Installed continuation qualification binds native builds to its installed Python,
+  preserving exact bytecode checks when PATH contains a different supported runtime.
+
 - Installed-wheel qualification exercises lazy project startup and strict MAC BOM
   rejection, verifying installed module origins and exact candidate bytes (#121).
 
@@ -10,8 +34,8 @@
   preserve command drift, missing-sidecar and guarded native build refusals (#102, #103).
 
 - Record the included Codex runtime-state and remote file-ceiling work as explicit
-  1.4 roadmap and release-manifest gates; both remain incomplete pending their
-  existing implementation, review and native qualification.
+  1.4 roadmap and release-manifest gates; both remain incomplete pending
+  review and native qualification.
 - Retain standalone Windows MSVC setup and C++ discovery timings in native qualification while preserving the five-minute default and caller-selected bounds.
 - Renew retained Windows command, source/context drift and missing native sidecar checks through the noneditable wheel on base and private interpreters (#102, #103).
 
@@ -27,6 +51,13 @@
 - Repository checkout checks Git LFS JSON-inventory support before configuring a remote. FreeBSD SDK staging propagates exact source-only Git trust to the clone child through a disposable config (#305).
 
 - Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
+
+- Source promotion exposes explicit `authorized-policy` reviews and a separate
+  operator acceptance opt-in while preserving human-only defaults and signed
+  source/graph/authority binding. These choices grant intent review, not host
+  execution or regenerative qualification. Complete source/wheel, installed policy-only
+  console and exact review/resulting-main CI now qualify this CLI boundary (#358).
+
 
 - Generated projects receive the same release-project collateral checklist as the
   framework: current READMEs, release notes, introductions, videos, captions,

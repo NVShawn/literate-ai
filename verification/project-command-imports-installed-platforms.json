@@ -3,7 +3,7 @@
   "goal": "CLI-IMPORT-001",
   "issue": 121,
   "source_revision": "8a57eeb688019f0cf86f5a8af57663ab9adfb55a",
-  "classification": "native macOS and Windows noneditable installed-wheel qualification; source matrix passes; resulting-main and final lifecycle open",
+  "classification": "Native macOS/Windows noneditable installed-wheel controls and resulting-main full matrix pass; final configured lifecycle/receipt renewal remains open",
   "platforms": [
     {
       "platform": "macos",
@@ -112,7 +112,7 @@
     }
   ],
   "remaining": [
-    "Resulting-main CI and final configured lifecycle/receipt renewal; retain complete original gate evidence.",
+    "Final configured lifecycle/receipt renewal; preserve original gate evidence.",
     "Complete release acceptance and publication remain separate from these native controls."
   ],
   "goal_complete": false,
@@ -129,7 +129,11 @@
   "merge_revision": "8f01fc77d643ee58359e120945a6f8fea2e5d63a",
   "resulting_main_ci": {
     "run": 42887279572,
-    "status": "pending; inspect live provider state"
+    "head": "8f01fc77d643ee58359e120945a6f8fea2e5d63a",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": 27,
+    "successful_jobs": 27
   },
   "linux_record": "verification/project-command-imports-installed-linux.json"
 }

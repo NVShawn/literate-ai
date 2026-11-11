@@ -1,0 +1,293 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "PYTHON-BINARY-CLOSURE-001",
+  "release_target": "1.4.0",
+  "classification": "dependency construction and existing offline worker-path development evidence; complete new gate integration pending",
+  "platform": "linux-aarch64",
+  "python": "3.15.2",
+  "original_failure": {
+    "framework_subject": "77353a8d6ee0cdaa44f38b02ddf066261e835f03",
+    "whole_wheel_gate": "worker.wheelhouse_download_failed",
+    "isolated_binary_download_exit": 1,
+    "dependency": "PyYAML==6.0.3",
+    "error": "No matching distribution found",
+    "classification": "retained failed unconfigured binary export; not reclassified"
+  },
+  "upstream_source_and_build": {
+    "source_url": "https://pypi.org/project/PyYAML/6.0.3/",
+    "source_archive_sha256": "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f",
+    "version": "6.0.3",
+    "wheel": "pyyaml-6.0.3-py3-none-any.whl",
+    "wheel_sha256": "5aced5e0e25cea18820161c0add140c071b5c9a2cbd458cf9738fa79a9779e84",
+    "reproducible_across_two_fresh_source_trees": true,
+    "build_python": "3.15.2",
+    "build_setuptools": "83.0.0",
+    "mode": "upstream --without-libyaml and PYYAML_FORCE_LIBYAML=0; optional native extension absent",
+    "source_date_epoch": 1758758400,
+    "source_modules_byte_identical": {
+      "_yaml/__init__.py": "d3801eff9a2cc5a8692476b75c165401fe308ba5d7df6811f03e97ea9eb81840",
+      "yaml/__init__.py": "b19dfcc333d6a75dfd73073901164507252f271b41d3b5f7d85510033a0547a7",
+      "yaml/composer.py": "fcaa37d16afa783594794a5ab94193dcb720f503c19ce3d59539c8311189f453",
+      "yaml/constructor.py": "90d8247da78b524c10618fd0e857f54f3d97570fe91b5c5513d024ef3faf88b0",
+      "yaml/cyaml.py": "e99ac01bd7c062f7557b614aff0d21997a06ed962ca185306a91bc0a20bbd87d",
+      "yaml/dumper.py": "3cb72d66563064ba7b5e679477046ebf89d8399d940670c8532f3e94a7cb17ea",
+      "yaml/emitter.py": "8e086d694ede170837d5b1b407b45979aff6f40762f422a65eafd08e04290a44",
+      "yaml/error.py": "021f73fada072546c4f63f8cf18a7181244ce4280b09cc15cc980b2d1176171a",
+      "yaml/events.py": "e74fd392c810884e2ea7e94aa3f57e9c1cbeb402319083d0c58e6a0e1282787c",
+      "yaml/loader.py": "5156becc8aa6905482218abf3e04869b835226db4763645fff3438fdbd5f1cdd",
+      "yaml/nodes.py": "80f28d8fca4a09d87677882bde021820d9cf39a3b11a12405226211919cf13ce",
+      "yaml/parser.py": "8a55a9e6fbe0a07146cef3990c8b45a068c3e83e369e1959ad9ca30306b4a09a",
+      "yaml/reader.py": "d1d9b38ab3a20c6e17a38d519ee412ecaf6b918df18c78956ac7c330d4ea08dc",
+      "yaml/representer.py": "22e58ff9c016f6c1ca1274b4802a926bcf78935060e1c813c5a0f021c6d143e6",
+      "yaml/resolver.py": "f4bf9561f9b89961f1503d558385fbae30d12bfed565de9bf76c33abb63620a6",
+      "yaml/scanner.py": "60433788b652690c17710460da5d91e0c753d3318fd85f5e1e42862a71f25906",
+      "yaml/serializer.py": "0a1b85826854d35863e31808f0668abfabdf33606e8f06bd8bb7761401e3edc0",
+      "yaml/tokens.py": "953408cd2570f0c83dc2fe39f7e4e388e41eeb05738aa69196a5f6ffcf6ba79e"
+    },
+    "record_and_license_verified": true,
+    "scope": "Dependency artifact construction only; installed tests and complete offline framework closure still required",
+    "earlier_extraction_refusal": "Initial bounded extraction validation refused the archive root directory spelling before extracting; corrected root-name check retains regular-file/directory and path bounds. No source changes or guard weakening."
+  },
+  "upstream_installed_tests": {
+    "python": "3.15.2",
+    "version": "6.0.3",
+    "with_libyaml": false,
+    "counts": {
+      "SUCCESS": 1283
+    },
+    "installed_modules_byte_match_wheel": {
+      "yaml.error": "021f73fada072546c4f63f8cf18a7181244ce4280b09cc15cc980b2d1176171a",
+      "yaml.tokens": "953408cd2570f0c83dc2fe39f7e4e388e41eeb05738aa69196a5f6ffcf6ba79e",
+      "yaml.events": "e74fd392c810884e2ea7e94aa3f57e9c1cbeb402319083d0c58e6a0e1282787c",
+      "yaml.nodes": "80f28d8fca4a09d87677882bde021820d9cf39a3b11a12405226211919cf13ce",
+      "yaml.reader": "d1d9b38ab3a20c6e17a38d519ee412ecaf6b918df18c78956ac7c330d4ea08dc",
+      "yaml.scanner": "60433788b652690c17710460da5d91e0c753d3318fd85f5e1e42862a71f25906",
+      "yaml.parser": "8a55a9e6fbe0a07146cef3990c8b45a068c3e83e369e1959ad9ca30306b4a09a",
+      "yaml.composer": "fcaa37d16afa783594794a5ab94193dcb720f503c19ce3d59539c8311189f453",
+      "yaml.constructor": "90d8247da78b524c10618fd0e857f54f3d97570fe91b5c5513d024ef3faf88b0",
+      "yaml.resolver": "f4bf9561f9b89961f1503d558385fbae30d12bfed565de9bf76c33abb63620a6",
+      "yaml.loader": "5156becc8aa6905482218abf3e04869b835226db4763645fff3438fdbd5f1cdd",
+      "yaml.emitter": "8e086d694ede170837d5b1b407b45979aff6f40762f422a65eafd08e04290a44",
+      "yaml.serializer": "0a1b85826854d35863e31808f0668abfabdf33606e8f06bd8bb7761401e3edc0",
+      "yaml.representer": "22e58ff9c016f6c1ca1274b4802a926bcf78935060e1c813c5a0f021c6d143e6",
+      "yaml.dumper": "3cb72d66563064ba7b5e679477046ebf89d8399d940670c8532f3e94a7cb17ea",
+      "yaml": "b19dfcc333d6a75dfd73073901164507252f271b41d3b5f7d85510033a0547a7"
+    },
+    "wheel_sha256": "5aced5e0e25cea18820161c0add140c071b5c9a2cbd458cf9738fa79a9779e84",
+    "scope": "Upstream pure Python suite against exact installed wheel; not framework closure or release qualification"
+  },
+  "tested_framework": {
+    "software_subject": "7078bc96bb4fcce57f2b955b4465a85fb826951f",
+    "wheel_sha256": "21368452601e23a7a7c94f08d7d0870b0cd4e50aacd58fd3ac2622e4a9baa702",
+    "distribution_identity": "sha256:02e8c3280bd2552ff69a60d3641b304e98f04546222d3f151210e39e5080cde5",
+    "scope": "Retained current telemetry development artifact, not the later Python closure gate implementation or final release artifact"
+  },
+  "existing_public_offline_export": {
+    "ok": true,
+    "closure_identity": "sha256:ed49ecce42c0eed24e4d20ec0c54c57f0fda488d5b94d767df966e60166997b6",
+    "native_target": {
+      "abi": null,
+      "implementation": null,
+      "platform": null,
+      "python_version": null
+    },
+    "wheel_count": 37,
+    "bootstrap_installed_distributions": [
+      {
+        "distribution_name": "arrow",
+        "distribution_version": "1.4.0",
+        "installed_identity": "sha256:cbf358f0b4758aa42a4650f4802afd9efcdb98a521392cbc7030709ba2a180f4"
+      },
+      {
+        "distribution_name": "attrs",
+        "distribution_version": "26.1.0",
+        "installed_identity": "sha256:e902e8ce00e59c2050c0032cb0c81b427313aecb52f615d964116f87f1284871"
+      },
+      {
+        "distribution_name": "boolean-py",
+        "distribution_version": "5.0",
+        "installed_identity": "sha256:31e6c22ec03bcbf483d5a86db8e4573d1ae2612661c6baf4ecffaf6e1e612d41"
+      },
+      {
+        "distribution_name": "certifi",
+        "distribution_version": "2026.7.22",
+        "installed_identity": "sha256:a384844dc2ea6e5c17f1f470c3896c647b5b97046571db5cff05a82feaa6066d"
+      },
+      {
+        "distribution_name": "cffi",
+        "distribution_version": "2.1.1",
+        "installed_identity": "sha256:2aa04d5e3cf89c226dbdf79af7518a524d50a29092786290b30adaa1440b00a4"
+      },
+      {
+        "distribution_name": "cryptography",
+        "distribution_version": "50.0.1",
+        "installed_identity": "sha256:890625f3b89f513a5aefc16a137020fbfc38d1aa663d415cf5ab88b23d940e6f"
+      },
+      {
+        "distribution_name": "cyclonedx-python-lib",
+        "distribution_version": "11.11.0",
+        "installed_identity": "sha256:8660fb93ae3214c1e247245588f39f23ae225ddfaef22f79f4f6a7f0bd413ec3"
+      },
+      {
+        "distribution_name": "defusedxml",
+        "distribution_version": "0.7.1",
+        "installed_identity": "sha256:18c37598cee29198e4a4bdedda07136bf5b209f5cb0efcde04a030888e61891b"
+      },
+      {
+        "distribution_name": "fqdn",
+        "distribution_version": "1.6.0",
+        "installed_identity": "sha256:9d669c4986b19b3540097900fb0f10360a332e81295dfd4c771bd0a48ece61ba"
+      },
+      {
+        "distribution_name": "idna",
+        "distribution_version": "3.20",
+        "installed_identity": "sha256:d23cd0f66c1847101ac00a31de12897ba2ac97eb22a3d23fd446c2dbfe518053"
+      },
+      {
+        "distribution_name": "isoduration",
+        "distribution_version": "20.11.0",
+        "installed_identity": "sha256:49044b0e4fa58ba24422e812b46341d1487213aa60f174450583958adfea88c7"
+      },
+      {
+        "distribution_name": "jsonpointer",
+        "distribution_version": "3.12",
+        "installed_identity": "sha256:adcfd06684cb1258c49d3c75b97ecbf0422e911d6b561d0d2a40e44a5ee5be19"
+      },
+      {
+        "distribution_name": "jsonschema",
+        "distribution_version": "4.26.0",
+        "installed_identity": "sha256:c191801a007e9fde9cc4ed9e660dc5222d0334b9672119d494cb5d90af9ead18"
+      },
+      {
+        "distribution_name": "jsonschema-specifications",
+        "distribution_version": "2025.9.1",
+        "installed_identity": "sha256:06a87a675db309dc007b6ce55d2962e5f10b964832ef5e3d63a9dfa92f4f25b1"
+      },
+      {
+        "distribution_name": "lark",
+        "distribution_version": "1.3.1",
+        "installed_identity": "sha256:fe0302e79ca3c29a168e686203c9326505209ead1ed45e2187438500fc2f3126"
+      },
+      {
+        "distribution_name": "license-expression",
+        "distribution_version": "30.4.4",
+        "installed_identity": "sha256:ae45a508431d5d949080eabce0b180e8723ba793819b67cd732ca3aa10cab661"
+      },
+      {
+        "distribution_name": "literate-ai",
+        "distribution_version": "1.4.0",
+        "installed_identity": "sha256:02e8c3280bd2552ff69a60d3641b304e98f04546222d3f151210e39e5080cde5"
+      },
+      {
+        "distribution_name": "packageurl-python",
+        "distribution_version": "0.17.6",
+        "installed_identity": "sha256:adf5af89c3a6e587f266c9ad6ec8831e7467f534e41d9635f6a374d37175c538"
+      },
+      {
+        "distribution_name": "packaging",
+        "distribution_version": "26.3",
+        "installed_identity": "sha256:76d2c0a05cc20073b498fe60afb0255b5a2b7f1774e463286f8718f40292b3aa"
+      },
+      {
+        "distribution_name": "py-serializable",
+        "distribution_version": "2.2.0",
+        "installed_identity": "sha256:14de7b5965b2e3752ee60e215b40e7f50fb20b6eae9595ce4244f29aeb5844f9"
+      },
+      {
+        "distribution_name": "pycparser",
+        "distribution_version": "3.12",
+        "installed_identity": "sha256:eda9c0a8f1373e26cce77008b57595c554df80802aac321b07d2050a2ff0a7e8"
+      },
+      {
+        "distribution_name": "pyjwt",
+        "distribution_version": "2.14.0",
+        "installed_identity": "sha256:484cee63fe6d009a09c26a6c9e3bda271bb5a3a689ba965ab6bea89b9f97f8c6"
+      },
+      {
+        "distribution_name": "python-dateutil",
+        "distribution_version": "4.0.0",
+        "installed_identity": "sha256:562e4a26b5348c303b400e3a8c6df3f5460caec658543198dc6b47836cdee734"
+      },
+      {
+        "distribution_name": "pyyaml",
+        "distribution_version": "6.0.3",
+        "installed_identity": "sha256:3e14727cab2b3d322807f32a0ad954de830451d3badb2055103f73284b493517"
+      },
+      {
+        "distribution_name": "referencing",
+        "distribution_version": "0.37.0",
+        "installed_identity": "sha256:c30cd0bf66ab3357e1e5e6cca9da50dbfbeb5f53c81cc03dce56e71ce665c5e4"
+      },
+      {
+        "distribution_name": "rfc3339-validator",
+        "distribution_version": "0.1.4",
+        "installed_identity": "sha256:226f1a75dc1de3c7cfbb1e312174898f6a342515686695a3fbbb35767722dab4"
+      },
+      {
+        "distribution_name": "rfc3986-validator",
+        "distribution_version": "0.1.1",
+        "installed_identity": "sha256:0e4e8e98570169386217fb6c018bfc8e5a779dc5b96180d48018c353ca02ec77"
+      },
+      {
+        "distribution_name": "rfc3987-syntax",
+        "distribution_version": "1.1.0",
+        "installed_identity": "sha256:41f7e8f1bf1e0cc82da4ac3b003b37fe33630559878ad2b04db1fc25b97d25c8"
+      },
+      {
+        "distribution_name": "rpds-py",
+        "distribution_version": "2026.9.1",
+        "installed_identity": "sha256:01bb255dfd3cd19aca7e65236b04c9afca2c5ca20d28c69ada7d32054db27dff"
+      },
+      {
+        "distribution_name": "semantic-version",
+        "distribution_version": "2.10.0",
+        "installed_identity": "sha256:ea5e8424042934c408de1b303ba460ad9ffafbf884ab38064e3bc2053649c027"
+      },
+      {
+        "distribution_name": "semver",
+        "distribution_version": "3.1.1",
+        "installed_identity": "sha256:c382d63b063aa3393ec1b9b312ffd8873f3445f69dd38a4e177151b559113eb4"
+      },
+      {
+        "distribution_name": "six",
+        "distribution_version": "1.17.0",
+        "installed_identity": "sha256:bcaa938ce1a1a4a684c5017c33847b82077dd7827303fbcf7d9907a957fa7cbe"
+      },
+      {
+        "distribution_name": "sortedcontainers",
+        "distribution_version": "2.4.0",
+        "installed_identity": "sha256:78cf35baddc9115f87116fcbba03624755277c1cb7c78344430ed2660a9c6613"
+      },
+      {
+        "distribution_name": "tzdata",
+        "distribution_version": "2026.6",
+        "installed_identity": "sha256:98f40b542d2921c4198e846fe354f15deff68e7a0eca599d97aa562de4a30c98"
+      },
+      {
+        "distribution_name": "univers",
+        "distribution_version": "32.0.1",
+        "installed_identity": "sha256:a6bc53a0f50b01ad28bdea28372414c6dc9505d8db28317a1be23c79513f4ea9"
+      },
+      {
+        "distribution_name": "uri-template",
+        "distribution_version": "1.3.0",
+        "installed_identity": "sha256:f67896e8ce9dba8466453031ebb1c51543123583a677a9ecb0f5b9f2a3ccd36d"
+      },
+      {
+        "distribution_name": "webcolors",
+        "distribution_version": "25.10.0",
+        "installed_identity": "sha256:eab691b9812820b924ddfbff016719a279c6c197d91db9e0557453007a532482"
+      }
+    ],
+    "bootstrap_ok": true,
+    "bootstrap_distribution_unchanged": true,
+    "controller_bootstrap_module_sha256": "448cd18dc180fe3734aa37a34020a56e4c15ab6f45c05cbf069eff0b118e8cab"
+  },
+  "pending": [
+    "Complete new wheel-check input projection qualification, custody negatives and exact artifact identities",
+    "Complete source gate and compatibility with minimum release Python",
+    "Independent review and exact review/resulting-main integration",
+    "Remaining1.4goals and release qualification/publication/readback"
+  ],
+  "release_attestation": false
+}
