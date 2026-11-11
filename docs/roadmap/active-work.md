@@ -34382,3 +34382,19 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
+
+### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+
+- **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
+
+- **Priority:** P1
+- **Owner:** Framework qualification CLI; PROJECT Goals1and4
+- **Direction:** Issue404: report typed independent native acceptance rejection truthfully when retained evidence is requested.
+- **Conclusion:** Preserve known acceptance error code/message through the public CLI; retain existing archive I/O failure classification and all authority refusal.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Handle typed acceptance failure separately from archive publication errors.
+- **Evidence:**
+  - [x] Public CLI controls with and without retained store preserve mismatch code, no output/admission; genuine archive write failure remains unchanged. The maintained module passes all16tests after the original public-code failure is preserved.
+  - [ ] Complete independent source review, full contributor/installed gates and exact-head/main integration before closing.
