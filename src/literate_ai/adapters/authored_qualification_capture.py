@@ -279,10 +279,29 @@ def capture_authored_qualification_products(owner):
 
 
 def reopen_authored_product_membership(reader, products_identity):
-    """Reopen exact byte/run/export membership without executing archive content.
+    """Check exact bytes and membership, without qualification or importer trust."""
 
-    This is not full qualification reopening: current authored/oracle ownership,
-    native stage validation, publication and importer admission remain mandatory.
+    reopened = _reopen_authored_product_records(reader, products_identity)
+    for run_identity, exports in reopened.exports:
+        run = next(
+            r for r in reopened.result.runs if r.request.run_identity == run_identity
+        )
+        capture_qualification_product_blobs(
+            exports,
+            _acceptances(run, exports, run.root.package_plan.target_identity),
+            target_profile_identity=run.root.package_plan.target_identity,
+            read_blob=lambda ref: reader.read_bytes(
+                ContentIdentity.parse_uri(ref.identity)
+            ),
+            max_bytes=reader.max_bytes,
+        )
+    return reopened
+
+
+def _reopen_authored_product_records(reader, products_identity):
+    """Decode metadata first so semantic callers can refuse before product reads.
+
+    No current owner, native observations, product bytes or admission is supplied.
     """
 
     if not isinstance(reader, QualificationEvidenceReader) or not isinstance(
@@ -347,15 +366,6 @@ def reopen_authored_product_membership(reader, products_identity):
             raise QualificationCaptureError(
                 "qualification.authored.capture_product_mismatch"
             )
-        accepted = _acceptances(run, exports, lock.target_profile_identity)
-        capture_qualification_product_blobs(
-            exports,
-            accepted,
-            target_profile_identity=lock.target_profile_identity,
-            read_blob=lambda ref: reader.read_bytes(
-                ContentIdentity.parse_uri(ref.identity)
-            ),
-            max_bytes=reader.max_bytes,
-        )
+        _acceptances(run, exports, lock.target_profile_identity)
         exports_by_run.append((member.run_identity, exports))
     return ReopenedAuthoredProductMembership(products, result, tuple(exports_by_run))

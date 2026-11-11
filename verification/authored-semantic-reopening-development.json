@@ -1,0 +1,101 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "issue": 393,
+  "review": 401,
+  "adr": "0072",
+  "software_base": "3526f42a385b3125d07bc1b14ec753d8ba78ca9e",
+  "source_sha256": {
+    "src/literate_ai/adapters/authored_qualification_reopening.py": "e8c266f9feee38c145e211aab07b9bd848449d47ce4bd1b1a6d16d3485ec4144",
+    "src/literate_ai/adapters/authored_qualification_capture.py": "6c341bdc2ce629b7ddf701a14d50c423ea615a4a092762cfe18610dc9e87dd7c",
+    "src/literate_ai/adapters/qualification_capture.py": "7cc583ffbc22e5131b90f222014bc5e878766fbc344bfe0720e72cc7239e5174",
+    "tests/critical/test_authored_qualification_reopening.py": "f5a9ca3a80e030e8f5b3b623f21f7c27a1a753a306dcc026bcfdc8234a6f50ab",
+    "tests/support/fixtures_test_qualification_capture.py": "eabad6e233e4dfbffee966fc53788b4136f3f96bf61c2ea0adad630979e5964a"
+  },
+  "authored_family": {
+    "state": "pass",
+    "selected": 95,
+    "passed": 95,
+    "failed": 0,
+    "skipped": 0,
+    "new_reopening_controls": 11,
+    "log_sha256": "494a46573706c97826eeed6d92e0cc9c517098719b8c5e7d5b536d84ad235f15"
+  },
+  "legacy_capture_archive_schema": {
+    "selected": 46,
+    "passed": 46,
+    "failed": 0,
+    "skipped": 0,
+    "log_sha256": "42541a3ec57374bd6d6f529b724d47442a3e5309c383e6094892a1c23fcb57c4"
+  },
+  "current_full_source_and_wheel": {
+    "state": "pending"
+  },
+  "driver_review": {
+    "schema": "literate-ai/lifecycle-driver-review@1",
+    "driver_id": "sample-host-conformance",
+    "state": "stale",
+    "pinned_identity": "sha256:0086cc0a419753fccae6f85b47c44a71ad1b01edba192bec635b64827a7aa1ed",
+    "computed_identity": "sha256:9e3eb146ccc8aba3eba17025b30707af2a1faaf443fe1dc8a661f147dea65cbb",
+    "implementation_paths": [
+      "scripts/run_samples.py",
+      "src/literate_ai",
+      "tests/conformance/support/durable_split_service.py",
+      "tests/conformance/support/runtime_oracles.py",
+      "tests/conformance/support/sample_runner.py",
+      "tests/conformance/support/standard_service_stack.py"
+    ],
+    "changed_since_pin": [
+      "src/literate_ai/adapters/authored_graph_acceptance.py",
+      "src/literate_ai/adapters/authored_qualification_authority.py",
+      "src/literate_ai/adapters/authored_qualification_capture.py",
+      "src/literate_ai/adapters/authored_qualification_comparison.py",
+      "src/literate_ai/adapters/authored_qualification_execution.py",
+      "src/literate_ai/adapters/authored_qualification_oracles.py",
+      "src/literate_ai/adapters/authored_qualification_planning.py",
+      "src/literate_ai/adapters/authored_qualification_reopening.py",
+      "src/literate_ai/adapters/authored_qualification_runs.py",
+      "src/literate_ai/adapters/component_lock_planning.py",
+      "src/literate_ai/adapters/lifecycle/standard_local.py",
+      "src/literate_ai/adapters/locked_generation_authority.py",
+      "src/literate_ai/adapters/qualification.py",
+      "src/literate_ai/adapters/qualification_capture.py",
+      "src/literate_ai/adapters/qualification_workspace_namespace.py",
+      "src/literate_ai/adapters/standard_rebuild.py",
+      "src/literate_ai/cli/authored_qualification.py",
+      "src/literate_ai/cli/dispatch.py",
+      "src/literate_ai/contracts/authored_qualification_acceptance.py",
+      "src/literate_ai/contracts/authored_qualification_comparisons.py",
+      "src/literate_ai/contracts/authored_qualification_plans.py",
+      "src/literate_ai/contracts/authored_qualification_products.py",
+      "src/literate_ai/contracts/authored_qualification_profiles.py",
+      "src/literate_ai/contracts/authored_qualification_requests.py",
+      "src/literate_ai/contracts/authored_qualification_runs.py",
+      "src/literate_ai/contracts/qualification_origins.py",
+      "src/literate_ai/schema_catalog.py"
+    ],
+    "recorded": false
+  },
+  "scope": {
+    "real": [
+      "Complete typed Standard lifecycle reconstruction",
+      "Shared source custody, generation provenance, authorization, native-stage observation and receipt verification",
+      "Current recipe command and suite/BOM joins",
+      "Both runs pass before any product read",
+      "Unique product-byte limit across all runs"
+    ],
+    "injected": [
+      "Original current authored plan admission",
+      "Generation and native execution",
+      "Independent authored oracle comparison; existing isolated comparison controls qualify that helper separately"
+    ],
+    "not_established": [
+      "Publication/receiving owner custody for independently projected current recipe/command maps",
+      "Recoverable public acknowledged apply and publication",
+      "Two genuine all-node Standard generations and independent native acceptance",
+      "Native resource retirement, closed native replay and ordinary retained Cargo receiving",
+      "Independent driver review or resulting-main release acceptance"
+    ]
+  }
+}

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reopen authored run evidence through shared Standard provenance, authorization,
+  native-stage, receipt and generated-case checks before reading retained products.
+  Public apply, recoverable publication and receiving admission remain in progress (#393).
+
 - Capture authored clean-run library bytes under original execution custody,
   retaining bounded run/product membership for integrity-only archive reopening.
   Full authored qualification reopening and publication remain in progress (#393).

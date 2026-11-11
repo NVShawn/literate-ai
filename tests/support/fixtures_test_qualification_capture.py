@@ -670,9 +670,10 @@ class QualificationCaptureTests(unittest.TestCase):
         promotion_audit=None,
         artifact_payloads=None,
         allocation_salt="",
+        bind_current_target=False,
     ):
         producer, surface, oracle = self.library_authority_fixture(
-            bind_current_target=promotion_audit is not None
+            bind_current_target=promotion_audit is not None or bind_current_target
         )
         qualification = lifecycle_fixtures.QualificationLifecycleRunnerTests()
         qualification.setUp()
@@ -820,7 +821,7 @@ class QualificationCaptureTests(unittest.TestCase):
                 generated_suites=run_suites,
                 generated_boms=run_boms,
                 artifact_target_identity=producer.lock.target_profile_identity
-                if promotion_audit is not None
+                if promotion_audit is not None or bind_current_target
                 else None,
                 artifact_payloads=artifact_payloads,
             )
