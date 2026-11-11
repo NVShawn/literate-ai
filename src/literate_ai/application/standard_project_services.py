@@ -35,6 +35,7 @@ from literate_ai.application.standard_project_lifecycle import (
     ComponentBuildPlanFinalizer,
     ComponentExecutor,
     ComponentTester,
+    GeneratedCandidateVerifier,
     GenerationIndexer,
     IndependentProjectAcceptor,
     PackagedProjectExecutor,
@@ -321,6 +322,7 @@ def assemble_standard_project_application_service(
     checkpoint_recorder: StandardLifecycleCheckpointRecorder | None = None,
     context_evidence_recorder: StandardContextEvidenceRecorder | None = None,
     candidate_repair_port: StandardCandidateRepairPort | None = None,
+    generated_candidate_verifier: GeneratedCandidateVerifier | None = None,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> StandardProjectApplicationService:
     """Assemble the public Standard service without a CLI-private dependency."""
@@ -353,6 +355,7 @@ def assemble_standard_project_application_service(
             checkpoint_recorder=checkpoint_recorder,
             context_evidence_recorder=context_evidence_recorder,
             candidate_repair_port=candidate_repair_port,
+            generated_candidate_verifier=generated_candidate_verifier,
             clock=clock,
         )
     )

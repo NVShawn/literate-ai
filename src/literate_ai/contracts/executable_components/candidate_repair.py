@@ -87,17 +87,21 @@ class CandidateRepairDiagnostic:
             )
         if not isinstance(self.classification, CandidateFailureClassification):
             fail("CandidateRepairDiagnostic.classification", "must be typed")
-        if (
-            self.classification is CandidateFailureClassification.RETRYABLE
-            and self.phase
-            not in {
+        if self.classification is CandidateFailureClassification.RETRYABLE and not (
+            self.phase
+            in {
                 StandardNodeFailurePhase.BUILD,
                 StandardNodeFailurePhase.TEST,
             }
+            or (
+                self.phase is StandardNodeFailurePhase.ACCEPT
+                and self.code == "component_acceptance.rust_harness_result_mismatch"
+            )
         ):
             fail(
                 "CandidateRepairDiagnostic.classification",
-                "only compiler/linker or generated-test failures may be retryable",
+                "only build, generated-test or exact native-result rejection "
+                "may be retryable",
             )
 
     @property

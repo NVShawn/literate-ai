@@ -34382,3 +34382,20 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
+
+### [ ] CANDIDATE-NATIVE-REPAIR-001 — Bind native-library rejection to existing bounded candidate repair
+
+- **GitHub issue:** [#405](https://github.com/jordanhubbard/literate-ai/issues/405)
+
+- **Priority:** P1
+- **Owner:** Framework Standard candidate repair and root integration; PROJECT Goals1and4
+- **Direction:** Issue405: allow narrowly attributable native result rejection to drive fresh same-authority repair through the existing finite attempt chain.
+- **Conclusion:** Prepare the smallest single-generated-library route preserving exact rejected package/source custody, recipe, changed request, fresh workspace and one shared retry budget; do not add a second retry framework or expose private oracle data.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Specify the fresh single-node Rust-v2 bridge into the existing three-total-candidate loop, with provisional acceptance before cache admission and fixed-category feedback only.
+  - [x] Implement reviewed exact result rejection; join current export bytes to the sealed build blob, retain package custody, and close native executable/tool pins on rejection as well as success.
+- **Evidence:**
+  - [x] Seven real native public-CLI controls pass: fresh same-authority repair, shared generated-test/native budget, exhaustion, command refusal, and actual export-before/export-during/native-executable mutation refusal. Twelve focused contract/lifecycle controls pass; independent source review covers both custody guards and prompt privacy.
+  - [ ] Run the full local source gates and qualify the exact noneditable wheel before treating the implementation as ready for downstream consumption.

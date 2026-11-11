@@ -399,6 +399,16 @@ also terminal.
 The next request receives no prior tree, expectation, diagnostic, or verifier-only fact.
 This is repeated clean generation, not incremental repair or acceptance feedback.
 
+The Standard project lifecycle separately allows exact native public-result
+rejection to use its existing three-total-candidate repair budget for a fresh,
+single-node Rust library with a version-2 native oracle and genuine prepared
+authority. The replacement receives a fixed rejection category and identities,
+without held-out oracle content or raw command output. Failed candidates remain
+retained and cannot enter the source cache. Changed export, verifier, tool or
+authority custody, native command errors and invalid output stop the run.
+This does not expand the sample driver's policy or apply to cached/retained source.
+Independent acceptance of the final package and clean qualification still run.
+
 Clean materialization and cache policy are distinct. An accepted source-derivation
 record can materialize an exact previously verified tree into a new output, but it never
 becomes generation authority or input to a different recipe. It remains

@@ -61,6 +61,15 @@ def _prompt_identity(prompt: bytes) -> ContentIdentity:
 def _safe_diagnostic(failure: StandardNodeFailureEvidence, raw: str | None) -> str:
     """Return only a bounded, portable fact that is useful for a fresh replacement."""
 
+    if (
+        failure.phase is StandardNodeFailurePhase.ACCEPT
+        and failure.code == "component_acceptance.rust_harness_result_mismatch"
+    ):
+        return (
+            "the independent native library verifier rejected the generated public "
+            "results; recheck every approved public boundary behavior and exact "
+            "static error before producing a complete fresh replacement"
+        )
     phase = failure.phase.value
     if isinstance(raw, str):
         match = _MISSING_INCLUDE.search(raw[:8192])
@@ -95,7 +104,7 @@ def _safe_diagnostic(failure: StandardNodeFailureEvidence, raw: str | None) -> s
 
 
 class FilesystemStandardCandidateRepairAdapter:
-    """Retry only attributable build/test rejection in a fresh sibling workspace."""
+    """Retry allowlisted candidate rejection in a fresh sibling workspace."""
 
     def __init__(self, diagnostics: Mapping[str, str]) -> None:
         self._diagnostics = diagnostics
@@ -111,10 +120,17 @@ class FilesystemStandardCandidateRepairAdapter:
             raise TypeError("candidate repair requires typed failure and source output")
         if output.candidate.component_revision != failure.component_revision:
             raise ValueError("candidate repair output names another Component")
-        retryable = failure.code in _RETRYABLE_CODES and failure.phase in {
-            StandardNodeFailurePhase.BUILD,
-            StandardNodeFailurePhase.TEST,
-        }
+        retryable = (
+            failure.code in _RETRYABLE_CODES
+            and failure.phase
+            in {
+                StandardNodeFailurePhase.BUILD,
+                StandardNodeFailurePhase.TEST,
+            }
+        ) or (
+            failure.phase is StandardNodeFailurePhase.ACCEPT
+            and failure.code == "component_acceptance.rust_harness_result_mismatch"
+        )
         return CandidateRepairDiagnostic(
             failure.component_revision,
             failure.phase,
