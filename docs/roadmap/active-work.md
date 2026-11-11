@@ -31236,9 +31236,7 @@ repair scope and makes no claim that the complete provided native gate passed.
   - [x] Measure native import startup: one baseline/deferred pair took 7.48/2.91 seconds;
         installed bytes stayed unchanged. See [the diagnostic record](../../verification/optional-project-import-development.json).
   - [ ] Run both maintained startup/MAC controls from the noneditable installed wheel with verified module origins and no checkout imports, then renew exact-candidate native wheel/full qualification.
-- **Next action:** Qualify macOS and Windows through the new canonical installed
-  startup/MAC hook, then complete exact-head/resulting-main full qualification and
-  final configured lifecycle/receipt renewal. Preserve the previous gate's evidence.
+- **Next action:** Observe resulting-main CI `42887279572` at merge `8f01fc77d` to terminal, then complete final configured lifecycle/receipt renewal. Preserve the previous gate's evidence. The native installed startup/MAC controls and exact source matrix now pass.
 - **Original focused development:** Two import controls and seven CycloneDX tests
   pass through `make python-check`; the fresh-process regression fails against the
   original eager import. Catalog costs and complete native renewal remain separate
@@ -31251,6 +31249,9 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 
 - **Installed candidate renewal (2026-11-10):** Exact `2085db22b` passes both maintained source controls and the complete native Linux ARM64/Python 3.12 noneditable wheel gate. The canonical wheel runner now executes both maintained startup/MAC cases in an isolated installed interpreter, rejects skipped or changed case inventories, verifies all 500 imported framework-module origins, and joins dispatcher/MAC adapter hashes to candidate source bytes. A direct counterexample using the managed editable source environment is refused by the actual installed-origin guard. Both cases pass with zero skips in wheel `sha256:79a9859a95aa9fa3a038c346aae7b659bbe527fadd9fd93a8d08e7db6417c397`; the complete existing wheel gate also passes. [Retained installed proof](../../verification/project-command-imports-installed-linux.json) binds the source, fixture, module, wheel and original result identities. macOS/Windows candidate qualification, exact-head/main integration and final lifecycle/receipt renewal remain open. No performance speedup, full native program completion or release readiness is inferred from this Linux gate.
+
+
+- **Native platform renewal (2026-11-10):** PR [#395](https://github.com/jordanhubbard/literate-ai/pull/395) lands the maintained installed startup/MAC hook. Exact source `8a57eeb68` passes all 27 full-matrix jobs in run `42873720744`. Both maintained cases pass without skips on native macOS 3.11/3.14 and Windows 3.12 noneditable wheels; each probe verifies all 500 framework-module origins. Downloaded wheel archives, exact source manifests and both dispatcher/MAC adapter hashes independently match the candidate and actual probe output. [Native platform evidence](../../verification/project-command-imports-installed-platforms.json) preserves this scope alongside the Linux proof. Resulting-main and final lifecycle/receipt renewal remain open; this does not close the complete release gate.
 
 ### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
 
@@ -34373,3 +34374,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Compose complete shared Standard regeneration, unchanged independent-oracle custody, recoverable publication, closed capture/replay and ordinary retained Cargo receiving/admission.
 - **Evidence:**
   - [ ] Qualify a genuine three-library diamond through installed public admission, two clean all-node runs, closed relocatable replay and retained Cargo check/materialize/admit; refuse stale, substituted, missing or failed evidence and preserve source-derived admission.
+
+### [ ] CUDA-SIGNAL-001 — Keep vendor-only source attribution out of CUDA requirements
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#396](https://github.com/jordanhubbard/literate-ai/issues/396)
+- **Next action:** Reconcile the corrected contributor PR [#398](https://github.com/jordanhubbard/literate-ai/pull/398), its source/test inventories and both intake records before integrated noneditable/exact-head/main qualification. Preserve the retained development variant and original failed controls.
+- **Priority:** P1 (blocking 1.4.0 release goal)
+- **Owner:** Framework inert source inventory and proposed Flavor evidence; PROJECT Goals 1, 2, 4 and 5
+- **Direction:** Include newly filed issue396 in 1.4.0: NVIDIA copyright/license attribution alone must not propose a CUDA accelerator requirement for portable source.
+- **Conclusion:** The current public inert inventory reproduces a CUDA signal from the unchanged SPDX header of an ordinary Rust identity function. Narrow detection to CUDA-specific source, toolchain and API evidence while preserving input bytes, existing exclusions and the evidence-proposal role. Do not remove headers, rewrite signed projections or change source-intelligence policy.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Remove vendor-only CUDA inference and exclude source attribution metadata from CUDA evidence; retain explicit CUDA source suffix, compiler/toolchain, runtime and driver evidence through bounded inert analysis.
+  - [ ] Add original portable-source and genuine-CUDA regressions with exact byte/digest preservation and unchanged sensitive, generated, binary and test classification precedence.
+- **Evidence:**
+  - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
+  - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.

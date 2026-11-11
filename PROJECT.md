@@ -115,6 +115,11 @@ development (2026-09-10):
 
 ## Current work
 
+CUDA-SIGNAL-001 records issue #396 as blocking 1.4.0 work under Goals 1, 2, 4
+and 5. Inert source inventory must preserve original bytes and propose CUDA only
+from CUDA-specific evidence; vendor attribution alone must not add an accelerator
+dependency. Source repair and installed/integration qualification remain open.
+
 QUALIFICATION-CASE-INVENTORY-001 and AUTHORED-GRAPH-QUALIFICATION-001 record
 issues #392 and #393 as blocking 1.4.0 work under Goals 1, 2, 4 and 6. Shared raw
 case inventory must preserve every actual node execution; genuinely authored graph
