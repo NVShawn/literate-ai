@@ -34377,12 +34377,14 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Remove vendor-only CUDA inference and exclude source attribution metadata from CUDA evidence; retain explicit CUDA source suffix, compiler/toolchain, runtime and driver evidence through bounded inert analysis.
-  - [ ] Add original portable-source and genuine-CUDA regressions with exact byte/digest preservation and unchanged sensitive, generated, binary and test classification precedence.
+  - [x] Remove vendor-only CUDA inference and exclude source attribution metadata from CUDA evidence; retain explicit CUDA source suffix, compiler/toolchain, runtime and driver evidence through bounded inert analysis.
+  - [x] Add original portable-source and genuine-CUDA regressions with exact byte/digest preservation and unchanged sensitive, generated, binary and test classification precedence.
 - **Evidence:**
-  - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
+  - [x] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
 
 - **Contributor reconciliation:** Preserve the original SOURCE-TARGET-SIGNALS-001 intake as this canonical CUDA-SIGNAL-001 goal. PR398 removes vendor-only inference, adds `.cu`/`.cuh`, runtime-header and runtime/driver-call signals, and retains inert byte-preserving input observation. Its original source regression observes ten failing predecessor subcases and thirteen passing corrected input subcases; its retained related source checks record 161 method successes and eight tool-dependent skips. Confirming contributor CI at `68049ea1b` passes all executed jobs, with only the declared FreeBSD ACL and unused matrix cells skipped. The contributor reports a complete noneditable wheel pass at `68049ea1b`; integrated installed acceptance remains separate. A normal merge of current main resolves only the duplicate roadmap intake, preserving the exact detector and test bytes. No GPU or generated-provider qualification is inferred.
 
 
+
+- **Integrated source checks:** On the normal current-main merge, both maintained inventory methods and their thirteen input subcases pass through `make python-check`, with zero skips. Detector and regression files are byte-identical to contributor `68049ea1b`; driver, runner and documentation reviews remain current, and strict lint plus formatting pass across all 1,890 files. No new driver repin was needed for the roadmap-only conflict resolution. Confirming integrated CI, installed acceptance and resulting-main qualification remain open.
