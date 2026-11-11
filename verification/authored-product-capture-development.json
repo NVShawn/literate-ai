@@ -31,7 +31,50 @@
     "scope": "Before final unique-payload owner-expiry tightening; complete 84-case authored family passes afterward"
   },
   "current_full_source_and_wheel": {
-    "state": "pending"
+    "state": "pass",
+    "subject": "3c32cb46deb585bf5e55a808cf847892c45abf70",
+    "interpreter": {
+      "version": "3.12.3",
+      "implementation": "cpython",
+      "architecture": "aarch64",
+      "platform": "linux"
+    },
+    "source": {
+      "summary": {
+        "executed": 2773,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2773,
+        "selected": 2873,
+        "skipped": 100
+      },
+      "worker_groups": 611,
+      "every_selected_instance_reconciled": true,
+      "report_sha256": "edc7fbf40102448cf9de15c34cae30ade70f4b68ec71d0b06a8038dd81e24dbb"
+    },
+    "wheel": {
+      "wheel_identity": "sha256:1c0b0a3bb269c75ec7c3fa7cc80a9f31d50a89d7283940fda10d13aae902a9b4",
+      "retained_manifest": "_build/ci-wheels/run-bmw2u94s/manifest.json",
+      "standard_binding": {
+        "distribution": "sha256:ad65887d28d6330702fe6fbca732f74e358642db9e82c959ca66f309e3946c29",
+        "members": 1399,
+        "policy": "sha256:a5ca0d6d13daff0199f218c5e4af723a2cec87b927e75dd3a731c511b5d85ac7"
+      }
+    },
+    "retained_artifact_rehash_passed": true,
+    "offline_workers": {
+      "worker_runtime": {
+        "installed_distributions": 38,
+        "dependency_closure_identity": "sha256:ee010be4537ccd10dd509259dd702eebb6223a677b5d1db5cee9fc56859523b5",
+        "framework_distribution": "sha256:ad65887d28d6330702fe6fbca732f74e358642db9e82c959ca66f309e3946c29"
+      },
+      "uv_tool_worker_runtime": {
+        "installed_distributions": 38,
+        "dependency_closure_identity": "sha256:ee010be4537ccd10dd509259dd702eebb6223a677b5d1db5cee9fc56859523b5",
+        "framework_distribution": "sha256:ad65887d28d6330702fe6fbca732f74e358642db9e82c959ca66f309e3946c29"
+      }
+    },
+    "scope": "Complete ordinary source and noneditable wheel/worker gates; not genuine authored model-run, public apply, full semantic qualification reopening or retained receiving acceptance"
   },
   "driver_review": {
     "schema": "literate-ai/lifecycle-driver-review@1",
@@ -98,5 +141,13 @@
       "Native resource retirement and retained Cargo receiving",
       "Independent lifecycle-driver review and resulting-main release acceptance"
     ]
+  },
+  "documentation_and_export": {
+    "state": "pass",
+    "mermaid_diagrams": 181,
+    "markdown_files": 1950,
+    "openspec_changes_passed": 4,
+    "public_export": "pass",
+    "canonical_project_validation_before_full": "pass"
   }
 }
