@@ -1,0 +1,311 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "REVIEW-AUTHORITY-CLI-001",
+  "release_target": "1.4.0",
+  "classification": "completed policy-review CLI feature integration; full release incomplete",
+  "qualified_software_subject": "309f850b1df20bfcd22e9193e9e465b96575f794",
+  "contribution": "382cf69ceeb4f4460330d63dae311d9f799ba9d5",
+  "integration_pr": 415,
+  "resulting_main": "69cb8eb034f94e5ce0a3c73c0f8ab92090cc1037",
+  "unchanged_paths": [
+    "src",
+    "scripts",
+    "tests",
+    "schemas"
+  ],
+  "source_composition": "policy-review-source-composition.json",
+  "source_wheel_installed_evidence": "policy-review-integration-linux.json",
+  "ci": [
+    {
+      "role": "exact-review",
+      "run": 42976806492,
+      "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492",
+      "head": "6b9e69d33ca94b1c159d2b29dd165ef5c2c01991",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "profile",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377683330"
+        },
+        {
+          "name": "FreeBSD POSIX.1e ACL preflight",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377790958"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (2 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377790978"
+        },
+        {
+          "name": "macos-latest / Python 3.14 (smoke)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791009"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (4 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791051"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (1 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791060"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (3 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791096"
+        },
+        {
+          "name": "Changed skill admission",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791419"
+        },
+        {
+          "name": "Sample composition / macos-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791421"
+        },
+        {
+          "name": "Sample composition / ubuntu-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791454"
+        },
+        {
+          "name": "ubuntu-latest / Python 3.11",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791460"
+        },
+        {
+          "name": "Windows / Python 3.12 / tests (1 of 3)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791469"
+        },
+        {
+          "name": "Windows / Python 3.12 / tests (2 of 3)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791472"
+        },
+        {
+          "name": "Windows / Python 3.12 / PR smoke (not release qualification)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791481"
+        },
+        {
+          "name": "Elixir 1.18.0 / OTP 27.0 / macos-15",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791482"
+        },
+        {
+          "name": "ubuntu-latest / Python 3.14",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791495"
+        },
+        {
+          "name": "macOS / Python 3.14 / PR smoke (not release qualification)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791497"
+        },
+        {
+          "name": "Windows / Python 3.12 / tests (3 of 3)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791503"
+        },
+        {
+          "name": "Elixir 1.18.0 / OTP 27.0 / ubuntu-24.04",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791509"
+        },
+        {
+          "name": "Elixir 1.20.4 / OTP 29.1.1 / ubuntu-24.04",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791515"
+        },
+        {
+          "name": "Native C++ library / ubuntu-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791544"
+        },
+        {
+          "name": "Elixir 1.20.4 / OTP 29.1.1 / windows-2022",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791554"
+        },
+        {
+          "name": "Windows / Python 3.12 / lint, OpenSpec, wheel",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791555"
+        },
+        {
+          "name": "Native C++ library / windows-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791575"
+        },
+        {
+          "name": "Sample composition / windows-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791590"
+        },
+        {
+          "name": "Elixir 1.18.0 / OTP 27.0 / windows-2022",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791621"
+        },
+        {
+          "name": "Elixir 1.20.4 / OTP 29.1.1 / macos-15",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42976806492/job/130377791649"
+        }
+      ]
+    },
+    {
+      "role": "resulting-main",
+      "run": 42988861680,
+      "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680",
+      "head": "69cb8eb034f94e5ce0a3c73c0f8ab92090cc1037",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "profile",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416517714"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (1 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416634635"
+        },
+        {
+          "name": "FreeBSD POSIX.1e ACL preflight",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416634684"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (4 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416634711"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (3 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416634785"
+        },
+        {
+          "name": "macos-latest / Python 3.14 (smoke)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416634855"
+        },
+        {
+          "name": "ubuntu-latest / Python 3.11",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635062"
+        },
+        {
+          "name": "macos-latest / Python 3.11 (2 of 4)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635066"
+        },
+        {
+          "name": "Changed skill admission",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635098"
+        },
+        {
+          "name": "Windows / Python 3.12 / lint, OpenSpec, wheel",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635110"
+        },
+        {
+          "name": "ubuntu-latest / Python 3.14",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635115"
+        },
+        {
+          "name": "Sample composition / windows-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635138"
+        },
+        {
+          "name": "Sample composition / macos-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635171"
+        },
+        {
+          "name": "Windows / Python 3.12 / tests (3 of 3)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635180"
+        },
+        {
+          "name": "Sample composition / ubuntu-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635185"
+        },
+        {
+          "name": "Native C++ library / ubuntu-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635193"
+        },
+        {
+          "name": "Windows / Python 3.12 / tests (2 of 3)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635223"
+        },
+        {
+          "name": "Native C++ library / windows-latest",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635225"
+        },
+        {
+          "name": "Elixir 1.18.0 / OTP 27.0 / windows-2022",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635252"
+        },
+        {
+          "name": "Elixir 1.20.4 / OTP 29.1.1 / ubuntu-24.04",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635256"
+        },
+        {
+          "name": "Windows / Python 3.12 / tests (1 of 3)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635267"
+        },
+        {
+          "name": "Elixir 1.20.4 / OTP 29.1.1 / windows-2022",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635280"
+        },
+        {
+          "name": "macOS / Python 3.14 / PR smoke (not release qualification)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635306"
+        },
+        {
+          "name": "Elixir 1.18.0 / OTP 27.0 / macos-15",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635329"
+        },
+        {
+          "name": "Elixir 1.18.0 / OTP 27.0 / ubuntu-24.04",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635392"
+        },
+        {
+          "name": "Windows / Python 3.12 / PR smoke (not release qualification)",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416635534"
+        },
+        {
+          "name": "Elixir 1.20.4 / OTP 29.1.1 / macos-15",
+          "conclusion": "success",
+          "url": "https://github.com/jordanhubbard/literate-ai/actions/runs/42988861680/job/130416636743"
+        }
+      ]
+    }
+  ],
+  "issue_closure": "https://github.com/jordanhubbard/literate-ai/issues/358#issuecomment-6793338479",
+  "scope_limit": "Policy-labeled signed intent promotion, unchanged human defaults and explicit acceptance opt-in only. Synthetic human-authority fixtures are not actual human approval. No generated application, native Cargo/provider, retained importer or release acceptance.",
+  "release_attestation": false
+}
