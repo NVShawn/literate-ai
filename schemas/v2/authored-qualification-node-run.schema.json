@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-qualification-node-run",
+  "title": "Actual per-node generated, built, tested and executed authored records",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "source_generation",
+    "source_output",
+    "index_identity",
+    "acceptance",
+    "node_result_identity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-qualification-node-run"
+    },
+    "source_generation": {
+      "$ref": "urn:literate-ai:schema:v3:source-generation-node-result"
+    },
+    "source_output": {
+      "$ref": "urn:literate-ai:schema:v3:source-generation-run-output"
+    },
+    "index_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "acceptance": {
+      "$ref": "urn:literate-ai:schema:v2:standard-component-acceptance-evidence"
+    },
+    "node_result_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-qualification-run",
+  "title": "Authored clean run observations; no source promotion or publication grant",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "request",
+    "driver_identity",
+    "lifecycle_policy_identity",
+    "framework_distribution_identity",
+    "lifecycle_request_identity",
+    "lifecycle_invocation_identity",
+    "lifecycle_result_identity",
+    "receipt",
+    "root",
+    "comparison",
+    "nodes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-qualification-run"
+    },
+    "request": {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-lifecycle-request"
+    },
+    "driver_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "lifecycle_policy_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "framework_distribution_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "lifecycle_request_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "lifecycle_invocation_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "lifecycle_result_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "receipt": {
+      "$ref": "urn:literate-ai:schema:v1:project-test-receipt"
+    },
+    "root": {
+      "$ref": "urn:literate-ai:schema:v1:standard-root-integration-evidence"
+    },
+    "comparison": {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-comparison"
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:authored-qualification-node-run"
+      }
+    }
+  }
+}
