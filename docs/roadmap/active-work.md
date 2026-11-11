@@ -34231,7 +34231,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
+  - [x] Expose the existing review authority choice with an explicit actor and independently acknowledged policy acceptance; preserve all signed intent, graph, uncertainty, source and lifecycle bindings.
 - **Evidence:**
   - [ ] Qualify public CLI serialization and signing, unchanged human defaults, refusal without operator opt-in, explicit opt-in success and tampered-authority refusal; require independent review, installed/native and exact integration gates.
 
@@ -34239,6 +34239,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Contributor reconciliation:** Preserve PR360 `382cf69c` and its original REVIEW-AUTHORITY-001 intake as this canonical REVIEW-AUTHORITY-CLI-001 goal. The contributor records three public CLI controls and nine existing inverse controls with zero skips at their original subject; an earlier borrowed-editable origin refusal stays historical. This integration preserves the exact runtime contribution through an ordinary merge with the reviewed transport/error batch; no contributor checkout or branch is edited.
 - **Current predecessor control:** In a fresh task-owned Make environment, the three maintained authority controls select one failing first method before fail-fast: the old CLI rejects `--authority authorized-policy` as `cli.usage`. No origin guard was relaxed; later selected methods were not executed and are not counted as failed.
 - **Next action:** Complete independent composition review and current focused/source/noneditable installed qualification, then exact-head and resulting-main gates. Keep actual qualification fixtures policy-labeled and retain human defaults only as contract-test data.
+
+
+- **Independent current composition review:** [Source composition record](../../verification/policy-review-source-composition.json) confirms every added/removed runtime line exactly matches NVShawn's contributed patch, combined with unchanged reviewed root/transport/error behavior. All three maintained public CLI controls pass in the current task-owned Make environment, including signing/identity, default denial, separate opt-in and tampering refusal. Supported driver renewal follows this non-author review; full and installed qualification remain open.
 
 ### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
 
