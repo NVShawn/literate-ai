@@ -372,6 +372,12 @@ qualified projection; retained-source authority is never exposed as current. Use
 returned archive reference for the reviewed retained-library binding. Archive
 publication alone does not authorize importer admission.
 
+An independent library-acceptance rejection keeps its stable acceptance error
+code and message, including when `--retained-evidence-store` is requested. The
+rejected candidate is not qualified or admitted. Actual retained archive
+publication failures use `qualification.retained_publication_failed`; that code
+does not replace a typed native acceptance mismatch.
+
 If the capture command was introduced by a newer Standard wheel, preserve the exact
 pre-rebind `literate.project.json` before applying the reviewed Standard rebind. Pass
 that file with `--prior-project-configuration PATH`. Literate AI requires its bytes to

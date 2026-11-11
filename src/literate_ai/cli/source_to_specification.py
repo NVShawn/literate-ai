@@ -2457,6 +2457,7 @@ def _complete_standard_lifecycle_qualification(
     """Run and admit only the filesystem Standard lifecycle qualification contract."""
 
     from literate_ai.adapters.authority import AuthorityProjectionStoreError
+    from literate_ai.adapters.component_acceptance import ComponentAcceptanceError
     from literate_ai.adapters.generation_preparation import (
         FilesystemLockedGenerationApplicationAdapter,
         GenerationPreparationError,
@@ -2650,7 +2651,11 @@ def _complete_standard_lifecycle_qualification(
                     for capture in adapter.library_captures
                 ],
             }
-    except (FilesystemQualificationError, SourceToSpecificationError) as exc:
+    except (
+        FilesystemQualificationError,
+        SourceToSpecificationError,
+        ComponentAcceptanceError,
+    ) as exc:
         raise CliFailure(
             getattr(exc, "code", "qualification.lifecycle_failed"),
             getattr(exc, "message", str(exc)),

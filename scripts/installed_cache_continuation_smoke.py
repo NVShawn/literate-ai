@@ -78,6 +78,10 @@ def scenario(root: Path, *, declared: bool, author_fixture) -> dict:
     os.environ.update(
         BUILD_DIR=str(root / "build"),
         OBJ_DIR=str(root / "obj"),
+        # Expected bytecode is authored by this installed interpreter. Select
+        # that same runtime through the public operator binding rather than
+        # allowing a different supported Python on PATH to change its format.
+        PYTHON=sys.executable,
         CODING_CLI="no-generation-provider",
         LITAI_CODING_PROVIDER="coding-cli",
     )

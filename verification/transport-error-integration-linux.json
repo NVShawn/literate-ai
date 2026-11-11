@@ -1,0 +1,133 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "RELEASE-INTEGRATION-005",
+  "candidate": "c7a8d308bb7b1eff9eb3900c202a265b50a563d9",
+  "platform": "linux-aarch64",
+  "python": "3.12.3",
+  "classification": "combined native Linux source and noneditable installed development qualification passed; exact-head/resulting-main and full release qualification pending",
+  "source": {
+    "schema": "literate-ai/verification-record@1",
+    "candidate": "c7a8d308bb7b1eff9eb3900c202a265b50a563d9",
+    "summary": {
+      "executed": 2680,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2680,
+      "selected": 2780,
+      "skipped": 100
+    },
+    "report_sha256": "03482a6d8e6456be1099ec35dce59ac33c3d08a47ea3b9166240d7126e774e6d",
+    "worker_groups": 598,
+    "event_kind_counts": {
+      "start": 2771,
+      "success": 2680,
+      "done": 598,
+      "skip": 91,
+      "fixture_skip": 1
+    },
+    "individual_started_cases": 2771,
+    "selected_instances_accounted": 2780,
+    "every_request_index_and_occurrence_qualified_report_key_matches_raw_terminal_event": true,
+    "duplicate_discovered_names": {
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_failed_policy_update_rolls_back_inventory_and_preserves_source": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_git_tracked_additions_are_captured_but_ignored_files_are_not": 2,
+      "tests.e2e.test_retained_scope_refresh.RetainedScopeRefreshTests.test_refresh_is_read_only_until_acknowledged_and_invalidates_old_receipt": 2
+    },
+    "declared_skip_reasons": {
+      "requires native FreeBSD root and POSIX ACLs": 13,
+      "set LITERATE_AI_RUN_LIVE_ROUNDTRIP=1 for live coding-agent round-trip": 1,
+      "Actual FreeBSD native proof": 1,
+      "Elixir is unavailable": 9,
+      "fixture selects actual macOS host": 1,
+      "set LITAI_OPENCODE_V1_BINARY to an exact native OpenCode binary": 1,
+      "set LITAI_OPENCODE_V2_BINARY to an exact native OpenCode binary": 1,
+      "no supported C++ compiler was found through CXX or PATH": 3,
+      "native Elixir/OTP runtime is unavailable": 1,
+      "pinned doc-toolchain is not installed; run make doc-toolchain-bootstrap": 1,
+      "requires native FreeBSD root": 2,
+      "requires native FreeBSD reaper": 4,
+      "native FreeBSD retained receiver entry point": 7,
+      "set LITERATE_AI_LIVE_SAMPLES=1 to invoke the authenticated coding CLI": 5,
+      "requires native FreeBSD pkg-static": 1,
+      "Requires actual Windows API": 1,
+      "set LITERATE_AI_ELIXIR_QUALIFICATION=1 for native proof": 6,
+      "Native pkg requires FreeBSD": 2,
+      "requires native FreeBSD pkg-static and C compiler": 3,
+      "requires the macOS sandbox runtime": 1,
+      "Windows portable mode contract": 1,
+      "Playwright Chromium is not installed": 2,
+      "set LITERATE_AI_ELIXIR_MIX_QUALIFICATION=1 for authorized native Mix proof": 12,
+      "requires privileged FreeBSD POSIX ACL fixture": 9,
+      "requires explicit FreeBSD UFS ACL-disabled and ACL-enabled mounts": 2,
+      "requires actual native FreeBSD pkg-static": 1,
+      "requires the actual Windows API": 1,
+      "Requires native Windows command": 1,
+      "Requires actual Windows PE imports": 1,
+      "requires native FreeBSD": 1,
+      "set LITERATE_AI_NATIVE_TOOLCHAIN_TESTS=1 with Bazel on PATH": 2,
+      "set LITERATE_AI_RUN_LIVE_COMPOSED_ROUNDTRIP=1 for composed live round-trip": 1,
+      "requires an explicitly selected Git source corpus": 1,
+      "set LITERATE_AI_ELIXIR_QUALIFICATION=1 for native Mix proof": 1
+    }
+  },
+  "installed_controls": {
+    "schema": "literate-ai/verification-record@1",
+    "candidate": "c7a8d308bb7b1eff9eb3900c202a265b50a563d9",
+    "distribution": "sha256:7cdd0265244cc20fb9494c03867ab9f12119c6e772c0320bc5f254717879ca11",
+    "wheel_sha256": "8d0f2c4fdbc1b85001745d716c0616de532b2c6940a37e627a49027140e02396",
+    "methods": 26,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "all_framework_imports_noneditable": true,
+    "framework_modules_checked": 568,
+    "module_sha256": {
+      "adapters/remote_transport.py": "f20259482269f1041251851d087cbd6ed50c633fa3c2515ad9fd52c28363b8a4",
+      "cli/source_to_specification.py": "240af4c6abcdd35cb4866329f7135cbe62e19e93ab9b2837ee4757b56a6fc26a",
+      "source_to_specification/inventory.py": "95a804e09b6fc1f354bd186c8dd7e6fa825329720780230c9f443afc3f1044d4"
+    },
+    "distribution_unchanged": true,
+    "scope": "Maintained native POSIX ceiling/transport, injected qualification CLI diagnostic-boundary and standalone root-option methods. No generated-provider or release acceptance claimed."
+  },
+  "reviewed_runtime_identity": "sha256:8bc7d5b293bef0121e95eb31a07eb2cb2b5cdf948db3e8c41bba893d95844b5b",
+  "documentation": {
+    "tooling_methods": 22,
+    "openspec_items": 4,
+    "mermaid_diagrams": 181,
+    "markdown_files": 1950,
+    "log_sha256": "1de2b0a8d19256ef27c50b5bee7a9b7203f7028180cbf5ee9cc414943b1dcb11"
+  },
+  "wheel_gate": {
+    "state": "passed",
+    "manifest_identity": "sha256:0eb939c60099ee84426de01821aab23002238cb363f3987adddf801f3936272c",
+    "manifest_sha256": "ce193e509826c202fba78bcf21cfda2995c4446aa219f27361499d0ab0b3c38d",
+    "wheel_sha256": "8d0f2c4fdbc1b85001745d716c0616de532b2c6940a37e627a49027140e02396",
+    "archive_bytes": 4234822,
+    "full_result_log_sha256": "8081a01f3197adca580b8ea9efbaaa79625fdb4041a503f6a72eaded2cfa3c1d",
+    "distribution": "sha256:7cdd0265244cc20fb9494c03867ab9f12119c6e772c0320bc5f254717879ca11",
+    "cache_continuation": {
+      "distribution": "sha256:7cdd0265244cc20fb9494c03867ab9f12119c6e772c0320bc5f254717879ca11",
+      "platform": "linux",
+      "qualified": true,
+      "scenarios": {
+        "default": {
+          "admissions": 2,
+          "exact_builds": 2,
+          "history_unchanged": true,
+          "runs": 2
+        },
+        "project-relative": {
+          "admissions": 2,
+          "exact_builds": 2,
+          "history_unchanged": true,
+          "runs": 2
+        }
+      }
+    }
+  },
+  "pending": [
+    "confirm exact-head full CI",
+    "resulting-main integration",
+    "remaining full 1.4 scope and final release qualification/publication"
+  ]
+}
