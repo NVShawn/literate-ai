@@ -17,7 +17,50 @@
     "tests/critical/test_authored_qualification_publication.py": "cefaa7964d021228b278ae69d567de27ef8f95005cdde47f47589d4be33dc30f"
   },
   "current_full_source_and_wheel": {
-    "state": "pending"
+    "state": "pass",
+    "subject": "76cdc1742046760d97109bfa7bd000cd08c26050",
+    "interpreter": {
+      "version": "3.12.3",
+      "implementation": "cpython",
+      "architecture": "aarch64",
+      "platform": "linux"
+    },
+    "source": {
+      "summary": {
+        "executed": 2810,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2810,
+        "selected": 2910,
+        "skipped": 100
+      },
+      "worker_groups": 614,
+      "every_selected_instance_reconciled": true,
+      "report_sha256": "8dd5bc3c99f1c4e0defe62df4301b68facf88bb840fe22e851bdc76cac22eb16"
+    },
+    "wheel": {
+      "wheel_identity": "sha256:6e401bdb7963a62815827e1cf022a92a3caaef6b1b50dcc9658d99fca73bddf7",
+      "retained_manifest": "_build/ci-wheels/run-vmt286tb/manifest.json",
+      "standard_binding": {
+        "distribution": "sha256:9d2bd34da3b69438ef5f8e01a27e28476d2656ca68176f0b3f60b9591b53fa88",
+        "members": 1405,
+        "policy": "sha256:a5ca0d6d13daff0199f218c5e4af723a2cec87b927e75dd3a731c511b5d85ac7"
+      }
+    },
+    "retained_artifact_rehash_passed": true,
+    "offline_workers": {
+      "worker_runtime": {
+        "installed_distributions": 38,
+        "dependency_closure_identity": "sha256:48fab36b814dfc403fe2a577c735c0a4f4549a2d58e5e28a9c3c03e8ccfda8e2",
+        "framework_distribution": "sha256:9d2bd34da3b69438ef5f8e01a27e28476d2656ca68176f0b3f60b9591b53fa88"
+      },
+      "uv_tool_worker_runtime": {
+        "installed_distributions": 38,
+        "dependency_closure_identity": "sha256:48fab36b814dfc403fe2a577c735c0a4f4549a2d58e5e28a9c3c03e8ccfda8e2",
+        "framework_distribution": "sha256:9d2bd34da3b69438ef5f8e01a27e28476d2656ca68176f0b3f60b9591b53fa88"
+      }
+    },
+    "scope": "Complete ordinary source and noneditable wheel/worker gates; not genuine authored model-run, installed/default-admission apply or native receiving acceptance"
   },
   "scope": {
     "real": [
@@ -41,11 +84,13 @@
     ]
   },
   "authored_family": {
+    "state": "pass",
     "selected": 121,
     "passed": 121,
     "failed": 0,
     "skipped": 0,
-    "log_sha256": "059e4f65ad6005f2e84929f542305399978fcb6ad823d4684c3707c96c850a34"
+    "scope": "Every authored outcome selected and reconciled in the complete source report",
+    "full_source_report_sha256": "8dd5bc3c99f1c4e0defe62df4301b68facf88bb840fe22e851bdc76cac22eb16"
   },
   "legacy_archive_schema_cli": {
     "selected": 48,
@@ -102,5 +147,13 @@
       "src/literate_ai/schema_catalog.py"
     ],
     "recorded": false
+  },
+  "documentation_and_export": {
+    "state": "pass",
+    "mermaid_diagrams": 181,
+    "markdown_files": 1950,
+    "openspec_changes_passed": 4,
+    "public_export": "pass",
+    "canonical_project_validation_before_full": "pass"
   }
 }
