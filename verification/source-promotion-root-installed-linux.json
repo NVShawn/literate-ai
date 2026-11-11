@@ -1,0 +1,29 @@
+{
+  "schema": "literate-ai/verification-record@1",
+  "goal": "SOURCE-PROMOTION-ROOT-001",
+  "revision": "e7a96c26982aae9639cfa1677e0a74a293279ede",
+  "distribution": "sha256:8045927725ea1f07300d83270363dd4fef50454b88eb0215f1982875b2e65d77",
+  "wheel_sha256": "cb645ef519f8663d01fa6a264dc15f8ddacd75431804e5a23a985dab1a6fdafe",
+  "platform": "linux",
+  "python": "3.12.3",
+  "methods": 2,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "framework_modules_checked": 513,
+  "all_framework_imports_noneditable": true,
+  "distribution_unchanged": true,
+  "whole_wheel_gate": "passed",
+  "whole_wheel_result_sha256": "f4778d0e520430e70a7a7ac5ea45e5428701a66885e189a9c298258547140ef3",
+  "qualified_manifest_identity": "sha256:06b9d6ce267e97e170dee5ba8722d8d171cd9645fabe5f4b354c483a62a7c28e",
+  "qualified_manifest_sha256": "e5be2fdc8c94a5e0f52ee167d1934ff98efbf3ac99b9490a943b156e447a3ee7",
+  "archive_bytes": 4234674,
+  "cli_module_sha256": "f08fcbd99e34bafdf3aa84b671ad9379073a3e5788e8d341b579d19e3ad01b0f",
+  "fixture_sha256": "887b643b82571b3ce0ac68653cf8a702670aba21a01d5695688ed2bf149dd1df",
+  "merge_revision": "274b35f9d6e05d51650ba0a9d567c43d02ae1fd0",
+  "classification": "native Linux candidate and landed source qualification; resulting-main and final release qualification pending",
+  "preserved_failures": [
+    "Python 3.15 binary dependency wheel download failure",
+    "mixed Python 3.12 oracle and Python 3.15 native artifact mismatch; fixture repair in PR407"
+  ]
+}

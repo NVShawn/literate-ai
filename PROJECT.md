@@ -115,6 +115,10 @@ development (2026-09-10):
 
 ## Current work
 
+SOURCE-PROMOTION-ROOT-001 records the landed explicit standalone root-lineage
+option under Goals 1, 4 and 6. Exact-candidate source and native Linux installed
+qualification pass; resulting-main and consuming release qualification remain open.
+
 QUALIFICATION-ERROR-001 and NATIVE-ACCEPTANCE-REPAIR-001 include newly observed
 issues #404 and #405 in 1.4 under Goals 1 and 4. Typed native acceptance rejection
 must remain distinct from archive I/O failure. Generated native-library repair
