@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Wheel qualification accepts a complete reviewed dependency wheel directory for
+  offline binary-only installs and both worker bootstrap paths, preserving pinned
+  dependencies on targets without published binary wheels (#418).
+
 - Standalone source promotion can explicitly select root repository lineage with
   `spec accept --project-target ... --root-project`; default inheritance and
   retained-host integration remain unchanged (#402).

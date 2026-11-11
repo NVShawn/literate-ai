@@ -18,6 +18,29 @@ commands before installing.
   metadata.
 - Node.js is not required to install or import the Python framework.
 
+Offline worker bootstrap requires compatible wheels for the selected interpreter
+and platform, including every pinned dependency. An ordinary Python installation
+may build an upstream source distribution; worker wheelhouse export deliberately
+does not. For example, PyYAML 6.0.3 publishes no CPython 3.15 or universal wheel.
+Its upstream pure Python build can supply the unchanged version after source,
+build and installed-behavior review. Do not rename another interpreter's wheel or
+change dependency pins to make a target appear compatible.
+
+Provide a complete reviewed dependency wheel directory through
+`litai worker wheelhouse export --wheel-directory PATH`. To qualify that same
+input through the complete repository wheel gate, use:
+
+```sh
+make wheel-check PYTHON_COMMAND=python3.15 WHEEL_WORKER_DIRECTORY=/absolute/reviewed-wheels
+```
+
+The gate validates and copies the bounded wheel set before installing dependencies,
+uses offline binary-only installation, and exercises both ordinary and uv-installed
+worker export/bootstrap with the selected Python. Missing, incompatible or changed
+inputs fail; a successful run records the exact dependency wheel identities. The
+default gate continues to resolve published binary dependencies when no directory
+is supplied. Supplying wheels does not authorize source builds on a worker.
+
 Every successful initialization returns a
 `literate-ai/project-initialization-prerequisites@1` report. It records the Python
 runtime already executing `litai` and whether a supported coding CLI is visible on
