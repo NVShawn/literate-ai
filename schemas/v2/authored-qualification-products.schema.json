@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authored-qualification-products",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "origin",
+    "qualification_identity",
+    "runs"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:authored-qualification-products"
+    },
+    "origin": {
+      "$ref": "urn:literate-ai:schema:v2:authored-qualification-origin"
+    },
+    "qualification_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "runs": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:authored-qualification-run-products"
+      }
+    }
+  },
+  "title": "Authored product/run membership; no execution or importer admission",
+  "$defs": {
+    "run": {
+      "$id": "urn:literate-ai:schema:v2:authored-qualification-run-products",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "run_identity",
+        "run_record_identity",
+        "export_set_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:authored-qualification-run-products"
+        },
+        "run_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "run_record_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "export_set_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    }
+  }
+}

@@ -147,6 +147,7 @@ class QualificationEvidenceReader:
                 raise QualificationCaptureError("qualification.capture.record-mismatch")
         self._records = dict(entries)
         self.max_bytes = max_bytes
+        self.max_records = max_records
 
     def read_bytes(self, identity: ContentIdentity) -> bytes:
         if not isinstance(identity, ContentIdentity):
@@ -240,6 +241,47 @@ def capture_qualification_run(
     ):
         raise QualificationCaptureError("qualification.capture.run-mismatch")
 
+    retained = capture_qualification_product_blobs(
+        exports,
+        acceptances,
+        target_profile_identity=run.target_profile_identity,
+        read_blob=read_blob,
+        max_bytes=max_bytes,
+    )
+    return QualificationRunCapture(run, exports, acceptances, retained)
+
+
+def capture_qualification_product_blobs(
+    exports: RetainedLibraryExportSet,
+    acceptances: tuple[StandardComponentAcceptanceEvidence, ...],
+    *,
+    target_profile_identity: ContentIdentity,
+    read_blob: Callable[[BlobRef], bytes],
+    max_bytes: int,
+) -> tuple[tuple[BlobRef, bytes], ...]:
+    """Shared product integrity after origin-specific run membership admission.
+
+    This supplies no qualification, source history or importer authorization.
+    Original source-derived callers retain their complete run checks above.
+    """
+
+    if type(max_bytes) is not int or max_bytes <= 0:
+        raise QualificationCaptureError("qualification.capture.limit-invalid")
+    if (
+        not isinstance(exports, RetainedLibraryExportSet)
+        or not isinstance(target_profile_identity, ContentIdentity)
+        or not isinstance(acceptances, tuple)
+        or not acceptances
+        or any(
+            not isinstance(a, StandardComponentAcceptanceEvidence) for a in acceptances
+        )
+    ):
+        raise QualificationCaptureError("qualification.capture.records-invalid")
+    identities = tuple(a.identity.uri for a in acceptances)
+    if identities != tuple(sorted(set(identities))) or len(
+        {a.component_revision for a in acceptances}
+    ) != len(acceptances):
+        raise QualificationCaptureError("qualification.capture.run-mismatch")
     built = {
         export.identity: export for item in acceptances for export in item.build.exports
     }
@@ -249,7 +291,7 @@ def capture_qualification_run(
         for export in manifest.exports
     }
     if built != graph_exports or any(
-        item.target_identity != run.target_profile_identity
+        item.target_identity != target_profile_identity
         for item in graph_exports.values()
     ):
         raise QualificationCaptureError("qualification.capture.export-mismatch")
@@ -269,7 +311,7 @@ def capture_qualification_run(
         ):
             raise QualificationCaptureError("qualification.capture.blob-mismatch")
         retained.append((reference, content))
-    return QualificationRunCapture(run, exports, acceptances, tuple(retained))
+    return tuple(retained)
 
 
 def capture_qualification_source_records(recorder, *, candidate, cas) -> None:

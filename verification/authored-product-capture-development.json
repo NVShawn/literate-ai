@@ -1,0 +1,102 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "issue": 393,
+  "review": 401,
+  "adr": "0072",
+  "software_base": "abb380172a78df8bb0708f8192564fffb6415463",
+  "source_sha256": {
+    "schemas/v2/authored-qualification-products.schema.json": "713e2d936b9fd25e730f466aa6d3f128c6847b6d907d366f05921da52cc48e58",
+    "schemas/v2/index.json": "0c8046d19629c35a21efa1daa9cf2b6299adf57296480809b36dfc852f184748",
+    "src/literate_ai/adapters/authored_qualification_capture.py": "256c0904bc1c55ce21a534b03b63b87d04e66817731d251f6a9c9a784377e99b",
+    "src/literate_ai/adapters/qualification_capture.py": "d9854fcd35b6554976d4ea1ea30cc6d59b287cadfeaa762d69573376315323c1",
+    "src/literate_ai/contracts/authored_qualification_products.py": "69983bc31f48b89c63d3a47db69cfa6a270299491382276a4f82e144d310df06",
+    "tests/critical/test_authored_qualification_capture.py": "de33e90a34b9deff27d4d8dd166be6cc12dd57d2e7900a49d79a823563ae2264",
+    "tests/critical/test_authored_qualification_runs.py": "eebcff784fd5e5d5b14510db3d44bab4aaf05e7de15ca38bafba43763ce071df"
+  },
+  "authored_family": {
+    "selected": 84,
+    "passed": 84,
+    "failed": 0,
+    "skipped": 0,
+    "log_sha256": "fa5f3857df9a1d24f5bb33962d2c6871436be0b113cad07e61f7153371826fb8"
+  },
+  "legacy_capture_archive_schema_checkpoint": {
+    "selected": 56,
+    "passed": 56,
+    "failed": 0,
+    "skipped": 0,
+    "log_sha256": "89a259627eb92c245f365b7abecdf0a37cf578d722b04bdcc41daace8d867ef9",
+    "scope": "Before final unique-payload owner-expiry tightening; complete 84-case authored family passes afterward"
+  },
+  "current_full_source_and_wheel": {
+    "state": "pending"
+  },
+  "driver_review": {
+    "schema": "literate-ai/lifecycle-driver-review@1",
+    "driver_id": "sample-host-conformance",
+    "state": "stale",
+    "pinned_identity": "sha256:0086cc0a419753fccae6f85b47c44a71ad1b01edba192bec635b64827a7aa1ed",
+    "computed_identity": "sha256:1f496521b11ca50a451e5d50a3cd765ab33111fa5fd6cc4355d8a9caa91d8a9d",
+    "implementation_paths": [
+      "scripts/run_samples.py",
+      "src/literate_ai",
+      "tests/conformance/support/durable_split_service.py",
+      "tests/conformance/support/runtime_oracles.py",
+      "tests/conformance/support/sample_runner.py",
+      "tests/conformance/support/standard_service_stack.py"
+    ],
+    "changed_since_pin": [
+      "src/literate_ai/adapters/authored_graph_acceptance.py",
+      "src/literate_ai/adapters/authored_qualification_authority.py",
+      "src/literate_ai/adapters/authored_qualification_capture.py",
+      "src/literate_ai/adapters/authored_qualification_comparison.py",
+      "src/literate_ai/adapters/authored_qualification_execution.py",
+      "src/literate_ai/adapters/authored_qualification_oracles.py",
+      "src/literate_ai/adapters/authored_qualification_planning.py",
+      "src/literate_ai/adapters/authored_qualification_runs.py",
+      "src/literate_ai/adapters/component_lock_planning.py",
+      "src/literate_ai/adapters/lifecycle/standard_local.py",
+      "src/literate_ai/adapters/locked_generation_authority.py",
+      "src/literate_ai/adapters/qualification.py",
+      "src/literate_ai/adapters/qualification_capture.py",
+      "src/literate_ai/adapters/qualification_workspace_namespace.py",
+      "src/literate_ai/adapters/standard_rebuild.py",
+      "src/literate_ai/cli/authored_qualification.py",
+      "src/literate_ai/cli/dispatch.py",
+      "src/literate_ai/contracts/authored_qualification_acceptance.py",
+      "src/literate_ai/contracts/authored_qualification_comparisons.py",
+      "src/literate_ai/contracts/authored_qualification_plans.py",
+      "src/literate_ai/contracts/authored_qualification_products.py",
+      "src/literate_ai/contracts/authored_qualification_profiles.py",
+      "src/literate_ai/contracts/authored_qualification_requests.py",
+      "src/literate_ai/contracts/authored_qualification_runs.py",
+      "src/literate_ai/contracts/qualification_origins.py",
+      "src/literate_ai/schema_catalog.py"
+    ],
+    "recorded": false
+  },
+  "scope": {
+    "real": [
+      "Typed Standard diamond service composition",
+      "Two runs with four library exports each",
+      "Hash-verified product bytes and bounded metadata/index accounting",
+      "Closed origin-specific products contract and schema",
+      "Model-free integrity-only archive membership reopening"
+    ],
+    "injected": [
+      "Original owner admission",
+      "Generation and native execution",
+      "Independent oracle acceptance",
+      "Native package custody and artifact blob I/O"
+    ],
+    "not_established": [
+      "Full semantic qualification reopening",
+      "Public acknowledged apply and recoverable publication",
+      "Two genuine all-node model generations",
+      "Native resource retirement and retained Cargo receiving",
+      "Independent lifecycle-driver review and resulting-main release acceptance"
+    ]
+  }
+}

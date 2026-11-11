@@ -69,6 +69,7 @@ class AuthoredQualificationRunTests(unittest.TestCase):
             2,
         )
         self.executions = {}
+        self.ports = {}
         self.runs = (self.run_fixture("one"), self.run_fixture("two"))
 
     def run_fixture(self, label):
@@ -83,7 +84,14 @@ class AuthoredQualificationRunTests(unittest.TestCase):
             )
             for key, value in f.nodes.items()
         }
-        ports = standard.ContractEvidenceLifecyclePorts(f.execution, f.names)
+        ports = standard.ContractEvidenceLifecyclePorts(
+            f.execution,
+            f.names,
+            library_exports=getattr(self, "library_exports", False),
+        )
+        if getattr(self, "library_exports", False):
+            ports.artifact_target_identity = f.lock.target_profile_identity
+        self.ports[label] = ports
         lifecycle = standard._service(ports).execute(
             f.execution,
             component_lock=f.lock,
@@ -110,8 +118,10 @@ class AuthoredQualificationRunTests(unittest.TestCase):
             self.plan.origin,
             self.plan.identity,
             self.plan.oracle_set_identity,
-            identity("run-" + label),
-            identity("allocation-" + label),
+            getattr(self, "run_identities", {}).get(label, identity("run-" + label)),
+            getattr(self, "allocation_identities", {}).get(
+                label, identity("allocation-" + label)
+            ),
         )
         comparison = AuthoredQualificationComparison(
             self.plan.origin,

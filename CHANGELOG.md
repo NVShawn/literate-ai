@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Capture authored clean-run library bytes under original execution custody,
+  retaining bounded run/product membership for integrity-only archive reopening.
+  Full authored qualification reopening and publication remain in progress (#393).
+
 - Bind authored qualification to the current complete plan before generation and
   retain original verifier and run-directory ownership through capture (#393).
 

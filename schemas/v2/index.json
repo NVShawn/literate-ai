@@ -1201,6 +1201,13 @@
       "file": "authored-qualification-result.schema.json",
       "root_id": "urn:literate-ai:schema:v2:authored-qualification-result",
       "public_ids": []
+    },
+    {
+      "file": "authored-qualification-products.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:authored-qualification-products",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:authored-qualification-run-products"
+      ]
     }
   ]
 }
