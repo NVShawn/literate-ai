@@ -34383,6 +34383,30 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Reconcile the retained predecessor failure and source-preserving negative/positive inventory controls with the actual corrected PR398 candidate. A locally qualified development variant remains on `fix/cuda-source-signals`; its passing suite is not contributor-head acceptance.
   - [ ] Run focused and complete qualification, independent review before driver repin, noneditable installed controls and exact-head/main integration; keep source promotion and source-intelligence authority unchanged.
 
+### [ ] SOURCE-PROMOTION-ROOT-001 — Expose explicit root lineage for standalone source promotion
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#402](https://github.com/jordanhubbard/literate-ai/issues/402).
+
+- **Priority:** P1
+- **Owner:** CLI source promotion and repository lineage
+- **Direction:** Issue #402 requests an explicit root-parent selection for newly created standalone source-promotion projects when implicit release-parent discovery cannot resolve usable authority.
+- **Conclusion:** Expose existing typed root lineage before child initialization and audit. Preserve default inheritance, retained-host integration, signed source intent and independent qualification; never rewrite package origin, tags or old projections.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Add --root-project only with --project-target; reject absent external targets and retained integration combinations; document the public route.
+- **Evidence:**
+  - [x] Six public-CLI controls pass, including actual root external acceptance and its locks/audit/lineage, default-parent failure, invalid public combinations, and direct namespace defense before target effects; twelve related controls and strict lint/format/layout/public-export gates pass.
+  - [x] The maintained checkpointed Python gate passes with 2,777 selected cases, 2,613 passed, 164 declared skips and no failures or known failures. Independent controller-agent source review precedes the lifecycle-driver repin; runner and documentation authority remain current. The ordinary worker documentation gate passes 22 tooling controls and renders 181 diagrams from 1,950 Markdown files with normal browser sandboxing; four strict OpenSpec items pass.
+  - [x] Complete exact-candidate noneditable installed-wheel qualification and confirming CI before upstream landing. No generated-provider or downstream source-retirement authority is claimed.
+
+- **Installed and landing evidence:** [Native Linux qualification](../../verification/source-promotion-root-installed-linux.json) binds the exact noneditable wheel, all 513 imported framework-module origins, both maintained root-option methods with zero skips, and the complete passed wheel gate at `e7a96c269`. PR #403 is merged as `274b35f9d`; issue #402 is closed by that reviewed landing. Earlier Python 3.15 dependency-download and mixed-interpreter fixture failures remain preserved.
+- **Next action:** Observe exact resulting-main qualification to terminal and retain its outcome before closing this deliverable; final release lifecycle and cross-platform release qualification remain separate.
+- **Evidence still required:**
+  - [ ] Pass exact resulting-main integration and record its outcome.
+
 ### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
 
 - **Release target:** 1.4.0
@@ -34415,3 +34439,6 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Implement only the reviewed generated native-library root route with sanitized feedback, preserved rejected evidence and the existing shared finite retry budget.
 - **Evidence:**
   - [ ] Prove same-authority fresh-request/workspace repair, complete validation/build/test/execution/acceptance replay, retry exhaustion, terminal custody/original-source failures and no admission on failure through installed public qualification.
+
+
+- **QUALIFICATION-ERROR-001 review progress:** Independent release-controller source review approves PR406 `a5fc16c3f`: only the typed acceptance failure mapping changes. The maintained public CLI module passes all 16 methods from source and again from its exact noneditable Linux wheel, with zero skips, all 544 imported framework-module origins verified, and the CLI module matched to candidate bytes. [Installed diagnostic proof](../../verification/qualification-error-installed-linux.json) retains the exact wheel and module identities. Full contributor/installed and exact-main qualification remain open; no native-result repair is inferred.
