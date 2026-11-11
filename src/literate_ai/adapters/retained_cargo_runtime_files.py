@@ -130,7 +130,9 @@ class RetainedCargoRuntimeFiles:
         return ((key, value),)
 
 
-def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
+def capture_retained_cargo_runtime_files(
+    roots, *, file_alias_roots=(), maximum_file_bytes=128 * 1024 * 1024
+):
     """Capture every immediate file in each selected loader directory.
 
     Subdirectories are observed as directory entries; separately selected search
@@ -138,10 +140,14 @@ def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
     loader libraries still require the host/external-input qualification boundary.
     Compiler callers may explicitly capture bounded file aliases and their external
     target bytes. Directory aliases and non-regular targets remain forbidden.
+    A measured compiler SDK may select at most 256 MiB per member; the default
+    remains 128 MiB and the complete captured closure remains at most 512 MiB.
     """
     roots = tuple(dict.fromkeys(roots))
     if (
-        type(file_alias_roots) is not tuple
+        type(maximum_file_bytes) is not int
+        or not 0 < maximum_file_bytes <= 256 * 1024 * 1024
+        or type(file_alias_roots) is not tuple
         or any(
             not isinstance(root, Path) or root not in roots for root in file_alias_roots
         )
@@ -164,7 +170,7 @@ def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
     states = tuple(states)
     closure = PinnedInputClosure(
         maximum_files=10000,
-        maximum_file_bytes=128 * 1024 * 1024,
+        maximum_file_bytes=maximum_file_bytes,
         maximum_total_bytes=512 * 1024 * 1024,
     )
     aliases = []

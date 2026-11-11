@@ -125,3 +125,71 @@ binding, workspace plan, gate policy, test inventory, source retirement, consume
 inputs and every successful command observation. Retain that JSON as CI evidence;
 changing consumer source, tools, policy, tests, package bytes, provider authority or
 retirement declaration requires a new receipt.
+
+## Public Python v2 receiving transaction
+
+The CLI commands above retain their v1 wire contracts. Versioned workspace
+patches, internal scratch ownership, complete input custody and typed test
+protocols use the public Python adapters below. A v2 document must never be cast
+to a v1 importer or passed through the v1 CLI to discard those declarations.
+
+The importing maintainer first authors and independently reviews the exact v2
+binding, after-manifests and lock, workspace plan, gate policy and complete test
+inventory. Resolve the provider through `read_retained_provider_authority` and
+`read_retained_provider_native`; their installed distribution, lifecycle policy,
+recipes, tools and oracle must still match the actual retained qualification.
+A new receiving SDK is not permission to rebind an older provider distribution.
+`compose_retained_cargo_current_inputs_v2` joins those live native inputs to the
+reviewed files, an independently supplied binding identity and configured store
+identifier. It does not generate or requalify source.
+
+Use this operation order:
+
+1. `read_retained_cargo_review_v2` reopens the exact independently reviewed files.
+2. Enter `retained_cargo_wrapper_context_v2(reviewed)`, then enter
+   `reserve_retained_cargo_scratch_v2(context)`. Both context managers must remain
+   live through every later step. The scratch declarations name ignored, absent
+   enclosing member-package and Cargo-output roots. Package destinations must be
+   absent direct children of their enclosing member root; they are not the root
+   itself. Existing output cannot be adopted or reopened by initial provisioning.
+3. `read_retained_cargo_files_v2(reviewed, manifest_state="after",
+   package_state="absent")` binds actual authored inputs and destination absence.
+4. Call `materialize_retained_cargo_archive_v2(files, scratch=scratch,
+   read_current=read_current, read_archive=read_archive, ...)`. The current reader
+   must reopen the same live importer/provider authority; archive transport must
+   honor the supplied bounds and configured store. All graph exports are
+   published, including non-library artifacts. Exact package bytes and original
+   source custody are checked around publication. On failure only unchanged
+   owned publications may be moved back; foreign changes and uncertain private
+   stages are preserved for review.
+5. Finish authorized dependency provisioning and exact-command cache warming,
+   then call `read_retained_cargo_execution_inputs_v2(materialized,
+   environment=environment)`. It captures the entire Cargo home, complete
+   workspace and declared external roots, plus ancestor Cargo configuration.
+   Only the still-live scratch owner supplies output exclusions. Do not renew an
+   input snapshot after drift to erase a failed execution.
+6. `execute_retained_cargo_consumer_v2` requires independently measured Cargo,
+   Rust and gate tool bindings, the exact environment and explicit
+   `allow_host_execution=True`. It verifies native patch-aware metadata before
+   and after the full ordered gates and every reviewed test target. One finite
+   deadline and output budget cover all commands. This is same-user execution,
+   not an operating-system sandbox.
+7. Durable admission additionally requires
+   `read_retained_cargo_retirement_authority_v2` and
+   `admit_retained_cargo_consumer_v2`. Retirement must name nonempty independent
+   reviewed original roots that were actually retired before the live receiving
+   snapshot. The reader never deletes them, permits overlap with current
+   manifests/packages/review/scratch, or supplies a no-retirement mode. Admission
+   reruns the actual guarded consumer transaction, requires explicit retirement
+   acknowledgement and returns the v2 receipt from its real observations.
+
+The typed inventory distinguishes named libtest passes and reviewed ignored
+cases from custom-harness command success and permitted exclusions. A custom
+protocol binds exact measured executable bytes, fixed input identities and finite
+command bounds; it cannot invent libtest counts. Exclusion requires an independent
+current permission reader, rechecked through the operation. Returning a candidate's
+permission identity without reopening its authority is not a valid implementation
+of that reader. An excluded target records no executed command or passing case.
+
+Publication and execution alone do not admit a consumer, retire source, prove an
+entire application migrated, or authorize reuse of stale provider authority.

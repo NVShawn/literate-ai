@@ -41,7 +41,7 @@ from tests.support.fixtures_test_retained_harness_receipts import (
 
 
 @contextmanager
-def scratch_review_fixture(base):
+def scratch_review_fixture(base, *, with_provider=False, fixture=None):
     project = base / "converted"
     _legacy_project(project)
     (project / ".gitignore").write_text("pkgs/\ncargo-output/\n")
@@ -59,7 +59,7 @@ def scratch_review_fixture(base):
         convert=True,
     )
     loaded = load_project(project)
-    fixture = RetainedCargoImportTests()
+    fixture = RetainedCargoImportTests() if fixture is None else fixture
     fixture.setUp()
     try:
         implementation = json.loads(
@@ -73,7 +73,9 @@ def scratch_review_fixture(base):
             ),
             RetainedCargoInputBudget(2000, 8000, 64 * 1024**2, 256 * 1024**2),
         )
-        graph = CargoWorkspaceExpectationV2(common.graph, ())
+        graph = CargoWorkspaceExpectationV2(
+            common.graph, getattr(fixture, "registry_patches", ())
+        )
         plan = RetainedCargoWorkspacePlanV2(
             common,
             graph,
@@ -103,8 +105,13 @@ def scratch_review_fixture(base):
                         p.root,
                         t.name,
                         tuple(sorted(t.kinds)),
-                        True,
-                        RetainedCargoLibtestProtocol(("reviewed_case",), ()),
+                        getattr(fixture, "harnesses", {}).get(
+                            (p.root, t.name, tuple(sorted(t.kinds))), True
+                        ),
+                        getattr(fixture, "protocols", {}).get(
+                            (p.root, t.name, tuple(sorted(t.kinds))),
+                            RetainedCargoLibtestProtocol(("reviewed_case",), ()),
+                        ),
                     )
                     for p, t in retained_cargo_test_targets(common.graph)
                 ),
@@ -147,6 +154,6 @@ def scratch_review_fixture(base):
             gate_policy_path="review/policy.json",
             test_inventory_path="review/tests.json",
         )
-        yield reviewed
+        yield (reviewed, fixture) if with_provider else reviewed
     finally:
         fixture.doCleanups()

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a public Python v2 retained-Cargo receiving transaction with live scratch
+  publication, patch-aware consumer gates, honest typed test outcomes and strict
+  already-retired source admission; preserve v1 contracts (#222–#226).
+
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test
   and package phases with preserved historical evidence.

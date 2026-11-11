@@ -1,0 +1,68 @@
+{
+  "scope": "Development checkpoint only; no successful v2 admission or installed qualification yet.",
+  "base_revision": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+  "worker_role": "Owned Linux CPU worker; model-free real native consumer processes.",
+  "producer_scope": "Synthetic existing producer contract fixture, not actual model/provider qualification.",
+  "prior_focused": {
+    "source_manifest_sha256": "53d943c4fc181f4bd53b9bd469c0cc3bcdc5df7437801d884e02fe3f1b77e4fe",
+    "tests_passed": 20,
+    "scope": "Earlier publication/v1/runtime-policy snapshot; current whole-tree regression still pending."
+  },
+  "latest_native": {
+    "source_manifest_sha256": "017465e5dccb034122cbcb0cc03481801804d2a49dc5f270e2a8248dc963ead0",
+    "tests_observed": 6,
+    "refusal_cases_passed": 5,
+    "positive": "PENDING: aggregate per-module 700-second test-worker deadline before complete report.",
+    "actual_original": "Converted original app.py preserved in negative; physically retired before live owner in other cases.",
+    "post_process_controls": "Actual native metadata returned zero before input addition and independent permission revocation each refused further gates.",
+    "source_before_unchanged": true,
+    "source_after_unchanged": true,
+    "unit_inactive": true,
+    "main_pid": 0,
+    "control_group_absent": true,
+    "cgroup_pids": [],
+    "result_sha256": "fe0d3c9aefa243c567ed54aa2cc057bd354380e721981c48d85b111a5c4d0b6d",
+    "stderr_sha256": "d9521e7bfa10d4dafabf7b86d03d0cacf444ed2bd747c392a0dcd2c1b8e04e72",
+    "independent_observer_sha256": "72140d21818adab203cada45209ca62120c28aef370c89f0e3104ea72c4419ec"
+  },
+  "preserved_failures": [
+    {
+      "kind": "Fixture expected two library products instead of all four graph exports",
+      "sha256": "19cf8f7a3811f969cb821934fa35be22ba672f186901701a39ddc9b1c0fc9522"
+    },
+    {
+      "kind": "Overselected native-package Cargo prerequisite despite pinned Rustup tools",
+      "sha256": "f6a7264381286bc2069f23cb02881b805caad2bf684be74ab55baa9eaba03d9f"
+    },
+    {
+      "kind": "Existing 128-MiB member cap rejected measured 208167760-byte compiler runtime",
+      "sha256": "def08a297ecd2cb7414db8f5658572f5688b520f675bb6409f4ff994ac969d4b"
+    },
+    {
+      "kind": "Imported TestCase helper discovered as a test",
+      "sha256": "7ae9335b5b8eac135e35f905ccd83cf7b3a33c150be34a5804e9c81ad3756d29"
+    },
+    {
+      "kind": "Fixture raw algorithm string rejected by typed identity constructor; same new custom comparison corrected",
+      "sha256": "de033165fa55fd25e9d4711b3c9f3f3a4acbed1effd3e5b0aa90e43184535ed7"
+    },
+    {
+      "kind": "Fixture 180-second execution deadline",
+      "sha256": "f4324250e119a8364bca30a722067aaf74e5811d8688a0f58d92cfdb396bd74c"
+    },
+    {
+      "kind": "Strengthened original-source fixture 480-second execution deadline",
+      "sha256": "85feebfa204ebb859af20f5fe91cd7ff0cd364d48a59936e2f09db9ba80ab1cd"
+    }
+  ],
+  "pending": [
+    "Complete positive native v2 receipt and exact protocol counts.",
+    "Current full maintained source/installed-wheel gates and public CLI composition.",
+    "Cross-installed producer authority composition using genuinely reopened original SDK/policy."
+  ],
+  "non_claims": [
+    "No downstream package materialization, application source retirement or whole-application migration.",
+    "No source contract/graph change or model call.",
+    "No completion of issues 222 through 226."
+  ]
+}
