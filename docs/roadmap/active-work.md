@@ -32061,7 +32061,9 @@ No software release or native success is claimed.
 - **Conclusion:** Labs are authored offline documentation examples, not locked canonical Component realizations. Correct the diagram and bundle claims, expose exact source inputs, fully specify and verify Grumpy Counter without inventing Components or receipts. Follow-up to DOCS-LABS-001 under PROJECT Goals 2 and 4.
 - **Depends on:** DOCS-LABS-001
 - **GitHub issue:** [#159](https://github.com/jordanhubbard/literate-ai/issues/159)
-- **Release target:** 1.4.0 (same development curriculum scope as DOCS-LABS-001).
+- **Release target:** 1.4.0
+- **Curriculum scope:** The same development curriculum scope as DOCS-LABS-001.
+- **Release-manifest reconciliation:** Preserve this existing included requirement in the 1.4 manifest. Issue #159 is open in milestone 1.4.0; the parent remains unchecked. The earlier inline target annotation did not establish a deferral or remove the canonical curriculum acceptance below.
 - **Next action:** Convert every lab to independently resolvable canonical Components and explicit Flavor selections, then qualify actual locks, generation and browser lifecycle evidence in increasing complexity.
 - **User clarification:** Self-contained means no dependency on earlier labs or external repositories; all labs must use Literate AI. Start small, progressively add real Components/Flavors and other harness dimensions, and finish with a visually substantial composed capstone. A labels-only correction is not completion.
 - **Implementation:**
