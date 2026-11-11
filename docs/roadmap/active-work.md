@@ -34243,6 +34243,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 - **Independent current composition review:** [Source composition record](../../verification/policy-review-source-composition.json) confirms every added/removed runtime line exactly matches NVShawn's contributed patch, combined with unchanged reviewed root/transport/error behavior. All three maintained public CLI controls pass in the current task-owned Make environment, including signing/identity, default denial, separate opt-in and tampering refusal. Supported driver renewal follows this non-author review; full and installed qualification remain open.
 
+
+- **Current installed/public qualification:** [Exact Linux integration evidence](../../verification/policy-review-integration-linux.json) binds `309f850b1`, 2,783 selected source cases (2,683 passed, 100 declared skips, no failed/known-failed), every terminal event across 599 worker groups and the complete noneditable wheel gate. All three maintained installed authority controls pass without skips; all 488 framework-module origins are noneditable and the CLI bytes match source/archive. A separate actual installed-console journey signs a policy-labeled review, refuses acceptance without opt-in before target effects, accepts only after explicit opt-in, and rejects authority tampering without changing source, trust inputs or the successful target. Stored review data matches the exact signed decision; no actual human approval or host application execution is claimed. Independent review/driver renewal and fast/docs gates pass; exact-head/resulting-main integration remains open.
+
 ### [ ] PROJECT-ID-001 — Migrate adopted project identity through a reviewed transaction
 
 - **GitHub issue:** [#361](https://github.com/jordanhubbard/literate-ai/issues/361)
