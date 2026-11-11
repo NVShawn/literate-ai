@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 import time
 import unittest
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from unittest import mock
 
 from literate_ai.adapters.action_capabilities import (
     probe_command_action_capabilities,
@@ -17,6 +19,8 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
+from literate_ai.adapters.builders._process import run_bounded_process
+from literate_ai.adapters.builders.python import BuildError
 from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.contracts.execution_dispatch import (
     LIFECYCLE_ACTION_WIRE_PROTOCOL,
@@ -123,22 +127,25 @@ class ActionCapabilityTests(unittest.TestCase):
                 deadline = ActionDispatchDeadline(
                     datetime.now(UTC) + timedelta(seconds=budget)
                 )
-                started = time.monotonic()
-                if succeeds:
-                    observed = probe_command_action_capabilities(
-                        worker,
-                        deadline,
-                        cwd=self.fixture.root,
-                        environment={
-                            **os.environ,
-                            "INDEX_WORKER_IDENTITY": worker.identity.uri,
-                        },
+                children = []
+
+                def original_spawn(*args, _children=children, **kwargs):
+                    child = subprocess.Popen(*args, **kwargs)
+                    _children.append(child)
+                    return child
+
+                def observed_runner(*args, **kwargs):
+                    return run_bounded_process(
+                        *args, process_factory=original_spawn, **kwargs
                     )
-                    self.assertEqual(observed.worker_identity, worker.identity)
-                    self.assertGreater(time.monotonic() - started, 60)
-                else:
-                    with self.assertRaises(ActionWireError):
-                        probe_command_action_capabilities(
+
+                started = time.monotonic()
+                with mock.patch(
+                    "literate_ai.adapters.action_capabilities.run_bounded_process",
+                    side_effect=observed_runner,
+                ):
+                    if succeeds:
+                        observed = probe_command_action_capabilities(
                             worker,
                             deadline,
                             cwd=self.fixture.root,
@@ -147,8 +154,38 @@ class ActionCapabilityTests(unittest.TestCase):
                                 "INDEX_WORKER_IDENTITY": worker.identity.uri,
                             },
                         )
-                    self.assertLess(time.monotonic() - started, delay)
-                self.assertTrue(pid_file.is_file(), "the actual receiver must start")
-                with self.assertRaises(ProcessLookupError):
-                    os.kill(int(pid_file.read_text()), 0)
+                        self.assertEqual(observed.worker_identity, worker.identity)
+                        self.assertGreater(time.monotonic() - started, 60)
+                    else:
+                        with self.assertRaises(ActionWireError) as refused:
+                            probe_command_action_capabilities(
+                                worker,
+                                deadline,
+                                cwd=self.fixture.root,
+                                environment={
+                                    **os.environ,
+                                    "INDEX_WORKER_IDENTITY": worker.identity.uri,
+                                },
+                            )
+                        self.assertLess(time.monotonic() - started, delay)
+                if not succeeds and refused.exception.code != "action_wire.expired":
+                    self.assertEqual(
+                        refused.exception.code, "action_capability.probe_failed"
+                    )
+                    self.assertIsInstance(refused.exception.__cause__, BuildError)
+                    self.assertEqual(
+                        refused.exception.__cause__.code, "action_capability_timeout"
+                    )
+                if succeeds:
+                    self.assertEqual(len(children), 1)
+                    self.assertTrue(pid_file.is_file(), "successful receiver must run")
+                elif not children:
+                    self.assertEqual(refused.exception.code, "action_wire.expired")
+                for child in children:
+                    self.assertIsNotNone(child.poll(), "original child must be reaped")
+                if pid_file.exists():
+                    self.assertEqual(len(children), 1)
+                    self.assertEqual(int(pid_file.read_text()), children[0].pid)
+                    with self.assertRaises(ProcessLookupError):
+                        os.kill(children[0].pid, 0)
                 self.assertEqual(list(self.fixture.workspace.iterdir()), [])
