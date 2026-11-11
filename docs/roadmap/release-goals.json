@@ -309,6 +309,9 @@
       },
       {
         "id": "SOURCE-PROMOTION-ROOT-001"
+      },
+      {
+        "id": "PYTHON-BINARY-CLOSURE-001"
       }
     ]
   }
