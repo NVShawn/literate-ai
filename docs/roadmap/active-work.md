@@ -34278,7 +34278,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [ ] Retain the original finite-file-limit failure and prove supported CLI configuration, native private state routing, process lifetime and unchanged parent environment.
   - [ ] Pass focused and full source gates, independent review before driver repin, installed/native finite-profile generation with an explicit operator model, and current-head integration gates.
 
-### [ ] REMOTE-FILE-CEILING-001 — Preserve inherited file-size ceilings in remote evidence transport
+### [x] REMOTE-FILE-CEILING-001 — Preserve inherited file-size ceilings in remote evidence transport
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#372](https://github.com/jordanhubbard/literate-ai/issues/372)
@@ -34286,18 +34286,18 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Priority:** P1
 - **Owner:** Framework core remote transport and native resource boundary
 - **Direction:** Fix issue #372, which blocks included Cargo qualification #347: an evidence allowance must never raise a caller file-size ceiling.
-- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. The pre-existing repair is integrated with current main; independent review, installed/native and forge qualification remain pending.
+- **Conclusion:** Clamp requested RLIMIT_FSIZE bounds independently against inherited finite soft and hard limits while preserving infinity semantics and all existing connector custody. The pre-existing repair is integrated with current main; independent review, installed/native controls and exact-head/resulting-main qualification are recorded below.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Repair the trusted POSIX limiter without changing the fresh-process connector contract or byte, digest, inode, timeout and cleanup guards.
 - **Evidence:**
   - [x] Preserve the actual predecessor failure and prove inherited soft/hard preservation, smaller requested limits, zero/infinite limits where supported and the existing complete command-route control under a finite parent ceiling. Both maintained controls also pass without skips from the qualified noneditable Linux wheel.
-  - [ ] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
+  - [x] Pass focused and full source gates, independent review before driver repin, clean installed/native and current-head integration gates.
 
 
 - **Current-main source qualification (2026-11-10):** The unchanged contributor repair applied to main base `8b83f5b96` passes a fresh native Linux ARM64/Python 3.12 gate: 2,777 selected, 2,657 passed, 120 declared skips, zero failed or known failed. Every selected instance matches the raw terminal events across all 598 completed worker groups, including occurrence-qualified repeated discovery names. Both native ceiling controls and all six unchanged transport controls pass without skips. The initial invalid-system-Bazel failure remains preserved; the successful run uses the existing digest-verified toolchain. Normal integration retains main `8489a4c4b` and all 68 release goals. [Sanitized source evidence](../../verification/file-ceiling-source-current-main.json) retains source and original report identities. This is source-development evidence; independent review before driver repin, noneditable installed/native controls and exact-head/resulting-main CI remain open.
-- **Next action:** Complete confirming CI on the reviewed candidate and resulting-main integration. The whole Linux installed gate and both explicit installed ceiling controls pass; independent source review and the supported lifecycle-driver renewal are now recorded below.
+- **Current status:** Functional integration gates are complete in the closure below. The consuming release lifecycle/receipt and full remaining 1.4 scope stay required.
 
 
 - **Whole installed candidate gate (2026-11-10):** Exact `b23ae877a` passes the complete canonical native Linux ARM64/Python 3.12 noneditable wheel gate. Its retained archive independently rehashes, and the packaged remote-transport module matches the source-qualified repair exactly. This proves the whole installed candidate gate, not yet direct execution of the explicit inherited-ceiling fixture from that installation. Specific installed controls, independent review before driver repin and exact-head/resulting-main CI remain required; no old pin or source-only outcome is promoted into approval.
@@ -34306,6 +34306,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Explicit installed ceiling controls (2026-11-10):** Both unchanged native cases pass without skips in a fresh environment created and verified by the canonical wheel helpers, using the exact archive from the completed whole wheel gate. All 241 imported framework modules resolve inside the noneditable prefix; the loaded limiter bytes match the source-qualified module and retained wheel. The maintained tests perform real nested-process RLIMIT_FSIZE controls and the complete finite-parent command-route custody scenario. Runtime identity is checked before and after, and both fixture files and archive bytes remain unchanged. This is native Linux installed acceptance, not external-worker qualification or independent source review; final integration and configured lifecycle/receipt remain open.
 
 - **Independent limiter review (2026-11-10):** The release controller, which did not author the limiter repair, reviewed the sole changed TCB file against main. Applying the same positive cap independently to inherited soft and hard limits preserves `soft <= hard`, never raises either finite limit, preserves zero, and replaces infinity with the requested cap. The fresh trusted process, isolated interpreter, deadline, process-tree cleanup and transport custody remain unchanged. After a normal merge of main `69bb7b92a`, both real native ceiling controls and all six unchanged transport controls pass again through the maintained Make harness without skips. The earlier bare-system-Python attempt could not import the declared CycloneDX dependency; the canonical managed environment resolves that setup failure. The supported review command renews the driver identity to `sha256:26a4bf2f555acf1740f1d7c525f48e895ca5b0b0043f39d0c01de76d6b6a50f0`, followed by documentation-authority renewal. The original failed CI run `42892873778` remains preserved; confirming CI and resulting-main acceptance are still required.
+
+- **Resulting-main closure (2026-11-11):** PR411 lands the reviewed composition at `25bf154778bb163e7447a1191acffe92e08acbe4`. All 27 full CI jobs pass both at exact review head `d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2` and resulting main. Source, scripts, tests and schemas are byte-identical from the fully source/wheel-qualified runtime `c7a8d308bb7b1eff9eb3900c202a265b50a563d9`; production modules match their reviewed/installed bytes, and the repository-side continuation fixture matches its qualified source. [Terminal integration evidence](../../verification/transport-error-resulting-main.json) binds the native source and whole-wheel gates, 26 installed controls and actual terminal job records. Earlier pending statements above are historical checkpoints superseded by this closure. This completes only this functional goal; native-result repair, FreeBSD product evidence, the consuming release lifecycle and every other remaining 1.4 goal stay required.
 
 ### [ ] QUALIFICATION-DIAGNOSTICS-001 — Retain original bounded observations when native qualification fails
 
@@ -34424,7 +34426,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Evidence:**
   - [x] Pass exact resulting-main integration and record its outcome.
 
-### [ ] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
+### [x] WHEEL-PYTHON-BINDING-001 — Bind installed continuation bytecode expectations to the selected Python
 
 - **Release target:** 1.4.0
 
@@ -34437,13 +34439,15 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Implementation:**
   - [x] Select the installed fixture interpreter through the public PYTHON operator binding before either continuation scenario.
 - **Evidence:**
-  - [ ] Confirm exact-head and resulting-main integration before closing this goal.
+  - [x] Confirm exact-head and resulting-main integration before closing this goal.
   - [x] Reproduce differing expected/artifact bytecode on the original mixed 3.12/3.15 setup; pass both installed continuation scenarios with the same original PATH after the fix and verify wheel/module identities.
 
 - **Installed evidence:** [Retained repair proof](../../verification/wheel-continuation-python-binding.json) binds the original Python 3.12 oracle (`cb0d0d0a`) and discovered 3.15 artifact (`520e0d0a`) mismatch. With the unchanged original PATH, the repaired fixture passes both default and project-relative cache scenarios against the same noneditable framework: four distinct admissions, four exact builds, four public runs, immutable historical cache bytes, and unchanged distribution identity. Seven maintained wheel-smoke methods pass without skips. The original failure and one missing-output-parent setup error remain preserved.
-- **Next action:** Land through confirming CI; the separate whole-wheel run and consuming release lifecycle remain required and are not claimed by this fixture result.
+- **Current status:** The whole-wheel gate and exact-head/resulting-main integration now pass as recorded below. The consuming release lifecycle remains a separate required release gate.
 
-### [ ] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
+- **Resulting-main closure (2026-11-11):** PR411 lands the reviewed composition at `25bf154778bb163e7447a1191acffe92e08acbe4`. All 27 full CI jobs pass both at exact review head `d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2` and resulting main. Source, scripts, tests and schemas are byte-identical from the fully source/wheel-qualified runtime `c7a8d308bb7b1eff9eb3900c202a265b50a563d9`; production modules match their reviewed/installed bytes, and the repository-side continuation fixture matches its qualified source. [Terminal integration evidence](../../verification/transport-error-resulting-main.json) binds the native source and whole-wheel gates, 26 installed controls and actual terminal job records. Earlier pending statements above are historical checkpoints superseded by this closure. This completes only this functional goal; native-result repair, FreeBSD product evidence, the consuming release lifecycle and every other remaining 1.4 goal stay required.
+
+### [x] QUALIFICATION-ERROR-001 — Preserve native acceptance failure codes in qualification CLI
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#404](https://github.com/jordanhubbard/literate-ai/issues/404)
@@ -34451,16 +34455,18 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Priority:** P1
 - **Owner:** Framework qualification CLI; PROJECT Goals 1 and 4
 - **Direction:** Include issue 404: typed independent native acceptance rejection must not become a retained archive publication error.
-- **Conclusion:** PR406 preserves known ComponentAcceptanceError codes and messages while leaving actual archive I/O failure handling unchanged. Admission, source custody and repair eligibility remain unchanged; contributor full/installed and resulting-main qualification remain open.
+- **Conclusion:** PR406 preserves known ComponentAcceptanceError codes and messages while leaving actual archive I/O failure handling unchanged. Admission, source custody and repair eligibility remain unchanged; the complete source/installed and resulting-main qualification are recorded below.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Handle typed independent acceptance rejection separately from actual archive publication failures.
-  - [ ] Review and integrate PR406 without changing native acceptance or archive authority.
+  - [x] Review and integrate PR406 without changing native acceptance or archive authority.
 - **Evidence:**
-  - [ ] Pass maintained public qualification CLI controls with and without retention, actual archive write failure, whole candidate source/installed checks and exact-head/resulting-main integration.
+  - [x] Pass maintained public qualification CLI controls with and without retention, actual archive write failure, whole candidate source/installed checks and exact-head/resulting-main integration.
 
 - **QUALIFICATION-ERROR-001 review progress:** Independent release-controller source review approves PR406 `a5fc16c3f`: only the typed acceptance failure mapping changes. The maintained public CLI module passes all 16 methods from source and again from its exact noneditable Linux wheel, with zero skips, all 544 imported framework-module origins verified, and the CLI module matched to candidate bytes. [Installed diagnostic proof](../../verification/qualification-error-installed-linux.json) retains the exact wheel and module identities. Full contributor/installed and exact-main qualification remain open; no native-result repair is inferred.
+
+- **Resulting-main closure (2026-11-11):** PR411 lands the reviewed composition at `25bf154778bb163e7447a1191acffe92e08acbe4`. All 27 full CI jobs pass both at exact review head `d4a49c22955288037fb0c0ba5ae6d6c62c00cbe2` and resulting main. Source, scripts, tests and schemas are byte-identical from the fully source/wheel-qualified runtime `c7a8d308bb7b1eff9eb3900c202a265b50a563d9`; production modules match their reviewed/installed bytes, and the repository-side continuation fixture matches its qualified source. [Terminal integration evidence](../../verification/transport-error-resulting-main.json) binds the native source and whole-wheel gates, 26 installed controls and actual terminal job records. Earlier pending statements above are historical checkpoints superseded by this closure. This completes only this functional goal; native-result repair, FreeBSD product evidence, the consuming release lifecycle and every other remaining 1.4 goal stay required.
 
 ### [ ] NATIVE-ACCEPTANCE-REPAIR-001 — Bind generated native-library acceptance rejection to bounded candidate repair
 

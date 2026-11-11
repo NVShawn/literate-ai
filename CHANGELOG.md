@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Evidence transfers preserve the caller's inherited POSIX file-size ceiling.
+- Qualification preserves independent acceptance errors and reports archive publication errors only for actual archive I/O failures.
+- Installed cache-continuation verification builds with its selected Python, avoiding cross-version bytecode mismatches.
+
 - Standalone source promotion can explicitly select root repository lineage with
   `spec accept --project-target ... --root-project`; default inheritance and
   retained-host integration remain unchanged (#402).
