@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Bind authored qualification to the current complete plan before generation and
+  retain original verifier and run-directory ownership through capture (#393).
+
 - Retain truthful authored all-node clean-run observations and derived per-node
   test counts, with closed run/result records under accepted ADR 0072. Public
   acknowledged apply and complete authored retained qualification remain in progress (#393).

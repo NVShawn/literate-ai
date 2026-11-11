@@ -181,7 +181,7 @@ class AuthoredQualificationRunTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     SchemaCatalog().validate(result.SCHEMA, wire)
 
-    def test_one_run_duplicate_run_and_reused_native_invocation_refuse(self):
+    def test_one_run_duplicate_run_and_reused_native_result_refuse(self):
         one, two = self.runs
         for runs in (
             (one,),
@@ -189,13 +189,32 @@ class AuthoredQualificationRunTests(unittest.TestCase):
             (
                 one,
                 replace(
-                    two, lifecycle_invocation_identity=one.lifecycle_invocation_identity
+                    two,
+                    lifecycle_result_identity=one.lifecycle_result_identity,
+                    receipt=replace(
+                        two.receipt, result_identity=one.lifecycle_result_identity
+                    ),
                 ),
             ),
         ):
             with self.subTest(runs=len(runs)):
                 with self.assertRaises(ValueError):
                     AuthoredQualificationResult(self.plan, runs)
+
+    def test_shared_standard_invocation_intent_keeps_distinct_real_node_results(self):
+        one, two = self.runs
+        two = replace(
+            two,
+            lifecycle_request_identity=one.lifecycle_request_identity,
+            lifecycle_invocation_identity=one.lifecycle_invocation_identity,
+        )
+        result = AuthoredQualificationResult(self.plan, (one, two))
+        self.assertNotEqual(
+            one.lifecycle_result_identity, two.lifecycle_result_identity
+        )
+        self.assertNotEqual(one.receipt.identity, two.receipt.identity)
+        self.assertEqual(len(result.runs), 2)
+        self.assertEqual([r.generated_test_total for r in result.runs], [4, 4])
 
     def test_borrowed_workspace_or_altered_plan_cannot_establish_clean_second_run(self):
         one, two = self.runs

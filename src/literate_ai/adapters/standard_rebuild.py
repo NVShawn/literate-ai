@@ -103,6 +103,9 @@ class FilesystemStandardRebuildRequest:
     accepted_source_only: bool = False
     source_selectors: StandardSourceSelectorSet | None = None
     directory_custody_identity: ContentIdentity | None = None
+    # Live caller constraint, not another field in the legacy wire request. The
+    # existing wire already binds the actual execution plan selected below.
+    expected_execution_plan_identity: ContentIdentity | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.prepared, PreparedLockedGeneration):
@@ -115,6 +118,12 @@ class FilesystemStandardRebuildRequest:
             raise TypeError("update_receipt must be a bool")
         if type(self.accepted_source_only) is not bool:
             raise TypeError("accepted_source_only must be a bool")
+        if self.expected_execution_plan_identity is not None and not isinstance(
+            self.expected_execution_plan_identity, ContentIdentity
+        ):
+            raise TypeError(
+                "expected_execution_plan_identity must be a ContentIdentity"
+            )
         if self.directory_custody_identity is not None and not isinstance(
             self.directory_custody_identity, ContentIdentity
         ):
@@ -264,6 +273,15 @@ class FilesystemStandardRebuildAdapter:
             (snapshot.authority.lock.identity,),
         )
         planned = self.runtime.plan(snapshot)
+        if (
+            request.expected_execution_plan_identity is not None
+            and planned.execution_plan.identity
+            != request.expected_execution_plan_identity
+        ):
+            raise FilesystemStandardRebuildError(
+                "standard_rebuild.execution_plan_changed",
+                "current execution plan differs from the acknowledged plan",
+            )
         readiness = self.runtime.production_readiness(planned)
         if not readiness.ready:
             raise FilesystemStandardRebuildError(

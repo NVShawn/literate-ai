@@ -93,8 +93,8 @@ from literate_ai.storage import FileSystemCAS
 from .standard_rebuild import FilesystemStandardRebuildError
 
 if TYPE_CHECKING:
-    from literate_ai.adapters.authored_qualification_oracles import (
-        CurrentAuthoredQualificationOracles,
+    from literate_ai.adapters.authored_qualification_planning import (
+        CurrentAuthoredQualificationPlan,
     )
     from literate_ai.contracts.authored_qualification_requests import (
         AuthoredQualificationLifecycleRequest,
@@ -413,8 +413,7 @@ class FilesystemStandardQualificationLifecyclePort:
         invalidation: ComponentInvalidationDecision,
         workspaces: FilesystemQualificationWorkspaceAllocator,
         profile: LocalQualificationProfile | None = None,
-        authored_oracles: CurrentAuthoredQualificationOracles | None = None,
-        authored_plan_identity: ContentIdentity | None = None,
+        authored_plan: CurrentAuthoredQualificationPlan | None = None,
         max_parallelism: int = 1,
         retain_library_products: bool = False,
         pipeline_model: str | None = None,
@@ -432,22 +431,36 @@ class FilesystemStandardQualificationLifecyclePort:
             str, tuple[QualificationLifecycleExecution, LocalStandardLifecyclePorts]
         ] = {}
         self.profile = profile
-        self.authored_oracles = authored_oracles
-        self.authored_plan_identity = authored_plan_identity
-        if authored_oracles is not None:
+        from literate_ai.adapters.authored_qualification_planning import (
+            CurrentAuthoredQualificationPlan,
+        )
+
+        self.authored_plan = authored_plan
+        if authored_plan is not None:
             if profile is not None or not isinstance(
-                authored_plan_identity, ContentIdentity
+                authored_plan, CurrentAuthoredQualificationPlan
             ):
                 raise FilesystemQualificationError(
                     "qualification.authored.composition_invalid",
-                    "authored qualification requires its own plan and current oracle "
+                    "authored qualification requires its original current plan "
                     "owner, without a source-derived profile",
                 )
-        elif profile is None or authored_plan_identity is not None:
+            authored_plan.require_unchanged()
+            if binding is not authored_plan.binding:
+                raise FilesystemQualificationError(
+                    "qualification.authored.binding_owner_required",
+                    "authored execution requires its original resolved "
+                    "Standard binding",
+                )
+        elif profile is None:
             raise FilesystemQualificationError(
                 "qualification.source_profile_required",
                 "source-derived qualification requires its original profile",
             )
+        self.authored_oracles = None if authored_plan is None else authored_plan.oracles
+        self.authored_plan_identity = (
+            None if authored_plan is None else authored_plan.plan.identity
+        )
         self.acceptance_oracle = self._current_acceptance_oracle()
         expected = {
             item.revision.identity.uri
@@ -495,6 +508,8 @@ class FilesystemStandardQualificationLifecyclePort:
     def require_current_authority(self) -> None:
         """Reopen provider authority before retained capture or final admission."""
 
+        if self.authored_plan is not None:
+            self.authored_plan.require_unchanged()
         self.prepared.locked_authority_snapshot.require_unchanged()
         try:
             self.binding.require_unchanged()
@@ -604,6 +619,11 @@ class FilesystemStandardQualificationLifecyclePort:
                     self.invalidation,
                     update_receipt=False,
                     max_parallelism=self.max_parallelism,
+                    expected_execution_plan_identity=(
+                        None
+                        if self.authored_plan is None
+                        else self.authored_plan.plan.execution_plan.identity
+                    ),
                 )
             )
         except FilesystemStandardRebuildError as exc:

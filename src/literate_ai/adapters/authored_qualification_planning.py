@@ -104,6 +104,7 @@ class CurrentAuthoredQualificationPlan:
     standard: PlannedStandardProject
     _reviewer: object = field(repr=False, compare=False)
     _coding_selector: object = field(repr=False, compare=False)
+    _pipeline_model: str | None = field(default=None, repr=False, compare=False)
 
     def require_unchanged(self):
         self.oracles.require_unchanged()
@@ -111,12 +112,19 @@ class CurrentAuthoredQualificationPlan:
         self.standard.coding_cli.require_unchanged()
         current_selection = self._coding_selector()
         current_selection.require_unchanged()
+        current_standard = FilesystemStandardProjectPlanningAdapter(
+            coding_cli_selector=lambda: current_selection,
+            model_selector=LockedComponentModelSelectionAdapter(
+                pipeline_model=self._pipeline_model
+            ),
+        ).plan(self.oracles.authority.locked)
         if (
             self.oracles.authority.origin != self.plan.origin
             or self.oracles.identity != self.plan.oracle_set_identity
             or self.oracles.profile.identity != self.plan.profile_identity
             or self.oracles.profile.minimum_clean_runs != self.plan.minimum_clean_runs
             or self.standard.execution_plan != self.plan.execution_plan
+            or current_standard.execution_plan != self.plan.execution_plan
             or ContentIdentity.parse_uri(self.standard.coding_cli.tool_binding_identity)
             != self.plan.coding_provider_binding_identity
             or current_selection.name != self.standard.coding_cli.name
@@ -191,7 +199,13 @@ class FilesystemAuthoredQualificationPlanner:
                 oracles.profile.minimum_clean_runs,
             )
             current = CurrentAuthoredQualificationPlan(
-                plan, oracles, binding, standard, self.reviewer, self.coding_selector
+                plan,
+                oracles,
+                binding,
+                standard,
+                self.reviewer,
+                self.coding_selector,
+                pipeline_model,
             )
             current.require_unchanged()
         current.require_unchanged()

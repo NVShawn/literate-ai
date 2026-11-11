@@ -8,50 +8,72 @@ are explicit fixtures, so this is not complete lifecycle qualification.
 import os
 import unittest
 from dataclasses import replace
-from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
+from literate_ai.adapters.generation_preparation import PreparedLockedGeneration
 from literate_ai.adapters.qualification import (
     FilesystemQualificationError,
     FilesystemQualificationWorkspaceAllocator,
     FilesystemStandardQualificationLifecyclePort,
 )
+from literate_ai.application.component_generation_scheduling import (
+    ComponentInvalidationDecision,
+)
+from literate_ai.contracts import ComponentChangeSurface
 from literate_ai.contracts.authored_qualification_requests import (
     AuthoredQualificationLifecycleRequest,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.critical import test_authored_qualification_oracles as oracle_fixtures
+from tests.critical import test_authored_qualification_planning as plan_fixtures
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class AuthoredQualificationRunnerBoundaryTests(unittest.TestCase):
     def setUp(self):
-        fixture = oracle_fixtures.AuthoredQualificationOracleTests("runTest")
-        fixture.setUp()
-        self.addCleanup(fixture.doCleanups)
+        planning = plan_fixtures.AuthoredQualificationPlanningTests("runTest")
+        planning.setUp()
+        self.addCleanup(planning.doCleanups)
+        self.planning = planning
+        self.current = planning.plan()
+        fixture = planning.fixture
+        fixture.authority = self.current.oracles.authority
         self.fixture = fixture
-        self.oracles = fixture.read()
-        self.plan = canonical_identity({"fixture-acknowledged-plan": True})
+        self.oracles = self.current.oracles
+        self.plan = self.current.plan.identity
         self.allocator = FilesystemQualificationWorkspaceAllocator(fixture.root)
         self.addCleanup(self.allocator.close)
+        lock = fixture.authority.locked.authority.lock
+        revisions = tuple(node.revision.identity for node in lock.nodes)
+        root_revision = next(
+            node.revision
+            for node in lock.nodes
+            if node.revision.identity == lock.root_revision
+        )
         self.arguments = {
             "project": fixture.authority.project,
-            "prepared": SimpleNamespace(
-                locked_authority_snapshot=fixture.authority.locked
+            "prepared": PreparedLockedGeneration(
+                component_root=fixture.component,
+                boundary=fixture.root,
+                definition=None,
+                recipe=None,
+                selected_flavors=(),
+                component_revision=root_revision,
+                toolchain_constraints=(),
+                input_closure=fixture.authority.locked.input_closure,
+                flavor_catalog_audit_identity=fixture.authority.locked.catalog_audit_identity,
+                locked_authority_snapshot=fixture.authority.locked,
             ),
-            "binding": SimpleNamespace(
-                driver=fixture.authority.project.definition.lifecycle_driver,
-                require_unchanged=Mock(),
-            ),
-            "invalidation": SimpleNamespace(
-                regenerate=tuple(
-                    n.revision.identity
-                    for n in fixture.authority.locked.authority.lock.nodes
-                )
+            "binding": self.current.binding,
+            "invalidation": ComponentInvalidationDecision(
+                "fixture-authored-qualification",
+                lock.root_revision,
+                ComponentChangeSurface.LOCAL_AUTHORITY,
+                revisions,
+                revisions,
+                revisions,
             ),
             "workspaces": self.allocator,
-            "authored_oracles": self.oracles,
-            "authored_plan_identity": self.plan,
+            "authored_plan": self.current,
         }
         self.port = FilesystemStandardQualificationLifecyclePort(**self.arguments)
         run = canonical_identity({"fixture-run": 1})
@@ -148,9 +170,10 @@ class AuthoredQualificationRunnerBoundaryTests(unittest.TestCase):
 
     def test_origin_dto_and_mixed_profiles_cannot_replace_the_current_owner(self):
         for fields in (
-            {"authored_oracles": self.fixture.authority.origin},
+            {"authored_plan": self.fixture.authority.origin},
+            {"authored_plan": self.current.plan},
             {"profile": object()},
-            {"authored_plan_identity": None},
+            {"authored_plan": None},
         ):
             with self.subTest(fields=fields):
                 with self.assertRaises(FilesystemQualificationError):

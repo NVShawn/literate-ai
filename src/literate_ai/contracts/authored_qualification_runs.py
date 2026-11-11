@@ -262,7 +262,10 @@ class AuthoredQualificationResult:
         plans = {
             p.component_revision: p for p in self.plan.execution_plan.generation_plans
         }
-        seen_runs, seen_workspaces, seen_invocations = set(), set(), set()
+        # Standard invocation identities describe deterministic configuration,
+        # not a fresh execution event. Actual results bind each run's distinct
+        # generated node/workspace observations even when that intent is shared.
+        seen_runs, seen_workspaces, seen_results = set(), set(), set()
         for run in self.runs:
             request = run.request
             if (
@@ -283,13 +286,13 @@ class AuthoredQualificationResult:
             if (
                 request.run_identity in seen_runs
                 or workspaces & seen_workspaces
-                or run.lifecycle_invocation_identity in seen_invocations
+                or run.lifecycle_result_identity in seen_results
                 or len(workspaces) != len(run.nodes) + 1
             ):
-                fail("runs", "must use distinct runs, invocations and workspaces")
+                fail("runs", "must use distinct runs, results and workspaces")
             seen_runs.add(request.run_identity)
             seen_workspaces.update(workspaces)
-            seen_invocations.add(run.lifecycle_invocation_identity)
+            seen_results.add(run.lifecycle_result_identity)
             for node in run.nodes:
                 plan = plans[node.component_revision]
                 if (

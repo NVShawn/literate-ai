@@ -1,0 +1,49 @@
+{
+  "schema": "literate-ai/development-qualification-evidence@1",
+  "release_target": "1.4.0",
+  "goal": "AUTHORED-GRAPH-QUALIFICATION-001",
+  "issue": 393,
+  "review": 401,
+  "adr": "0072",
+  "software_base": "b731eff92a14f4154f87f4a35d0681d7e4fc6c7f",
+  "source_sha256": {
+    "src/literate_ai/adapters/authored_qualification_execution.py": "83d059b2f6010b6d201e9cbea9983abdba0a0aaff11ba864bd13f25529fbb41f",
+    "src/literate_ai/adapters/authored_qualification_planning.py": "58a56a6adc7ec53b2ec0cceda7d06fe1d12497e49127248497e759fa1f5084d0",
+    "src/literate_ai/adapters/qualification.py": "5bc74dde98e1c291b6c75f95dc1d589f84f784cbc87fc64afac1d541de22ac6c",
+    "src/literate_ai/adapters/standard_rebuild.py": "0698bed5d82817c940efb29408fb5f2592552840effe7c3792c836ad382fdd36",
+    "src/literate_ai/contracts/authored_qualification_runs.py": "5e3225dbb598d28267fe45c6694c0ca89cbc0143b2d3a435026c0df9a180b66d",
+    "tests/critical/test_authored_execution_plan_guard.py": "5e8337b28e51c74ec0b73ba31188ad5affc1fe69b1114324df546d7b4e05b241",
+    "tests/critical/test_authored_qualification_execution.py": "601f0465c5415edc2155bcd909a57be350a6e28a2781dc22a56ef42ae77645bb",
+    "tests/critical/test_authored_qualification_runner_boundary.py": "70b6a3a520e176c4c7a7b5606c5ea6692bf6072d73d799c979156fbc56b0e06e",
+    "tests/critical/test_authored_qualification_runs.py": "e5caf547e6c2f63a1673ffa2d8817a15e2756c27f7950ab427ba7e9981912d50"
+  },
+  "authored_family": {
+    "summary": {
+      "executed": 74,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 74,
+      "selected": 74,
+      "skipped": 0
+    },
+    "report_sha256": "6a271198ea3512120b0b7b13e594027ad22112ebb7dbe924bdbb198b7c67b984"
+  },
+  "current_full_source_and_wheel": {
+    "state": "pending for this execution-composition checkpoint; no current full acceptance claimed"
+  },
+  "scope": [
+    "Require acknowledgement of the exact original current plan and explicit host execution permission before preparation or namespace allocation.",
+    "Reopen original project review, provider/model selection, prepared root/graph and Standard binding. The shared rebuild checks the actual plan before readiness and model execution.",
+    "Hold original private verifier and run namespace owners through every clean run and the caller capture scope. Failure returns no completed owner; escaped owners expire.",
+    "Retain bounded observation records, force every selected node and preserve failed scratch diagnostics. No positive authored reference or package publication occurs.",
+    "Preserve existing Standard request/invocation wire identities. Shared deterministic invocation configuration is valid across genuinely separate lifecycle results and node/run allocations; replayed results refuse.",
+    "Retain the exact per-run selection records in the bounded evidence recorder so their referenced identities can be structurally reopened during capture."
+  ],
+  "boundaries": [
+    "Actual current graph/model/private-input reads, generation preparation and native namespace custody execute in the new controls.",
+    "Downstream Standard generation/native execution, comparison and final result admission are explicit fixture ports in execution-context controls.",
+    "Existing Standard service/run-record controls retain their typed actual composition coverage; these fixtures are not genuine model runs or complete native authored qualification.",
+    "Acknowledged public apply, complete closed product capture/reopening, recoverable publication, actual two-run model generation and retained Cargo admission remain blocking work.",
+    "No lifecycle driver or test-runner pin is renewed. Independent non-author review and exact native/installed/integration qualification remain required."
+  ]
+}
