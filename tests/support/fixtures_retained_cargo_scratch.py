@@ -42,7 +42,7 @@ from tests.support.fixtures_test_retained_harness_receipts import (
 
 @contextmanager
 def scratch_review_fixture(
-    base, *, with_provider=False, fixture=None, build_outputs=()
+    base, *, with_provider=False, fixture=None, build_outputs=(), native_custody=None
 ):
     project = base / "converted"
     _legacy_project(project)
@@ -95,6 +95,7 @@ def scratch_review_fixture(
                 )
             ),
             custody,
+            native_custody,
         )
         if build_outputs:
             ignore = project / ".gitignore"

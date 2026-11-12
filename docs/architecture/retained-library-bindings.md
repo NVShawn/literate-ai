@@ -623,6 +623,24 @@ and arbitrary external build-script inputs remains required
 before public admission. The internal
 observations do not finalize a durable consumer receipt or provide containment.
 
+V2 gate policies may opt into `native_custody`, an identity-bound
+`RetainedCargoNativeCustodyPolicy` with separate `executables`, `runtime` and
+`build_outputs` budgets. Each `RetainedCargoOutputBudget` declares positive
+`maximum_file_bytes` and `maximum_total_bytes`, with at most 1 GiB per member
+and 64 GiB across all three aggregate allowances. This is a generated-output
+budget, separate from source and external-input custody. Missing declarations
+retain the existing byte limits and serialized policy identity; explicit null,
+unknown fields, invalid types and excessive allowances refuse.
+
+The explicit path stores bounded digest/physical/ancestor observations rather
+than file payloads. Every guard reopens and hashes every selected byte through
+the existing native descriptor custody primitive. File replacement, ownership,
+permissions, write-and-restore and parent replacement remain refusals. Runtime
+directory entries, compiler aliases, complete recursive OUT_DIR membership,
+file/entry counts and executable selection remain unchanged. The same bounded
+files and labels retain their existing closure content identity. These limits
+neither grant execution nor remove any input, runtime, target or test gate.
+
 The existing `PortableHostDependencyObserver` accepts explicit native library roots
 and forwards them to ELF, PE and Mach-O observation. Mach-O `@rpath` and bare runtime
 names can resolve through these roots; multiple valid images still refuse as

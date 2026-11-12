@@ -36,6 +36,10 @@ from literate_ai.adapters.retained_cargo_wrapper_v2 import (
 )
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.retained_cargo_admission import RetainedCargoSourceRetirement
+from literate_ai.contracts.retained_cargo_native_custody import (
+    RetainedCargoNativeCustodyPolicy,
+    RetainedCargoOutputBudget,
+)
 from literate_ai.contracts.retained_cargo_test_protocol import (
     RetainedCargoLibtestProtocol,
 )
@@ -49,13 +53,18 @@ from tests.support.fixtures_test_retained_cargo_import import blob
     "requires native POSIX Cargo/Rust and retained Make/Git adoption",
 )
 class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
-    def open_case(self, *, retire=True):
+    def open_case(self, *, retire=True, native_custody=None):
         base = Path(
             self.enterContext(tempfile.TemporaryDirectory(prefix="nrv2-"))
         ).resolve()
         fixture = native_fixtures.NativeReceivingFixture(base)
         self.reviewed, self.fixture = self.enterContext(
-            scratch_review_fixture(base, with_provider=True, fixture=fixture)
+            scratch_review_fixture(
+                base,
+                with_provider=True,
+                fixture=fixture,
+                native_custody=native_custody,
+            )
         )
         root = self.reviewed.project.root
         # app.py was present in _legacy_project BEFORE adoption and is in the
@@ -277,6 +286,32 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
         encoded = json.dumps(observation, sort_keys=True)
         self.assertLessEqual(len(encoded.encode()), 65536)
         print("native receiving receipt " + encoded, file=sys.stderr, flush=True)
+
+    def test_explicit_native_output_custody_keeps_complete_admission(self):
+        native = RetainedCargoNativeCustodyPolicy(
+            executables=RetainedCargoOutputBudget(512 * 1024**2, 1024**3),
+            runtime=RetainedCargoOutputBudget(512 * 1024**2, 4 * 1024**3),
+            build_outputs=RetainedCargoOutputBudget(256 * 1024**2, 1024**3),
+        )
+        self.open_case(native_custody=native)
+        self.assertEqual(self.reviewed.policy.native_custody, native)
+        receipt = admit_retained_cargo_consumer_v2(
+            self.materialized,
+            retirement_authority=self.retirement(),
+            acknowledge_source_retirement=True,
+            **self.execution(),
+        )
+        receipt.require_declarations(
+            self.reviewed.binding,
+            self.reviewed.plan,
+            self.reviewed.policy,
+            self.reviewed.inventory,
+        )
+        self.assertEqual(
+            tuple(item.key for item in receipt.target_outcomes),
+            tuple(item.key for item in self.reviewed.inventory.targets),
+        )
+        self.assertFalse(self.original_path.exists())
 
     def test_actual_original_source_is_preserved_and_refuses_retirement(self):
         self.open_case(retire=False)

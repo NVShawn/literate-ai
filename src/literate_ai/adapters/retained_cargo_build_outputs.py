@@ -6,7 +6,11 @@ from pathlib import Path
 from literate_ai._filesystem import UnsafeFilesystemPathError
 from literate_ai.adapters.exclusive_directory import directory_node
 from literate_ai.adapters.retained_cargo_consumer_files import _observe
+from literate_ai.adapters.streamed_file_custody import StreamedFileCustody
 from literate_ai.contracts.identity import canonical_identity
+from literate_ai.contracts.retained_cargo_native_custody import (
+    RetainedCargoOutputBudget,
+)
 from literate_ai.projects import PinnedInputClosure
 
 
@@ -29,7 +33,7 @@ class RetainedCargoBuildOutputs:
     output_root: Path
     trees: tuple
     parents: tuple
-    closure: PinnedInputClosure
+    closure: PinnedInputClosure | StreamedFileCustody
     maximum_entries: int
 
     @property
@@ -65,6 +69,7 @@ def capture_retained_cargo_build_outputs(
     maximum_entries=10000,
     maximum_file_bytes=16 * 1024 * 1024,
     maximum_total_bytes=256 * 1024 * 1024,
+    custody: RetainedCargoOutputBudget | None = None,
 ):
     """Capture all checked build-script outputs beneath the fresh compilation root.
 
@@ -84,6 +89,7 @@ def capture_retained_cargo_build_outputs(
             )
         )
         or maximum_file_bytes > maximum_total_bytes
+        or (custody is not None and type(custody) is not RetainedCargoOutputBudget)
     ):
         raise ValueError("retained.build-outputs.configuration-invalid")
     parents = {output_root: _directory(output_root)}
@@ -114,10 +120,14 @@ def capture_retained_cargo_build_outputs(
     roots = tuple(sorted(roots))
     if any(a != b and a.is_relative_to(b) for a in roots for b in roots):
         raise ValueError("retained.build-outputs.roots-overlap")
-    closure = PinnedInputClosure(
-        maximum_files=maximum_entries,
-        maximum_file_bytes=maximum_file_bytes,
-        maximum_total_bytes=maximum_total_bytes,
+    closure = (
+        PinnedInputClosure(
+            maximum_files=maximum_entries,
+            maximum_file_bytes=maximum_file_bytes,
+            maximum_total_bytes=maximum_total_bytes,
+        )
+        if custody is None
+        else StreamedFileCustody(maximum_files=maximum_entries, budget=custody)
     )
     trees = []
     remaining = maximum_entries - 1

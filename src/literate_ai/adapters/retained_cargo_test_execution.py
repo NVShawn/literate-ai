@@ -32,6 +32,7 @@ from literate_ai.adapters.retained_native_dependencies import (
     observe_retained_native_dependencies,
 )
 from literate_ai.adapters.retained_package_tree import _signature
+from literate_ai.adapters.streamed_file_custody import StreamedFileCustody
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.repositories import RepositoryBuildCommand
 from literate_ai.projects import PinnedInputClosure
@@ -152,6 +153,7 @@ def _prepare_retained_native_tests(
     rustc,
     environment,
     run,
+    native_custody=None,
 ):
     """Shared measured-binary/runtime ownership, not an importer or graph decoder.
 
@@ -195,6 +197,7 @@ def _prepare_retained_native_tests(
         # Measured Rust SDKs can include a >128 MiB LLVM member. Preserve the
         # 512 MiB aggregate boundary while explicitly admitting at most 256 MiB.
         maximum_file_bytes=256 * 1024 * 1024,
+        custody=None if native_custody is None else native_custody.runtime,
     )
     compiled = run(
         compile_command(fresh),
@@ -207,7 +210,10 @@ def _prepare_retained_native_tests(
         records, metadata, workspace=workspace
     )
     build_outputs = capture_retained_cargo_build_outputs(
-        records, metadata, output_root=fresh
+        records,
+        metadata,
+        output_root=fresh,
+        custody=None if native_custody is None else native_custody.build_outputs,
     )
     runtime_roots = []
     known_packages = {package["id"] for package in metadata["packages"]}
@@ -240,13 +246,18 @@ def _prepare_retained_native_tests(
         runtime_roots,
         file_alias_roots=(Path(lines[0]),),
         maximum_file_bytes=256 * 1024 * 1024,
+        custody=None if native_custody is None else native_custody.runtime,
     )
     compiler_runtime.require_unchanged()
     compiler_runtime = None
-    closure = PinnedInputClosure(
-        maximum_files=4096,
-        maximum_file_bytes=64 * 1024 * 1024,
-        maximum_total_bytes=256 * 1024 * 1024,
+    closure = (
+        PinnedInputClosure(
+            maximum_files=4096,
+            maximum_file_bytes=64 * 1024 * 1024,
+            maximum_total_bytes=256 * 1024 * 1024,
+        )
+        if native_custody is None
+        else StreamedFileCustody(maximum_files=4096, budget=native_custody.executables)
     )
     nodes, parents, identities, hashes = {}, {}, {}, {}
     for binary in binaries:
@@ -255,10 +266,16 @@ def _prepare_retained_native_tests(
         content = closure.pin(
             path, boundary=fresh, label=path.relative_to(fresh).as_posix()
         )
+        digest = (
+            hashlib.sha256(content).hexdigest()
+            if native_custody is None
+            else content.digest
+        )
+        size = len(content) if native_custody is None else content.size
         if _signature(path.lstat()) != node:
             raise ValueError("retained.tests.binary-changed")
         nodes[path] = node
-        hashes[path] = hashlib.sha256(content).hexdigest()
+        hashes[path] = digest
         parent = path.parent
         while parent != fresh:
             require_safe_directory(parent)
@@ -274,8 +291,8 @@ def _prepare_retained_native_tests(
                     build_environments.get(binary.package_root, ())
                 ),
                 "path": path.relative_to(fresh).as_posix(),
-                "sha256": hashlib.sha256(content).hexdigest(),
-                "bytes": len(content),
+                "sha256": digest,
+                "bytes": size,
             }
         )
 

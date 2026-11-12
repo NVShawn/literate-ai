@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retained Cargo v2 can explicitly review finite native executable, runtime and
+  build-output byte budgets with fresh streaming custody instead of retaining
+  multi-GiB payload copies; defaults and complete membership checks remain (#433).
+
 - Retained Cargo v2 composition keeps independently measured consumer Cargo/Rust
   tools separate from the provider's guarded native observations (#430).
 

@@ -166,6 +166,7 @@ def observe_retained_cargo_tests_v2(
         rustc=rustc,
         environment=environment,
         run=run,
+        native_custody=reviewed.policy.native_custody,
     )
     selected = {
         (b.package_root, b.target_name, tuple(sorted(b.target_kinds))): (b, t, g, h)
