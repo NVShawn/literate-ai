@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Accepted-source export qualification uses the actual admitted Python compiler
+  for independent expected bytecode when the test interpreter differs (#424).
+
 - Avoid redundant initial Cargo census metadata and semantic JSON work during
   fresh input-currentness checks, retaining every payload hash and closing
   namespace, physical-node and lineage check (#432).
