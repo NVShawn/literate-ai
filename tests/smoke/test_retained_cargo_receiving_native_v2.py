@@ -112,9 +112,9 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
             "consumer_inputs": self.inputs,
             "allow_host_execution": True,
             "read_exclusion_permission": self.fixture.read_permission,
-            # Measured source/runtime rechecks exhausted the earlier 180-second
-            # fixture allowance. Keep a finite bound below the API's 900 default.
-            "timeout_seconds": 480,
+            # Complete native input/runtime observations need the API's finite
+            # default allowance on two-CPU workers; retain all deadline guards.
+            "timeout_seconds": 900,
         }
 
     def test_real_patch_workspace_gates_protocols_and_retired_admission(self):

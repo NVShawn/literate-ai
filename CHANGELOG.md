@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Native retained-Cargo integration tests use the existing finite API deadline
+  default on slower workers while preserving production bounds and input checks.
+
 - Native retained-Cargo fixtures preserve the caller's implicit Rustup toolchain root
   before isolating HOME, while retaining explicit values and discovery refusals.
 
