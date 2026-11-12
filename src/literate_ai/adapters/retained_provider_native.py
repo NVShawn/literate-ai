@@ -6,6 +6,9 @@ from pathlib import Path
 from types import MappingProxyType
 
 from literate_ai.adapters.component_acceptance import LibraryAcceptance
+from literate_ai.adapters.legacy_generation_catalog import (
+    read_only_flavor_graph_observations,
+)
 from literate_ai.adapters.qualification import _qualification_acceptance_oracle
 from literate_ai.adapters.retained_provider_authority import RetainedProviderAuthority
 from literate_ai.adapters.standard_project import (
@@ -13,7 +16,10 @@ from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.contracts import ComponentCommandContract, ContentIdentity
-from literate_ai.projects import PinnedInputClosure
+from literate_ai.projects import (
+    PinnedInputClosure,
+    read_only_project_configuration_parses,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,14 +37,22 @@ class RetainedProviderNative:
         )
 
     def require_unchanged(self) -> None:
-        self.provider.require_unchanged()
-        self._inputs.require_unchanged()
-        self.toolchain.require_unchanged()
-        if self.oracle.identity != self._oracle_identity:
-            raise ValueError("retained.provider.oracle-changed")
-        self.provider.require_unchanged()
-        self._inputs.require_unchanged()
-        self.toolchain.require_unchanged()
+        # Reuse only existing read-only parsing observations in this one guard.
+        # Every callback, complete graph and fresh byte check still runs; Flavor
+        # observations additionally close their membership/bytes on scope exit.
+        # The next independent guard creates its own observation again.
+        with (
+            read_only_project_configuration_parses(),
+            read_only_flavor_graph_observations(),
+        ):
+            self.provider.require_unchanged()
+            self._inputs.require_unchanged()
+            self.toolchain.require_unchanged()
+            if self.oracle.identity != self._oracle_identity:
+                raise ValueError("retained.provider.oracle-changed")
+            self.provider.require_unchanged()
+            self._inputs.require_unchanged()
+            self.toolchain.require_unchanged()
 
 
 def read_retained_provider_native(
