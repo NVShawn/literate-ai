@@ -93,5 +93,22 @@
     "tool_hashes_unchanged": 5,
     "unit_absent": true,
     "owned_groups_absent": true
+  },
+  "mixed_interpreter_repair": {
+    "issue": "https://github.com/jordanhubbard/literate-ai/issues/424",
+    "unchanged_upstream_main": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+    "actual_main_counterfactual_failed": true,
+    "first_observer_actual_failed": "Wheel-only target assumption refused generic bytecode command contract",
+    "failed_pair_archive_sha256": "c4295512f748c2f55559a40245b75e787e6e4c53c07bfc8f31598b5546a2383f",
+    "corrected_case_passed": true,
+    "native_compiler_version": "3.12.10",
+    "test_process_version": "3.14.4",
+    "corrected_case_seconds": 57.928,
+    "corrected_test_sha256": "c86d0158a312dbc35239d322b4dbff27c0e21e8799f26fec785cfc7496388a34",
+    "sanitized_proof_sha256": "45e8e9973fd7e15f272c7bc7febbdd0846a48d8c8b01f8710ea39102c16421f4",
+    "independent_closure_sha256": "fe17720549c561d96ab7e02461c9e751774c9346850b77d773d281147d393fdf",
+    "closed_archive_sha256": "d62ba57f8496107b2989a0bbad8b3be3cf5caf87c942b126e5f9a05f56a54a18",
+    "full_suite_failure_archive_sha256": "621eb247a05b029ee44edf235f68edb3de15805e48d031cd43ace9272d4a857d",
+    "full_suite_requalification": "Pending; supported exact suite pin includes changed test-module bytes, so the old partial prefix cannot be manually reused."
   }
 }

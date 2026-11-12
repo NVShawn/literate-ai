@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Accepted-source export qualification compiles independent expected bytecode with
+  the actual admitted Python compiler when the test interpreter differs (#424).
+
 - Add a public Python v2 retained-Cargo receiving transaction with live scratch
   publication, patch-aware consumer gates, honest typed test outcomes and strict
   already-retired source admission; preserve v1 contracts (#222–#226).
