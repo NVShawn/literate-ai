@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Public-export reference checking avoids quadratic backtracking on long ASCII
+  runs while preserving the same denied labels and complete scanned inputs (#427).
+
 - Windows bounded tools reuse confirmed Job Object termination during repeated
   cleanup, avoiding redundant `taskkill` enumeration while retaining fallback
   cleanup when Job ownership or termination is unavailable (#426).

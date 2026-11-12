@@ -34558,3 +34558,24 @@ implementation, policy weakening, qualification or issue closure is recorded her
         closure. The earlier timeout and unattributed diagnostic access violation
         remain preserved; the complete 17-case selection remains separate.
   - [ ] Final local gates, independent review and the required PR CI pass.
+
+### [ ] PUBLIC-EXPORT-SCAN-001 — Bound suffix-free public-export reference matching
+
+- **Priority:** P1
+- **Owner:** framework public-export guard
+- **GitHub issue:** [#427](https://github.com/jordanhubbard/literate-ai/issues/427)
+- **Direction:** Repair measured quadratic deny-reference scan exposed by normal source qualification.
+- **Conclusion:** A single preceding class character preserves boolean existence language of the unanchored fixed-suffix matcher; retain every scanned byte and denied label.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Replace only the greedy unanchored prefix with its last character;
+        every previously matching prefix still contains that match. Preserve
+        every denied label, fixed suffix and scanned input.
+- **Evidence:**
+  - [x] The old actual 65,536-byte negative times out at five seconds; the
+        corrected four tests pass in 0.159 seconds, including 116 boundary/parity
+        inputs. The unchanged complete audit passes in 34.50 seconds. The earlier
+        complete audit passed after an observed 215 CPU seconds; its exact total
+        duration was not captured and is not inferred.
+  - [ ] Final independent review and required PR CI pass.

@@ -31,7 +31,9 @@ DENIED_REFERENCES = (
     ),
     DeniedReference(
         "NVIDIA internal worker host",
-        re.compile(rb"[A-Za-z0-9_.-]+\.hrd\.nvidia\.com", re.I),
+        # Only existence is exposed. The last prefix character recognizes the
+        # same unanchored matches without quadratic suffix-free backtracking.
+        re.compile(rb"[A-Za-z0-9_.-]\.hrd\.nvidia\.com", re.I),
     ),
     DeniedReference("NVIDIA employee address", re.compile(rb"@nvidia\.com", re.I)),
     DeniedReference(

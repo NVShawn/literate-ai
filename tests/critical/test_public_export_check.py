@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import re
+import subprocess
+import sys
 import unittest
+from pathlib import Path
 
 from scripts.check_public_export import denied_labels
 
@@ -32,3 +36,36 @@ class PublicExportCheckTests(unittest.TestCase):
         ):
             with self.subTest(value=value):
                 self.assertEqual(denied_labels(value), ())
+
+    def test_worker_match_preserves_unanchored_existence_boundaries(self):
+        legacy = re.compile(rb"[A-Za-z0-9_.-]+\.hrd\.nvidia\.com", re.I)
+        suffix = b".hrd" + b".nvidia.com"
+        cases = [b"", b"hrd.nvidia.com", suffix, b"a" + suffix.upper()]
+        for prefix in (b"", b"a", b"_", b"-", b".", b"ab.cd", b"A" * 128):
+            for leading in (b"", b"!", b"x!", b"\xff"):
+                for ending in (b"", b":123", b"/path", b".other"):
+                    cases.append(leading + prefix + suffix + ending)
+        for content in cases:
+            with self.subTest(content=content):
+                self.assertEqual(
+                    "NVIDIA internal worker host" in denied_labels(content),
+                    bool(legacy.search(content)),
+                )
+
+    def test_long_suffix_free_input_finishes_within_process_budget(self):
+        # Only one Python child evaluates the real matcher; no helpers can escape
+        # this finite process deadline. The old greedy search exceeds it.
+        script = Path(__file__).resolve().parents[2] / "scripts/check_public_export.py"
+        code = (
+            "import runpy,sys;"
+            "m=runpy.run_path(sys.argv[1]);"
+            "print(m['denied_labels'](b'A'*65536))"
+        )
+        result = subprocess.run(
+            [sys.executable, "-I", "-B", "-c", code, str(script)],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            check=True,
+            timeout=5,
+        )
+        self.assertEqual(result.stdout.strip(), b"()")
