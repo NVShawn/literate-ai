@@ -9,6 +9,10 @@
   publication, patch-aware consumer gates, honest typed test outcomes and strict
   already-retired source admission; preserve v1 contracts (#222–#226).
 
+- Avoid redundant initial Cargo census metadata and semantic JSON work during
+  fresh input-currentness checks, retaining every payload hash and closing
+  namespace, physical-node and lineage check (#432).
+
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test
   and package phases with preserved historical evidence.
