@@ -34550,6 +34550,15 @@ implementation, policy weakening, qualification or issue closure is recorded her
   is inferred. Relevant input/materialization controls give fifteen passes and
   one declared Windows-only skip. Whole-provider performance, full regression,
   installed and native receiving/admission qualification remain pending.
+- **Native scope controls:** Five counted orchestration cases use real project and
+  Flavor files: unchanged main gives one pass/four expected failures, candidate
+  five passes. Two calls still invoke all four provider, four toolchain and four
+  input guards and produce four independent graphs; Flavor parsing drops from
+  four loads to two operation-local loads. Late Flavor/project-discovery changes,
+  next-call drift and exception cleanup refuse correctly. Twenty-seven combined
+  parsing/Flavor/native-scope controls pass; an initial test expected the wrong
+  existing membership-refusal exception and was corrected without changing
+  production behavior. No genuine-provider timing improvement is claimed yet.
 - **Priority:** P1
 - **Owner:** Framework core; native retained Cargo input observation
 - **Direction:** Keep genuine per-process currentness feasible for complete native inventories without stale observations or relaxed coverage.
@@ -34559,6 +34568,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Implementation:**
   - [x] Link #432 and establish exact profiled/current-source projection before source edits.
   - [x] Reuse initial inventory metadata within one capture; compare complete fresh semantic tree fields without redundant canonical serialization.
+  - [x] Use existing bounded read-only project/Flavor parsing scopes within one native guard, retaining all callbacks and fresh/closing input checks.
   - [ ] Retain changed-then-restored, path/mode/namespace/descriptor and process-boundary refusals; do not skip target protocols or cache guard success.
 - **Evidence:**
   - [ ] Portable actual filesystem mutation/refusal controls and deterministic before/after stat/hash/identity counts.
