@@ -34560,7 +34560,7 @@ implementation, policy weakening, qualification or issue closure is recorded her
   review marker before the full Python, wheel or installed gates ran. Independent
   review of the two changed adapters permits refreshing that marker; complete
   maintained qualification remains pending.
-- **Qualification prerequisite:** The next full run reached 1,705 tests and failed the already tracked mixed-interpreter oracle defect [#424](https://github.com/jordanhubbard/literate-ai/issues/424), with 84 declared skips. Reuse the exact reviewed test correction from `5895a62ad6b97a8d3288324cf68348f728e441b5` / PR #425; preserve full byte equality and actual admitted compiler identity. This is a test-only prerequisite, not a new production optimization. Full maintained qualification remains pending.
+- **Qualification prerequisite:** The next full run reached 1,705 tests and failed the already tracked mixed-interpreter oracle defect [#424](https://github.com/jordanhubbard/literate-ai/issues/424), with 84 declared skips. Reuse the exact reviewed test correction from `5895a62ad6b97a8d3288324cf68348f728e441b5` / PR #425; preserve full byte equality and actual admitted compiler identity. This is a test-only prerequisite, not a new production optimization. The previously failing accepted-source case and the successive-revision control now both pass on the same mixed-interpreter host in 117.259 seconds; the source remains unchanged and the owned test unit has exited. Full maintained qualification remains pending.
 - **Priority:** P1
 - **Owner:** Framework core; native retained Cargo input observation
 - **Direction:** Keep genuine per-process currentness feasible for complete native inventories without stale observations or relaxed coverage.
