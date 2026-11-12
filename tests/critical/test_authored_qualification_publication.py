@@ -204,6 +204,52 @@ class AuthoredQualificationPublicationTests(unittest.TestCase):
         self.assertFalse((self.root / self.current.plan.output_root).exists())
         self.assertFalse(list(self.scratch_parent.iterdir()))
 
+    def test_public_reader_forwards_exact_native_sdk_owner_to_projection(self):
+        # Publication/archive/retirement are real fixture filesystem operations.
+        # Only projection admission is injected: this proves owner forwarding,
+        # not genuine SDK custody or native authored qualification.
+        with self.admitted():
+            published = self.apply()
+            sdk_owner = object()
+            with patch(
+                MODULE + "open_current_authored_qualification_projection",
+                side_effect=lambda *_a, **_k: nullcontext(
+                    SimpleNamespace(require_unchanged=self.current.require_unchanged)
+                ),
+            ) as projection:
+                reread = read_published_authored_qualification(
+                    self.current,
+                    published.reference.attempt,
+                    expected_identity=published.reference.identity,
+                    native_sdk_inputs=sdk_owner,
+                )
+            self.assertEqual(reread, published)
+            projection.assert_called_once_with(
+                self.current, native_sdk_inputs=sdk_owner
+            )
+
+    def test_public_reader_cannot_drop_refused_native_sdk_custody(self):
+        with self.admitted():
+            published = self.apply()
+            sdk_owner = object()
+
+            def refuse(_current, *, native_sdk_inputs=None):
+                self.assertIs(native_sdk_inputs, sdk_owner)
+                raise ValueError("fixture native SDK owner expired")
+
+            with (
+                patch(
+                    MODULE + "open_current_authored_qualification_projection",
+                    side_effect=refuse,
+                ),
+                self.assertRaisesRegex(ValueError, "native SDK owner expired"),
+            ):
+                read_published_authored_qualification(
+                    self.current,
+                    published.reference.attempt,
+                    native_sdk_inputs=sdk_owner,
+                )
+
     def test_interrupted_stage_is_not_a_reference_and_recovery_does_not_delete_runs(
         self,
     ):

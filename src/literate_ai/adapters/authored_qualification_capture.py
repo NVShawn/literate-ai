@@ -26,6 +26,7 @@ from literate_ai.contracts.authored_qualification_runs import (
     AuthoredQualificationResult,
     AuthoredQualificationRun,
 )
+from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
@@ -33,6 +34,9 @@ from literate_ai.contracts.identity import (
 )
 from literate_ai.contracts.library_products import LibraryArtifactProduct
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
+from literate_ai.contracts.standard_post_source_evidence import (
+    StandardComponentAcceptanceEvidence,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +50,20 @@ class ReopenedAuthoredProductMembership:
     products: AuthoredQualificationProducts
     result: AuthoredQualificationResult
     exports: tuple[tuple[ContentIdentity, RetainedLibraryExportSet], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class AuthoredQualificationRunCapture:
+    """Immutable selected authored products, never source-promotion evidence.
+
+    This value supplies bytes to a separate receiving transaction. It cannot
+    restore a current owner, importer trust, execution or retirement permission.
+    """
+
+    run: AuthoredQualificationRun
+    exports: RetainedLibraryExportSet
+    acceptances: tuple[StandardComponentAcceptanceEvidence, ...]
+    blobs: tuple[tuple[BlobRef, bytes], ...]
 
 
 def _join_result_lock(result, lock):

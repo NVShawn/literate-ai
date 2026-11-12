@@ -207,9 +207,18 @@ def _replay(
 
 
 def read_published_authored_qualification(
-    current, attempt, *, expected_identity=None, max_bytes=DEFAULT_BYTES
+    current,
+    attempt,
+    *,
+    expected_identity=None,
+    max_bytes=DEFAULT_BYTES,
+    native_sdk_inputs=None,
 ):
-    """Reopen a real committed provider reference; grant no importer permission."""
+    """Reopen a committed reference under its actual current SDK input owners.
+
+    Explicit inputs follow the same guarded projection contract as publication;
+    passive data cannot restore SDK custody. This grants no importer permission.
+    """
     if not isinstance(current, CurrentAuthoredQualificationPlan):
         raise TypeError("original current authored plan required")
     if type(max_bytes) is not int or max_bytes <= 0:
@@ -239,7 +248,15 @@ def read_published_authored_qualification(
         ):
             raise ValueError("qualification.authored.publication_reference_mismatch")
         _retired(files, current, attempt)
-        with _replay(files, current, attempt, stage, archive, max_bytes=max_bytes):
+        with _replay(
+            files,
+            current,
+            attempt,
+            stage,
+            archive,
+            max_bytes=max_bytes,
+            native_sdk_inputs=native_sdk_inputs,
+        ):
             files.require_current()
             return PublishedAuthoredQualification(
                 reference, base + "/reference.json", base

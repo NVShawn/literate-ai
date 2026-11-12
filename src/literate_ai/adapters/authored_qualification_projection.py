@@ -10,6 +10,10 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from types import MappingProxyType
 
+from literate_ai.adapters.authored_qualification_capture import (
+    AuthoredQualificationRunCapture,
+    _acceptances,
+)
 from literate_ai.adapters.authored_qualification_execution import (
     CurrentAuthoredQualificationExecution,
 )
@@ -25,6 +29,10 @@ from literate_ai.adapters.generation_preparation import (
     PreparedLockedGeneration,
 )
 from literate_ai.adapters.models.coding_cli import GenerationRecipe
+from literate_ai.adapters.qualification_capture import (
+    QualificationCaptureError,
+    capture_qualification_product_blobs,
+)
 from literate_ai.adapters.standard_project import (
     ProjectedStandardToolchainClosure,
     project_locked_standard_toolchain_closure,
@@ -209,3 +217,60 @@ def reopen_projected_authored_qualification(
     )
     projection.require_unchanged()
     return result
+
+
+def reopen_projected_authored_run(
+    projection,
+    reader,
+    products_identity,
+    *,
+    run_identity,
+    exports_identity,
+    max_package_bytes,
+) -> AuthoredQualificationRunCapture:
+    """Select exact authored products after verifying every complete clean run.
+
+    Selection identities come from independent importing review. A selected run
+    cannot hide another failed run. The returned immutable bytes retain authored
+    origin and grant no materialization, execution or importer permission.
+    """
+    if (
+        type(projection) is not CurrentAuthoredQualificationProjection
+        or not isinstance(run_identity, ContentIdentity)
+        or not isinstance(exports_identity, ContentIdentity)
+    ):
+        raise TypeError("original authored projection and typed selection required")
+    reopened = reopen_projected_authored_qualification(
+        projection, reader, products_identity, max_package_bytes=max_package_bytes
+    )
+    runs = tuple(
+        run
+        for run in reopened.membership.result.runs
+        if run.request.run_identity == run_identity
+    )
+    exports = tuple(
+        value
+        for selected, value in reopened.membership.exports
+        if selected == run_identity and value.identity == exports_identity
+    )
+    if len(runs) != 1 or len(exports) != 1:
+        raise QualificationCaptureError(
+            "qualification.authored.receiving_selection_mismatch"
+        )
+    run, selected = runs[0], exports[0]
+    target = (
+        projection.current.oracles.authority.locked.authority.lock.target_profile_identity
+    )
+    acceptances = _acceptances(run, selected, target)
+    projection.require_unchanged()
+    blobs = capture_qualification_product_blobs(
+        selected,
+        acceptances,
+        target_profile_identity=target,
+        read_blob=lambda reference: reader.read_bytes(
+            ContentIdentity.parse_uri(reference.identity)
+        ),
+        max_bytes=max_package_bytes,
+    )
+    projection.require_unchanged()
+    return AuthoredQualificationRunCapture(run, selected, acceptances, blobs)

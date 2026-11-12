@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve live native SDK inputs when rereading authored publications and expose
+  exact selected-run products only after complete clean-run reopening. Authored
+  importer and consumer admission remain in progress (#393).
+
 - Add acknowledged `project qualify apply` with bounded authored archive capture,
   transaction-owned run retirement and atomic reference publication. Interrupted
   staged archives can be replayed under fresh authority without restoring cleanup

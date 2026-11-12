@@ -34402,6 +34402,9 @@ implementation, policy weakening, qualification or issue closure is recorded her
 
 ### [ ] AUTHORED-GRAPH-QUALIFICATION-001 — Admit genuinely authored native graphs to public qualification
 
+- **Receiving continuation (source-only):** A separate contributor branch composes exact maintainer PR401 `97362d5c` with receiver PR434 `ddbda1a3`. Implement authored-specific current provider/DTO/archive capture and explicit origin dispatch through the existing retained transaction, preserving source-derived promotion obligations. No fabricated source baseline, passive reference as authority, reduced graph or no-retirement receipt. Independent source review, genuine causal/native composition and complete source/wheel qualification remain pending; neither prerequisite proof qualifies this composition.
+- **Receiving selection checkpoint:** The public published-reference reader now forwards the caller's original native SDK input owner to its existing guarded replay. A separate authored run-capture type retains genuine authored run records, and projection-bound selection reopens every clean run before returning one exact run/export pair. Five maintained selection controls pass, including failure of the other run and late currentness refusal. Two exact-owner forwarding/refusal controls pass within a publication selection that reached 15 of 16 passes before its outer deadline; the remaining named reference-substitution case subsequently passes separately. The original deadline remains a failed/incomplete gate, not a full-suite pass. Fixtures explicitly inject current-plan/projection/native execution admission; actual authored receiving, origin-specific importer DTO, materialization, full consumer gates and retirement/admission are still unfinished.
+
 - **Release target:** 1.4.0
 - **GitHub issue:** [#393](https://github.com/jordanhubbard/literate-ai/issues/393)
 
