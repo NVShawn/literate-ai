@@ -1,0 +1,108 @@
+{
+  "schema": "literate-ai/upstream-observation-qualification@1",
+  "source_commit": "8dd7ff04524bc0c2a1c99102f61d669b470ed56b",
+  "platform": "Linux x86_64",
+  "python": {
+    "executed": 2682,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2682,
+    "selected": 2796,
+    "skipped": 114
+  },
+  "commands": [
+    {
+      "phase": "checkout",
+      "exit_code": 0,
+      "seconds": 16.435,
+      "stdout_sha256": "328cf039afeb95cc4ae6266c8f8af8bc8508a075da0ecd35e74bcc0ce0d62b83",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "development-environment",
+      "exit_code": 0,
+      "seconds": 23.723,
+      "stdout_sha256": "a822ea7547c4606d29730a7e5bdf5e17f61824d2ebdb5a7d33a0e5c0cfbccd1d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "node-npm-readiness",
+      "exit_code": 0,
+      "seconds": 0.031,
+      "stdout_sha256": "d757d43c53951704e32c04b9b1e6b4cc65713b659e72fcdbb02f5200675c7fd8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "npm-readiness",
+      "exit_code": 0,
+      "seconds": 0.351,
+      "stdout_sha256": "1b9487d55bea47fea50d226cc9c53bc548877ad2a318bac8fbc8b320f429e5c5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "source-controls",
+      "exit_code": 0,
+      "seconds": 4.76,
+      "stdout_sha256": "b709ab8f9390d0e7f6e055cb84683d57ba22b5eb01d0fde8bffc5ca08d273890",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "full-maintained-python",
+      "exit_code": 0,
+      "seconds": 2046.345,
+      "stdout_sha256": "89008a176264b6471911b8ef64c33f5796bf684191ab9054c7f747424dcacb72",
+      "stderr_sha256": "1be835d4f6ddf4e2f1db9700f908be8e320869e565cf15ffd3cc0b7ee9c7001d"
+    },
+    {
+      "phase": "installed-offline",
+      "exit_code": 0,
+      "seconds": 213.684,
+      "stdout_sha256": "fe24b43266a0f0e568de4bfa164eb68573ac5ed4db58afd69fbe893ee6819420",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "wheel",
+      "exit_code": 0,
+      "seconds": 975.203,
+      "stdout_sha256": "595f88505011bb291b97f483262a2ca008b81f7541378b5fe83d10b2840309d5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "private-prefix-install",
+      "exit_code": 0,
+      "seconds": 200.987,
+      "stdout_sha256": "03bd023a56d4644b0ada2503446c6d9d35783025527585fff4bbb99e12f06af0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "specification-and-documents",
+      "exit_code": 0,
+      "seconds": 86.777,
+      "stdout_sha256": "9703c1636be04888925f36c6d4cc0bc381c5477e39d5d479451280ccca2a0a91",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "public-export-audit",
+      "exit_code": 0,
+      "seconds": 237.172,
+      "stdout_sha256": "2e9dda0c6ed88829286bc0adfbfae5d47f5c72392421842418f2f0a8e9c1da88",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "wheel": {
+    "revision": "8dd7ff04524bc0c2a1c99102f61d669b470ed56b",
+    "version": "1.4.0",
+    "manifest_identity": "sha256:b4a965877108e46ecf80635d0e086a082a786536f0f1d633d09af856b674709f",
+    "sha256": "7c706eb65964b8b5fc2257ea2dbf588ff8ab40a2aa765f932ce43cf3b8109f13",
+    "bytes": 4254757,
+    "artifact": "literate_ai-1.4.0-py3-none-any.whl"
+  },
+  "source_members_unchanged": 5330,
+  "tools_unchanged": 8,
+  "independent_closure_sha256": "d22bc76822450f96da1a17701d4f18439cf098c4ada4e964bd1065ba89db510a",
+  "limits": [
+    "No complete native receiving or downstream consumer/source-retirement acceptance.",
+    "No demonstrated whole-guard speedup; original 15.706s versus16.064s comparison retained.",
+    "All114 declared test skips remain excluded; no skipped test is claimed as passed."
+  ]
+}
