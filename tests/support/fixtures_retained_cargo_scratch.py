@@ -41,7 +41,9 @@ from tests.support.fixtures_test_retained_harness_receipts import (
 
 
 @contextmanager
-def scratch_review_fixture(base, *, with_provider=False, fixture=None):
+def scratch_review_fixture(
+    base, *, with_provider=False, fixture=None, build_outputs=()
+):
     project = base / "converted"
     _legacy_project(project)
     (project / ".gitignore").write_text("pkgs/\ncargo-output/\n")
@@ -79,12 +81,26 @@ def scratch_review_fixture(base, *, with_provider=False, fixture=None):
         plan = RetainedCargoWorkspacePlanV2(
             common,
             graph,
-            (
-                RetainedCargoScratchRoot("cargo-output", "cargo-output"),
-                RetainedCargoScratchRoot("pkgs", "member-packages"),
+            tuple(
+                sorted(
+                    (
+                        RetainedCargoScratchRoot("cargo-output", "cargo-output"),
+                        RetainedCargoScratchRoot("pkgs", "member-packages"),
+                        *(
+                            RetainedCargoScratchRoot(p, "build-output")
+                            for p in build_outputs
+                        ),
+                    ),
+                    key=lambda r: r.path,
+                )
             ),
             custody,
         )
+        if build_outputs:
+            ignore = project / ".gitignore"
+            ignore.write_text(
+                ignore.read_text() + "".join("**/" + p + "/\n" for p in build_outputs)
+            )
         policy = RetainedLibraryGatePolicyV2(
             RetainedLibraryGatePolicy(
                 loaded.definition.project_id,
