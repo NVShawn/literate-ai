@@ -34552,7 +34552,14 @@ implementation, policy weakening, qualification or issue closure is recorded her
   next-call drift and exception cleanup refuse correctly. Twenty-seven combined
   parsing/Flavor/native-scope controls pass; an initial test expected the wrong
   existing membership-refusal exception and was corrected without changing
-  production behavior. No genuine-provider timing improvement is claimed yet.
+  production behavior. A separate installed historical-reader comparison with
+  these two runtime changes measured 15.706 seconds before and 16.064 seconds
+  after, so no full-guard speedup was demonstrated. That diagnostic does not
+  qualify this maintained source checkpoint. The first full local run passed
+  layout, lint and formatting, then correctly refused a stale lifecycle-driver
+  review marker before the full Python, wheel or installed gates ran. Independent
+  review of the two changed adapters permits refreshing that marker; complete
+  maintained qualification remains pending.
 - **Priority:** P1
 - **Owner:** Framework core; native retained Cargo input observation
 - **Direction:** Keep genuine per-process currentness feasible for complete native inventories without stale observations or relaxed coverage.
