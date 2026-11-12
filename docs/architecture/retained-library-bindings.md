@@ -741,3 +741,21 @@ importer-admission receipts. `admit` composes complete source/external-dependenc
 custody, attributable positive consumer results, durable admission and acknowledged
 source retirement as required by ADR 0040. Endpoint provisioning belongs to the
 operator.
+
+### Secondary retained build outputs in v2
+
+An explicitly reviewed `build-output` scratch root names secondary output of an
+unchanged retained gate, such as assets generated beneath a package's existing
+source parent. It is distinct from Cargo's disjoint target directory and from
+materialized library packages. It cannot overlap a reviewed Cargo manifest or
+target source. All scratch paths remain mutually disjoint.
+
+The existing live receiver proves ordinary ancestry, ignore status and initial
+absence, publishes its exact empty staging inode exclusively, and retains its
+reservation and current original-source custody. Only that live owner can exclude
+this exact root from workspace input capture. A saved plan, ignored directory,
+existing output or prior receipt supplies no such permission. Replacement,
+redirection and foreign source changes still refuse; outputs remain preserved
+when the owner closes. This role changes no v1 behavior and grants no source
+retirement, execution, cleanup or durable admission authority. Actual maintained
+gates, complete native target coverage and independent admission remain required.
