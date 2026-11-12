@@ -3,6 +3,7 @@
 import json
 import os
 import shutil
+import sys
 import tempfile
 import time
 import unittest
@@ -35,6 +36,9 @@ from literate_ai.adapters.retained_cargo_wrapper_v2 import (
 )
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.retained_cargo_admission import RetainedCargoSourceRetirement
+from literate_ai.contracts.retained_cargo_test_protocol import (
+    RetainedCargoLibtestProtocol,
+)
 from tests.support import fixtures_retained_cargo_native_v2 as native_fixtures
 from tests.support.fixtures_retained_cargo_scratch import scratch_review_fixture
 from tests.support.fixtures_test_retained_cargo_import import blob
@@ -114,24 +118,101 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
         }
 
     def test_real_patch_workspace_gates_protocols_and_retired_admission(self):
+        case_start = time.monotonic()
+        measured = {"full_input_checks": 0, "commands": []}
+        telemetry_rows = 0
+
+        def emit(event, **values):
+            nonlocal telemetry_rows
+            if telemetry_rows >= 256:
+                return
+            telemetry_rows += 1
+            print(
+                "native receiving progress "
+                + json.dumps(
+                    {
+                        "event": event,
+                        "elapsed_seconds": time.monotonic() - case_start,
+                        "full_input_checks": measured["full_input_checks"],
+                        **values,
+                    }
+                ),
+                file=sys.stderr,
+                flush=True,
+            )
+
+        emit("fixture-start")
         self.open_case()
+        # Expected coverage comes from independently reviewed declarations,
+        # never from materialized package counts or observed outcomes.
+        expected_targets = self.reviewed.inventory.targets
+        expected_libtests = tuple(
+            target
+            for target in expected_targets
+            if isinstance(target.protocol, RetainedCargoLibtestProtocol)
+        )
+        emit(
+            "fixture-ready",
+            reviewed_targets=len(expected_targets),
+            reviewed_libtests=len(expected_libtests),
+        )
         authority = self.retirement()
+        emit("retirement-ready")
         actual_run = executor.run_bounded_process
         actual_inputs = type(self.inputs).current_identity
-        measured = {"full_input_checks": 0, "commands": []}
 
         def input_check(owner, *, environment):
             measured["full_input_checks"] += 1
-            return actual_inputs(owner, environment=environment)
+            index = measured["full_input_checks"]
+            emit("input-check-start", check=index)
+            check_start = time.monotonic()
+            passed = False
+            try:
+                result = actual_inputs(owner, environment=environment)
+                passed = True
+                return result
+            finally:
+                emit(
+                    "input-check-complete",
+                    check=index,
+                    passed=passed,
+                    check_seconds=time.monotonic() - check_start,
+                )
 
         def native_process(argv, **kwargs):
+            assert len(measured["commands"]) < 64
+            if Path(argv[0]).name.startswith("excluded-"):
+                label = "forbidden-excluded"
+            elif Path(argv[0]).name.startswith("custom-"):
+                label = "custom-harness"
+            elif "--list" in argv:
+                label = "libtest-list"
+            elif "--format=pretty" in argv:
+                label = "libtest-run"
+            elif "metadata" in argv:
+                label = "metadata"
+            elif "check" in argv:
+                label = "reviewed-gate"
+            elif "--no-run" in argv:
+                label = "test-compile"
+            else:
+                label = "compiler-runtime"
+            index = len(measured["commands"]) + 1
+            emit("process-start", command=index, label=label)
             result = actual_run(argv, **kwargs)
             measured["commands"].append(
                 {
-                    "executable": Path(argv[0]).name,
+                    "label": label,
                     "exit_code": result.returncode,
                     "elapsed_seconds": result.elapsed_seconds,
                 }
+            )
+            emit(
+                "process-complete",
+                command=index,
+                label=label,
+                exit_code=result.returncode,
+                process_seconds=result.elapsed_seconds,
             )
             return result
 
@@ -149,12 +230,18 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
                 )
         finally:
             measured["admission_wall_seconds"] = time.monotonic() - start
-            # Real subprocess passthrough and real input checks: these counters
-            # never replace a result or authorize any execution/receipt.
-            print("native receiving timing " + json.dumps(measured), flush=True)
-        self.assertEqual(len(receipt.target_outcomes), 5)
+            print(
+                "native receiving timing " + json.dumps(measured),
+                file=sys.stderr,
+                flush=True,
+            )
         self.assertEqual(
-            [outcome.kind for outcome in receipt.target_outcomes].count("libtest"), 3
+            tuple(outcome.key for outcome in receipt.target_outcomes),
+            tuple(target.key for target in expected_targets),
+        )
+        self.assertEqual(
+            [outcome.kind for outcome in receipt.target_outcomes].count("libtest"),
+            len(expected_libtests),
         )
         custom = [x for x in receipt.target_outcomes if x.kind == "custom-harness"]
         self.assertEqual(len(custom), 1)
@@ -163,13 +250,16 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
         self.assertEqual(len(excluded), 1)
         self.assertEqual(excluded[0].command_observation_identities, ())
         self.assertFalse(
-            any(x["executable"].startswith("excluded-") for x in measured["commands"])
+            any(x["label"] == "forbidden-excluded" for x in measured["commands"])
         )
         self.assertEqual(
-            sum(x["executable"].startswith("custom-") for x in measured["commands"]),
+            sum(x["label"] == "custom-harness" for x in measured["commands"]),
             1,
         )
-        self.assertEqual(sum(len(x.ignored_cases) for x in receipt.target_outcomes), 2)
+        self.assertEqual(
+            sum(len(x.ignored_cases) for x in receipt.target_outcomes),
+            sum(len(target.protocol.ignored) for target in expected_libtests),
+        )
         receipt.require_declarations(
             self.reviewed.binding,
             self.reviewed.plan,
@@ -177,6 +267,16 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
             self.reviewed.inventory,
         )
         self.assertFalse(self.original_path.exists())
+        # Export only generic fixture contract identities and typed outcomes.
+        # Parsing this observation does not reopen live admission authority.
+        observation = {
+            "receipt_identity": receipt.identity.uri,
+            "inventory_identity": self.reviewed.inventory.identity.uri,
+            "receipt": receipt.to_dict(),
+        }
+        encoded = json.dumps(observation, sort_keys=True)
+        self.assertLessEqual(len(encoded.encode()), 65536)
+        print("native receiving receipt " + encoded, file=sys.stderr, flush=True)
 
     def test_actual_original_source_is_preserved_and_refuses_retirement(self):
         self.open_case(retire=False)
@@ -266,3 +366,44 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
             )
         finally:
             self.fixture.permission_path.write_bytes(self.fixture.permission_bytes)
+
+    def test_native_binary_change_after_listing_refuses_next_process(self):
+        self.open_case()
+        actual = executor.run_bounded_process
+        changed = []
+        unexpected_attempts = []
+        marker = b"owned native test mutation"
+
+        def changed_after_list(argv, **kwargs):
+            if changed:
+                unexpected_attempts.append(True)
+                self.fail("no process may follow the mutated binary")
+            result = actual(argv, **kwargs)
+            if "--list" in argv:
+                binary = Path(argv[0])
+                output = (
+                    self.materialized.scratch.context.workspace
+                    / self.reviewed.plan.graph.common.output_directory
+                )
+                self.assertTrue(binary.resolve().is_relative_to(output.resolve()))
+                descriptor = os.open(binary, os.O_WRONLY | os.O_APPEND | os.O_NOFOLLOW)
+                with os.fdopen(descriptor, "ab") as stream:
+                    stream.write(marker)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                changed.append(binary)
+            return result
+
+        with (
+            patch.object(executor, "run_bounded_process", changed_after_list),
+            self.assertRaises(RetainedCargoExecutionError) as failure,
+        ):
+            execute_retained_cargo_consumer_v2(self.materialized, **self.execution())
+        self.assertEqual(len(changed), 1)
+        self.assertFalse(unexpected_attempts)
+        self.assertTrue(changed[0].read_bytes().endswith(marker))
+        self.assertTrue(
+            failure.exception.observations[-1].command.step_id.endswith("-list")
+        )
+        self.assertEqual(failure.exception.observations[-1].result.returncode, 0)
+        self.assertIn("executable changed", str(failure.exception.__cause__))

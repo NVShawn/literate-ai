@@ -43,6 +43,14 @@ class RetainedCargoExecutionV2:
     consumer_inputs_identity: object
 
 
+def _require_distinct_extra_guard(tool, extra_guard):
+    """Share an identical current tool callback, never a cached guard result."""
+    if not (
+        type(tool) is LocalComponentToolBinding and extra_guard is tool._authority_guard
+    ):
+        extra_guard()
+
+
 def execute_retained_cargo_consumer_v2(
     materialized: RetainedCargoMaterializationV2,
     *,
@@ -172,9 +180,11 @@ def execute_retained_cargo_consumer_v2(
                 raise ValueError("retained.execution.v2-exclusion-authority-changed")
 
     def guard():
-        materialized.require_unchanged()
         for tool in (cargo, rustc, *tools.values()):
             tool.require_unchanged()
+        # This complete input check already brackets its capture with live
+        # materialized source/package/scratch checks. Do not repeat that scan
+        # before the independently measured tool observations above.
         if consumer_inputs.current_identity(environment=base_environment) != baseline:
             raise ValueError("retained.execution.v2-consumer-inputs-changed")
         if (
@@ -196,7 +206,9 @@ def execute_retained_cargo_consumer_v2(
     ):
         nonlocal remaining
         guard()
-        extra_guard()
+        _require_distinct_extra_guard(tool, extra_guard)
+        # A derived native tool's own guard is the exact binary/runtime/source
+        # guard. Run it once at this boundary; distinct extra guards still run.
         measured(tool)
         cwd = root / command.working_directory
         require_safe_directory(cwd)
@@ -244,7 +256,7 @@ def execute_retained_cargo_consumer_v2(
                 raise ValueError("retained.execution.v2-custom-output-exhausted")
         finally:
             guard()
-            extra_guard()
+            _require_distinct_extra_guard(tool, extra_guard)
             tool.require_unchanged()
             require_safe_directory(output)
         if result.returncode != 0:
