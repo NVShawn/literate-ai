@@ -32,6 +32,7 @@ from literate_ai.adapters.retained_native_dependencies import (
     observe_retained_native_dependencies,
 )
 from literate_ai.adapters.retained_package_tree import _signature
+from literate_ai.adapters.streamed_file_custody import StreamedFileCustody
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.repositories import RepositoryBuildCommand
 from literate_ai.projects import PinnedInputClosure
@@ -49,8 +50,118 @@ def observe_retained_cargo_tests(
     """
     authority.require_unchanged()
     plan = authority.materialized.plan
-    workspace = authority.importer.project.root / plan.workspace_root
-    output = workspace / plan.graph.output_directory
+    project_root = authority.importer.project.root
+    workspace = project_root / plan.workspace_root
+
+    def compile_command(fresh):
+        argv = [
+            "cargo",
+            "test",
+            "--workspace",
+            "--all-targets",
+            "--no-run",
+            "--locked",
+            "--message-format=json",
+            "--target",
+            plan.target,
+            "--target-dir",
+            str(fresh),
+        ]
+        if offline:
+            argv.append("--offline")
+        if plan.features:
+            argv.append("--features=" + ",".join(plan.features))
+        if plan.all_features:
+            argv.append("--all-features")
+        if plan.no_default_features:
+            argv.append("--no-default-features")
+        return RepositoryBuildCommand(
+            "retained-test-compile",
+            tuple(argv),
+            plan.workspace_root,
+            (),
+            network=not offline,
+        )
+
+    def select(compiled, fresh):
+        return select_cargo_test_executables(
+            compiled,
+            metadata,
+            workspace_root=workspace,
+            output_root=fresh,
+            expected=plan.graph,
+        )
+
+    sessions, binary_guard = _prepare_retained_native_tests(
+        project_root=project_root,
+        workspace=workspace,
+        output=workspace / plan.graph.output_directory,
+        target=plan.target,
+        source_guard=authority.require_unchanged,
+        inventory_identity=authority.inventory.identity,
+        compile_command=compile_command,
+        select=select,
+        metadata=metadata,
+        cargo=cargo,
+        rustc=rustc,
+        environment=environment,
+        run=run,
+    )
+    expected = {target.key: target.cases for target in authority.inventory.targets}
+    for index, (binary, tool, target_guard, _) in enumerate(sessions):
+        results = []
+        for phase, arguments in (
+            ("list", ("--list", "--format=terse")),
+            ("run", ("--format=pretty", "--color=never")),
+        ):
+            results.append(
+                run(
+                    RepositoryBuildCommand(
+                        f"retained-test-{index}-{phase}",
+                        (str(binary.executable), *arguments),
+                        (workspace / binary.package_root)
+                        .relative_to(project_root)
+                        .as_posix(),
+                        (),
+                        network=False,
+                    ),
+                    tool,
+                    extra_guard=target_guard,
+                )
+            )
+        key = (
+            binary.package_root,
+            binary.target_name,
+            tuple(sorted(binary.target_kinds)),
+        )
+        verify_libtest_observation(*results, expected[key])
+    binary_guard()
+
+
+def _prepare_retained_native_tests(
+    *,
+    project_root,
+    workspace,
+    output,
+    target,
+    source_guard,
+    inventory_identity,
+    compile_command,
+    select,
+    metadata,
+    cargo,
+    rustc,
+    environment,
+    run,
+    native_custody=None,
+):
+    """Shared measured-binary/runtime ownership, not an importer or graph decoder.
+
+    Version-specific callers own independent plan/source authority, native graph
+    selection, exact commands and test protocols. This helper shares only the
+    existing bounded compiler/output/native-loader capture implementation.
+    """
+    source_guard()
     ensure_safe_directory(output)
     parent_node = directory_node(output)
     fresh = Path(tempfile.mkdtemp(prefix="tests-", dir=output))
@@ -58,7 +169,7 @@ def observe_retained_cargo_tests(
     compiler_runtime = None
 
     def output_guard():
-        authority.require_unchanged()
+        source_guard()
         if compiler_runtime is not None:
             compiler_runtime.require_unchanged()
         require_safe_directory(output)
@@ -66,32 +177,11 @@ def observe_retained_cargo_tests(
         if directory_node(output) != parent_node or directory_node(fresh) != fresh_node:
             raise ValueError("retained.tests.output-replaced")
 
-    argv = [
-        "cargo",
-        "test",
-        "--workspace",
-        "--all-targets",
-        "--no-run",
-        "--locked",
-        "--message-format=json",
-        "--target",
-        plan.target,
-        "--target-dir",
-        str(fresh),
-    ]
-    if offline:
-        argv.append("--offline")
-    if plan.features:
-        argv.append("--features=" + ",".join(plan.features))
-    if plan.all_features:
-        argv.append("--all-features")
-    if plan.no_default_features:
-        argv.append("--no-default-features")
     libdir_result = run(
         RepositoryBuildCommand(
             "retained-test-runtime",
-            ("rustc", "--print", "target-libdir", "--target", plan.target),
-            plan.workspace_root,
+            ("rustc", "--print", "target-libdir", "--target", target),
+            workspace.relative_to(project_root).as_posix(),
             (),
             network=False,
         ),
@@ -102,32 +192,28 @@ def observe_retained_cargo_tests(
     if len(lines) != 1 or not lines[0] or libdir_result.stderr:
         raise ValueError("retained.runtime.compiler-path-invalid")
     compiler_runtime = capture_retained_cargo_runtime_files(
-        (Path(lines[0]),), file_alias_roots=(Path(lines[0]),)
+        (Path(lines[0]),),
+        file_alias_roots=(Path(lines[0]),),
+        # Measured Rust SDKs can include a >128 MiB LLVM member. Preserve the
+        # 512 MiB aggregate boundary while explicitly admitting at most 256 MiB.
+        maximum_file_bytes=256 * 1024 * 1024,
+        custody=None if native_custody is None else native_custody.runtime,
     )
     compiled = run(
-        RepositoryBuildCommand(
-            "retained-test-compile",
-            tuple(argv),
-            plan.workspace_root,
-            (),
-            network=not offline,
-        ),
+        compile_command(fresh),
         cargo,
         extra_guard=output_guard,
     )
-    binaries = select_cargo_test_executables(
-        compiled,
-        metadata,
-        workspace_root=workspace,
-        output_root=fresh,
-        expected=plan.graph,
-    )
+    binaries = select(compiled, fresh)
     records = tuple(json.loads(line) for line in compiled.stdout.splitlines())
     build_environments = cargo_build_environments(
         records, metadata, workspace=workspace
     )
     build_outputs = capture_retained_cargo_build_outputs(
-        records, metadata, output_root=fresh
+        records,
+        metadata,
+        output_root=fresh,
+        custody=None if native_custody is None else native_custody.build_outputs,
     )
     runtime_roots = []
     known_packages = {package["id"] for package in metadata["packages"]}
@@ -154,29 +240,42 @@ def observe_retained_cargo_tests(
                 raise ValueError("retained.runtime.search-path-invalid")
             if path.is_relative_to(fresh):
                 runtime_roots.append(path)
-    runtime_base = fresh / plan.target / "debug"
+    runtime_base = fresh / target / "debug"
     runtime_roots.extend((runtime_base / "deps", runtime_base, Path(lines[0])))
     runtime = capture_retained_cargo_runtime_files(
-        runtime_roots, file_alias_roots=(Path(lines[0]),)
+        runtime_roots,
+        file_alias_roots=(Path(lines[0]),),
+        maximum_file_bytes=256 * 1024 * 1024,
+        custody=None if native_custody is None else native_custody.runtime,
     )
     compiler_runtime.require_unchanged()
     compiler_runtime = None
-    expected = {target.key: target.cases for target in authority.inventory.targets}
-    closure = PinnedInputClosure(
-        maximum_files=4096,
-        maximum_file_bytes=64 * 1024 * 1024,
-        maximum_total_bytes=256 * 1024 * 1024,
+    closure = (
+        PinnedInputClosure(
+            maximum_files=4096,
+            maximum_file_bytes=64 * 1024 * 1024,
+            maximum_total_bytes=256 * 1024 * 1024,
+        )
+        if native_custody is None
+        else StreamedFileCustody(maximum_files=4096, budget=native_custody.executables)
     )
-    nodes, parents, identities = {}, {}, {}
+    nodes, parents, identities, hashes = {}, {}, {}, {}
     for binary in binaries:
         path = binary.executable
         node = _signature(path.lstat())
         content = closure.pin(
             path, boundary=fresh, label=path.relative_to(fresh).as_posix()
         )
+        digest = (
+            hashlib.sha256(content).hexdigest()
+            if native_custody is None
+            else content.digest
+        )
+        size = len(content) if native_custody is None else content.size
         if _signature(path.lstat()) != node:
             raise ValueError("retained.tests.binary-changed")
         nodes[path] = node
+        hashes[path] = digest
         parent = path.parent
         while parent != fresh:
             require_safe_directory(parent)
@@ -185,15 +284,15 @@ def observe_retained_cargo_tests(
         identities[path] = canonical_identity(
             {
                 "schema": "literate-ai/retained-cargo-test-executable-observation@1",
-                "inventory": authority.inventory.identity.uri,
+                "inventory": inventory_identity.uri,
                 "runtime": runtime.identity.uri,
                 "build_outputs": build_outputs.identity.uri,
                 "build_environment": list(
                     build_environments.get(binary.package_root, ())
                 ),
                 "path": path.relative_to(fresh).as_posix(),
-                "sha256": hashlib.sha256(content).hexdigest(),
-                "bytes": len(content),
+                "sha256": digest,
+                "bytes": size,
             }
         )
 
@@ -209,12 +308,8 @@ def observe_retained_cargo_tests(
         closure.require_unchanged()
 
     binary_guard()
-    for index, binary in enumerate(binaries):
-        key = (
-            binary.package_root,
-            binary.target_name,
-            tuple(sorted(binary.target_kinds)),
-        )
+    sessions = []
+    for binary in binaries:
         package = workspace / binary.package_root
         build_environment = build_environments.get(binary.package_root, ())
         tool_environment = {
@@ -267,23 +362,6 @@ def observe_retained_cargo_tests(
             tuple(sorted(tool_environment.items())),
             target_guard,
         )
-        results = []
-        for phase, arguments in (
-            ("list", ("--list", "--format=terse")),
-            ("run", ("--format=pretty", "--color=never")),
-        ):
-            results.append(
-                run(
-                    RepositoryBuildCommand(
-                        f"retained-test-{index}-{phase}",
-                        (str(binary.executable), *arguments),
-                        package.relative_to(authority.importer.project.root).as_posix(),
-                        (),
-                        network=False,
-                    ),
-                    tool,
-                    extra_guard=target_guard,
-                )
-            )
-        verify_libtest_observation(*results, expected[key])
+        sessions.append((binary, tool, target_guard, hashes[binary.executable]))
     binary_guard()
+    return tuple(sessions), binary_guard

@@ -33,6 +33,7 @@ class RetainedCargoScratchRoot:
         if not isinstance(self.kind, str) or self.kind not in {
             "member-packages",
             "cargo-output",
+            "build-output",
         }:
             fail(self.__class__.__name__ + ".kind", "requires a reviewed scratch role")
 
@@ -94,6 +95,24 @@ class RetainedCargoWorkspacePlanV2:
                     (root.path, self.common.graph.output_directory),
                     label="disjoint portable Cargo scratch/output roots",
                 )
+            if root.kind == "build-output":
+                # A retained gate may create secondary artifacts beneath an
+                # existing package parent. It may never hide a reviewed manifest
+                # or target source. Filesystem absence, ignore status and live
+                # exclusive ownership remain the scratch receiver's job.
+                protected = {
+                    *(item.path for item in self.common.manifests),
+                    *(
+                        target.source
+                        for package in self.common.graph.packages
+                        for target in package.targets
+                    ),
+                }
+                for source in sorted(protected):
+                    canonical_relative_posix_paths(
+                        (root.path, source),
+                        label="disjoint build output and reviewed Cargo inputs",
+                    )
             if root.kind == "member-packages" and not any(
                 package.root in self.common.graph.members
                 and (

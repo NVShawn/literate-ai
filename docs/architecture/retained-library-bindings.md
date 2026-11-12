@@ -623,6 +623,24 @@ and arbitrary external build-script inputs remains required
 before public admission. The internal
 observations do not finalize a durable consumer receipt or provide containment.
 
+V2 gate policies may opt into `native_custody`, an identity-bound
+`RetainedCargoNativeCustodyPolicy` with separate `executables`, `runtime` and
+`build_outputs` budgets. Each `RetainedCargoOutputBudget` declares positive
+`maximum_file_bytes` and `maximum_total_bytes`, with at most 1 GiB per member
+and 64 GiB across all three aggregate allowances. This is a generated-output
+budget, separate from source and external-input custody. Missing declarations
+retain the existing byte limits and serialized policy identity; explicit null,
+unknown fields, invalid types and excessive allowances refuse.
+
+The explicit path stores bounded digest/physical/ancestor observations rather
+than file payloads. Every guard reopens and hashes every selected byte through
+the existing native descriptor custody primitive. File replacement, ownership,
+permissions, write-and-restore and parent replacement remain refusals. Runtime
+directory entries, compiler aliases, complete recursive OUT_DIR membership,
+file/entry counts and executable selection remain unchanged. The same bounded
+files and labels retain their existing closure content identity. These limits
+neither grant execution nor remove any input, runtime, target or test gate.
+
 The existing `PortableHostDependencyObserver` accepts explicit native library roots
 and forwards them to ELF, PE and Mach-O observation. Mach-O `@rpath` and bare runtime
 names can resolve through these roots; multiple valid images still refuse as
@@ -741,3 +759,21 @@ importer-admission receipts. `admit` composes complete source/external-dependenc
 custody, attributable positive consumer results, durable admission and acknowledged
 source retirement as required by ADR 0040. Endpoint provisioning belongs to the
 operator.
+
+### Secondary retained build outputs in v2
+
+An explicitly reviewed `build-output` scratch root names secondary output of an
+unchanged retained gate, such as assets generated beneath a package's existing
+source parent. It is distinct from Cargo's disjoint target directory and from
+materialized library packages. It cannot overlap a reviewed Cargo manifest or
+target source. All scratch paths remain mutually disjoint.
+
+The existing live receiver proves ordinary ancestry, ignore status and initial
+absence, publishes its exact empty staging inode exclusively, and retains its
+reservation and current original-source custody. Only that live owner can exclude
+this exact root from workspace input capture. A saved plan, ignored directory,
+existing output or prior receipt supplies no such permission. Replacement,
+redirection and foreign source changes still refuse; outputs remain preserved
+when the owner closes. This role changes no v1 behavior and grants no source
+retirement, execution, cleanup or durable admission authority. Actual maintained
+gates, complete native target coverage and independent admission remain required.

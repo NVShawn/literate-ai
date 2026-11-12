@@ -57,7 +57,7 @@ def blob(content, media="application/json"):
 
 
 class RetainedCargoImportTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self, *, package_files=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             content = b"authored promotion input"
@@ -85,18 +85,30 @@ class RetainedCargoImportTests(unittest.TestCase):
             ).encode()
             for name in producer.names.values()
         }
-        payloads = {
-            name: encode_directory_export(
-                (
+        selected_files = {
+            name: (
+                package_files(name, manifest)
+                if package_files is not None
+                else (
                     DirectoryExportFile("source/Cargo.toml", manifest, 0o644),
                     DirectoryExportFile(
                         "source/src/lib.rs", b"pub fn run() {}\n", 0o644
                     ),
-                ),
+                )
+            )
+            for name, manifest in self.native_manifests.items()
+        }
+        self.native_manifests = {
+            name: next(f.content for f in files if f.path == "source/Cargo.toml")
+            for name, files in selected_files.items()
+        }
+        payloads = {
+            name: encode_directory_export(
+                files,
                 max_bytes=4096,
                 max_entries=10,
             )
-            for name, manifest in self.native_manifests.items()
+            for name, files in selected_files.items()
         }
         self.artifact_payloads = payloads
         self.promotion_audit = audit

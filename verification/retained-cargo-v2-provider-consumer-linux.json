@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "scope": "Linux maintained source/build/noneditable-wheel/private-install qualification of private upstream candidate; not parent release/merge or downstream application admission",
+  "source": "44acdf2d9616de4ea1ed8d19c941ac931a0a9ab9",
+  "source_members": 5345,
+  "canonical_selected_methods": {
+    "executed": 2707,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2707,
+    "selected": 2821,
+    "skipped": 114
+  },
+  "raw_unittest_stream_note": "The separate raw unittest stream counts started bodies and fixture events; the canonical report counts selected method outcomes. Counts above are the canonical report, not an inference from Ran minus raw skips.",
+  "all11phase_exit0_and_owned_groups_closed": true,
+  "phases": [
+    {
+      "name": "checkout",
+      "elapsed_ms": 32029
+    },
+    {
+      "name": "development-environment",
+      "elapsed_ms": 23901
+    },
+    {
+      "name": "node-npm-readiness",
+      "elapsed_ms": 31
+    },
+    {
+      "name": "npm-readiness",
+      "elapsed_ms": 355
+    },
+    {
+      "name": "source-controls",
+      "elapsed_ms": 4700
+    },
+    {
+      "name": "full-maintained-python",
+      "elapsed_ms": 2890130
+    },
+    {
+      "name": "installed-offline",
+      "elapsed_ms": 209761
+    },
+    {
+      "name": "wheel",
+      "elapsed_ms": 970631
+    },
+    {
+      "name": "private-prefix-install",
+      "elapsed_ms": 195940
+    },
+    {
+      "name": "specification-and-documents",
+      "elapsed_ms": 91013
+    },
+    {
+      "name": "public-export-audit",
+      "elapsed_ms": 232038
+    }
+  ],
+  "all_source8tools4prior_inputs_and_managed_runtime_preserved": true,
+  "unit_absent_and_all_phase_roots_groups_absent": true,
+  "qualified_wheel": {
+    "files": [
+      {
+        "identity": "sha256:d85f853613f445ff6602d2ca78762fa9f7a3c42d29347d24de3305acba63fb58",
+        "path": "literate_ai-1.4.0-py3-none-any.whl",
+        "role": "wheel",
+        "size": 4272061
+      }
+    ],
+    "identity": "sha256:da27faadadb80dc8ec5eb17e25ef018af9b92237601e8f893dec34ddb08e45c6",
+    "revision": "44acdf2d9616de4ea1ed8d19c941ac931a0a9ab9",
+    "schema": "literate-ai/qualified-release-files@1",
+    "version": "1.4.0"
+  },
+  "wheel_sha256": "d85f853613f445ff6602d2ca78762fa9f7a3c42d29347d24de3305acba63fb58",
+  "wheel_bytes": 4272061,
+  "closed_export_members": 30,
+  "all_export_members_reopened_and_rehashed": true,
+  "collector_sha256": "90860c5cf52c4490d43f1f64cb005eb9d006096dc0adcd05cc56c3548838a959",
+  "canonical_report_sha256": "a6236c369962a43fc58286169d2f9a64c21bfec715974ec06f88e0623d7cd966",
+  "result_sha256": "caf59dbe7bf6fbd42feeb2405b418975346837168bb3f95b0a50029933ac4fe7",
+  "source_manifest_sha256": "cce6744911834c80bec6280dd3790763f2b12c7d8d3a3ee7e70fc63f6f8e5783",
+  "actual_application_consumption_complete": false,
+  "original_producer_and_receiver_unchanged": true,
+  "parent_main_merge_or_release": false
+}

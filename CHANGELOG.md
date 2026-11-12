@@ -26,6 +26,28 @@
 - Retain truthful authored all-node clean-run observations and derived per-node
   test counts, with closed run/result records under accepted ADR 0072. Genuine
   qualification and complete authored retained admission remain in progress (#393).
+- Retained Cargo v2 can explicitly review finite native executable, runtime and
+  build-output byte budgets with fresh streaming custody instead of retaining
+  multi-GiB payload copies; defaults and complete membership checks remain (#433).
+
+- Retained Cargo v2 composition keeps independently measured consumer Cargo/Rust
+  tools separate from the provider's guarded native observations (#430).
+
+- Retained Cargo v2 can explicitly reserve secondary build outputs under the same
+  live ownership and source-input fences, preserving unchanged full gates (#429).
+
+- Native retained-Cargo integration tests use the existing finite API deadline
+  default on slower workers while preserving production bounds and input checks.
+
+- Native retained-Cargo fixtures preserve the caller's implicit Rustup toolchain root
+  before isolating HOME, while retaining explicit values and discovery refusals.
+
+- Accepted-source export qualification compiles independent expected bytecode with
+  the actual admitted Python compiler when the test interpreter differs (#424).
+
+- Add a public Python v2 retained-Cargo receiving transaction with live scratch
+  publication, patch-aware consumer gates, honest typed test outcomes and strict
+  already-retired source admission; preserve v1 contracts (#222–#226).
 
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test

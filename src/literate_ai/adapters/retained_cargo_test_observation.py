@@ -69,6 +69,32 @@ def select_cargo_test_executables(
     verify_cargo_workspace_graph(
         metadata, workspace_root=workspace_root, expected=expected
     )
+    return _select_cargo_test_executable_values(
+        result,
+        metadata,
+        workspace_root=workspace_root,
+        output_root=output_root,
+        expected=expected,
+        maximum_bytes=maximum_bytes,
+        maximum_records=maximum_records,
+    )
+
+
+def _select_cargo_test_executable_values(
+    result,
+    metadata,
+    *,
+    workspace_root,
+    output_root,
+    expected,
+    maximum_bytes,
+    maximum_records,
+):
+    """Shared attribution after the caller's version-specific graph check.
+
+    This parser never grants execution or treats a v2 graph as v1 authority.
+    Both public selectors must first perform their complete native graph check.
+    """
     declared_output = workspace_root / expected.output_directory
     if (
         not isinstance(output_root, Path)

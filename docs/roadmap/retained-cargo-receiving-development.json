@@ -1,0 +1,114 @@
+{
+  "scope": "Development native v2 admission passed for a generic fixture; full maintained and installed qualification pending.",
+  "base_revision": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+  "worker_role": "Owned Linux CPU worker; model-free real native consumer processes.",
+  "producer_scope": "Synthetic existing producer contract fixture, not actual model/provider qualification.",
+  "prior_focused": {
+    "source_manifest_sha256": "53d943c4fc181f4bd53b9bd469c0cc3bcdc5df7437801d884e02fe3f1b77e4fe",
+    "tests_passed": 20,
+    "scope": "Earlier publication/v1/runtime-policy snapshot; current whole-tree regression still pending."
+  },
+  "preserved_failures": [
+    {
+      "kind": "Fixture hardcoded two destinations instead of all four reviewed graph exports",
+      "sha256": "19cf8f7a3811f969cb821934fa35be22ba672f186901701a39ddc9b1c0fc9522"
+    },
+    {
+      "kind": "Overselected native-package Cargo prerequisite despite pinned Rustup tools",
+      "sha256": "f6a7264381286bc2069f23cb02881b805caad2bf684be74ab55baa9eaba03d9f"
+    },
+    {
+      "kind": "Existing 128-MiB member cap rejected measured 208167760-byte compiler runtime",
+      "sha256": "def08a297ecd2cb7414db8f5658572f5688b520f675bb6409f4ff994ac969d4b"
+    },
+    {
+      "kind": "Imported TestCase helper discovered as a test",
+      "sha256": "7ae9335b5b8eac135e35f905ccd83cf7b3a33c150be34a5804e9c81ad3756d29"
+    },
+    {
+      "kind": "Fixture raw algorithm string rejected by typed identity constructor; same new custom comparison corrected",
+      "sha256": "de033165fa55fd25e9d4711b3c9f3f3a4acbed1effd3e5b0aa90e43184535ed7"
+    },
+    {
+      "kind": "Fixture 180-second execution deadline",
+      "sha256": "f4324250e119a8364bca30a722067aaf74e5811d8688a0f58d92cfdb396bd74c"
+    },
+    {
+      "kind": "Strengthened original-source fixture 480-second execution deadline",
+      "sha256": "85feebfa204ebb859af20f5fe91cd7ff0cd364d48a59936e2f09db9ba80ab1cd"
+    },
+    {
+      "kind": "Isolated 480-second deadline before the final target; all 13 attempted commands returned zero.",
+      "independent_closure_sha256": "ba7a85ea4ebd75e0c22e48b5674687a77be1491e4ab95815ebed6c0c100d118c"
+    }
+  ],
+  "pending": [
+    "Current full maintained source/installed-wheel gates and public CLI composition.",
+    "Cross-installed producer authority composition using genuinely reopened original SDK/policy."
+  ],
+  "non_claims": [
+    "No downstream package materialization, application source retirement or whole-application migration.",
+    "No source contract/graph change or model call.",
+    "No completion of issues 222 through 226."
+  ],
+  "preserved_prior_native": {
+    "source_manifest_sha256": "017465e5dccb034122cbcb0cc03481801804d2a49dc5f270e2a8248dc963ead0",
+    "tests_observed": 6,
+    "refusal_cases_passed": 5,
+    "positive": "PENDING: aggregate per-module 700-second test-worker deadline before complete report.",
+    "actual_original": "Converted original app.py preserved in negative; physically retired before live owner in other cases.",
+    "post_process_controls": "Actual native metadata returned zero before input addition and independent permission revocation each refused further gates.",
+    "source_before_unchanged": true,
+    "source_after_unchanged": true,
+    "unit_inactive": true,
+    "main_pid": 0,
+    "control_group_absent": true,
+    "cgroup_pids": [],
+    "result_sha256": "fe0d3c9aefa243c567ed54aa2cc057bd354380e721981c48d85b111a5c4d0b6d",
+    "stderr_sha256": "d9521e7bfa10d4dafabf7b86d03d0cacf444ed2bd747c392a0dcd2c1b8e04e72",
+    "independent_observer_sha256": "72140d21818adab203cada45209ca62120c28aef370c89f0e3104ea72c4419ec"
+  },
+  "latest_native": {
+    "source_manifest_sha256": "6ad7fd30768e2c8aa585797a1aeaed29cf5f2a18f27b590e4771609c3389209f",
+    "callback_controls_passed": 5,
+    "actual_post_process_input_permission_binary_refusals_passed": 3,
+    "isolated_positive_passed": true,
+    "consumer_commands": 16,
+    "all_exit_zero": true,
+    "complete_input_checks": 59,
+    "admission_seconds": 463.16709371400066,
+    "declaration_derived_targets": {
+      "libtest": 5,
+      "custom-harness": 1,
+      "excluded": 1
+    },
+    "reviewed_ignored_cases": 4,
+    "actual_original": "Originally inventoried generic app.py physically retired before live receiving custody; retained-original negative preserved.",
+    "raw_receipt_identity_exported": false,
+    "receipt_export_followup": "The upcoming maintained run will emit the actual generic receipt identity and typed outcomes.",
+    "independent_closure_sha256": "597f9f1452d520210e735bf21f9cf07a73d76346c188580294149bef09a968c3",
+    "sanitized_proof_sha256": "b84d3c4abae304647ca4dfb685e3c5af17ce9ae74b7a39fc3f199e8a9f9a66d8",
+    "closed_archive_sha256": "9f2d0b95968aba83c0a126ec92c3e1b06c1f28bfd28e003d98b4441292abe5a3",
+    "source_members_unchanged": 5340,
+    "tool_hashes_unchanged": 5,
+    "unit_absent": true,
+    "owned_groups_absent": true
+  },
+  "mixed_interpreter_repair": {
+    "issue": "https://github.com/jordanhubbard/literate-ai/issues/424",
+    "unchanged_upstream_main": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+    "actual_main_counterfactual_failed": true,
+    "first_observer_actual_failed": "Wheel-only target assumption refused generic bytecode command contract",
+    "failed_pair_archive_sha256": "c4295512f748c2f55559a40245b75e787e6e4c53c07bfc8f31598b5546a2383f",
+    "corrected_case_passed": true,
+    "native_compiler_version": "3.12.10",
+    "test_process_version": "3.14.4",
+    "corrected_case_seconds": 57.928,
+    "corrected_test_sha256": "c86d0158a312dbc35239d322b4dbff27c0e21e8799f26fec785cfc7496388a34",
+    "sanitized_proof_sha256": "45e8e9973fd7e15f272c7bc7febbdd0846a48d8c8b01f8710ea39102c16421f4",
+    "independent_closure_sha256": "fe17720549c561d96ab7e02461c9e751774c9346850b77d773d281147d393fdf",
+    "closed_archive_sha256": "d62ba57f8496107b2989a0bbad8b3be3cf5caf87c942b126e5f9a05f56a54a18",
+    "full_suite_failure_archive_sha256": "621eb247a05b029ee44edf235f68edb3de15805e48d031cd43ace9272d4a857d",
+    "full_suite_requalification": "Pending; supported exact suite pin includes changed test-module bytes, so the old partial prefix cannot be manually reused."
+  }
+}

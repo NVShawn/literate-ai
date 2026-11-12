@@ -9,7 +9,11 @@ from pathlib import Path
 from literate_ai._filesystem import require_safe_directory, stat_is_link_or_reparse
 from literate_ai.adapters.exclusive_directory import directory_node
 from literate_ai.adapters.retained_package_tree import _signature
+from literate_ai.adapters.streamed_file_custody import StreamedFileCustody
 from literate_ai.contracts.identity import canonical_identity
+from literate_ai.contracts.retained_cargo_native_custody import (
+    RetainedCargoOutputBudget,
+)
 from literate_ai.projects import PinnedInputClosure
 
 
@@ -73,7 +77,7 @@ def _file_alias(path):
 class RetainedCargoRuntimeFiles:
     roots: tuple[Path, ...]
     states: tuple
-    closure: PinnedInputClosure
+    closure: PinnedInputClosure | StreamedFileCustody
     aliases: tuple = ()
     file_alias_roots: tuple[Path, ...] = ()
 
@@ -130,7 +134,13 @@ class RetainedCargoRuntimeFiles:
         return ((key, value),)
 
 
-def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
+def capture_retained_cargo_runtime_files(
+    roots,
+    *,
+    file_alias_roots=(),
+    maximum_file_bytes=128 * 1024 * 1024,
+    custody: RetainedCargoOutputBudget | None = None,
+):
     """Capture every immediate file in each selected loader directory.
 
     Subdirectories are observed as directory entries; separately selected search
@@ -138,10 +148,17 @@ def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
     loader libraries still require the host/external-input qualification boundary.
     Compiler callers may explicitly capture bounded file aliases and their external
     target bytes. Directory aliases and non-regular targets remain forbidden.
+    A measured compiler SDK may select at most 256 MiB per member; the default
+    remains 128 MiB and the ordinary captured closure remains at most 512 MiB.
+    An explicit reviewed output budget selects streaming custody instead, with
+    exactly the same complete directory/file/alias and closing checks.
     """
     roots = tuple(dict.fromkeys(roots))
     if (
-        type(file_alias_roots) is not tuple
+        type(maximum_file_bytes) is not int
+        or not 0 < maximum_file_bytes <= 256 * 1024 * 1024
+        or (custody is not None and type(custody) is not RetainedCargoOutputBudget)
+        or type(file_alias_roots) is not tuple
         or any(
             not isinstance(root, Path) or root not in roots for root in file_alias_roots
         )
@@ -162,10 +179,14 @@ def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
             raise ValueError("retained.runtime.entry-limit")
         states.append(state)
     states = tuple(states)
-    closure = PinnedInputClosure(
-        maximum_files=10000,
-        maximum_file_bytes=128 * 1024 * 1024,
-        maximum_total_bytes=512 * 1024 * 1024,
+    closure = (
+        PinnedInputClosure(
+            maximum_files=10000,
+            maximum_file_bytes=maximum_file_bytes,
+            maximum_total_bytes=512 * 1024 * 1024,
+        )
+        if custody is None
+        else StreamedFileCustody(maximum_files=10000, budget=custody)
     )
     aliases = []
     for index, (root, state) in enumerate(zip(roots, states, strict=True)):

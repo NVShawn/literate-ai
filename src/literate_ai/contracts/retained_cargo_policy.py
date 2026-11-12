@@ -15,6 +15,7 @@ from ._validation import contract_fields, fail
 from .identity import ContentIdentity, canonical_identity
 from .repositories import RepositoryBuildCommand
 from .retained_cargo_custody import RetainedCargoCustodyPolicy
+from .retained_cargo_native_custody import RetainedCargoNativeCustodyPolicy
 from .retained_libraries import RetainedLibraryGatePolicy
 
 
@@ -22,6 +23,7 @@ from .retained_libraries import RetainedLibraryGatePolicy
 class RetainedLibraryGatePolicyV2:
     common: RetainedLibraryGatePolicy
     input_custody: RetainedCargoCustodyPolicy
+    native_custody: RetainedCargoNativeCustodyPolicy | None = None
 
     SCHEMA: ClassVar[str] = "literate-ai/retained-library-gate-policy@2"
     FIELDS: ClassVar[frozenset[str]] = frozenset(
@@ -42,6 +44,11 @@ class RetainedLibraryGatePolicyV2:
         self.input_custody.require_external_variables(
             self.common.external_input_variables
         )
+        if (
+            self.native_custody is not None
+            and type(self.native_custody) is not RetainedCargoNativeCustodyPolicy
+        ):
+            fail(self.__class__.__name__, "requires exact native output custody")
 
     @property
     def importer_project_id(self) -> str:
@@ -70,16 +77,25 @@ class RetainedLibraryGatePolicyV2:
             external_input_variables=list(self.external_input_variables),
             input_custody=self.input_custody.to_dict(),
         )
+        if self.native_custody is not None:
+            result["native_custody"] = self.native_custody.to_dict()
         return result
 
     @classmethod
     def from_dict(cls, value: Any) -> RetainedLibraryGatePolicyV2:
         data = contract_fields(
-            value, path=cls.__name__, schema_uri=cls.SCHEMA, required=cls.FIELDS
+            value,
+            path=cls.__name__,
+            schema_uri=cls.SCHEMA,
+            required=cls.FIELDS,
+            optional=frozenset({"native_custody"}),
         )
         common = {key: data[key] for key in cls.FIELDS if key != "input_custody"}
         common["schema"] = RetainedLibraryGatePolicy.SCHEMA
         return cls(
             RetainedLibraryGatePolicy.from_dict(common),
             RetainedCargoCustodyPolicy.from_dict(data["input_custody"]),
+            RetainedCargoNativeCustodyPolicy.from_dict(data["native_custody"])
+            if "native_custody" in data
+            else None,
         )
