@@ -13,12 +13,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from literate_ai._filesystem import require_safe_directory
+from literate_ai.adapters.authored_qualification_capture import (
+    AuthoredQualificationRunCapture,
+)
 from literate_ai.adapters.directory_artifacts import read_directory_export
 from literate_ai.adapters.exclusive_directory import (
     directory_node,
     publish_directory_exclusive,
 )
 from literate_ai.adapters.qualification_capture import QualificationRunCapture
+from literate_ai.adapters.retained_authored_cargo_import_v2 import (
+    RetainedAuthoredCargoCurrentInputsV2,
+)
 from literate_ai.adapters.retained_cargo_files_v2 import RetainedCargoFileSnapshotV2
 from literate_ai.adapters.retained_cargo_import_v2 import (
     RetainedCargoCurrentInputsV2,
@@ -46,11 +52,13 @@ class RetainedCargoMaterializationV2:
     """
 
     plan: RetainedCargoWorkspacePlanV2
-    capture: QualificationRunCapture
+    capture: QualificationRunCapture | AuthoredQualificationRunCapture
     packages: tuple[RetainedPackageTree, ...]
     files: RetainedCargoFileSnapshotV2 = field(repr=False)
     scratch: RetainedCargoScratchScopeV2 = field(repr=False)
-    current: RetainedCargoCurrentInputsV2 = field(repr=False)
+    current: RetainedCargoCurrentInputsV2 | RetainedAuthoredCargoCurrentInputsV2 = field(
+        repr=False
+    )
     _read_current: Callable = field(repr=False)
 
     def __init__(
@@ -85,7 +93,7 @@ class RetainedCargoMaterializationV2:
         for package in self.packages:
             package.require_unchanged()
         latest = self._read_current()
-        if type(latest) is not RetainedCargoCurrentInputsV2 or latest != self.current:
+        if type(latest) is not type(self.current) or latest != self.current:
             raise ValueError("retained.materialize.v2-current-inputs-changed")
         latest.require_unchanged()
         self.files.require_authored_unchanged()
@@ -96,7 +104,9 @@ def materialize_retained_cargo_archive_v2(
     files: RetainedCargoFileSnapshotV2,
     *,
     scratch: RetainedCargoScratchScopeV2,
-    read_current: Callable[[], RetainedCargoCurrentInputsV2],
+    read_current: Callable[
+        [], RetainedCargoCurrentInputsV2 | RetainedAuthoredCargoCurrentInputsV2
+    ],
     read_archive: Callable[[str, BlobRef, int], bytes],
     max_plan_bytes: int,
     max_archive_bytes: int,
@@ -126,7 +136,10 @@ def materialize_retained_cargo_archive_v2(
 
     def current():
         value = read_current()
-        if type(value) is not RetainedCargoCurrentInputsV2:
+        if type(value) not in (
+            RetainedCargoCurrentInputsV2,
+            RetainedAuthoredCargoCurrentInputsV2,
+        ):
             raise TypeError("retained.materialize.v2-current-inputs-required")
         if value.reviewed.identity != files.reviewed.identity:
             raise ValueError("retained.materialize.v2-review-mismatch")

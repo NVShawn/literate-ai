@@ -9,12 +9,19 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from literate_ai.adapters.authored_qualification_capture import (
+    AuthoredQualificationRunCapture,
+)
 from literate_ai.adapters.qualification_archive import reopen_qualification_archive
 from literate_ai.adapters.qualification_capture import (
     QualificationRunCapture,
     reopen_qualification_products,
 )
 from literate_ai.adapters.retained_cargo_import import RetainedCargoImportInputs
+from literate_ai.adapters.retained_authored_cargo_import_v2 import (
+    RetainedAuthoredCargoCurrentInputsV2,
+    _verify_current_authored_archive,
+)
 from literate_ai.adapters.retained_cargo_plan import (
     _verify_retained_cargo_package_values,
     _verify_retained_cargo_provider,
@@ -104,13 +111,18 @@ class RetainedCargoCurrentInputsV2:
 
 def verify_retained_cargo_archive_v2(
     *,
-    read_current: Callable[[], RetainedCargoCurrentInputsV2],
+    read_current: Callable[
+        [], RetainedCargoCurrentInputsV2 | RetainedAuthoredCargoCurrentInputsV2
+    ],
     read_archive: Callable[[str, BlobRef, int], bytes],
     max_plan_bytes: int,
     max_archive_bytes: int,
     max_records: int,
     max_package_bytes: int,
-) -> tuple[RetainedCargoWorkspacePlanV2, QualificationRunCapture]:
+) -> tuple[
+    RetainedCargoWorkspacePlanV2,
+    QualificationRunCapture | AuthoredQualificationRunCapture,
+]:
     """Reopen current review on both sides of native archive/product verification.
 
     Transport must enforce its byte allowance before allocating its response.
@@ -127,6 +139,19 @@ def verify_retained_cargo_archive_v2(
             "retained import requires explicit authority and transport readers"
         )
     current = read_current()
+    # Origin is selected by one of two explicit live DTOs, never inferred from
+    # absent promotion fields or a failed source-authority check. The existing
+    # source-derived branch below retains every promotion obligation unchanged.
+    if type(current) is RetainedAuthoredCargoCurrentInputsV2:
+        return _verify_current_authored_archive(
+            current,
+            read_current=read_current,
+            read_archive=read_archive,
+            max_plan_bytes=max_plan_bytes,
+            max_archive_bytes=max_archive_bytes,
+            max_records=max_records,
+            max_package_bytes=max_package_bytes,
+        )
     if type(current) is not RetainedCargoCurrentInputsV2:
         raise TypeError("retained.cargo.v2-current-inputs-required")
     plan = current.preflight(max_plan_bytes=max_plan_bytes)
