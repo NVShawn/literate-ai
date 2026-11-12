@@ -34548,7 +34548,13 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] The named old-source regression fails on redundant `taskkill`; four corrected
         pure ownership controls pass. Shared process checks pass 22 cases with four
         declared FreeBSD skips; targeted lint/format and host-path checks pass.
-  - [ ] Native Windows descendant-after-root-exit, timeout and output-overflow
-        cleanup pass; the unchanged focused accepted-source case remains within
-        its existing 360-second budget.
+  - [x] Native Windows cleanup passes seven cases without skips in 12.422 seconds.
+        The unchanged original focused case passes in 353.062 seconds under its
+        unchanged 360-second cap. Qualification `28a55320` changes only the
+        process helper on original `53724d2e`; its fixed production bytes and
+        direct builder/observer callers match candidate `7e3b8e5c`.
+        [Source-bound native proof](../../verification/windows-job-fallback-native.json)
+        records five zero-taskkill samples and independent source/tool/actor
+        closure. The earlier timeout and unattributed diagnostic access violation
+        remain preserved; the complete 17-case selection remains separate.
   - [ ] Final local gates, independent review and the required PR CI pass.

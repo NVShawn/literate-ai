@@ -1,0 +1,95 @@
+{
+  "schema": "literate-ai/windows-job-fallback-native@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/426",
+  "status": "qualified-native-scope-pr-integration-pending",
+  "candidate_production_revision": "7e3b8e5c1be0badd547111470ac90f8bdacdf8b1",
+  "candidate_base_revision": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+  "native_qualification_revision": "28a55320886f6513b95ffd0353146e4f67def596",
+  "native_qualification_base": "53724d2e32903e9adb5be3343afa03539d28f4ee",
+  "native_qualification_delta": [
+    "src/literate_ai/adapters/_processes.py"
+  ],
+  "candidate_and_qualification_production_bytes_equal": true,
+  "shared_builder_and_dependency_observer_bytes_equal": true,
+  "original_focused_test_bytes_unchanged": true,
+  "platform": {
+    "OS": "Windows 11",
+    "architecture": "AMD64",
+    "Python": "3.12.10",
+    "LLVM": "23.1.3"
+  },
+  "limits": {
+    "CPU_affinity_cores": 3,
+    "Job_memory_GiB": 6,
+    "native_regressions_seconds": 120,
+    "original_focused_case_seconds": 360
+  },
+  "native_regressions": {
+    "run": 7,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "elapsed_seconds": 12.422,
+    "coverage": [
+      "confirmed and repeated Job success avoids taskkill",
+      "missing/failed/released ownership retains fallback and root kill",
+      "pending concurrent claim does not imply success",
+      "still-running root is killed after Job success",
+      "real descendant retirement after root exit",
+      "real timeout descendant retirement",
+      "real output-overflow descendant retirement"
+    ]
+  },
+  "original_focused_case": {
+    "selector": "tests.e2e.test_accepted_retained_source_export.AcceptedRetainedSourceExportTests.test_exact_entry_selection_preserves_successive_admitted_revisions",
+    "run": 1,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "elapsed_seconds": 353.062,
+    "owned_capture_elapsed_seconds": 353.562,
+    "budget_unchanged": true
+  },
+  "taskkill_image_samples": [
+    {
+      "seconds": 60.01500000001397,
+      "taskkill_images": 0
+    },
+    {
+      "seconds": 120.01500000001397,
+      "taskkill_images": 0
+    },
+    {
+      "seconds": 180.01500000001397,
+      "taskkill_images": 0
+    },
+    {
+      "seconds": 240.01500000001397,
+      "taskkill_images": 0
+    },
+    {
+      "seconds": 300.0,
+      "taskkill_images": 0
+    }
+  ],
+  "independent_closure": {
+    "passed": true,
+    "all_four_Jobs_naturally_zero": true,
+    "watchdog_sampler_handles_retired": true,
+    "complete_source_members": 5342,
+    "source_tools_namespace_and_service_unchanged": true,
+    "archive_members_reopened": 36,
+    "result_sha256": "6e0e04e9e5f34cea88a8f70f49fc237a50d58c8af94be2a9b4d024580f4183db",
+    "closure_sha256": "4a39e43de44b951df654ec195db0a27bef415bdf50c982b1394c05206143a5bc",
+    "archive_sha256": "bc810bd0aef9d4d714e2d9b0d0bf3831998bede9f8977a3dbde73fd4a19c51f6"
+  },
+  "preserved_failures": [
+    "Original selected Windows cohort exhausted its unchanged 360-second budget in the first focused case.",
+    "Earlier instrumented diagnostic exited0xC0000005; its cause remains unattributed and it is not evidence of a fixed crash."
+  ],
+  "limits_of_claim": [
+    "One focused original case and seven cleanup regressions; not the complete 17-case Windows selection.",
+    "Five sampled observations do not provide exhaustive process-event tracing.",
+    "No claim of completed parent integration, release, installation or model execution."
+  ]
+}
