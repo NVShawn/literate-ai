@@ -34557,6 +34557,13 @@ implementation, policy weakening, qualification or issue closure is recorded her
         records five zero-taskkill samples and independent source/tool/actor
         closure. The earlier timeout and unattributed diagnostic access violation
         remain preserved; the complete 17-case selection remains separate.
+  - [x] The first PR CI attempt ran 2,759 Python cases with zero failures and
+        113 declared skips, passed the documentation gate, then correctly refused
+        a stale lifecycle-driver TCB pin for the process helper. The independently
+        reviewed pin is recorded through the maintained workflow; contributor
+        instructions
+        now explicitly name driver/documentation review and lint/format gates
+        instead of incorrectly attributing them to `make python-check`.
   - [ ] Final local gates, independent review and the required PR CI pass.
 
 ### [ ] PUBLIC-EXPORT-SCAN-001 — Bound suffix-free public-export reference matching

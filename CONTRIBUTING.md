@@ -75,8 +75,8 @@ correct:
 `literate.project.json` pins a content hash (`driver.pinned_identity`) over every
 file under the declared `implementation_paths` — the framework's trusted computing
 base. If your change touches anything under `src/literate_ai/` (or another declared
-implementation path), that pin goes stale and `make driver-review` (part of
-`make python-check`) fails with a message naming the drifted files.
+implementation path), that pin goes stale and the separate `make driver-review`
+gate fails with a message naming the drifted files.
 
 Fix it by re-pinning after what changed has been reviewed. The review must not be
 the author's own: an independent agent reviewer that did not write the drift is
@@ -122,12 +122,13 @@ Then re-run `make documentation-review` (read-only) to confirm `"state": "curren
 Run the full gate locally so CI doesn't surprise you:
 
 ```
-make python-check
+make python-check driver-review documentation-review lint format-check
 ```
 
-This runs the project's Python test suite plus both checks above (`driver-review`,
-`documentation-review`), along with lint and formatting checks. If it passes locally,
-CI should pass too.
+These explicit targets run the project's Python test suite, both checks above
+(`driver-review`, `documentation-review`), lint, and formatting checks.
+`make python-check` alone does not run the other four gates. Resolve their findings
+before pushing; a passing test suite does not establish current authority pins.
 
 At cycle boundaries, inspect peer work with `litai project peer-work survey --when
 start|end`. Before deleting a local branch, record an exact `merged` or reason-bearing
