@@ -188,8 +188,8 @@ class StreamedNativeCustodyTests(unittest.TestCase):
 
     @unittest.skipIf(os.name == "nt", "POSIX modes and symlinks")
     def test_permissions_ancestors_and_links_refuse(self):
-        parent = self.root / "parent"
-        parent.mkdir()
+        parent = self.root / "holder/parent"
+        parent.mkdir(parents=True)
         file = parent / "file"
         file.write_bytes(b"original")
         captured = self.closure()
@@ -199,13 +199,21 @@ class StreamedNativeCustodyTests(unittest.TestCase):
             captured.require_unchanged()
         captured = self.closure()
         captured.pin(file, boundary=self.root, label="file")
-        parent.rename(self.root / "old")
-        parent.mkdir()
-        file.write_bytes(b"original")
+        file_before = file.stat()
+        parent.parent.rename(self.root / "old")
+        parent.parent.mkdir()
+        # Move the containing directory, preserving every file stat field.
+        # Only the grandparent inode changes in the captured lineage.
+        (self.root / "old/parent").rename(parent)
+        file_after = file.stat()
+        self.assertEqual(file_before, file_after)
+        self.assertEqual(file_before.st_ctime_ns, file_after.st_ctime_ns)
         with self.assertRaises(ValueError):
             captured.require_unchanged()
+        target = self.root / "target"
+        target.write_bytes(b"original")
         file.unlink()
-        file.symlink_to(self.root / "old/file")
+        file.symlink_to(target)
         with self.assertRaises(ValueError):
             self.closure().pin(file, boundary=self.root, label="file")
 
