@@ -34529,3 +34529,31 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Dependency development evidence:** [Source/build/installed and canonical offline bootstrap record](../../verification/python315-worker-dependency-development.json) retains exact artifact identities. Its existing framework artifact is bound to `7078bc96b`; it does not qualify the later new wheel-gate projection or a final release candidate.
 
 - **Current complete local qualification:** [Minimum/current Python source and whole-wheel record](../../verification/python-worker-wheel-inputs-linux.json) binds software `c733d96f80cd80b802e7aa4387cab2d7740e219a`. Both native Python 3.11.14 and 3.15.2 select 2,783 source cases: 2,683 pass, 100 retain declared skips, and all 599 raw groups reconcile with no failed or known-failed cases. Both complete noneditable wheel gates pass with the same framework distribution identity and exact reviewed pure PyYAML bytes; ordinary and uv worker paths install respectively 38 and 37 distributions with matching framework identities. Real empty/redirected input refusals precede installation. The earlier source-prefix failure and unconfigured binary-export failure remain preserved separately. Parent completion and issue closure await independent/exact integrated acceptance; no release acceptance is claimed.
+
+### [ ] CARGO-CUSTODY-PERF-001 — Bound redundant native Cargo input custody work
+
+- **GitHub issue:** [#432](https://github.com/jordanhubbard/literate-ai/issues/432)
+- **Related program:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117); completed traversal prior art [#86](https://github.com/jordanhubbard/literate-ai/issues/86).
+- **Current source evidence:** Eight actual filesystem controls give five passes
+  and three expected failures on unchanged main, then eight passes on the
+  candidate. A deterministic 1,024-file/64-directory corpus retains every fresh
+  payload hash and identical semantic identity while reducing anchored metadata
+  calls from 7,552 to 6,464 per capture. Alternating capture times improve from
+  0.438–0.469 seconds to 0.382–0.389; guard times overlap (baseline 0.454–0.488,
+  candidate 0.401–0.495), so no broad currentness or consumer-budget improvement
+  is inferred. Relevant input/materialization controls give fifteen passes and
+  one declared Windows-only skip. Whole-provider performance, full regression,
+  installed and native receiving/admission qualification remain pending.
+- **Priority:** P1
+- **Owner:** Framework core; native retained Cargo input observation
+- **Direction:** Keep genuine per-process currentness feasible for complete native inventories without stale observations or relaxed coverage.
+- **Conclusion:** Track issue #432 as the Cargo receiving/verifier facet of existing retained-observation performance work (#117); preserve completed ancestor-traversal contract #86. Optimize only redundant semantic serialization and metadata already freshly observed in the same bounded census, retaining every fresh content hash and closing custody check.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Link #432 and establish exact profiled/current-source projection before source edits.
+  - [x] Reuse initial inventory metadata within one capture; compare complete fresh semantic tree fields without redundant canonical serialization.
+  - [ ] Retain changed-then-restored, path/mode/namespace/descriptor and process-boundary refusals; do not skip target protocols or cache guard success.
+- **Evidence:**
+  - [ ] Portable actual filesystem mutation/refusal controls and deterministic before/after stat/hash/identity counts.
+  - [ ] Measured genuine currentness comparison, complete affected regression and installed/native source qualification before downstream use.

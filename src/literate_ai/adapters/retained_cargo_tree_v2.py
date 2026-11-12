@@ -91,7 +91,10 @@ class RetainedCargoInputTreeV2:
             exclusions=self.exclusions,
             maximum_metadata_bytes=self.maximum_metadata_bytes,
         )
-        if self._physical != current._physical or self.identity != current.identity:
+        # Compare every freshly observed field directly. Re-encoding both
+        # complete immutable records adds no custody check; current capture has
+        # still streamed/hash-checked every payload and closed its namespace.
+        if self._physical != current._physical or self != current:
             raise ValueError("retained.cargo.v2-input-custody-changed")
 
 
@@ -135,7 +138,7 @@ def capture_retained_cargo_tree_v2(
                 else (root / name).lstat()
             )
 
-        def inventory():
+        def inventory(*, initial_nodes=None):
             descriptor = None
             if access is not None:
                 descriptor = os.open(
@@ -181,6 +184,8 @@ def capture_retained_cargo_tree_v2(
                         raise ValueError("retained.cargo.v2-input-metadata-limit")
                     if stat.S_ISLNK(node.st_mode):
                         charged_links[name] = _node(node)
+                    if initial_nodes is not None:
+                        initial_nodes[name] = node
 
             observed = _inventory(
                 root,
@@ -194,8 +199,13 @@ def capture_retained_cargo_tree_v2(
             return (*observed, charged_links)
 
         root_node = _node(root.lstat())
-        names, directories, charged_links = inventory()
-        before = {name: metadata(name) for name in (*directories, *names)}
+        before = {}
+        names, directories, charged_links = inventory(initial_nodes=before)
+        # These are the same no-follow observations that admitted each initial
+        # census entry. Keep them across streaming rather than replacing them
+        # with a redundant later pass that could hide an intervening write.
+        if set(before) != set((*directories, *names)):
+            raise ValueError("retained.cargo.v2-input-membership-changed")
         # Reuse portable case/normalization policy without imposing the standalone
         # SDK tree's smaller member ceiling on a reviewed Cargo custody budget.
         keys = set()
