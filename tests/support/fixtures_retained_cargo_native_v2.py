@@ -42,6 +42,12 @@ from tests.support.fixtures_test_retained_cargo_import import (
 )
 
 
+def _rustup_home_before_isolation():
+    if "RUSTUP_HOME" in os.environ:
+        return os.environ["RUSTUP_HOME"]
+    return str(Path.home() / ".rustup")
+
+
 class NativeReceivingFixture(RetainedCargoImportTests):
     """All declarations are built before the real reviewed/live receiver opens."""
 
@@ -73,6 +79,7 @@ class NativeReceivingFixture(RetainedCargoImportTests):
             (project / ".literate/legacy-lift-shift.json").read_bytes()
         )["implementation_directory"]
         workspace = project / implementation
+        rustup_home = _rustup_home_before_isolation()
         home = self.base / "native-cargo-home"
         home.mkdir()
         self.environment = {
@@ -84,9 +91,8 @@ class NativeReceivingFixture(RetainedCargoImportTests):
             "CARGO_INCREMENTAL": "0",
             "CARGO_BUILD_JOBS": "2",
             "RUSTUP_AUTO_INSTALL": "0",
+            "RUSTUP_HOME": rustup_home,
         }
-        if "RUSTUP_HOME" in os.environ:
-            self.environment["RUSTUP_HOME"] = os.environ["RUSTUP_HOME"]
         cargo = discover_cargo_toolchain(self.environment)
         rust = discover_rust_toolchain(self.environment)
         self.cargo = LocalComponentToolBinding.from_observed_toolchain(cargo)

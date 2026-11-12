@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Native retained-Cargo fixtures preserve the caller's implicit Rustup toolchain root
+  before isolating HOME, while retaining explicit values and discovery refusals.
+
 - Accepted-source export qualification compiles independent expected bytecode with
   the actual admitted Python compiler when the test interpreter differs (#424).
 
