@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Windows bounded tools reuse confirmed Job Object termination during repeated
+  cleanup, avoiding redundant `taskkill` enumeration while retaining fallback
+  cleanup when Job ownership or termination is unavailable (#426).
+
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test
   and package phases with preserved historical evidence.
