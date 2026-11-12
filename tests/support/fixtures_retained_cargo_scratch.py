@@ -95,7 +95,6 @@ def scratch_review_fixture(
                 )
             ),
             custody,
-            native_custody,
         )
         if build_outputs:
             ignore = project / ".gitignore"
@@ -114,6 +113,7 @@ def scratch_review_fixture(
                 ),
             ),
             custody,
+            native_custody,
         )
         targets = tuple(
             sorted(
