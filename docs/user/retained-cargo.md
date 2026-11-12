@@ -143,6 +143,25 @@ A new receiving SDK is not permission to rebind an older provider distribution.
 reviewed files, an independently supplied binding identity and configured store
 identifier. It does not generate or requalify source.
 
+When the provider tools live on a different host, the native reader also accepts
+the locked projection's explicit `host_platform`, `toolchain_discoverer`,
+`dependency_observer`, `observer_identity` and `dependency_guard` parameters.
+Select `command_phases=()` for custody-only observation; every returned tool and
+dependency observation must have a real currentness guard on its original host.
+This mode requires an explicit callable `dependency_guard`.
+An archived identity or an unavailable observer is insufficient. This adapter
+does not supply a network transport or execute provider commands remotely.
+
+Measure the importing worker's actual `CargoToolchain` and `RustToolchain`
+separately and pass both as `consumer_cargo` and `consumer_rustc` to
+`compose_retained_cargo_current_inputs_v2`. Their exact identities must match the
+reviewed importing plan and gate policy; their guards remain live in the joined
+inputs. The original provider command contracts and qualification products keep
+their original tool identities. Omit both arguments to retain the local
+convenience behavior; one-sided or wrong-role arguments refuse. The same measured
+consumer tools can be adapted with
+`LocalComponentToolBinding.from_observed_toolchain` for consumer execution.
+
 Use this operation order:
 
 1. `read_retained_cargo_review_v2` reopens the exact independently reviewed files.

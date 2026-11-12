@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Retained Cargo v2 composition keeps independently measured consumer Cargo/Rust
+  tools separate from the provider's guarded native observations (#430).
+
 - Native retained-Cargo integration tests use the existing finite API deadline
   default on slower workers while preserving production bounds and input checks.
 
