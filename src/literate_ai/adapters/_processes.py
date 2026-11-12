@@ -174,6 +174,9 @@ class ProcessTreeOwnership:
 
     popen_options: dict[str, object]
     job: WindowsProcessTreeJob | None = None
+    _termination_succeeded: bool = field(
+        default=False, init=False, repr=False, compare=False
+    )
     _job_lock: threading.Lock = field(
         default_factory=threading.Lock,
         init=False,
@@ -209,16 +212,25 @@ class ProcessTreeOwnership:
             self.job = None
         job.close()
 
-    def terminate(self) -> None:
-        """Terminate and close the Job Object once across concurrent callers."""
+    def terminate(self) -> bool:
+        """Return only confirmed Job termination, including repeated cleanup.
+
+        A concurrent caller that finds a claimed but unfinished job must still
+        use the fallback: claiming ownership alone does not prove termination.
+        """
 
         job = self._claim_job()
         if job is None:
-            return
+            with self._job_lock:
+                return self._termination_succeeded
         try:
-            job.terminate()
+            terminated = job.terminate()
         finally:
             job.close()
+        if terminated:
+            with self._job_lock:
+                self._termination_succeeded = True
+        return terminated
 
     def release(self) -> None:
         """Release the job handle without terminating anything."""
@@ -310,9 +322,8 @@ def terminate_process_tree(
                 process.kill()
         return
     if selected_platform == "nt":
-        if ownership is not None:
-            ownership.terminate()
-        executable = windows_taskkill_executable(environment)
+        terminated = ownership is not None and ownership.terminate()
+        executable = None if terminated else windows_taskkill_executable(environment)
         if executable is not None:
             try:
                 terminator = subprocess.Popen(
