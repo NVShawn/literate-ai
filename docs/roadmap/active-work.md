@@ -34549,6 +34549,8 @@ implementation, policy weakening, qualification or issue closure is recorded her
   - [x] Add omitted, null, configured and invalid policy regression coverage.
 - **Evidence:**
   - [x] Run maintained make python-check for contribution-policy and project-release tests, plus formatting and lint.
+  - [x] Independently review the parser change and refresh its lifecycle driver pin through the maintained review command.
+- **Validation:** 31 maintained local release tests pass, with formatting/lint clean. The first PR CI run exposed a stale lifecycle driver pin for the changed parser; the same refusal was reproduced locally. Independent source review confirmed the optional-field behavior and retained strict validation before supported re-pinning. Hosted confirmation and main integration remain pending.
 
 - **Qualification:** Maintained `make python-check PYTHON_TEST_START_DIRECTORY=tests/e2e PYTHON_TEST_PATTERN=test*release*.py PYTHON_TEST_WORKERS=2` passed all 31 selected cases, including four new contribution-policy regressions. Changed Python files pass Ruff lint and format checks.
 - **Next action:** Upstream review and integration; this source fix does not upgrade downstream SDKs.
