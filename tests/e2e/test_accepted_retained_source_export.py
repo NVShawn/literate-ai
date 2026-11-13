@@ -11,6 +11,12 @@ import unittest
 from dataclasses import replace
 from unittest.mock import patch
 
+from literate_ai.adapters.builders import run_bounded_process
+from literate_ai.adapters.builders.python import (
+    controlled_python_environment,
+    discover_python_toolchain,
+)
+from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecyclePorts
 from literate_ai.adapters.standard_lifecycle_binding import (
     resolve_standard_project_lifecycle_driver,
 )
@@ -21,8 +27,61 @@ from tests.support.fixtures_retained_native import author_retained_native_fixtur
 
 @unittest.skipUnless(shutil.which("make"), "the retained fixture needs Make")
 class AcceptedRetainedSourceExportTests(unittest.TestCase):
-    setUp = fixture.ModelFreeRebuildTests.setUp
     rebuild = fixture.ModelFreeRebuildTests.rebuild
+
+    def setUp(self):
+        fixture.ModelFreeRebuildTests.setUp(self)
+        self.admitted_python = []
+        original_accept = LocalStandardLifecyclePorts.accept
+
+        def observe_compiler(ports, plan, *args, **kwargs):
+            accepted = original_accept(ports, plan, *args, **kwargs)
+            contract = ports.contracts[plan.component_revision.uri]
+            binding = ports.tool_bindings[contract.language_compiler_identity.uri]
+            binding.require_unchanged()
+            self.admitted_python.append(
+                (binding.command, binding.toolchain_identity.uri)
+            )
+            return accepted
+
+        self.enterContext(
+            patch.object(LocalStandardLifecyclePorts, "accept", observe_compiler)
+        )
+
+    def compile_expected(self, source, destination):
+        # The unittest interpreter is not the admitted native compiler. Reopen
+        # the actual accepted binding rather than selecting another PATH tool.
+        self.assertTrue(self.admitted_python)
+        command, identity = self.admitted_python[-1]
+        environment = controlled_python_environment({**os.environ, **self.environment})
+        compiler = discover_python_toolchain(environment, pinned_command=command)
+        self.assertEqual(compiler.identity, identity)
+        self.assertFalse(destination.exists())
+        compiler.require_unchanged(environment)
+        try:
+            result = run_bounded_process(
+                [
+                    *compiler.command,
+                    "-I",
+                    "-S",
+                    "-c",
+                    "import py_compile,sys; py_compile.compile("
+                    "sys.argv[1],cfile=sys.argv[2],dfile='main.py',doraise=True,"
+                    "invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH)",
+                    str(source),
+                    str(destination),
+                ],
+                cwd=self.root,
+                environment=environment,
+                timeout_seconds=60,
+                stdout_limit_bytes=1024,
+                stderr_limit_bytes=4096,
+                error_prefix="fixture.accepted-python-compile",
+            )
+        finally:
+            compiler.require_unchanged(environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return destination.read_bytes()
 
     def build(self, *, command="build", cache_entries=()):
         output = io.StringIO()
@@ -67,7 +126,6 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
             ) from exc
 
     def test_exact_entry_selection_preserves_successive_admitted_revisions(self):
-        import py_compile
         from pathlib import Path
 
         from literate_ai.adapters.cache import FileSystemSourceCache
@@ -90,19 +148,14 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
                         stream.write(
                             "\n# independently reviewed second retained revision\n"
                         )
-                compiled = self.root / f"expected-{revision}.pyc"
-                py_compile.compile(
-                    str(source / "main.py"),
-                    cfile=str(compiled),
-                    dfile="main.py",
-                    doraise=True,
-                    invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH,
-                )
-                expected.append(compiled.read_bytes())
+                # Retain an independent pre-build oracle. A builder must not
+                # mutate the retained input and make both byte streams agree.
+                expected_source = (source / "main.py").read_bytes()
                 status, review = self.rebuild(
                     "--retained-source", str(source), "--retained-source-plan"
                 )
                 self.assertEqual(status, 0, review)
+                self.assertEqual((source / "main.py").read_bytes(), expected_source)
                 status, result = self.rebuild(
                     "--retained-source",
                     str(source),
@@ -110,6 +163,16 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
                     review["result"]["authorization_identity"],
                 )
                 self.assertEqual(status, 0, result)
+                self.assertEqual((source / "main.py").read_bytes(), expected_source)
+                oracle_source = self.root / f"expected-source-{revision}.py"
+                with oracle_source.open("xb") as stream:
+                    stream.write(expected_source)
+                expected.append(
+                    self.compile_expected(
+                        oracle_source, self.root / f"expected-{revision}.pyc"
+                    )
+                )
+                self.assertEqual(oracle_source.read_bytes(), expected_source)
                 entries = cache.verified_published_entries()
                 fresh = [entry for entry in entries if entry not in admitted]
                 self.assertEqual(len(fresh), 1)
@@ -466,7 +529,6 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
         self.exercise_accepted_export(committed_target=True, materialize=True)
 
     def exercise_accepted_export(self, *, committed_target, materialize=False):
-        import py_compile
         from pathlib import Path
 
         from literate_ai.adapters.artifact_exports import load_artifact_export
@@ -626,13 +688,7 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
         self.assertIsNone(export.model_selector)
         self.assertTrue(export.artifact_reference.identity.uri.startswith("sha256:"))
         expected = self.root / "expected.pyc"
-        py_compile.compile(
-            str(source / "main.py"),
-            cfile=str(expected),
-            dfile="main.py",
-            doraise=True,
-            invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH,
-        )
+        self.compile_expected(source / "main.py", expected)
         self.assertEqual(
             Path(built["result"]["artifact"]).read_bytes(), expected.read_bytes()
         )

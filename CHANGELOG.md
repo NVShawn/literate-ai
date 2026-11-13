@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Reuse the existing admitted-compiler test oracle for accepted-source bytecode
+  on mixed-interpreter hosts, preserving full artifact and binding assertions (#424).
+
 - Reuse bounded lexical path parsing during retained Cargo input capture while
   keeping all filesystem observations, byte reads and currentness guards fresh (#432).
 
