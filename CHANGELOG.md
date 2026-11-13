@@ -107,6 +107,11 @@
 
 - Measure native Windows CPU pressure with bounded timing counters while preserving required-metric refusal for unavailable or uncovered systems.
 
+- Native Cargo provider projection uses stable sealed-material paths across execution
+  reauthorization while retaining exact export provenance and ambiguity refusal.
+
+- Independent Rust library import verification runs Cargo from its fresh consumer
+  directory, so an unrelated caller Cargo configuration cannot select its wrapper.
 - Source promotion exposes explicit `authorized-policy` reviews and a separate
   operator acceptance opt-in while preserving human-only defaults and signed
   source/graph/authority binding. These choices grant intent review, not host
