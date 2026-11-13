@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/authored-retirement-PR401-stack@1",
-  "status": "FOCUSED_SOURCE_PASS_NATIVE_MODULE_PROJECTION_PASS_PENDING_REVIEW_AND_FULL_GATES",
+  "status": "FOCUSED_SOURCE_NATIVE_MODULE_PROJECTION_AND_SCOPED_REVIEW_PASS_PARENT_GATES_PENDING",
   "base_commit": "97362d5c",
   "target_branch": "jordanhubbard:feat/authored-standard-run",
   "parent_review": 401,
@@ -40,11 +40,17 @@
   },
   "actual_Windows_development_evidence": "authored-retirement-windows-development.json",
   "Windows_transfer_limit": "Seven actual Windows API cases exercised these exact modules from literal397db76e; no whole new-stack installed/native/model qualification is inferred",
-  "driver_pin": "STALE_UNTIL_INDEPENDENT_REVIEW_AND_CANONICAL_RENEWAL",
+  "driver_pin": "INHERITED_DEFINITION_UNCHANGED_STALE31_NOT_RENEWED",
   "remaining": [
-    "Independent review of narrow401-base transplant before driver renewal",
+    "Complete broader driver/currentness review before any canonical renewal; scoped retirement review passed",
     "Whole framework/installed/platform gates appropriate to contribution and maintainer401 acceptance",
     "Genuine authored/model/all-node/receiving acceptance remains separate",
     "No upstream merge, release or installed/global SDK replacement"
-  ]
+  ],
+  "scoped_independent_review": {
+    "source_commit": "8948adef7aafac22c801c6b7299e45459de37dd7",
+    "sha256": "d9ee92d7e721a86bebee845ffa7d5abddc5810d679d67bfb6a538e3dc489a4e1",
+    "result": "PASS_NARROW_RETIREMENT_DIFF",
+    "scope": "Nine file/evidence pins, two TCB diffs, four native-qualified module joins and three publication AST projections; no whole31 driver renewal"
+  }
 }
