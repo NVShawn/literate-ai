@@ -1,0 +1,207 @@
+{
+  "schema": "literate-ai/retained-cargo-lexical-qualification@1",
+  "status": "Native source comparison and complete mixed-interpreter default framework suite passed; upstream integration pending",
+  "source_commit": "56fb5310fe2b67fb1a00d6533d951a5197001888",
+  "base_source_commit": "f34debb73b62f9fff59a138f86b3640d7be65183",
+  "platform": "Linux x86_64",
+  "comparison_scope": "Fresh-source candidate modules in an isolated interpreter; unchanged installed baseline. No candidate wheel/global installation or full receiving acceptance.",
+  "source_sha256": {
+    "retained_project_inputs.py": {
+      "bytes": 35353,
+      "sha256": "04c78b049d028fac033244966841e7287d14c6145240429f4f9444a3365d80a9"
+    },
+    "retained_cargo_tree_v2.py": {
+      "bytes": 12485,
+      "sha256": "e7c7dfbabf0d788981c38647be0c0d5909fbf477ef647a8d90a2705dd92e648f"
+    },
+    "test_retained_input_lexical.py": {
+      "bytes": 12265,
+      "sha256": "edc2c44eacf49597cafdf128438fd5269368df933de6074eb4d35a20f37ab49d"
+    }
+  },
+  "native_filesystem_tests": {
+    "errors": 0,
+    "failed": 0,
+    "run": 12,
+    "skipped": 0
+  },
+  "os_api_and_payload_stream_counts": {
+    "baseline": {
+      "close": 60,
+      "fstat": 313,
+      "lstat": 4,
+      "open": 188,
+      "stat": 7898,
+      "stream": 128
+    },
+    "candidate": {
+      "close": 60,
+      "fstat": 313,
+      "lstat": 4,
+      "open": 188,
+      "stat": 7898,
+      "stream": 128
+    },
+    "identical_semantic_and_physical": true
+  },
+  "count_limit": "Python os API and actual payload-reader calls, not kernel syscall tracing.",
+  "order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "samples": [
+    {
+      "bytes": 1688282712,
+      "cache": [
+        {
+          "entries_before_close": 0,
+          "retained_bytes_before_close": 0
+        }
+      ],
+      "cpu_seconds": 30.661167918999997,
+      "entries": 58462,
+      "files": 47616,
+      "identity": "sha256:fc95956851f89094ebdb5074c8c166df93f48742965b780c479f3ab5857a1a09",
+      "index": 0,
+      "variant": "baseline",
+      "wall_seconds": 30.68614071101183
+    },
+    {
+      "bytes": 1688282712,
+      "cache": [
+        {
+          "entries_before_close": 58462,
+          "retained_bytes_before_close": 126489128
+        }
+      ],
+      "cpu_seconds": 22.330409503000006,
+      "entries": 58462,
+      "files": 47616,
+      "identity": "sha256:fc95956851f89094ebdb5074c8c166df93f48742965b780c479f3ab5857a1a09",
+      "index": 1,
+      "variant": "candidate",
+      "wall_seconds": 22.35015923998435
+    },
+    {
+      "bytes": 1688282712,
+      "cache": [
+        {
+          "entries_before_close": 58462,
+          "retained_bytes_before_close": 126489128
+        }
+      ],
+      "cpu_seconds": 22.406831714999996,
+      "entries": 58462,
+      "files": 47616,
+      "identity": "sha256:fc95956851f89094ebdb5074c8c166df93f48742965b780c479f3ab5857a1a09",
+      "index": 2,
+      "variant": "candidate",
+      "wall_seconds": 22.4290434079885
+    },
+    {
+      "bytes": 1688282712,
+      "cache": [
+        {
+          "entries_before_close": 0,
+          "retained_bytes_before_close": 0
+        }
+      ],
+      "cpu_seconds": 30.791781401999998,
+      "entries": 58462,
+      "files": 47616,
+      "identity": "sha256:fc95956851f89094ebdb5074c8c166df93f48742965b780c479f3ab5857a1a09",
+      "index": 3,
+      "variant": "baseline",
+      "wall_seconds": 30.81949208601145
+    }
+  ],
+  "means_seconds": {
+    "baseline": 30.75281639851164,
+    "candidate": 22.389601323986426
+  },
+  "capture_wall_time_reduction_percent": 27.194956605437845,
+  "whole_job_peak_rss_kib": 325316,
+  "preservation": {
+    "SDK-distribution": true,
+    "SDK-modules": true,
+    "candidate-source": true,
+    "cargo-root": true,
+    "module-registry": true
+  },
+  "cache_bound": {
+    "maximum_charged_bytes": 134217728,
+    "maximum_entries": 65536,
+    "successful_only": true,
+    "scope": "one directory access; cleared on close; no filesystem observation cached"
+  },
+  "closure": {
+    "native_unit_absent": true,
+    "owned_process_groups_retired": true,
+    "root_readback_sha256": "4915ef2f50b617792f6991b0126ab18591d6b13878e4827f1f37a21662c8dd16",
+    "archive_members": 34,
+    "archive_sha256": "8626ec6bb2be59f01d69589a993a28dfdbbdff20a42c589d08d43d7e66fb0161"
+  },
+  "limits": [
+    "The 27.2% applies to this CargoHome tree capture, not a complete input guard or consumer transaction.",
+    "All process/file/content/currentness checks remain fresh; no successful guard state is cached.",
+    "No target scope, permission, output/native dependency guard or negative-control exclusion is changed.",
+    "Complete receiving cost still exceeds current admitted budget; no full consumer restart is justified.",
+    "Opt-in hardware/model acceptance is outside this default framework qualification."
+  ],
+  "qualified_composed_commit": "29437a85c0d9e7dc10863a0f16680c1ef31b0d38",
+  "preserved_first_default_suite": {
+    "status": "FAILED",
+    "original_source_commit": "56fb5310fe2b67fb1a00d6533d951a5197001888",
+    "summary": {
+      "selected": 2795,
+      "executed": 1628,
+      "passed": 1627,
+      "failed": 1,
+      "known_failed": 0,
+      "skipped": 86
+    },
+    "sole_failure": "tests.e2e.test_accepted_retained_source_export.AcceptedRetainedSourceExportTests.test_admit_then_build_from_accepted_retained_source_without_agent",
+    "known_upstream_issue": 424,
+    "lexical_cases_passed": 12,
+    "source_and_declared_tools_preserved": true,
+    "root_readback_sha256": "66064d8a38c182e6e8e6b0d2fa6eac97c6af9ff408313fd1eb934b4fcb365269",
+    "no_rerun": true
+  },
+  "full_default_framework_suite": {
+    "status": "PASSED",
+    "source_commit": "29437a85c0d9e7dc10863a0f16680c1ef31b0d38",
+    "selection": "make python-check defaults; fresh checkpoint; 3 test workers; no filters, exclusions or interpreter activation",
+    "summary": {
+      "executed": 2677,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2677,
+      "selected": 2795,
+      "skipped": 118
+    },
+    "lexical_cases_passed": 12,
+    "native_suite_elapsed_seconds": 1921.782,
+    "native_complete_job_elapsed_seconds": 2014.9561069049814,
+    "focused_prior_e2e_passed": true,
+    "focused_prior_e2e_seconds": 55.125,
+    "actual_runner_version": "3.14.4",
+    "actual_admitted_compiler_version": "3.12.10",
+    "admitted_compiler_identity": "sha256:86f4cfd032ac55a94be3c27979a2995d7450e410959a37a3bbb24227e66316e4",
+    "oracle_prerequisite": {
+      "issue": 424,
+      "original_commit": "5895a62ad6b97a8d3288324cf68348f728e441b5",
+      "reused_test_sha256": "c86d0158a312dbc35239d322b4dbff27c0e21e8799f26fec785cfc7496388a34",
+      "scope": "Exact existing test oracle only; independent expected source, accepted compiler binding and complete byte equality preserved"
+    },
+    "report_sha256": "99d4f06173e6a5aa30e79e430e51b6ddb71221f569c2199e0584260c68883b6d",
+    "source_and_declared_tools_preserved": true,
+    "all_five_phase_exit_codes": 0,
+    "native_unit_absent": true,
+    "owned_groups_retired": true,
+    "archive_members": 96,
+    "archive_sha256": "0be9515041d59b49dc82fa3faa5709fa04095a50ef98f9fea6430f2fb9f47973",
+    "root_readback_sha256": "3cf6685d7ebb99b89335ea20d36e254069d670c317e6ad5f776b20fca244dd25"
+  }
+}
