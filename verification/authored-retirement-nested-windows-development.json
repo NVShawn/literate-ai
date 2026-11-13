@@ -1,0 +1,89 @@
+{
+  "schema": "literate-ai/authored-retirement-nested-windows-development@1",
+  "issue": 393,
+  "review": 401,
+  "predecessor": "64a2dd7ba69f49c1bea03cc869f2cf879479b662",
+  "independent_finding_sha256": "79f8d5b415bf7fc162b00c8e7f74e49ba6c9a157d0d93971732b6d039cc16350",
+  "finding": "DR393-02: nested generic cleanup bypasses readonly hardlink permission guard",
+  "source_sha256": {
+    "src/literate_ai/adapters/qualification_workspace_namespace.py": "fd90b872873795b66314eac5761f1eebce6f730316bf2badccde1f79d9916478",
+    "tests/critical/test_authored_windows_retirement.py": "8359f8a6e8c15bc5cc8e91329421c3d6ac74be2be72167a36b2c3d988d436df3"
+  },
+  "unchanged_function_ast": [
+    "qualification_workspace_identity",
+    "retire_qualification_workspace",
+    "_retire_posix_run",
+    "hold_qualification_workspace_namespace"
+  ],
+  "actual_reports": {
+    "windows-retire-guards": {
+      "sha256": "be36a458acc6bdcdf2ce52aa8860cd4792116d8df9eaded010cf5e9a11419b3d",
+      "summary": {
+        "executed": 7,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 7,
+        "selected": 7,
+        "skipped": 0
+      },
+      "test_ids": [
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_deeper_readonly_hardlink_uses_same_guard",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_direct_readonly_hardlink_refuses_without_external_permission_change",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_nested_readonly_hardlink_refuses_without_external_permission_change",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_nested_reparse_refuses_before_permission_change",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_owned_direct_readonly_file_can_retry",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_owned_nested_readonly_file_can_retry",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_replaced_leaf_is_not_made_writable"
+      ]
+    },
+    "windows-retire-posix": {
+      "sha256": "497f5d7f552b511ef4a6463ae573ebf7aaa78541d3961a56ed97dd9937a09c0e",
+      "summary": {
+        "executed": 8,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 8,
+        "selected": 8,
+        "skipped": 0
+      },
+      "test_ids": [
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_interrupted_retirement_preserves_live_owner_and_diagnostics",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_missing_path_without_original_owner_completion_does_not_allow_replay",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_normal_retirement_removes_original_run_and_retains_empty_container",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_public_parent_replacement_after_guard_cannot_delete_foreign_tree",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_readonly_directories_and_links_do_not_modify_external_objects",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_replacement_before_retirement_preserves_both_trees",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_retirement_record_is_bound_to_actual_intent_attempt_and_root",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_run_replacement_after_open_is_preserved_and_never_claimed_retired"
+      ]
+    },
+    "windows-retire-before": {
+      "sha256": "9c9c66d872568eb739023141fad6aa7d1899d6274d3e1cee037075162903eb23",
+      "summary": {
+        "executed": 2,
+        "failed": 1,
+        "known_failed": 0,
+        "passed": 1,
+        "selected": 2,
+        "skipped": 0
+      },
+      "test_ids": [
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_direct_readonly_hardlink_refuses_without_external_permission_change",
+        "tests.critical.test_authored_windows_retirement.WindowsRetirementControlFlowTests.test_nested_readonly_hardlink_refuses_without_external_permission_change"
+      ]
+    }
+  },
+  "actual_current_counts": {
+    "windows_control_flow_passed": 7,
+    "POSIX_retirement_passed": 8,
+    "failed": 0,
+    "skipped": 0
+  },
+  "preserved_predecessor_control": "The same two direct/nested protective tests executed against actual64a predecessor source: direct passes; nested fails because external inode mode0400 becomes0600. This is an intentional baseline failure, not a current safety pass.",
+  "boundaries": [
+    "Windows APIs are explicit fixtures; real hardlinks/chmod/cleanup plus one injected readonly unlink error ran on Linux.",
+    "No native Windows sharing, disposition or readonly-attribute claim; focused native Windows validation remains pending.",
+    "POSIX path AST is unchanged and eight Linux filesystem controls pass. Prior17publication/6reader results remain literal64a evidence, not rerun or relabeled.",
+    "No driver pin renewal, whole framework source/wheel, authored model graph, generated provider, consumer receipt, upstream merge/release or global SDK change."
+  ]
+}

@@ -7,7 +7,7 @@ import stat
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
-from literate_ai._filesystem import require_safe_directory
+from literate_ai._filesystem import require_safe_directory, stat_is_link_or_reparse
 
 
 def qualification_workspace_identity(path):
@@ -137,7 +137,6 @@ def _retire_windows_run(path, identity, container, container_identity, check):
     from ctypes import wintypes
 
     from literate_ai._cache_lock import _Kernel32Windows
-    from literate_ai.adapters.retained_project_inputs import _remove_tree
 
     kernel = _Kernel32Windows()
     with ExitStack() as stack:
@@ -157,21 +156,7 @@ def _retire_windows_run(path, identity, container, container_identity, check):
         stack.callback(kernel.close, handle)
         if kernel.file_identity(handle) != identity:
             raise ValueError("qualification.authored.scratch_owner_changed")
-        for count, child in enumerate(path.iterdir(), 1):
-            if count > 1_000_000:
-                raise ValueError("qualification.authored.retirement_limit")
-            check()
-            if child.is_symlink() or not child.is_dir():
-                try:
-                    child.unlink()
-                except PermissionError:
-                    node = child.lstat()
-                    if not stat.S_ISREG(node.st_mode) or node.st_nlink != 1:
-                        raise
-                    child.chmod(stat.S_IREAD | stat.S_IWRITE)
-                    child.unlink()
-            else:
-                _remove_tree(child)
+        _remove_windows_run_contents(path, check)
         check()
         dispose = ctypes.WinDLL(
             "kernel32", use_last_error=True
@@ -186,6 +171,54 @@ def _retire_windows_run(path, identity, container, container_identity, check):
         delete = ctypes.c_ubyte(1)  # FILE_DISPOSITION_INFO.DeleteFile (BOOLEAN).
         if not dispose(handle, 4, ctypes.byref(delete), ctypes.sizeof(delete)):
             raise OSError(ctypes.get_last_error(), "owned run retirement refused")
+
+
+def _remove_windows_run_contents(path, check):
+    """Use one permission-retry policy at every depth of this owned run."""
+    count = 0
+
+    def current_node(path):
+        node = path.lstat()
+        if stat_is_link_or_reparse(node):
+            raise ValueError("qualification.authored.scratch_owner_changed")
+        return node
+
+    def same_node(before, after):
+        return (before.st_dev, before.st_ino, before.st_mode) == (
+            after.st_dev,
+            after.st_ino,
+            after.st_mode,
+        )
+
+    def remove(directory, depth=0):
+        nonlocal count
+        if depth > 128:
+            raise ValueError("qualification.authored.retirement_limit")
+        for child in directory.iterdir():
+            count += 1
+            if count > 1_000_000:
+                raise ValueError("qualification.authored.retirement_limit")
+            check()
+            before = current_node(child)
+            if stat.S_ISDIR(before.st_mode):
+                remove(child, depth + 1)
+                check()
+                if not same_node(before, current_node(child)):
+                    raise ValueError("qualification.authored.scratch_owner_changed")
+                child.rmdir()
+            elif stat.S_ISREG(before.st_mode):
+                try:
+                    child.unlink()
+                except PermissionError:
+                    after = current_node(child)
+                    if after.st_nlink != 1 or not same_node(before, after):
+                        raise
+                    child.chmod(stat.S_IREAD | stat.S_IWRITE)
+                    child.unlink()
+            else:
+                raise ValueError("qualification.authored.scratch_owner_changed")
+
+    remove(path)
 
 
 @contextmanager

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Apply authored Windows retirement permission checks recursively, preserving
+  readonly hardlink peers when a nested file refuses deletion (#393).
+
 - Keep authored run retirement within its original private namespace and require
   intent-bound original-owner completion before publication or recovery (#393).
 
