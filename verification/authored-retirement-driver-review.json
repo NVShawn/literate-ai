@@ -1,0 +1,31 @@
+{
+  "schema": "literate-ai/authored-retirement-driver-review@1",
+  "issue": 393,
+  "review": 401,
+  "reviewed_code_head": "fb921945a06cad7d4d3014dc6b4be3e2fe095b29",
+  "independent_reviews": [
+    {
+      "scope": "44 changed TCB paths; P1 finding retained",
+      "sha256": "eea0d504d9c81180b0e66ad671cba3f6703eeb503b2e6d6e58ef8f05cdc6645f"
+    },
+    {
+      "scope": "Original retirement repair addresses P1 within cooperative POSIX scope; P2 retained",
+      "sha256": "79f8d5b415bf7fc162b00c8e7f74e49ba6c9a157d0d93971732b6d039cc16350"
+    },
+    {
+      "scope": "Narrow P2 recursive Windows guard repair; no new confirmed finding",
+      "sha256": "efa0baf3be2409b6dca12c88c84c025500b78fb21a1d707eb0a2f30d86824150"
+    }
+  ],
+  "prior_implementation_identity": "sha256:f224b7b2fd002f2efd6e01f587de85ce2be44b406e6f748f22421c3c8973bed5",
+  "reviewed_implementation_identity": "sha256:2046978a825620672a17ff3b79268b45bafbea90d4a2000e1435f61b1c337146",
+  "mechanism": "Maintained make driver-review-record after independent review; documentation-review-record afterward",
+  "claim": "Independent source review and private development driver authority only. Targeted Linux authored qualification can be prepared; model/worker execution still requires its exact finite grant.",
+  "not_qualified": [
+    "Native Windows sharing/disposition/readonly attributes",
+    "Complete current-source and noneditable framework qualification",
+    "Genuine model-forward authored graph and independent acceptance",
+    "Closed receiving/retirement consumer acceptance",
+    "Upstream main integration, release or global SDK replacement"
+  ]
+}
