@@ -1,0 +1,109 @@
+{
+  "schema": "literate-ai/authored-retirement-custody-development@1",
+  "issue": 393,
+  "review": 401,
+  "reviewed_failure_source": "528b1eb9bb6e5f070b94bffbb8c9b7666ac86fff",
+  "failure_review_sha256": "eea0d504d9c81180b0e66ad671cba3f6703eeb503b2e6d6e58ef8f05cdc6645f",
+  "failure_public_record": "https://github.com/jordanhubbard/literate-ai/issues/393#issuecomment-6860148007",
+  "source_sha256": {
+    "src/literate_ai/adapters/authored_qualification_publication.py": "48338f8d810f54670fbfb2e6af31606f7d885de8e70c10d4c000eca1af2bcd57",
+    "src/literate_ai/adapters/qualification_workspace_namespace.py": "8ab7d5e8d4ac0a7ffbc1dd8814e4a38aae65d748215cfb1ea8aa3a2ec8a76cc3",
+    "tests/critical/test_authored_scratch_retirement.py": "d4298aa7b4e9355bc1ed749e3cffc408258ebbf43fd3c2580a40e6d35205b45a",
+    "tests/critical/test_authored_qualification_publication.py": "22ab9f9c6c0ddcb45b1b99e503eebdde32d468d8809b977a885b12a7318beb46"
+  },
+  "actual_platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "python": "3.12.3"
+  },
+  "actual_framework_only_checks": [
+    {
+      "role": "scratch-retire-final",
+      "report_sha256": "6a422c6baf0f02ca4aff22ec38d6226d9ae1fa9052aa20f3ef553d4a64db883b",
+      "summary": {
+        "executed": 8,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 8,
+        "selected": 8,
+        "skipped": 0
+      },
+      "test_ids": [
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_interrupted_retirement_preserves_live_owner_and_diagnostics",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_missing_path_without_original_owner_completion_does_not_allow_replay",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_normal_retirement_removes_original_run_and_retains_empty_container",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_public_parent_replacement_after_guard_cannot_delete_foreign_tree",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_readonly_directories_and_links_do_not_modify_external_objects",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_replacement_before_retirement_preserves_both_trees",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_retirement_record_is_bound_to_actual_intent_attempt_and_root",
+        "tests.critical.test_authored_scratch_retirement.AuthoredScratchRetirementTests.test_run_replacement_after_open_is_preserved_and_never_claimed_retired"
+      ]
+    },
+    {
+      "role": "scratch-publication",
+      "report_sha256": "522a455fb4040588772a7ac12535fd75af89c89cc242149144708f34ff8e6261",
+      "summary": {
+        "executed": 17,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 17,
+        "selected": 17,
+        "skipped": 0
+      },
+      "test_ids": [
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_acknowledgement_and_host_permission_precede_any_output",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_copied_file_owner_cannot_borrow_namespace_or_writer_mode",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_failed_replay_or_closing_authority_has_no_reference",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_file_owner_expires_and_exclusive_writes_never_replace_bytes",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_interrupted_stage_is_not_a_reference_and_recovery_does_not_delete_runs",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_output_namespace_links_refuse_and_leave_foreign_directory_empty",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_projected_tool_drift_after_link_cannot_return_success_or_reopen",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_public_apply_cli_requires_acknowledgement_and_host_permission",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_public_apply_cli_returns_exact_published_reference",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_public_reader_cannot_drop_refused_native_sdk_custody",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_public_reader_forwards_exact_native_sdk_owner_to_projection",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_public_reader_forwards_explicit_observations_and_requires_live_guard",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_publish_after_real_resource_retirement_and_closed_archive_replay",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_recovery_refuses_corrupt_archive_before_any_reference_or_execution",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_recovery_uses_new_attempt_fresh_replay_and_preserves_old_journal",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_reference_contract_refuses_source_history_and_unknown_origin",
+        "tests.critical.test_authored_qualification_publication.AuthoredQualificationPublicationTests.test_substituted_reference_and_wrong_reference_identity_refuse"
+      ]
+    },
+    {
+      "role": "scratch-reader",
+      "report_sha256": "b21fe4626071f7f7e2cff3fad7d6b6a0610b69241d01a0b4082a04844c9c36a4",
+      "summary": {
+        "executed": 6,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 6,
+        "selected": 6,
+        "skipped": 0
+      },
+      "test_ids": [
+        "tests.critical.test_retained_authored_provider.RetainedAuthoredProviderTests.test_changed_archive_bytes_refuse_without_restoring_or_deleting_them",
+        "tests.critical.test_retained_authored_provider.RetainedAuthoredProviderTests.test_current_original_authority_is_rechecked",
+        "tests.critical.test_retained_authored_provider.RetainedAuthoredProviderTests.test_independent_reference_identity_is_required_before_projection",
+        "tests.critical.test_retained_authored_provider.RetainedAuthoredProviderTests.test_live_owner_expires_and_a_copy_cannot_borrow_its_guard",
+        "tests.critical.test_retained_authored_provider.RetainedAuthoredProviderTests.test_original_observation_options_reach_both_public_readers",
+        "tests.critical.test_retained_authored_provider.RetainedAuthoredProviderTests.test_recreated_run_path_is_not_accepted_as_retired"
+      ]
+    }
+  ],
+  "selected_total": 31,
+  "qualified_scope": [
+    "Original-owner private container and child run retirement on POSIX",
+    "Original held-object deletion, parent/run replacement refusal and foreign preservation",
+    "Interrupted deletion preserves original live owner and diagnostics",
+    "No replay from missing pathname without intent-bound original-owner completion",
+    "Actual create-once completion publication, post-retirement recovery, immutable prior journal and existing provider reader refusals"
+  ],
+  "limits": [
+    "Cooperative private namespace custody; not hostile same-UID process containment",
+    "Windows handle-based retirement branch is source-only and natively UNRUN",
+    "No complete framework source/wheel/default-SDK/current-head or resulting-main qualification",
+    "No genuine model-forward authored graph/native dependency qualification or retained consumer acceptance",
+    "Driver pin remains stale pending independent successor review; no global SDK replacement/upstream merge/release"
+  ]
+}

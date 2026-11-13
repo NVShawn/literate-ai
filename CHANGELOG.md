@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Keep authored run retirement within its original private namespace and require
+  intent-bound original-owner completion before publication or recovery (#393).
+
 - Forward explicitly guarded original-host observations through authored public
   readers and provider scopes, preserving default execution and refusing custody-only
   reopening without a live dependency guard. Native receiving remains pending (#393).
