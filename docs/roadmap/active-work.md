@@ -34533,3 +34533,21 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Dependency development evidence:** [Source/build/installed and canonical offline bootstrap record](../../verification/python315-worker-dependency-development.json) retains exact artifact identities. Its existing framework artifact is bound to `7078bc96b`; it does not qualify the later new wheel-gate projection or a final release candidate.
 
 - **Current complete local qualification:** [Minimum/current Python source and whole-wheel record](../../verification/python-worker-wheel-inputs-linux.json) binds software `c733d96f80cd80b802e7aa4387cab2d7740e219a`. Both native Python 3.11.14 and 3.15.2 select 2,783 source cases: 2,683 pass, 100 retain declared skips, and all 599 raw groups reconcile with no failed or known-failed cases. Both complete noneditable wheel gates pass with the same framework distribution identity and exact reviewed pure PyYAML bytes; ordinary and uv worker paths install respectively 38 and 37 distributions with matching framework identities. Real empty/redirected input refusals precede installation. The earlier source-prefix failure and unconfigured binary-export failure remain preserved separately. Parent completion and issue closure await independent/exact integrated acceptance; no release acceptance is claimed.
+
+### [ ] CARGO-LEXICAL-PERF-001 — Bound repeated lexical path validation during retained input capture
+
+- **GitHub issue:** [#432](https://github.com/jordanhubbard/literate-ai/issues/432); separate lexical follow-up to the pending [PR #435](https://github.com/jordanhubbard/literate-ai/pull/435).
+- **Release target:** 1.4.0
+- **Priority:** P1
+- **Owner:** Retained input filesystem adapter; PROJECT Goals 1 and 4
+- **Direction:** Resolve the remaining pure lexical traversal amplification reported under upstream issue #432 without reducing fresh byte, filesystem or currentness checks.
+- **Conclusion:** Use one bounded per-access memo of successful immutable relative-path parsing only. Charge it within the existing metadata allowance, evict before retention exceeds that allowance, preserve every stat/read/lineage/guard operation and fall back to uncached parsing when no allowance remains. Prior descriptor and parsing-scope work in PR #435 stays separate; neither this patch nor its timing closes #432 or downstream receiving acceptance.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Implement an opt-in access-local lexical cache and tree metadata accounting; keep default/Windows/low-descriptor readers and public identities unchanged.
+  - [ ] Add causal filesystem content/mode/ancestor/namespace mutation controls, exact fresh-operation counters, finite cache/eviction/low-budget/cleanup coverage and a fresh same-input before/after comparison.
+- **Evidence:**
+  - [ ] Pass applicable maintained Python tests and source gates, independent review of accounting and custody invariants, and an actual bounded native baseline/candidate comparison before publishing any speed claim. Full receiving, installed SDK and upstream integration remain separately pending.
+
+- **Development evidence:** The maintained focused Python gate selects 57 POSIX input cases: 55 pass, with the existing Windows-executable and optional external source-corpus cases explicitly skipped. The 12 new cases preserve identical native stat/open/close and payload-stream counts against uncached parsing, and cover cache caps, metadata-budget fallback, exception cleanup, namespace/content/mode/write-and-restore and same-byte object replacement refusals. Full formatting (1,893 files) and lint pass. The first new alias fixture used an absolute target that failed the existing target-spelling contract; its failure is retained and the fixture now exercises a valid relative escaping target. Fresh worker timing, independent review and full/integrated qualification remain pending; no speed claim or complete receiving acceptance follows from these focused checks.

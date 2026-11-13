@@ -508,6 +508,17 @@ External source edits invalidate the consumer capture without requalifying the
 provider. Declaration is the maintainer's input-coverage review, not automatic
 inference of every path an arbitrary script might read.
 
+A v2 input-tree capture may reuse successful portable relative-path parsing
+within its current POSIX directory-access context. This cache contains only
+immutable spelling/parts, never a file observation, digest or successful guard.
+It is limited to 65,536 entries and 128 MiB of conservative retained-memory
+charges, within the capture's existing metadata allowance. Growing graph
+reservations evict parsing entries before retaining graph data; insufficient
+space falls back to ordinary parsing without changing acceptance. Closing the
+access releases the cache. Every native lookup, ancestor/current-name check,
+file read, complete inventory and later execution guard remains fresh; Windows
+and unavailable-descriptor fallback retain their existing behavior.
+
 Internal native execution requires `RetainedCargoExecutionInputs`, captured from
 local consumer files, verified package trees and an explicit `CARGO_HOME`. The
 capture includes provisioned registry/Git files and both Cargo configuration names

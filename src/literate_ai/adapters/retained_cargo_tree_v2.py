@@ -126,7 +126,19 @@ def capture_retained_cargo_tree_v2(
     canonical_relative_posix_paths(exclusions, label="owned Cargo exclusions")
     root = _root(Path(root))
     excluded = frozenset(exclusions)
-    with _directory_access(root) as access:
+    peak_metadata_bytes = 16 * 1024 * 1024
+    with _directory_access(
+        root, lexical_cache_bytes=maximum_metadata_bytes - peak_metadata_bytes
+    ) as access:
+
+        def reserve_metadata(value):
+            nonlocal peak_metadata_bytes
+            peak_metadata_bytes = max(peak_metadata_bytes, value)
+            if access is not None:
+                # Parsing is optional acceleration, never additional custody.
+                # Evict before retaining charged graph entries; a full graph
+                # keeps its original allowance and simply uses uncached parsing.
+                access.set_lexical_budget(maximum_metadata_bytes - peak_metadata_bytes)
 
         def metadata(name):
             return (
@@ -155,6 +167,7 @@ def capture_retained_cargo_tree_v2(
                         root_bytes += 128 + 32 * len(entry.name.encode("utf-8"))
                         if root_bytes + 16 * 1024 * 1024 > maximum_metadata_bytes:
                             raise ValueError("retained.cargo.v2-input-metadata-limit")
+                        reserve_metadata(root_bytes + 16 * 1024 * 1024)
                         roots.append(entry.name)
             finally:
                 if descriptor is not None:
@@ -179,6 +192,7 @@ def capture_retained_cargo_tree_v2(
                         metadata_bytes += 64 * node.st_size
                     if metadata_bytes > maximum_metadata_bytes:
                         raise ValueError("retained.cargo.v2-input-metadata-limit")
+                    reserve_metadata(metadata_bytes)
                     if stat.S_ISLNK(node.st_mode):
                         charged_links[name] = _node(node)
 

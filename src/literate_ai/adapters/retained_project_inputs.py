@@ -39,13 +39,16 @@ class _DirectoryAccess:
     Cached lineages are checked again before successful transaction completion.
     """
 
-    def __init__(self, root: Path, budget: int):
+    def __init__(self, root: Path, budget: int, *, lexical_cache_bytes: int = 0):
         self.root = root
         self._root_parts = root.parts
         self._last_path_parts = None
         self._last_relative_parts = None
         self._absolute = []
         self._cached = OrderedDict()
+        self._lexical = OrderedDict()
+        self._lexical_bytes = 0
+        self.set_lexical_budget(lexical_cache_bytes)
         self._flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
         self._flags |= getattr(os, "O_CLOEXEC", 0)
         try:
@@ -181,6 +184,39 @@ class _DirectoryAccess:
             descriptor = self._cached[key][0]
         return descriptor, tuple(lineage)
 
+    def set_lexical_budget(self, maximum_bytes):
+        """Release pure parsing results before their owner's remaining budget falls."""
+        if type(maximum_bytes) is not int or maximum_bytes < 0:
+            raise ValueError("Retained lexical budget must be a nonnegative integer")
+        self._lexical_limit = min(maximum_bytes, 128 * 1024**2)
+        if self._lexical_bytes > self._lexical_limit:
+            # Clearing also releases the hash table's old capacity; merely
+            # popping entries could leave uncharged allocation after shrink.
+            self._lexical.clear()
+            self._lexical_bytes = 0
+
+    def relative_parts(self, name):
+        """Memoize successful lexical parsing only; no filesystem fact is retained."""
+        cached = self._lexical.get(name)
+        if cached is not None:
+            self._lexical.move_to_end(name)
+            return cached[0]
+        parts = canonical_relative_posix_paths((name,), label="retained entry")[0].parts
+        if self._lexical_limit:
+            # Account before retaining keys/parts, including Unicode strings,
+            # tuple/dict/LRU overhead and separately allocated path segments.
+            charge = 512 + 8 * len(name.encode("utf-8")) + 128 * len(parts)
+            if charge <= self._lexical_limit:
+                while self._lexical and (
+                    self._lexical_bytes + charge > self._lexical_limit
+                    or len(self._lexical) >= 65536
+                ):
+                    _, (_, removed) = self._lexical.popitem(last=False)
+                    self._lexical_bytes -= removed
+                self._lexical[name] = (parts, charge)
+                self._lexical_bytes += charge
+        return parts
+
     def parent(self, path):
         # This cache contains only immutable lexical parsing, never filesystem
         # observations. Python 3.12 relative_to walks parents; avoid repeating
@@ -190,7 +226,7 @@ class _DirectoryAccess:
             if path_parts[: len(self._root_parts)] != self._root_parts:
                 raise RetainedProjectInputError("Retained entry is outside its root")
             parts = path_parts[len(self._root_parts) :]
-            canonical_relative_posix_paths(("/".join(parts),), label="retained entry")
+            self.relative_parts("/".join(parts))
             self._last_path_parts = path_parts
             self._last_relative_parts = parts
         parts = self._last_relative_parts
@@ -208,6 +244,8 @@ class _DirectoryAccess:
         self._root_current()
 
     def close(self):
+        self._lexical.clear()
+        self._lexical_bytes = 0
         for descriptor, _ in self._cached.values():
             os.close(descriptor)
         self._cached.clear()
@@ -217,7 +255,7 @@ class _DirectoryAccess:
 
 
 @contextmanager
-def _directory_access(root):
+def _directory_access(root, *, lexical_cache_bytes=0):
     if os.name == "nt":
         yield None
         return
@@ -229,7 +267,7 @@ def _directory_access(root):
         yield None
         return
     try:
-        access = _DirectoryAccess(root, budget)
+        access = _DirectoryAccess(root, budget, lexical_cache_bytes=lexical_cache_bytes)
     except OSError as error:
         if error.errno not in (errno.EMFILE, errno.ENFILE):
             raise
@@ -446,7 +484,10 @@ def _inventory(
         count += 1
         if count > limit:
             raise RetainedProjectInputError("Retained inputs exceed entry bound")
-        canonical_relative_posix_paths((name,), label="retained entry")
+        if access is None:
+            canonical_relative_posix_paths((name,), label="retained entry")
+        else:
+            access.relative_parts(name)
         path = root / name
         if access is None:
             require_safe_directory(path.parent)

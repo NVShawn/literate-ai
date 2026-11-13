@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Reuse bounded lexical path parsing during retained Cargo input capture while
+  keeping all filesystem observations, byte reads and currentness guards fresh (#432).
+
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test
   and package phases with preserved historical evidence.
