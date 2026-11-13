@@ -53,11 +53,24 @@ from tests.support.fixtures_test_retained_cargo_import import blob
     "requires native POSIX Cargo/Rust and retained Make/Git adoption",
 )
 class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
+    fixture_type = native_fixtures.NativeReceivingFixture
+
+    def current_inputs(self, fixture):
+        return RetainedCargoCurrentInputsV2(
+            self.reviewed,
+            replace(
+                fixture.inputs,
+                importer_project_id=self.reviewed.project.definition.project_id,
+                reviewed_binding_identity=self.reviewed.binding.identity,
+                configured_store_id=self.reviewed.binding.common.source_store_id,
+            ),
+        )
+
     def open_case(self, *, retire=True, native_custody=None):
         base = Path(
             self.enterContext(tempfile.TemporaryDirectory(prefix="nrv2-"))
         ).resolve()
-        fixture = native_fixtures.NativeReceivingFixture(base)
+        fixture = self.fixture_type(base)
         self.reviewed, self.fixture = self.enterContext(
             scratch_review_fixture(
                 base,
@@ -82,15 +95,7 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
         )
         self.retirement_bytes = canonical_json_bytes(retirement.to_dict())
         (root / "review/retirement.json").write_bytes(self.retirement_bytes)
-        current = RetainedCargoCurrentInputsV2(
-            self.reviewed,
-            replace(
-                fixture.inputs,
-                importer_project_id=self.reviewed.project.definition.project_id,
-                reviewed_binding_identity=self.reviewed.binding.identity,
-                configured_store_id=self.reviewed.binding.common.source_store_id,
-            ),
-        )
+        current = self.current_inputs(fixture)
         context = self.enterContext(retained_cargo_wrapper_context_v2(self.reviewed))
         scratch = self.enterContext(reserve_retained_cargo_scratch_v2(context))
         files = read_retained_cargo_files_v2(
@@ -112,7 +117,7 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
             reviewed_retirement=blob(self.retirement_bytes),
         )
 
-    def execution(self):
+    def execution(self, *, timeout_seconds=900):
         return {
             "cargo": self.fixture.cargo,
             "rustc": self.fixture.rustc,
@@ -121,9 +126,9 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
             "consumer_inputs": self.inputs,
             "allow_host_execution": True,
             "read_exclusion_permission": self.fixture.read_permission,
-            # Complete native input/runtime observations need the API's finite
-            # default allowance on two-CPU workers; retain all deadline guards.
-            "timeout_seconds": 900,
+            # Positive whole-command cases select a measured finite allowance;
+            # negative controls retain the ordinary900-second caller bound.
+            "timeout_seconds": timeout_seconds,
         }
 
     def test_real_patch_workspace_gates_protocols_and_retired_admission(self):
@@ -235,7 +240,7 @@ class RetainedCargoNativeReceivingV2Tests(unittest.TestCase):
                     self.materialized,
                     retirement_authority=authority,
                     acknowledge_source_retirement=True,
-                    **self.execution(),
+                    **self.execution(timeout_seconds=2400),
                 )
         finally:
             measured["admission_wall_seconds"] = time.monotonic() - start
