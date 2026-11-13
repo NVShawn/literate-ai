@@ -1,0 +1,97 @@
+{
+  "schema": "literate-ai/authored-retirement-windows-development@1",
+  "status": "FOCUSED_NATIVE_WINDOWS_PASS_NOT_COMPLETE_AUTHORED_QUALIFICATION",
+  "source_commit": "397db76e49e56ba5517517a27202f5c12efd7d36",
+  "production_code_commit": "fb921945a06cad7d4d3014dc6b4be3e2fe095b29",
+  "interpreter": {
+    "implementation": "CPython3.13",
+    "PE_machine": "AMD64",
+    "host": "WindowsARM64",
+    "scope": "Actual Windows filesystem APIs through AMD64 interpreter; no nativeARM64 ABI claim"
+  },
+  "cases": [
+    {
+      "case": "owned-nested-readonly",
+      "passed": true,
+      "actual_win32_refusal": null
+    },
+    {
+      "case": "direct-readonly-hardlink",
+      "passed": true,
+      "actual_win32_refusal": 5
+    },
+    {
+      "case": "nested-readonly-hardlink",
+      "passed": true,
+      "actual_win32_refusal": 5
+    },
+    {
+      "case": "replaced-run",
+      "passed": true,
+      "actual_win32_refusal": null
+    },
+    {
+      "case": "held-run-rename",
+      "passed": true,
+      "actual_win32_refusal": 32
+    },
+    {
+      "case": "replaced-container",
+      "passed": true,
+      "actual_win32_refusal": null
+    },
+    {
+      "case": "interrupted-cleanup",
+      "passed": true,
+      "actual_win32_refusal": null
+    }
+  ],
+  "actual_cases": 7,
+  "passed": 7,
+  "failed": 0,
+  "skipped": 0,
+  "native_work_ms": 382,
+  "outer_elapsed_ms": 14805,
+  "custody": {
+    "all_actual_native_jobs_observed_zero": true,
+    "independent_namespace_actors": [],
+    "input_tool_native_identities_bytes_preserved": true,
+    "retained_streams_match": true,
+    "external_readonly_hardlink_peers_identity_mode_attributes_bytes_preserved": true,
+    "foreign_and_original_replacement_witnesses_preserved": true,
+    "cooperative_same_uid_model_only": true
+  },
+  "production_source_sha256": {
+    "literate_ai._filesystem": "48372e2df82da255222607c4e916fb60cff11ccdcf303cfaadd4961a31e1f1c6",
+    "literate_ai._cache_lock": "f3f353261783bdee578baa1da632bae7591afbfcd6943bebe010f4e88ebc0838",
+    "literate_ai.adapters.qualification_workspace_namespace": "fd90b872873795b66314eac5761f1eebce6f730316bf2badccde1f79d9916478"
+  },
+  "limits": {
+    "CPU": 2,
+    "affinity_mask": 3,
+    "job_memory_bytes": 1073741824,
+    "maximum_processes": 32,
+    "native_child_seconds": 25,
+    "native_watchdog_seconds": 40,
+    "outer_seconds": 400
+  },
+  "evidence": {
+    "root_independent_readback_sha256": "e1c81be7b2b79437c596f195b7cbe766ec30e2f3e29a8161a4ec65f5aadb5104",
+    "independent_readback_sha256": "7ca5ec2a72f41ae4efa6f3114a8fa179922f9e15e31203267369083abfd07861",
+    "archive_sha256": "aed3bb2e0e69524b2bfd27294e051e3b666d987f7f942f855fb2880fd6481bb8",
+    "archive_members": 45,
+    "actual_stdout_sha256": "a45c3c37ff971050e6fc83a1df9c5a9f3f980a92c8986ca44357365de02b4a5f",
+    "independent_closure_sha256": "53216f4a122c2761010f894c2453ac535b62c925821d11a61168236218be338e"
+  },
+  "preserved_predecessor": {
+    "original_exec": 57305,
+    "result": "LOCAL_TEMPLATE_SCHEMA_FAILURE_BEFORE_WORKER_DISPATCH",
+    "readback_sha256": "0024a86dd51f24f6c3033c96c8e1044c24a316eed4b0aae2057b81959383671d"
+  },
+  "remaining": [
+    "Noneditable installed/full-framework/exact-head gates and genuine model all-node qualification remain separate",
+    "No hostile sameUID protection claim",
+    "No generated core, residual4 graph, receiving admission, source retirement or issue393 completion",
+    "No upstream merge/release/global SDK replacement"
+  ]
+}
