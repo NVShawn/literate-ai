@@ -6,6 +6,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from literate_ai.adapters.locked_generation_authority import (
+    read_only_component_catalog_observations,
+)
 from literate_ai.adapters.retained_cargo_execution_inputs import _state
 from literate_ai.adapters.retained_cargo_input_scope_v2 import (
     RetainedCargoInputScopeV2,
@@ -15,7 +18,10 @@ from literate_ai.adapters.retained_cargo_materialization_v2 import (
     RetainedCargoMaterializationV2,
 )
 from literate_ai.contracts.identity import canonical_identity
-from literate_ai.projects import PinnedInputClosure
+from literate_ai.projects import (
+    PinnedInputClosure,
+    read_only_project_configuration_parses,
+)
 
 _CREATION_KEY = object()
 
@@ -39,26 +45,32 @@ class RetainedCargoExecutionInputsV2:
             object.__setattr__(self, name, value)
 
     def current_identity(self, *, environment: Mapping[str, str]):
-        self.materialized.require_unchanged()
-        self.scope.require_unchanged(environment=environment)
-        for path, before in self._states:
-            if _state(path) != before:
-                raise ValueError("retained.inputs.v2-ancestor-configuration-changed")
-        self._configuration.require_unchanged()
-        self.scope.require_unchanged(environment=environment)
-        self.materialized.require_unchanged()
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-cargo-execution-inputs@2",
-                "binding": self.materialized.files.reviewed.binding.identity.uri,
-                "scope": self.scope.identity.uri,
-                "configuration": self._configuration.identity,
-                "present": [str(path) for path, state in self._states if state[2]],
-                "absent": [
-                    str(path) for path, state in self._states if state[2] is None
-                ],
-            }
-        )
+        with (
+            read_only_project_configuration_parses(isolated=True),
+            read_only_component_catalog_observations(isolated=True),
+        ):
+            self.materialized.require_unchanged()
+            self.scope.require_unchanged(environment=environment)
+            for path, before in self._states:
+                if _state(path) != before:
+                    raise ValueError(
+                        "retained.inputs.v2-ancestor-configuration-changed"
+                    )
+            self._configuration.require_unchanged()
+            self.scope.require_unchanged(environment=environment)
+            self.materialized.require_unchanged()
+            return canonical_identity(
+                {
+                    "schema": "literate-ai/retained-cargo-execution-inputs@2",
+                    "binding": self.materialized.files.reviewed.binding.identity.uri,
+                    "scope": self.scope.identity.uri,
+                    "configuration": self._configuration.identity,
+                    "present": [str(path) for path, state in self._states if state[2]],
+                    "absent": [
+                        str(path) for path, state in self._states if state[2] is None
+                    ],
+                }
+            )
 
     def require_metadata_paths(self, metadata, *, environment):
         """Require every source/manifest to resolve within captured input owners."""

@@ -138,9 +138,13 @@ _PROJECT_CONFIGURATION_PARSES: ContextVar[_ProjectConfigurationParses | None] = 
 
 
 @contextmanager
-def read_only_project_configuration_parses() -> Iterator[None]:
-    """Share private parsing templates, never file reads or currentness decisions."""
-    if _PROJECT_CONFIGURATION_PARSES.get() is not None:
+def read_only_project_configuration_parses(*, isolated: bool = False) -> Iterator[None]:
+    """Share parsing templates, never file reads or currentness decisions.
+
+    An isolated frame restores any ambient frame on exit and retains no new
+    templates in that ambient frame.
+    """
+    if not isolated and _PROJECT_CONFIGURATION_PARSES.get() is not None:
         yield
         return
     token = _PROJECT_CONFIGURATION_PARSES.set(_ProjectConfigurationParses())

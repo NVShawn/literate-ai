@@ -45,14 +45,17 @@ _catalog_observations: ContextVar[
 
 
 @contextmanager
-def read_only_component_catalog_observations() -> Iterator[None]:
+def read_only_component_catalog_observations(
+    *, isolated: bool = False
+) -> Iterator[None]:
     """Share parsing within one request; every load still fully revalidates.
 
     These are parsed observations, not cached currentness decisions or grants.
     Owning execution boundaries retain their existing final authority checks.
+    An isolated frame restores its ambient frame without adding observations to it.
     """
 
-    if _catalog_observations.get() is not None:
+    if not isolated and _catalog_observations.get() is not None:
         yield
         return
     token = _catalog_observations.set({})

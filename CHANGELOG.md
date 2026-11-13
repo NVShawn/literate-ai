@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Retained Cargo v2 can reuse parsed authority templates within one current-input
+  observation while preserving every fresh guard and restoring ambient contexts (#432).
+
 - Retained Cargo v2 can explicitly review finite native executable, runtime and
   build-output byte budgets with fresh streaming custody instead of retaining
   multi-GiB payload copies; defaults and complete membership checks remain (#433).
