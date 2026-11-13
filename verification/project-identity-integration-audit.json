@@ -1,0 +1,124 @@
+{
+  "all_main_ci_jobs_succeeded": true,
+  "classification": "independent native evidence audit; original review-head security findings unresolved",
+  "compared_roots": [
+    "src",
+    "scripts",
+    "tests",
+    "schemas"
+  ],
+  "goal": "PROJECT-ID-001",
+  "goal_complete": false,
+  "implementation_byte_identical": true,
+  "independent_source_review": {
+    "files": [
+      "src/literate_ai/adapters/project_identity_migration.py",
+      "tests/support/installed_identity_migration_journey.py",
+      "scripts/wheel_smoke.py"
+    ],
+    "findings": [],
+    "reviewed_invariants": [
+      "fresh acknowledged plan under lifecycle lock",
+      "immutable bounded rename history",
+      "compare-and-swap publication and owned-state rollback",
+      "source and adoption-history preservation",
+      "old receipt refusal and real retained-parity renewal",
+      "installed module origin and distribution identity"
+    ]
+  },
+  "macos_installed_rename_journey": {
+    "fixture_source_sha256": {
+      ".gitignore": "6d8daa439263c4a75977bd7d09b855453dc49d8465894a2b9a435ac92e4e0af7",
+      "Makefile": "28b9d5737e1d43b906490900ebffd6150c76b56a65a11b9513b90b0bc5c023b4",
+      "app.py": "ba1a531f581d2e6094e978ed6f7aca7a8d92eeb62c6e7ad73ee692f7f18bc772",
+      "build.py": "4bd56a377e4690a2fe130b9972a429da440fc2114858580b1db0836029caffde",
+      "test_app.py": "56b4a6feb9a025ca25eda7a6adb4d0dc654ff7f35e125dcb5a834be4531f464b"
+    },
+    "framework_distribution": "sha256:1fc52ee7f0d3e33523d4f72f39c284ac048ad08aa823ab1f259b7565e522fabf",
+    "immutable_adoption_records": 3,
+    "immutable_rename_records": 2,
+    "native_retained_runs": [
+      {
+        "candidate_identity": "sha256:ce94d1f19ac5bc59814dea917c749935ec5e48c4b9040e520a0b84ea73ee8734",
+        "classification": "retained-legacy-parity",
+        "evidence_identity": "sha256:e05dbec37d15bc7acc2202978c1f9071942572b771ea01dc9fe571ca3e5af0b5",
+        "tests": 2
+      },
+      {
+        "candidate_identity": "sha256:6bf8d055a61b6d65e08142e555d9215eee17ce1503bc367cf23d939b3aa78492",
+        "classification": "retained-legacy-parity",
+        "evidence_identity": "sha256:dd9b435c66c00364d8433b7d5acbeda6b79da75431f1d8b03cd04b96ac7ab68f",
+        "tests": 2
+      },
+      {
+        "candidate_identity": "sha256:370350fb5f0e026bb0e0043eaabade35bf120821b6b0dd6fa1a74b7625cfbcb1",
+        "classification": "retained-legacy-parity",
+        "evidence_identity": "sha256:6901edb4adf606ee420316f0edacbbf656f2b9fd5ac7c826450f8bb8368851ae",
+        "tests": 2
+      }
+    ],
+    "qualified": true,
+    "refusals": [
+      "project_identity.acknowledgement_required",
+      "project_identity.plan_stale",
+      "project.documentation_authority_review_stale",
+      "project.test_receipt_stale",
+      "project_identity.acknowledgement_required",
+      "project_identity.plan_stale",
+      "project.documentation_authority_review_stale",
+      "project.test_receipt_stale"
+    ],
+    "renames": 2,
+    "scope": "Installed public CLI and real retained parity; no regenerated Component acceptance",
+    "source_files_preserved": 5,
+    "synthetic_framework_observers": false
+  },
+  "main_ci_jobs": 27,
+  "main_ci_run": 43038760305,
+  "original_review_head": {
+    "head": "de035d6ead11e7927be3a507e8163c2f19773ad8",
+    "pr": 421,
+    "security_check": {
+      "annotations_returned": 0,
+      "check_id": 130528719965,
+      "conclusion": "failure",
+      "details_url": "https://dashboard.gitguardian.com",
+      "name": "GitGuardian Security Checks",
+      "resolution": "unresolved; no findings dismissed or secrets printed",
+      "title": "2 secrets uncovered!"
+    },
+    "state": "merged"
+  },
+  "release_attestation": false,
+  "remaining": [
+    "Resolve original review-head GitGuardian findings through actual incident evidence and accepted security checks",
+    "Land the evidence reconciliation through its required documentation/review checks"
+  ],
+  "resulting_main": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+  "schema": "literate-ai/verification-record@1",
+  "source_qualified_candidate": "ebd97fc2fae74863e84e2b6920132177da0fe23c",
+  "windows_installed_evidence": {
+    "artifact": "qualified-wheel-windows-3.12",
+    "artifact_id": 13868562040,
+    "ci_job": 130584773994,
+    "evidence_boundary": "Successful mandatory whole-wheel gate requires two real installed public-CLI renames, exact distribution, and no synthetic observers. Windows log lacks terminal result JSON; the checked script and exact qualified wheel bind this gate result.",
+    "installed_migration_module_matches_main": true,
+    "qualified_manifest": {
+      "files": [
+        {
+          "identity": "sha256:2fdf66422c7cc68f98fc60bf715c5f96c3b95d5b12c7473541726c7905d20556",
+          "path": "literate_ai-1.4.0-py3-none-any.whl",
+          "role": "wheel",
+          "size": 4254390
+        }
+      ],
+      "identity": "sha256:a4b904268fa921938d3b2b5c8d7ad693f2df98164e569bcdbcf1dbc6af7ed591",
+      "revision": "638845ec00272776ae4644944d6e1dec4b1c4ff6",
+      "schema": "literate-ai/qualified-release-files@1",
+      "version": "1.4.0"
+    },
+    "step": "Verify the installed wheel outside the checkout",
+    "step_conclusion": "success",
+    "wheel_sha256_verified": true
+  }
+}
