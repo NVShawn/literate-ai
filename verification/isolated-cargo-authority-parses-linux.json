@@ -1,0 +1,89 @@
+{
+  "schema": "literate-ai/isolated-cargo-authority-parses-qualification@1",
+  "status": "Focused native source qualification passed; upstream dependency and integration pending",
+  "source_commit": "7ef2ad0b5ee71bf5cf02d86821dadd561e091d36",
+  "dependency_base_commit": "ddbda1a35e1bcea95bdba428dfebbe931d5bb583",
+  "dependency_pull_request": "https://github.com/jordanhubbard/literate-ai/pull/434",
+  "platform": "Linux x86_64",
+  "scope": "Fresh private-source framework fixtures and public read-only authority/catalog reader subsets. Not upstream-main, full framework-suite, installed-wheel or full consumer acceptance.",
+  "source_sha256": {
+    "src/literate_ai/projects.py": "7f47916ef34e712f6821c57fd1a03138faead0ded9d00733a3792e3aa64949d4",
+    "src/literate_ai/adapters/locked_generation_authority.py": "49d6f3dff00fc61b781a2c59b1df7f5d659c82797b7f508f71e12c41e69e2cad",
+    "src/literate_ai/adapters/retained_cargo_execution_inputs_v2.py": "6041ff61c3825055c62ddcb2cafc57bdc67c38cc1534bf8393f0998c4439b5a4",
+    "tests/critical/test_retained_cargo_isolated_parses.py": "8ca4329223e49928d61884e1c4b96bd09b4fe5e22cdcab895913ce0af6bb16e6"
+  },
+  "native_tests": {
+    "run": 24,
+    "passed": 24,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0,
+    "seconds": 176.689,
+    "new_cases": 7,
+    "modules": [
+      "tests.critical.test_current_component_locks",
+      "tests.critical.test_project_configuration",
+      "tests.critical.test_retained_cargo_receiving_v2",
+      "tests.critical.test_retained_cargo_isolated_parses"
+    ],
+    "controls": [
+      "Actual17-fence sequence and identity equality with strictly fewer cold authoring parses",
+      "Fresh Component/Flavor/selected payload, membership, nearest-project and redirect refusals",
+      "Warm real-authority mutation preserves exact exception type/code/text and wrapper events",
+      "Nested/default/isolated context behavior and ambient restoration on success/failure",
+      "Real provider callback error and ended original scratch refusal retained"
+    ]
+  },
+  "public_reader_subset": {
+    "order": [
+      "baseline",
+      "isolated-parse-reuse"
+    ],
+    "pairs_each": 17,
+    "pair": "validated_project_authority_identity plus current_project_component_lock_identities with freshly loaded ordinary project descriptor",
+    "baseline_wall_seconds": 40.20416582599864,
+    "candidate_wall_seconds": 35.69584647999727,
+    "difference_seconds": 4.508319346001372,
+    "baseline_project_authority_seconds": 35.32009479496628,
+    "candidate_project_authority_seconds": 32.163310396979796,
+    "baseline_current_locks_seconds": 4.882663231051993,
+    "candidate_current_locks_seconds": 3.5311245319608133,
+    "identities_equal": true,
+    "frames_restored": true,
+    "candidate_frame_observation": {
+      "catalog_keys": 1,
+      "catalog_source_bytes_not_decoded_heap": 85106,
+      "project_charged_bytes": 16444,
+      "project_templates": 1
+    },
+    "whole_reader_process_peak_rss_kib": 350412,
+    "limitations": [
+      "One ordered pair of subsets, not a general speed guarantee or exact current_identity delta.",
+      "Each timed lock read includes an additional load_project compared with the retained wrapper method.",
+      "Catalog source bytes are not a decoded-heap quota; project templates keep their existing2MiB/16-entry limit.",
+      "No filesystem operation-count parity or full consumer duration/admission inferred."
+    ]
+  },
+  "closure": {
+    "four_native_phases_exit_zero": true,
+    "source_before_after_bytes_and_git_modes_equal": true,
+    "declared_tool_hashes_preserved": true,
+    "owned_phase_and_outer_groups_absent": true,
+    "independent_unit_absent": true,
+    "archive_members": 73,
+    "archive_sha256": "4286b16444d80cb4814cc41a456195a19d00b4c7d7107567314537b50e12b871",
+    "root_readback_sha256": "52aff59717e8c63e2f43572a245c3cf96072c0f0bdb0c9c261c05a55cf0c47c1"
+  },
+  "preserved_contract": {
+    "wrapper_fences": 17,
+    "successful_filesystem_state_cached": false,
+    "all_selected_lock_closures_retained": true,
+    "discovery_walks_changed": false,
+    "default_context_behavior_unchanged": true
+  },
+  "remaining": [
+    "Upstream v2 dependency and this contribution integration",
+    "Broader whole-source/installed qualification as required for integration",
+    "Complete consumer cost and native receiving acceptance; current budget remains unqualified"
+  ]
+}
