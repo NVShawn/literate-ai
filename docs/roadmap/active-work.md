@@ -34533,3 +34533,22 @@ implementation, policy weakening, qualification or issue closure is recorded her
 - **Dependency development evidence:** [Source/build/installed and canonical offline bootstrap record](../../verification/python315-worker-dependency-development.json) retains exact artifact identities. Its existing framework artifact is bound to `7078bc96b`; it does not qualify the later new wheel-gate projection or a final release candidate.
 
 - **Current complete local qualification:** [Minimum/current Python source and whole-wheel record](../../verification/python-worker-wheel-inputs-linux.json) binds software `c733d96f80cd80b802e7aa4387cab2d7740e219a`. Both native Python 3.11.14 and 3.15.2 select 2,783 source cases: 2,683 pass, 100 retain declared skips, and all 599 raw groups reconcile with no failed or known-failed cases. Both complete noneditable wheel gates pass with the same framework distribution identity and exact reviewed pure PyYAML bytes; ordinary and uv worker paths install respectively 38 and 37 distributions with matching framework identities. Real empty/redirected input refusals precede installation. The earlier source-prefix failure and unconfigured binary-export failure remain preserved separately. Parent completion and issue closure await independent/exact integrated acceptance; no release acceptance is claimed.
+
+### [ ] RELEASE-MANIFEST-001 — Preserve optional contribution manifest policy round trips
+
+- **Priority:** P1
+- **Owner:** framework release policy parser
+- **GitHub issue:** [#441](https://github.com/jordanhubbard/literate-ai/issues/441)
+- **Goal:** PROJECT.md Goal 1, reliable release-engineering policy.
+- **Direction:** Fix upstream issue #441: omitted optional roadmap_goal_manifest must be accepted, including the parser own serialized default.
+- **Conclusion:** Treat only the manifest field as optional; retain required milestone, unknown-key and relative-path validation. No downstream policy or installed SDK changes.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Parse the optional manifest separately before exact required-key validation.
+  - [x] Add omitted, null, configured and invalid policy regression coverage.
+- **Evidence:**
+  - [x] Run maintained make python-check for contribution-policy and project-release tests, plus formatting and lint.
+
+- **Qualification:** Maintained `make python-check PYTHON_TEST_START_DIRECTORY=tests/e2e PYTHON_TEST_PATTERN=test*release*.py PYTHON_TEST_WORKERS=2` passed all 31 selected cases, including four new contribution-policy regressions. Changed Python files pass Ruff lint and format checks.
+- **Next action:** Upstream review and integration; this source fix does not upgrade downstream SDKs.

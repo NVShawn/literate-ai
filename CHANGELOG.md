@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Release policy: accept an omitted optional contribution roadmap manifest, including the serialized default, while retaining strict milestone, field and path validation (#441).
+
 - Exercise adopted-project identity migration through the installed console in the
   whole-wheel gate, using two successive renames and real retained build, unit-test
   and package phases with preserved historical evidence.
