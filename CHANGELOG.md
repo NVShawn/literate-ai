@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retire authored scratch runs through their original private container/native
+  identity and require intent-bound completion before recovery. Recursive Windows
+  readonly permission retries refuse shared hardlink peers at every depth (#393).
+
 - Add acknowledged `project qualify apply` with bounded authored archive capture,
   transaction-owned run retirement and atomic reference publication. Interrupted
   staged archives can be replayed under fresh authority without restoring cleanup

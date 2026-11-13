@@ -175,6 +175,17 @@ class AuthoredQualificationPublicationTests(unittest.TestCase):
             self.assertEqual(self.comparisons, 2)
             self.assertTrue(all(not p.exists() for p in self.paths))
             reference = published.reference
+            intent = json.loads(
+                (self.base(reference.attempt) / "intent.json").read_bytes()
+            )
+            retired = json.loads(
+                (self.base(reference.attempt) / "retirement.json").read_bytes()
+            )
+            self.assertEqual(
+                retired["intent_identity"], canonical_identity(intent).to_dict()
+            )
+            self.assertEqual(retired["scratch_root"], str(self.paths[0]))
+            self.assertTrue(all(p.parent.is_dir() for p in self.paths))
             SchemaCatalog().validate(reference.SCHEMA, reference.to_dict())
             self.assertEqual(
                 AuthoredQualificationReference.from_dict(reference.to_dict()), reference
@@ -221,18 +232,33 @@ class AuthoredQualificationPublicationTests(unittest.TestCase):
                 self.apply(recover_attempt=attempt)
             self.assertTrue(self.paths[0].exists())
             self.assertEqual(self.executions, 1)
+            # Test ownership permits removing this temporary fixture; a missing
+            # pathname still cannot replace original-owner retirement evidence.
+            shutil.rmtree(self.paths[0])
+            with self.assertRaisesRegex(
+                AuthoredPublicationError, "run_resources_not_retired"
+            ):
+                self.apply(recover_attempt=attempt)
 
     def test_recovery_uses_new_attempt_fresh_replay_and_preserves_old_journal(self):
         with self.admitted():
-            self.interrupt_after_stage = True
-            with self.assertRaises(AuthoredPublicationError) as stopped:
-                self.apply()
+            original = AuthoredPublicationFiles.write
+
+            def interrupt_after_retirement(files, relative, *args, **kwargs):
+                result = original(files, relative, *args, **kwargs)
+                if relative.endswith("/retirement.json"):
+                    raise RuntimeError("fixture interrupted after owned retirement")
+                return result
+
+            with patch.object(
+                AuthoredPublicationFiles, "write", interrupt_after_retirement
+            ):
+                with self.assertRaises(AuthoredPublicationError) as stopped:
+                    self.apply()
             old = stopped.exception.attempt
+            self.assertFalse(self.paths[0].exists())
+            self.assertTrue((self.base(old) / "retirement.json").exists())
             journal = {p.name: p.read_bytes() for p in self.base(old).glob("*.json")}
-            # The enclosing test owns this whole temporary tree; production
-            # recovery must never derive deletion permission from its journal.
-            shutil.rmtree(self.paths[0])
-            self.interrupt_after_stage = False
             self.comparisons = 1
             recovered = self.apply(recover_attempt=old)
             self.assertNotEqual(recovered.reference.attempt, old)

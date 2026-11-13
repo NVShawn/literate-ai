@@ -1,0 +1,50 @@
+{
+  "schema": "literate-ai/authored-retirement-PR401-stack@1",
+  "status": "FOCUSED_SOURCE_PASS_NATIVE_MODULE_PROJECTION_PASS_PENDING_REVIEW_AND_FULL_GATES",
+  "base_commit": "97362d5c",
+  "target_branch": "jordanhubbard:feat/authored-standard-run",
+  "parent_review": 401,
+  "production_patches": [
+    "64a2dd7ba69f49c1bea03cc869f2cf879479b662",
+    "fb921945a06cad7d4d3014dc6b4be3e2fe095b29"
+  ],
+  "excluded_composition_dependencies": [
+    "PR347 nativeCargo changes",
+    "PR434 v2receiver changes",
+    "0707 authored receiving contribution"
+  ],
+  "same_qualified_production_module_sha256": {
+    "src/literate_ai/_filesystem.py": "48372e2df82da255222607c4e916fb60cff11ccdcf303cfaadd4961a31e1f1c6",
+    "src/literate_ai/_cache_lock.py": "f3f353261783bdee578baa1da632bae7591afbfcd6943bebe010f4e88ebc0838",
+    "src/literate_ai/adapters/qualification_workspace_namespace.py": "fd90b872873795b66314eac5761f1eebce6f730316bf2badccde1f79d9916478",
+    "src/literate_ai/adapters/retained_project_inputs.py": "6dfdcae5128efbb822465e545a406412cc396ae523d29b7cbc74d38ecf672f24"
+  },
+  "same_publication_AST": [
+    "_FreshScratch",
+    "_intent",
+    "_retired"
+  ],
+  "Linux_source_controls": {
+    "actual_selected": 29,
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 144.549,
+    "raw_report_sha256": "2801aa157519dce6f9627ad015c1923985248357526a3244e1c4c6238d11df97",
+    "modules": [
+      "test_authored_scratch_retirement",
+      "test_authored_windows_retirement",
+      "test_authored_qualification_publication"
+    ],
+    "Windows_control_flow_cases_are_simulated": true
+  },
+  "actual_Windows_development_evidence": "authored-retirement-windows-development.json",
+  "Windows_transfer_limit": "Seven actual Windows API cases exercised these exact modules from literal397db76e; no whole new-stack installed/native/model qualification is inferred",
+  "driver_pin": "STALE_UNTIL_INDEPENDENT_REVIEW_AND_CANONICAL_RENEWAL",
+  "remaining": [
+    "Independent review of narrow401-base transplant before driver renewal",
+    "Whole framework/installed/platform gates appropriate to contribution and maintainer401 acceptance",
+    "Genuine authored/model/all-node/receiving acceptance remains separate",
+    "No upstream merge, release or installed/global SDK replacement"
+  ]
+}

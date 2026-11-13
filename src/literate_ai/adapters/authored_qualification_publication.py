@@ -36,9 +36,9 @@ from literate_ai.adapters.qualification_archive import (
     reopen_qualification_archive,
 )
 from literate_ai.adapters.qualification_workspace_namespace import (
-    hold_qualification_workspace_namespace,
+    qualification_workspace_identity,
+    retire_qualification_workspace,
 )
-from literate_ai.adapters.retained_project_inputs import _remove_tree
 from literate_ai.application.generation_preparation import GenerationPreparationRequest
 from literate_ai.contracts.authored_qualification_reference import (
     AuthoredQualificationReference,
@@ -55,6 +55,7 @@ MAX_RECORDS = 100_000
 DEFAULT_BYTES = 256 * 1024 * 1024
 INTENT = "literate-ai/authored-qualification-publication-intent@1"
 STAGE = "literate-ai/authored-qualification-publication-stage@1"
+RETIREMENT = "literate-ai/authored-qualification-retirement@1"
 
 
 class AuthoredPublicationError(RuntimeError):
@@ -139,6 +140,26 @@ def _retired(files, current, attempt, seen=()):
             or any(path.is_relative_to(p) for p in _project_roots(current.oracles))
         ):
             raise ValueError("qualification.authored.scratch_path_invalid")
+        # Only a completion emitted by the original creation owner permits
+        # replay. Missing saved pathnames do not prove original retirement.
+        try:
+            retired = _json(files, _base(current, attempt) + "/retirement.json")
+        except FileNotFoundError as error:
+            raise ValueError(
+                "qualification.authored.run_resources_not_retired"
+            ) from error
+        if (
+            set(retired)
+            != {"schema", "attempt", "intent_identity", "scratch_root", "identity"}
+            or retired["schema"] != RETIREMENT
+            or retired["attempt"] != attempt
+            or retired["intent_identity"] != canonical_identity(intent).to_dict()
+            or retired["scratch_root"] != str(path)
+            or not isinstance(retired["identity"], list)
+            or len(retired["identity"]) not in (2, 3)
+            or any(type(value) is not int or value < 0 for value in retired["identity"])
+        ):
+            raise ValueError("qualification.authored.retirement_record_invalid")
         try:
             path.lstat()
         except FileNotFoundError:
@@ -251,27 +272,23 @@ class _FreshScratch:
 
     def __init__(self, parent):
         require_safe_directory(parent)
-        self.path = Path(tempfile.mkdtemp(prefix="lq-", dir=parent)).resolve(
+        self.container = Path(tempfile.mkdtemp(prefix="lq-", dir=parent)).resolve(
             strict=True
         )
-        metadata = self.path.lstat()
-        self.identity = (metadata.st_dev, metadata.st_ino)
+        self.path = self.container / "run"
+        self.path.mkdir(mode=0o700)
+        self.container_identity = qualification_workspace_identity(self.container)
+        self.identity = qualification_workspace_identity(self.path)
         self.active = True
 
     def retire(self):
         if not self.active:
             raise ValueError("qualification.authored.scratch_owner_expired")
-        with hold_qualification_workspace_namespace(self.path) as check:
-            check()
-            now = self.path.lstat()
-            if (now.st_dev, now.st_ino) != self.identity:
-                raise ValueError("qualification.authored.scratch_owner_changed")
-        # Only this in-memory creation owner can clean up. Recovery never calls
-        # this on a journal path, and failed attempts retain their diagnostics.
-        _remove_tree(self.path)
-        if self.path.exists() or self.path.is_symlink():
-            raise ValueError("qualification.authored.run_resources_not_retired")
+        retire_qualification_workspace(
+            self.path, self.identity, self.container, self.container_identity
+        )
         self.active = False
+        return list(self.identity)
 
 
 def apply_authored_qualification(
@@ -431,7 +448,20 @@ def apply_authored_qualification(
                         max_bytes=METADATA_BYTES,
                     )
                 current.require_unchanged()
-                scratch.retire()
+                retired_identity = scratch.retire()
+                files.write(
+                    base + "/retirement.json",
+                    canonical_json_bytes(
+                        {
+                            "schema": RETIREMENT,
+                            "attempt": attempt,
+                            "intent_identity": canonical_identity(intent).to_dict(),
+                            "scratch_root": str(scratch.path),
+                            "identity": retired_identity,
+                        }
+                    ),
+                    max_bytes=METADATA_BYTES,
+                )
             else:
                 _, old_stage, archive = prior
                 archive_bytes = files.read(
