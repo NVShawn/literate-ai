@@ -26,6 +26,7 @@ from literate_ai.adapters.authored_qualification_planning import (
     _project_roots,
 )
 from literate_ai.adapters.authored_qualification_projection import (
+    _readonly_observation_options,
     open_authored_execution_projection,
     open_current_authored_qualification_projection,
     reopen_projected_authored_qualification,
@@ -44,6 +45,7 @@ from literate_ai.contracts.authored_qualification_reference import (
     AuthoredQualificationReference,
 )
 from literate_ai.contracts.blobs import BlobRef
+from literate_ai.contracts.executable_components import ComponentCommandPhase
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
@@ -177,7 +179,15 @@ def _stage(files, current, attempt, max_bytes):
 
 @contextmanager
 def _replay(
-    files, current, attempt, stage, archive, *, max_bytes, native_sdk_inputs=None
+    files,
+    current,
+    attempt,
+    stage,
+    archive,
+    *,
+    max_bytes,
+    native_sdk_inputs=None,
+    observation_options=None,
 ):
     payload = files.read(
         _blob_path(_base(current, attempt), archive), max_bytes=max_bytes
@@ -186,7 +196,7 @@ def _replay(
         payload, archive, max_bytes=max_bytes, max_records=MAX_RECORDS
     )
     with open_current_authored_qualification_projection(
-        current, native_sdk_inputs=native_sdk_inputs
+        current, native_sdk_inputs=native_sdk_inputs, **(observation_options or {})
     ) as projection:
         reopened = reopen_projected_authored_qualification(
             projection,
@@ -213,6 +223,13 @@ def read_published_authored_qualification(
     expected_identity=None,
     max_bytes=DEFAULT_BYTES,
     native_sdk_inputs=None,
+    environment=None,
+    host_platform=None,
+    toolchain_discoverer=None,
+    dependency_observer=None,
+    command_phases=tuple(ComponentCommandPhase),
+    observer_identity=None,
+    dependency_guard=None,
 ):
     """Reopen a committed reference under its actual current SDK input owners.
 
@@ -223,6 +240,15 @@ def read_published_authored_qualification(
         raise TypeError("original current authored plan required")
     if type(max_bytes) is not int or max_bytes <= 0:
         raise ValueError("qualification.authored.publication_byte_limit")
+    options = _readonly_observation_options(
+        environment=environment,
+        host_platform=host_platform,
+        toolchain_discoverer=toolchain_discoverer,
+        dependency_observer=dependency_observer,
+        command_phases=command_phases,
+        observer_identity=observer_identity,
+        dependency_guard=dependency_guard,
+    )
     attempt = _key(attempt)
     with AuthoredPublicationFiles(current, writable=False) as files:
         base = _base(current, attempt)
@@ -256,6 +282,7 @@ def read_published_authored_qualification(
             archive,
             max_bytes=max_bytes,
             native_sdk_inputs=native_sdk_inputs,
+            observation_options=options,
         ):
             files.require_current()
             return PublishedAuthoredQualification(

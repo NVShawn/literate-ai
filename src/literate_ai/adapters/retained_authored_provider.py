@@ -15,6 +15,7 @@ from literate_ai.adapters.authored_qualification_planning import (
 )
 from literate_ai.adapters.authored_qualification_projection import (
     CurrentAuthoredQualificationProjection,
+    _readonly_observation_options,
     open_current_authored_qualification_projection,
     reopen_projected_authored_qualification,
     reopen_projected_authored_run,
@@ -36,6 +37,7 @@ from literate_ai.adapters.qualification_capture import QualificationEvidenceRead
 from literate_ai.contracts.authored_qualification_reference import (
     AuthoredQualificationReference,
 )
+from literate_ai.contracts.executable_components import ComponentCommandPhase
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 
 
@@ -74,6 +76,13 @@ def open_retained_authored_provider(
     expected_publication_identity,
     native_sdk_inputs=None,
     max_archive_bytes=DEFAULT_BYTES,
+    environment=None,
+    host_platform=None,
+    toolchain_discoverer=None,
+    dependency_observer=None,
+    command_phases=tuple(ComponentCommandPhase),
+    observer_identity=None,
+    dependency_guard=None,
 ):
     """Reopen a committed authored provider under fresh original owners.
 
@@ -82,13 +91,21 @@ def open_retained_authored_provider(
     bytes, bracketed by current canonical recipe/tool/private-verifier custody.
     Immutable package transport alone cannot recreate this scope after it closes.
     """
-    if (
-        type(current) is not CurrentAuthoredQualificationPlan
-        or not isinstance(expected_publication_identity, ContentIdentity)
+    if type(current) is not CurrentAuthoredQualificationPlan or not isinstance(
+        expected_publication_identity, ContentIdentity
     ):
         raise TypeError("original authored plan and independent publication required")
     if type(max_archive_bytes) is not int or max_archive_bytes <= 0:
         raise ValueError("qualification.authored.publication_byte_limit")
+    options = _readonly_observation_options(
+        environment=environment,
+        host_platform=host_platform,
+        toolchain_discoverer=toolchain_discoverer,
+        dependency_observer=dependency_observer,
+        command_phases=command_phases,
+        observer_identity=observer_identity,
+        dependency_guard=dependency_guard,
+    )
     attempt = _key(attempt)
     published = read_published_authored_qualification(
         current,
@@ -96,14 +113,16 @@ def open_retained_authored_provider(
         expected_identity=expected_publication_identity,
         native_sdk_inputs=native_sdk_inputs,
         max_bytes=max_archive_bytes,
+        **options,
     )
     active = True
     with (
         AuthoredPublicationFiles(current, writable=False) as files,
         open_current_authored_qualification_projection(
-            current, native_sdk_inputs=native_sdk_inputs
+            current, native_sdk_inputs=native_sdk_inputs, **options
         ) as projection,
     ):
+
         def read_current_archive():
             projection.require_unchanged()
             reference = AuthoredQualificationReference.from_dict(

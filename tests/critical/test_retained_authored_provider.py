@@ -14,6 +14,9 @@ from unittest.mock import patch
 from literate_ai.adapters.authored_qualification_capture import (
     reopen_authored_product_membership,
 )
+from literate_ai.adapters.authored_qualification_publication import (
+    read_published_authored_qualification,
+)
 from literate_ai.adapters.retained_authored_provider import (
     open_retained_authored_provider,
 )
@@ -44,9 +47,7 @@ class RetainedAuthoredProviderTests(unittest.TestCase):
                 patch(
                     MODULE + "open_current_authored_qualification_projection",
                     side_effect=lambda *_a, **_k: nullcontext(
-                        SimpleNamespace(
-                            require_unchanged=f.current.require_unchanged
-                        )
+                        SimpleNamespace(require_unchanged=f.current.require_unchanged)
                     ),
                 ),
                 patch(
@@ -104,7 +105,9 @@ class RetainedAuthoredProviderTests(unittest.TestCase):
         with f.admitted():
             published = f.apply()
             with (
-                patch(MODULE + "open_current_authored_qualification_projection") as native,
+                patch(
+                    MODULE + "open_current_authored_qualification_projection"
+                ) as native,
                 self.assertRaisesRegex(ValueError, "reference_mismatch"),
                 open_retained_authored_provider(
                     f.current,
@@ -114,3 +117,46 @@ class RetainedAuthoredProviderTests(unittest.TestCase):
             ):
                 self.fail("foreign reference restored a provider")
             native.assert_not_called()
+
+    def test_original_observation_options_reach_both_public_readers(self):
+        f = self.fixture
+        with f.admitted():
+            published = f.apply()
+            guard = f.current.require_unchanged
+            options = dict(
+                environment={},
+                host_platform="macos",
+                toolchain_discoverer=lambda *_: None,
+                dependency_observer=lambda *_: None,
+                observer_identity=canonical_identity("fixture original observer"),
+                command_phases=(),
+                dependency_guard=guard,
+            )
+            with (
+                patch(
+                    MODULE + "read_published_authored_qualification",
+                    wraps=read_published_authored_qualification,
+                ) as reader,
+                patch(
+                    MODULE + "open_current_authored_qualification_projection",
+                    side_effect=lambda *_a, **_k: nullcontext(
+                        SimpleNamespace(require_unchanged=guard)
+                    ),
+                ) as projected,
+                patch(
+                    MODULE + "reopen_projected_authored_qualification",
+                    side_effect=lambda _p, r, i, **_k: SimpleNamespace(
+                        membership=reopen_authored_product_membership(r, i)
+                    ),
+                ),
+                open_retained_authored_provider(
+                    f.current,
+                    published.reference.attempt,
+                    expected_publication_identity=published.reference.identity,
+                    **options,
+                ) as owner,
+            ):
+                owner.require_unchanged()
+                for name, value in options.items():
+                    self.assertIs(reader.call_args.kwargs[name], value)
+                    self.assertIs(projected.call_args.kwargs[name], value)

@@ -6,6 +6,7 @@ fixture's macOS platform selection are injected. No generated/native application
 publication or retained consumer runs here.
 """
 
+import sys
 import tempfile
 import unittest
 from contextlib import contextmanager
@@ -21,15 +22,17 @@ from literate_ai.adapters.authored_qualification_projection import (
     open_current_authored_qualification_projection,
     reopen_projected_authored_qualification,
 )
+from literate_ai.adapters.builders.python import BuildError as PythonBuildError
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
 from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.contracts.identity import canonical_identity
-from literate_ai.projects import PinnedInputClosureError
+from literate_ai.projects import PinnedInputClosure, PinnedInputClosureError
 from tests.critical import test_authored_qualification_planning as planning
 from tests.smoke import test_python_toolchain as python_fixtures
+from tests.support.fixtures_test_standard_command_projection import _observation
 
 MODULE = "literate_ai.adapters.authored_qualification_projection."
 
@@ -53,6 +56,84 @@ class AuthoredQualificationProjectionTests(unittest.TestCase):
         ):
             with open_current_authored_qualification_projection(self.current) as owner:
                 yield owner
+
+    def observed_arguments(self, tool=None):
+        # Tool discovery and dependency-file custody are real; the dependency
+        # graph and macOS platform remain explicit projection fixtures.
+        root = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        dependency = root / "original-observation"
+        dependency.write_bytes(b"live original-host observation fixture")
+        custody = PinnedInputClosure(
+            maximum_files=1, maximum_file_bytes=4096, maximum_total_bytes=4096
+        )
+        custody.pin(dependency, boundary=root, label=dependency.name)
+        observed = tool or discover_python_toolchain(pinned_command=(sys.executable,))
+        calls = []
+
+        def guard():
+            calls.append(None)
+            custody.require_unchanged()
+
+        return (
+            dependency,
+            calls,
+            dict(
+                host_platform="macos",
+                toolchain_discoverer=lambda *_: observed,
+                dependency_observer=_observation,
+                observer_identity=canonical_identity(
+                    "authored original-observer fixture"
+                ),
+                command_phases=(),
+                dependency_guard=guard,
+            ),
+        )
+
+    def test_explicit_observer_guard_rechecks_actual_dependency_drift(self):
+        dependency, calls, options = self.observed_arguments()
+        with self.assertRaises(PinnedInputClosureError):
+            with open_current_authored_qualification_projection(
+                self.current, **options
+            ) as owner:
+                count = len(calls)
+                owner.require_unchanged()
+                self.assertGreater(len(calls), count)
+                dependency.write_bytes(b"changed original-host observation fixture")
+                owner.require_unchanged()
+
+    def test_explicit_observer_retains_actual_tool_byte_guard(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with patch.object(
+                python_fixtures, "symlinks_followable", return_value=False
+            ):
+                executable = python_fixtures._install_python_alias(
+                    Path(temporary), "python"
+                )
+            tool = discover_python_toolchain(pinned_command=(str(executable),))
+            _, _, options = self.observed_arguments(tool)
+            with self.assertRaisesRegex(
+                ValueError, "observed toolchain changed after projection"
+            ) as refused:
+                with open_current_authored_qualification_projection(
+                    self.current, **options
+                ) as owner:
+                    executable.write_bytes(executable.read_bytes() + b"\0")
+                    owner.require_unchanged()
+            self.assertIsInstance(refused.exception.__cause__, PythonBuildError)
+            self.assertIn("launcher bytes changed", str(refused.exception.__cause__))
+
+    def test_custody_only_requires_callable_live_guard_before_projection(self):
+        with patch(MODULE + "project_locked_standard_toolchain_closure") as native:
+            for guard in (None, object()):
+                with self.subTest(guard=type(guard).__name__):
+                    with self.assertRaisesRegex(
+                        TypeError, "live_dependency_guard_required"
+                    ):
+                        with open_current_authored_qualification_projection(
+                            self.current, command_phases=(), dependency_guard=guard
+                        ):
+                            self.fail("custody-only projection lacked a live guard")
+            native.assert_not_called()
 
     def test_complete_canonical_projection_reads_no_archive_or_project_output(self):
         root = self.current.oracles.authority.project.root

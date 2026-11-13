@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Forward explicitly guarded original-host observations through authored public
+  readers and provider scopes, preserving default execution and refusing custody-only
+  reopening without a live dependency guard. Native receiving remains pending (#393).
+
 - Preserve live native SDK inputs when rereading authored publications and expose
   exact selected-run products only after complete clean-run reopening. Authored
   importer and consumer admission remain in progress (#393).

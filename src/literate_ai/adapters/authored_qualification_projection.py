@@ -40,7 +40,10 @@ from literate_ai.adapters.standard_project import (
 from literate_ai.contracts.authored_qualification_runs import (
     AuthoredQualificationResult,
 )
-from literate_ai.contracts.executable_components import ComponentCommandContract
+from literate_ai.contracts.executable_components import (
+    ComponentCommandContract,
+    ComponentCommandPhase,
+)
 from literate_ai.contracts.identity import ContentIdentity
 
 
@@ -67,8 +70,36 @@ class CurrentAuthoredQualificationProjection:
         return self._commands
 
 
+def _readonly_observation_options(
+    *,
+    environment=None,
+    host_platform=None,
+    toolchain_discoverer=None,
+    dependency_observer=None,
+    command_phases=tuple(ComponentCommandPhase),
+    observer_identity=None,
+    dependency_guard=None,
+):
+    if command_phases == () and not callable(dependency_guard):
+        raise TypeError("qualification.authored.live_dependency_guard_required")
+    values = {
+        "environment": environment,
+        "host_platform": host_platform,
+        "toolchain_discoverer": toolchain_discoverer,
+        "dependency_observer": dependency_observer,
+        "observer_identity": observer_identity,
+        "dependency_guard": dependency_guard,
+    }
+    result = {name: value for name, value in values.items() if value is not None}
+    if command_phases != tuple(ComponentCommandPhase):
+        result["command_phases"] = command_phases
+    return result
+
+
 @contextmanager
-def _open_projection(current, *, native_sdk_inputs, execution):
+def _open_projection(
+    current, *, native_sdk_inputs, execution, observation_options=None
+):
     if not isinstance(current, CurrentAuthoredQualificationPlan):
         raise TypeError("original current authored plan required")
     if execution is not None and (
@@ -100,7 +131,10 @@ def _open_projection(current, *, native_sdk_inputs, execution):
         )
         projector.guard(snapshot)
         closure = project_locked_standard_toolchain_closure(
-            snapshot, plan, native_sdk_inputs=native_sdk_inputs
+            snapshot,
+            plan,
+            native_sdk_inputs=native_sdk_inputs,
+            **(observation_options or {}),
         )
         if not isinstance(closure, ProjectedStandardToolchainClosure):
             raise TypeError("original Standard toolchain projection required")
@@ -168,16 +202,43 @@ def _open_projection(current, *, native_sdk_inputs, execution):
 
 
 @contextmanager
-def open_current_authored_qualification_projection(current, *, native_sdk_inputs=None):
+def open_current_authored_qualification_projection(
+    current,
+    *,
+    native_sdk_inputs=None,
+    environment=None,
+    host_platform=None,
+    toolchain_discoverer=None,
+    dependency_observer=None,
+    command_phases=tuple(ComponentCommandPhase),
+    observer_identity=None,
+    dependency_guard=None,
+):
     """Independently reopen canonical current inputs without model generation.
 
     Native SDK inputs, when selected, must be actual producer-backed owners. The
     existing Standard projector refuses absent, stale or substituted SDK custody.
     Importer review, archive trust and consumer execution remain separate gates.
+    Explicit original-host observations use the same locked projection ports as
+    source-derived receiving. Custody-only projection requires its live original
+    dependency guard and all lower projector observations; no native observation
+    or identity is derived from archived expectations. Execution projection keeps
+    its unchanged full-command defaults.
     """
 
     with _open_projection(
-        current, native_sdk_inputs=native_sdk_inputs, execution=None
+        current,
+        native_sdk_inputs=native_sdk_inputs,
+        execution=None,
+        observation_options=_readonly_observation_options(
+            environment=environment,
+            host_platform=host_platform,
+            toolchain_discoverer=toolchain_discoverer,
+            dependency_observer=dependency_observer,
+            command_phases=command_phases,
+            observer_identity=observer_identity,
+            dependency_guard=dependency_guard,
+        ),
     ) as projection:
         yield projection
 
@@ -258,9 +319,8 @@ def reopen_projected_authored_run(
             "qualification.authored.receiving_selection_mismatch"
         )
     run, selected = runs[0], exports[0]
-    target = (
-        projection.current.oracles.authority.locked.authority.lock.target_profile_identity
-    )
+    current_lock = projection.current.oracles.authority.locked.authority.lock
+    target = current_lock.target_profile_identity
     acceptances = _acceptances(run, selected, target)
     projection.require_unchanged()
     blobs = capture_qualification_product_blobs(

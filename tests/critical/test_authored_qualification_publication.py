@@ -250,6 +250,50 @@ class AuthoredQualificationPublicationTests(unittest.TestCase):
                     native_sdk_inputs=sdk_owner,
                 )
 
+    def test_public_reader_forwards_explicit_observations_and_requires_live_guard(self):
+        with self.admitted():
+            published = self.apply()
+            guard = self.current.require_unchanged
+            options = dict(
+                environment={},
+                host_platform="macos",
+                toolchain_discoverer=lambda *_: None,
+                dependency_observer=lambda *_: None,
+                observer_identity=canonical_identity("fixture original observer"),
+                command_phases=(),
+                dependency_guard=guard,
+            )
+            with patch(
+                MODULE + "open_current_authored_qualification_projection",
+                side_effect=lambda *_a, **_k: nullcontext(
+                    SimpleNamespace(require_unchanged=guard)
+                ),
+            ) as projected:
+                reopened = read_published_authored_qualification(
+                    self.current,
+                    published.reference.attempt,
+                    expected_identity=published.reference.identity,
+                    **options,
+                )
+                self.assertEqual(reopened.reference, published.reference)
+                self.assertEqual(
+                    projected.call_args.kwargs, {"native_sdk_inputs": None, **options}
+                )
+                self.assertIs(
+                    projected.call_args.kwargs["environment"], options["environment"]
+                )
+                self.assertIs(projected.call_args.kwargs["dependency_guard"], guard)
+                projected.reset_mock()
+                with self.assertRaisesRegex(
+                    TypeError, "live_dependency_guard_required"
+                ):
+                    read_published_authored_qualification(
+                        self.current,
+                        published.reference.attempt,
+                        **{**options, "dependency_guard": None},
+                    )
+                projected.assert_not_called()
+
     def test_interrupted_stage_is_not_a_reference_and_recovery_does_not_delete_runs(
         self,
     ):
