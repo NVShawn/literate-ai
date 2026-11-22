@@ -9,7 +9,6 @@ import os
 import shlex
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -66,7 +65,7 @@ class MonorepoComponentTests(unittest.TestCase):
         (self.source / "shared" / "api.py").write_text("API = 1\n", encoding="utf-8")
         # A versionless alias may be absent or select another installation.
         command = [
-            Path(sys.executable).as_posix(),
+            "python3",
             "-m",
             "unittest",
             "discover",
