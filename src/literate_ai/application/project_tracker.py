@@ -248,7 +248,14 @@ def _repository_selector(url: str, forge: Forge) -> str | None:
     ):
         return None
     if forge == "github":
-        return f"{host}/{path}"
+        # A single-label host is an SSH transport alias for github.com, not a
+        # real GitHub Enterprise hostname; `gh` would treat it as an
+        # unreachable host. Resolve the owner/repository path only so `gh`
+        # uses its configured default host. Dotted hosts (including
+        # github.com itself and Enterprise names) keep the explicit host.
+        if "." in host:
+            return f"{host}/{path}"
+        return path
     # glab accepts a full URL, including nested groups and an HTTP(S) API port.
     # A custom SSH transport port is not an API port.
     scheme = "https"

@@ -54,6 +54,11 @@ class RepositoryCommandBindingTests(unittest.TestCase):
                 "github.enterprise.test/team/project",
             ),
             (
+                "ssh://github-nvshawn/owner/repo.git",
+                "owner/repo",
+            ),
+            ("git@gh-alias:owner/repo.git", "owner/repo"),
+            (
                 "git@gitlab.example.test:group/subgroup/project.git",
                 "https://gitlab.example.test/group/subgroup/project",
             ),
