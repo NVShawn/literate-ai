@@ -279,9 +279,13 @@ class ConvertHarnessSliceTests(unittest.TestCase):
             for name in ("kit", "runtime"):
                 root = target / name
                 root.mkdir()
-                # The running interpreter, not `python3`: on Windows that name
-                # can resolve to the Microsoft Store alias instead of Python.
-                python = Path(sys.executable).as_posix()
+                # The running interpreter on Windows (where `python3` can
+                # resolve to the Microsoft Store alias); the neutral `python3`
+                # on POSIX, where sys.executable may embed a venv path that
+                # the environment-bound detector rejects.
+                python = (
+                    Path(sys.executable).as_posix() if os.name == "nt" else "python3"
+                )
                 (root / "Makefile").write_text(
                     f'all:\n\t@true\ntest:\n\t@"{python}" -m unittest discover -v\n',
                     encoding="utf-8",
@@ -524,7 +528,7 @@ services.
 
             def exiting_command(status: int) -> str:
                 command = [
-                    Path(sys.executable).as_posix(),
+                    sys.executable if os.name == "nt" else "python3",
                     "-c",
                     f"raise SystemExit({status})",
                 ]
