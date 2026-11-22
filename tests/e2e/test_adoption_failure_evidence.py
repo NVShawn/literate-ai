@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-import shlex
 import stat
-import sys
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -106,10 +104,10 @@ class ConversionFailureStoreTests(unittest.TestCase):
             "    raise SystemExit(3)\n"
             "print('healthy phase')\n"
         )
-        python = shlex.quote(sys.executable)
+
         (self.project / "Makefile").write_text(
             "".join(
-                f"{p}:\n\t@{python} harness.py {p}\n"
+                f"{p}:\n\t@python3 harness.py {p}\n"
                 for p in ("build", "test", "package")
             )
         )
