@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import os
-import shlex
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -31,8 +29,8 @@ class RetainedOutputDiagnosticsTests(unittest.TestCase):
             f"    def test_three(self): self.assertTrue({not fail!r})\n",
             encoding="utf-8",
         )
-        argv = [sys.executable, "-m", "unittest", "test_emit"]
-        command = subprocess.list2cmdline(argv) if os.name == "nt" else shlex.join(argv)
+        argv = ["python3", "-m", "unittest", "test_emit"]
+        command = subprocess.list2cmdline(argv) if os.name == "nt" else " ".join(argv)
         inventory = {
             "commands": {"test": {"command": command, "evidence": "test_emit.py"}},
             "findings": [],
