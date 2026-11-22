@@ -171,7 +171,8 @@ class ReleaseContributionsPolicy:
     @classmethod
     def from_dict(cls, value: object, *, path: str) -> ReleaseContributionsPolicy:
         data = _mapping(value, path)
-        _keys(data, path, {"current_milestone", "roadmap_goal_manifest"})
+        manifest_raw = data.pop("roadmap_goal_manifest", None)
+        _keys(data, path, {"current_milestone"})
         milestone = _string(data["current_milestone"], f"{path}.current_milestone")
         remainder = milestone.replace("{version}", "")
         if milestone.count("{version}") > 1 or "{" in remainder or "}" in remainder:
@@ -179,7 +180,6 @@ class ReleaseContributionsPolicy:
                 f"{path}.current_milestone",
                 "must be a literal milestone or contain one {version} placeholder",
             )
-        manifest_raw = data.get("roadmap_goal_manifest")
         manifest = (
             None
             if manifest_raw is None
