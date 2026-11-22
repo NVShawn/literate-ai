@@ -32,8 +32,17 @@ with run.node("release/gate/retry", operation="retry"):
     print("gate ready", flush=True)
     time.sleep(120)
 """
-_PARENT = """import subprocess, sys
+_PARENT = """import signal, subprocess, sys
 from pathlib import Path
+
+# The test runner may be launched from a shell (nohup, non-interactive
+# bash) that sets SIGINT to SIG_IGN.  Python preserves SIG_IGN across
+# exec, so this script must explicitly restore the default handler the
+# test contract depends on: SIGINT must raise KeyboardInterrupt inside
+# record_subprocess, not be silently ignored.
+if signal.getsignal(signal.SIGINT) == signal.SIG_IGN:
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+
 from literate_ai.evidence_ledger import open_run, record_subprocess
 
 root = Path(sys.argv[1])
