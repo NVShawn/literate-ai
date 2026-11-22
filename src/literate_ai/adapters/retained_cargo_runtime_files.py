@@ -164,7 +164,11 @@ def capture_retained_cargo_runtime_files(roots, *, file_alias_roots=()):
     states = tuple(states)
     closure = PinnedInputClosure(
         maximum_files=10000,
-        maximum_file_bytes=128 * 1024 * 1024,
+        # Rust toolchain driver shared libraries exceed 128 MiB on current
+        # x86_64 releases (librustc_driver is ~151 MiB); bound at 256 MiB
+        # to accommodate observed and near-future toolchain growth while
+        # retaining a finite per-file ceiling well below the total bound.
+        maximum_file_bytes=256 * 1024 * 1024,
         maximum_total_bytes=512 * 1024 * 1024,
     )
     aliases = []
