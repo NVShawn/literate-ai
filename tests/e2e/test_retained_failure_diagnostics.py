@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -48,7 +47,7 @@ class RetainedFailureDiagnosticsTests(unittest.TestCase):
             )
             (project / "Makefile").write_text(
                 "".join(
-                    f'{phase}:\n\t@"{sys.executable}" harness.py {phase}\n'
+                    f"{phase}:\n\t@python3 harness.py {phase}\n"
                     for phase in ("build", "test", "package")
                 )
             )
