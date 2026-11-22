@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import json
 import os
-import shlex
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -42,7 +40,7 @@ class AdoptionNodeDependencyTests(unittest.TestCase):
             "        self.assertEqual(p.returncode, 0, p.stderr)\n"
             "        self.assertEqual(p.stdout.strip(), '7')\n"
         )
-        python = shlex.quote(sys.executable)
+        python = "python3"
         (self.root / "Makefile").write_text(
             f"build:\n\t{python} -m py_compile test_dep.py\n"
             f"test:\n\t{python} -m unittest -q test_dep\n"
