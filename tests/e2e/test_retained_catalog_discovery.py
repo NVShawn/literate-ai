@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import os
-import shlex
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -107,7 +105,7 @@ class RetainedCatalogDiscoveryTests(unittest.TestCase):
             "    def test_value(self): self.assertEqual(value(), 7)\n",
             encoding="utf-8",
         )
-        python = shlex.quote(sys.executable)
+        python = "python3"
         (legacy / "Makefile").write_text(
             f"build:\n\t{python} -m py_compile app.py\n"
             f"test:\n\t{python} -m unittest discover -p 'test_*.py'\n"

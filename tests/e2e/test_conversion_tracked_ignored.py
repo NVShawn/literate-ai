@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import json
 import os
-import shlex
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -39,7 +37,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
             "class SourceTest(unittest.TestCase):\n"
             "    def test_value(self): self.assertEqual(VALUE, 7)\n"
         )
-        python = shlex.quote(sys.executable)
+        python = "python3"
         (self.root / "Makefile").write_text(
             f"build:\n\t{python} -m py_compile test_main.py\n"
             f"test:\n\t{python} -m unittest -q test_main\n"
