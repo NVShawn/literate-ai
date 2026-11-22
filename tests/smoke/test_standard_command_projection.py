@@ -804,6 +804,7 @@ class StandardCommandProjectionTests(unittest.TestCase):
             # Do not let an operator's wrapper environment mask that tripwire.
             environment.pop("RUSTC_WRAPPER", None)
             environment.pop("RUSTC_WORKSPACE_WRAPPER", None)
+            environment.pop("CARGO_BUILD_RUSTC_WRAPPER", None)
             hostile = subprocess.run(
                 [cargo, "check", "--offline", "--manifest-path", str(manifest)],
                 cwd=work,
