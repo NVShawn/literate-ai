@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 import tempfile
 import unittest
 from dataclasses import replace
@@ -70,7 +69,7 @@ class RetainedRemotePlatformTests(unittest.TestCase):
                     "evidence": "test_app.py",
                     "command": "uv run test_app.py"
                     if tools
-                    else f"{sys.executable} -B test_app.py",
+                    else "python3 -B test_app.py",
                 }
             ],
         }
