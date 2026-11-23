@@ -46,7 +46,7 @@ class NativeCargoLockTests(unittest.TestCase):
                     component_bom_ref(node.component_revision),
                     ManagedComponentKind.COMPONENT,
                     node.component_revision,
-                    node.package,
+                    "component://native-cargo-gate/" + node.package,
                     "8.0.0",
                     ("runtime",),
                 )
@@ -269,3 +269,115 @@ version = "1.0.0"
                 resolution_candidates=(),
                 lock_projection=projection,
             )
+
+
+class QualifiedProviderImportAdmissionTests(unittest.TestCase):
+    def setUp(self):
+        f = fixture.NativeCargoProjectionTests()
+        f.setUp()
+        self.fixture = f
+        self.graph = f.graph
+        self.root_ref = component_bom_ref(f.root)
+        nodes = [
+            CycloneDxManagedComponent(
+                self.root_ref,
+                ManagedComponentKind.ROOT,
+                f.root,
+                "consumer",
+                "9.0.0",
+                (),
+            ),
+            *(
+                CycloneDxManagedComponent(
+                    component_bom_ref(node.component_revision),
+                    ManagedComponentKind.COMPONENT,
+                    node.component_revision,
+                    "component://native-cargo-gate/" + node.package,
+                    "8.0.0",
+                    ("runtime",),
+                )
+                for node in self.graph.nodes
+            ),
+        ]
+        self.managed = CycloneDxManagedGraph(
+            self.root_ref,
+            tuple(sorted(nodes, key=lambda row: row.bom_ref)),
+            tuple(
+                sorted(
+                    CycloneDxManagedEdge(
+                        component_bom_ref(edge.consumer_revision),
+                        component_bom_ref(edge.provider_revision),
+                    )
+                    for edge in self.graph.edges
+                )
+            ),
+            fixture.identity("managed"),
+        )
+        source_bom, _binding = build_cyclonedx_bom(
+            lifecycle=CycloneDxLifecycle.SOURCE, managed_graph=self.managed
+        )
+        # The generator authors the source inventory: components are named by
+        # Component coordinate with no purl aliases, so the complete managed
+        # graph never covers the qualified provider import name.
+        document = json.loads(source_bom)
+        for row in document.get("components", ()):
+            row.pop("purl", None)
+        from literate_ai.storage import canonical_json_bytes
+
+        self.source_bom = canonical_json_bytes(document)
+        self.files = {
+            "source/Cargo.toml": f.original.decode(),
+            "source/src/lib.rs": (
+                "use beta::Event;\npub fn read(e: &Event) -> u32 { e.value }\n"
+            ),
+        }
+        self.artifact = {
+            "effective_revision_digest": f.root.uri,
+            "source_bundle_digest": "sha256:" + "0" * 64,
+            "files": dict(self.files),
+        }
+        import tempfile
+
+        self.directory = tempfile.TemporaryDirectory(
+            prefix="native-cargo-provider-import-"
+        )
+        self.addCleanup(self.directory.cleanup)
+
+    def resolver(self, **changes):
+        from pathlib import Path
+        from unittest.mock import Mock
+
+        from literate_ai.adapters.dependencies import (
+            CycloneDxLifecycleResolver,
+            HostDependencyObservation,
+        )
+
+        arguments = dict(
+            managed_graph=self.managed,
+            observer=Mock(observe=Mock(return_value=HostDependencyObservation((), ()))),
+            evidence_path=Path(self.directory.name) / "resolved.json",
+        )
+        arguments.update(changes)
+        return CycloneDxLifecycleResolver(**arguments)
+
+    def test_qualified_provider_import_stays_exempt_from_declaration_admission(self):
+        """Provider-supplied imports may be absent from generated declarations.
+
+        Generated manifests express registry intent and may omit dependencies
+        supplied by qualified Component edges, so importing a qualified provider
+        crate is not an undeclared external import when the typed native graph
+        binds the provider; the same import refuses without that authority.
+        """
+        files = dict(self.files)
+        files["source/.literate/sbom.cdx.json"] = self.source_bom.decode()
+        artifact = dict(self.artifact)
+        artifact["files"] = files
+        with_graph = self.resolver(
+            native_cargo_graph=self.graph,
+            native_cargo_manifest="source/Cargo.toml",
+        )
+        with_graph.validate_source(artifact)
+        without_graph = self.resolver()
+        with self.assertRaises(DependencyObservationError) as refused:
+            without_graph.validate_source(artifact)
+        self.assertEqual(refused.exception.code, "dependencies.import-bom-mismatch")

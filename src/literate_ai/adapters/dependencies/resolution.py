@@ -226,6 +226,11 @@ class CycloneDxLifecycleResolver:
             allow_missing_cargo_lock=self.allow_missing_cargo_lock,
             runtime_python_imports=self.runtime_python_imports,
             python_source_authority=self.python_source_authority,
+            provider_imports=(
+                frozenset(edge.alias for edge in self.native_cargo_graph.edges)
+                if self.native_cargo_graph is not None
+                else frozenset()
+            ),
         )
         lock_projection = _generated_lock_projection(
             files,
