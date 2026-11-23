@@ -297,6 +297,13 @@ class NativeCargoProviderSource:
         )
 
 
+def native_cargo_provider_directory(node) -> str:
+    """The canonical projected directory for one qualified provider node."""
+
+    _require(type(node) is NativeCargoProviderNode, "node")
+    return _RESERVED + "/providers/" + node.projection_identity.digest
+
+
 def project_native_cargo_graph(*, graph, root_manifest, root_manifest_path, sources):
     """Return a replacement root manifest and new files for a disposable tree.
 
@@ -338,9 +345,7 @@ def project_native_cargo_graph(*, graph, root_manifest, root_manifest_path, sour
     if not graph.nodes:
         return root_manifest, ()
     directories = {
-        node.component_revision: _RESERVED
-        + "/providers/"
-        + node.projection_identity.digest
+        node.component_revision: native_cargo_provider_directory(node)
         for node in graph.nodes
     }
     manifests = {

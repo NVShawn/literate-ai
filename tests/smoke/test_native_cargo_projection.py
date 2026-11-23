@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import tomllib
 import unittest
 from copy import deepcopy
 from dataclasses import replace
@@ -25,6 +26,9 @@ from literate_ai.adapters.lifecycle.native_cargo_projection import (
 )
 from literate_ai.adapters.lifecycle.native_cargo_projection import (
     validate_native_cargo_metadata,
+)
+from literate_ai.adapters.lifecycle.standard_cargo import (
+    project_library_verifier_consumer,
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.contracts.native_cargo_provider_graph import (
@@ -411,3 +415,135 @@ class NativeCargoProjectionTests(unittest.TestCase):
             shutil.copytree(original, relocated)
             shutil.rmtree(original)
             run(relocated, parent / "objects-b")
+
+    def test_verifier_consumer_projection_reprojects_sealed_library(self):
+        """The v1 library verifier consumes a sealed export through projection.
+
+        A sealed consumer library export keeps its original manifest bytes and
+        omits the qualified provider edge.  The verifier consumer projection
+        copies the sealed tree and injects exactly the admitted library edges,
+        so an independent diamond harness compiles without ambient provider
+        paths while the sealed bytes stay unchanged.
+        """
+        with tempfile.TemporaryDirectory(prefix="native-cargo-verifier-") as temporary:
+            parent = Path(temporary)
+            export = parent / "sealed"
+            (export / "source/src").mkdir(parents=True)
+            # The sealed export keeps the ORIGINAL manifest: the qualified
+            # beta edge is deliberately absent (registry intent only).
+            (export / "source/Cargo.toml").write_bytes(self.alpha.original_manifest)
+            (export / "source/src/lib.rs").write_bytes(self.alpha.files[1].content)
+            before = {
+                "source/Cargo.toml": self.alpha.original_manifest,
+                "source/src/lib.rs": self.alpha.files[1].content,
+            }
+            graph = Graph(
+                self.alpha.node.component_revision,
+                (self.beta.node,),
+                (
+                    Edge(
+                        self.alpha.node.component_revision,
+                        self.beta.node.component_revision,
+                        "beta",
+                    ),
+                ),
+            )
+            consumer, direct = project_library_verifier_consumer(
+                export,
+                parent / "verifier-consumer",
+                manifest_path="source/Cargo.toml",
+                graph=graph,
+                sources=(self.beta,),
+                read_bytes=lambda path: path.read_bytes(),
+            )
+            self.assertEqual(
+                direct,
+                (
+                    (
+                        "beta",
+                        "beta",
+                        consumer.parent
+                        / ".literate/native-cargo/providers"
+                        / self.beta.node.projection_identity.digest
+                        / "source",
+                    ),
+                ),
+            )
+            # Sealed custody stays byte-identical.
+            for name, content in before.items():
+                self.assertEqual((export / name).read_bytes(), content, name)
+            # The consumer copy carries the admitted edge.
+            document = tomllib.loads(
+                (consumer / "Cargo.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(document["dependencies"]["beta"]["package"], "beta")
+            env = dict(os.environ)
+            env["CARGO_INCREMENTAL"] = "0"
+            cargo = shutil.which("cargo")
+            # The independent diamond harness compiles against the projected
+            # consumer and shares the single beta nominal package.
+            for label, library, bindings in (
+                ("projected", consumer, direct),
+                ("unprojected", export / "source", ()),
+            ):
+                harness = parent / ("harness-" + label)
+                (harness / "src").mkdir(parents=True)
+                dependencies = (
+                    'alpha={package="alpha",path=' + json.dumps(str(library)) + "}\n"
+                )
+                for alias, package, root in bindings:
+                    dependencies += (
+                        json.dumps(alias)
+                        + "={package="
+                        + json.dumps(package)
+                        + ",path="
+                        + json.dumps(str(root))
+                        + "}\n"
+                    )
+                (harness / "Cargo.toml").write_text(
+                    '[package]\nname="litai-library-acceptance"'
+                    '\nversion="0.0.0"\nedition="2021"\n[dependencies]\n'
+                    + dependencies,
+                    encoding="utf-8",
+                )
+                (harness / "src/main.rs").write_text(
+                    "fn main() {\n"
+                    "    let event = beta::Event { value: 37 };\n"
+                    "    assert_eq!(event.value, 37);\n"
+                    "    assert_eq!(alpha::read(&event), 37);\n"
+                    '    println!("read:{}", alpha::read(&event));\n'
+                    "}\n",
+                    encoding="utf-8",
+                )
+                result = subprocess.run(
+                    [
+                        cargo,
+                        "run",
+                        "--offline",
+                        "--quiet",
+                        "--manifest-path",
+                        str(harness / "Cargo.toml"),
+                        "--target-dir",
+                        str(parent / ("target-" + label)),
+                    ],
+                    env=env,
+                    cwd=harness,
+                    capture_output=True,
+                    timeout=60,
+                    check=False,
+                )
+                if label == "projected":
+                    self.assertEqual(
+                        result.returncode,
+                        0,
+                        result.stderr.decode(errors="replace"),
+                    )
+                else:
+                    # The unprojected sealed manifest keeps the original
+                    # registry intent, so the diamond harness must refuse
+                    # to compile against it.
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(
+                        "beta",
+                        result.stderr.decode(errors="replace"),
+                    )

@@ -8395,15 +8395,44 @@ class LocalStandardLifecyclePorts:
                         ) from exc
                     (temporary / "src").mkdir()
                     harness.replace(temporary / "src/main.rs")
-                    (temporary / "Cargo.toml").write_text(
-                        '[package]\nname="litai-library-acceptance"\nversion="0.0.0"\n'
-                        'edition="2021"\n[dependencies]\n'
-                        + surface.package
+                    verifier_library = manifest.parent
+                    verifier_dependencies: tuple[tuple[str, str, Path], ...] = ()
+                    provider_projection = getattr(
+                        self, "_library_verifier_provider_projection", None
+                    )
+                    projected = (
+                        provider_projection(component_lock, export, temporary)
+                        if callable(provider_projection)
+                        else None
+                    )
+                    if projected is not None:
+                        # The sealed export keeps its original manifest; the
+                        # verifier compiles against a disposable projection
+                        # carrying exactly the admitted library edges, and the
+                        # harness declares the same shared provider crates.
+                        verifier_library, verifier_dependencies = projected
+                    dependencies = (
+                        surface.package
                         + "={package="
                         + json.dumps(package_name)
                         + ",path="
-                        + json.dumps(str(manifest.parent))
-                        + "}\n",
+                        + json.dumps(str(verifier_library))
+                        + "}\n"
+                    )
+                    for alias, provider_package, provider_root in sorted(
+                        verifier_dependencies
+                    ):
+                        dependencies += (
+                            json.dumps(alias)
+                            + "={package="
+                            + json.dumps(provider_package)
+                            + ",path="
+                            + json.dumps(str(provider_root))
+                            + "}\n"
+                        )
+                    (temporary / "Cargo.toml").write_text(
+                        '[package]\nname="litai-library-acceptance"\nversion="0.0.0"\n'
+                        'edition="2021"\n[dependencies]\n' + dependencies,
                         encoding="utf-8",
                     )
                     command = (
