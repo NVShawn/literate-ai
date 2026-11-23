@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import posixpath
 import re
 import shutil
 import time
@@ -44,6 +45,7 @@ from .native_cargo_inputs import (
 )
 from .native_cargo_projection import (
     MAX_PROJECTION_FILES,
+    native_cargo_provider_directory,
     project_native_cargo_graph,
     validate_native_cargo_metadata,
 )
@@ -206,6 +208,69 @@ def _retain_rust_harness_compilers(compilers):
     return observation
 
 
+def project_library_verifier_consumer(
+    export: Path,
+    destination: Path,
+    *,
+    manifest_path: str,
+    graph,
+    sources,
+    read_bytes: Callable[[Path], bytes],
+) -> tuple[Path, tuple[tuple[str, str, Path], ...]]:
+    """Project one sealed library export for an independent verifier consumer.
+
+    A sealed library export deliberately keeps its original manifest bytes and
+    omits qualified Component edges.  The v1 library verifier must not compile
+    against ambient provider paths or edit sealed custody in place; this
+    projection copies the sealed tree into a disposable consumer destination
+    and injects exactly the admitted library edges through the same shared
+    canonical projection the authorized build used.  The sealed tree is only
+    read, never written.
+
+    The returned pair is the projected manifest's package root plus the direct
+    verifier dependency bindings (alias, package name, package root) for every
+    qualified provider, so an independent diamond harness can declare the same
+    shared provider crates instead of copied types.
+    """
+
+    if destination.exists() or destination.is_symlink():
+        raise LocalStandardLifecycleError(
+            "verifier consumer projection destination is occupied"
+        )
+    manifest_file = PurePosixPath(manifest_path)
+    original = read_bytes(export.joinpath(*manifest_file.parts))
+    sync_projection(export, destination)
+    rewritten, files = project_native_cargo_graph(
+        graph=graph,
+        root_manifest=original,
+        root_manifest_path=manifest_path,
+        sources=sources,
+    )
+    projected_manifest = destination.joinpath(*manifest_file.parts)
+    projected_manifest.write_bytes(rewritten)
+    for row in files:
+        target = destination / row.path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(row.content)
+    by_revision = {row.node.component_revision: row for row in sources}
+    alias_by_provider = {edge.provider_revision: edge.alias for edge in graph.edges}
+    direct: list[tuple[str, str, Path]] = []
+    for node in graph.nodes:
+        alias = alias_by_provider.get(node.component_revision)
+        if alias is None:
+            continue
+        provider_manifest = by_revision[node.component_revision].manifest
+        provider_root = destination.joinpath(
+            *PurePosixPath(
+                native_cargo_provider_directory(node)
+                + "/"
+                + posixpath.dirname(provider_manifest)
+            ).parts
+        )
+        direct.append((alias, node.package, provider_root))
+    return projected_manifest.parent, tuple(direct)
+
+
 class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
     """Local Standard ports that derive Cargo resolution after authorization."""
 
@@ -305,6 +370,44 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         )
         validate_native_cargo_provider_locks(graph=native[0], sources=native[1])
         return native
+
+    def _library_verifier_provider_projection(
+        self, component_lock, export: Path, stage: Path
+    ) -> tuple[Path, tuple[tuple[str, str, Path], ...]] | None:
+        """Reproject the sealed library's provider closure for the v1 verifier.
+
+        The authorized build injected the admitted library edges into its own
+        disposable tree; the independent library verifier compiles against the
+        same shared canonical graph rather than ambient provider paths or edits
+        to sealed custody.  ``None`` preserves the dependency-free verifier
+        behavior for libraries without qualified providers.
+        """
+
+        plan = getattr(self, "_plans_by_revision", {}).get(
+            component_lock.root_revision.uri
+        )
+        target = getattr(self, "cargo_targets", {}).get(
+            component_lock.root_revision.uri
+        )
+        if plan is None or target is None or not target.library:
+            return None
+        providers = tuple(
+            self._exports_by_identity[identity.uri]
+            for identity in plan.provider_artifact_identities
+        )
+        native = self._current_native_cargo_inputs(plan, providers)
+        if native is None:
+            return None
+        return project_library_verifier_consumer(
+            export,
+            stage / "verifier-consumer",
+            manifest_path=target.manifest,
+            graph=native[0],
+            sources=native[1],
+            read_bytes=lambda path: self._read_bounded(
+                path, label="sealed library manifest"
+            ),
+        )
 
     def _cargo_workspace_identity(self, plan, providers, contract, native):
         compatibility = self.cargo_targets[
