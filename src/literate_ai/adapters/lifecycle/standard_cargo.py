@@ -208,6 +208,85 @@ def _retain_rust_harness_compilers(compilers):
     return observation
 
 
+def _already_projected_verifier_consumer(
+    export: Path,
+    manifest_path: str,
+    original: bytes,
+    graph,
+    sources,
+) -> tuple[Path, tuple[tuple[str, str, Path], ...]] | None:
+    """Return the export's own projection when it carries the exact graph edges.
+
+    A sealed export from the authorized build already holds the framework's
+    injected provider edges and the shared canonical provider directories.
+    Re-projecting that tree would see its own injection as a conflicting
+    generator declaration; instead, every root edge must match the canonical
+    injection exactly and the provider packages must be present in the
+    export.  A missing edge means an unprojected original manifest; a
+    different edge shape is a conflict and refuses.
+    """
+
+    if not graph.nodes:
+        return None
+    try:
+        document = tomllib.loads(original.decode("utf-8"))
+    except (UnicodeError, tomllib.TOMLDecodeError):
+        return None
+    dependencies = document.get("dependencies")
+    if not isinstance(dependencies, dict):
+        return None
+    by_revision = {row.node.component_revision: row for row in sources}
+    manifest_directory = posixpath.dirname(manifest_path) or "."
+    direct: list[tuple[str, str, Path]] = []
+    for edge in sorted(graph.edges, key=lambda row: row.alias):
+        if edge.consumer_revision != graph.root_revision:
+            continue
+        node = next(
+            row
+            for row in graph.nodes
+            if row.component_revision == edge.provider_revision
+        )
+        entry = dependencies.get(edge.alias)
+        if entry is None:
+            return None
+        expected_path = posixpath.relpath(
+            posixpath.dirname(
+                native_cargo_provider_directory(node)
+                + "/"
+                + by_revision[edge.provider_revision].manifest
+            ),
+            manifest_directory,
+        )
+        if (
+            not isinstance(entry, dict)
+            or set(entry) != {"package", "version", "path"}
+            or entry["package"] != node.package
+            or entry["version"] != "=" + node.version
+            or entry["path"] != expected_path
+        ):
+            raise LocalStandardLifecycleError(
+                "verifier consumer projection conflicts with a changed "
+                f"provider declaration for {edge.alias!r}"
+            )
+        provider_root = export.joinpath(
+            *PurePosixPath(
+                posixpath.normpath(posixpath.join(manifest_directory, entry["path"]))
+            ).parts
+        )
+        if not (provider_root / "Cargo.toml").is_file():
+            raise LocalStandardLifecycleError(
+                "verifier consumer projection lacks the sealed provider "
+                f"package for {edge.alias!r}"
+            )
+        direct.append((edge.alias, node.package, provider_root))
+    if not direct:
+        return None
+    return (
+        export.joinpath(*PurePosixPath(manifest_path).parts).parent,
+        tuple(direct),
+    )
+
+
 def project_library_verifier_consumer(
     export: Path,
     destination: Path,
@@ -239,6 +318,13 @@ def project_library_verifier_consumer(
         )
     manifest_file = PurePosixPath(manifest_path)
     original = read_bytes(export.joinpath(*manifest_file.parts))
+    already = _already_projected_verifier_consumer(
+        export, manifest_path, original, graph, sources
+    )
+    if already is not None:
+        # The authorized build sealed the projected tree; consume those exact
+        # injected edges in place instead of rewriting sealed custody.
+        return already
     sync_projection(export, destination)
     rewritten, files = project_native_cargo_graph(
         graph=graph,

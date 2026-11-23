@@ -547,3 +547,97 @@ class NativeCargoProjectionTests(unittest.TestCase):
                         "beta",
                         result.stderr.decode(errors="replace"),
                     )
+
+    def test_verifier_consumer_reuses_exact_projected_export_without_rewrite(self):
+        """An already-projected export is consumed without rewriting custody.
+
+        The authorized build seals the projected tree: the consumer manifest
+        carries exactly the framework-injected provider edges and the shared
+        canonical provider directories.  A later verifier projection over that
+        export must reuse those exact edges instead of refusing them as
+        conflicting generator declarations, and must never rewrite sealed
+        custody.  A mimicked edge that differs from the canonical injection
+        still refuses.
+        """
+        with tempfile.TemporaryDirectory(
+            prefix="native-cargo-verifier-projected-"
+        ) as temporary:
+            parent = Path(temporary)
+            export = parent / "sealed-projected"
+            graph = Graph(
+                self.alpha.node.component_revision,
+                (self.beta.node,),
+                (
+                    Edge(
+                        self.alpha.node.component_revision,
+                        self.beta.node.component_revision,
+                        "beta",
+                    ),
+                ),
+            )
+            rewritten, files = project(
+                graph=graph,
+                root_manifest=self.alpha.original_manifest,
+                root_manifest_path=self.alpha.manifest,
+                sources=(self.beta,),
+            )
+            (export / "source/src").mkdir(parents=True)
+            (export / "source/Cargo.toml").write_bytes(rewritten)
+            (export / "source/src/lib.rs").write_bytes(
+                self.alpha.files[1].content
+            )
+            for row in files:
+                path = export / row.path
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(row.content)
+            before = {
+                path.relative_to(export).as_posix(): path.read_bytes()
+                for path in sorted(export.rglob("*"))
+                if path.is_file()
+            }
+            consumer, direct = project_library_verifier_consumer(
+                export,
+                parent / "verifier-consumer",
+                manifest_path="source/Cargo.toml",
+                graph=graph,
+                sources=(self.beta,),
+                read_bytes=lambda path: path.read_bytes(),
+            )
+            self.assertEqual(consumer, export / "source")
+            self.assertEqual(len(direct), 1)
+            alias, package, provider_root = direct[0]
+            self.assertEqual(alias, "beta")
+            self.assertEqual(package, "beta")
+            self.assertEqual(
+                provider_root,
+                export
+                / ".literate/native-cargo/providers"
+                / self.beta.node.projection_identity.digest
+                / "source",
+            )
+            # Sealed custody stays byte-identical; no destination was created.
+            after = {
+                path.relative_to(export).as_posix(): path.read_bytes()
+                for path in sorted(export.rglob("*"))
+                if path.is_file()
+            }
+            self.assertEqual(before, after)
+            self.assertFalse((parent / "verifier-consumer").exists())
+            # A mimicked edge that differs from the canonical injection of the
+            # same qualified provider still refuses.
+            mimicked = parent / "mimicked"
+            shutil.copytree(export, mimicked)
+            manifest_bytes = (mimicked / "source/Cargo.toml").read_bytes()
+            (mimicked / "source/Cargo.toml").write_bytes(
+                manifest_bytes.replace(b'"=1.0.0"', b'"=9.9.9"')
+            )
+            with self.assertRaises(Exception) as refused:
+                project_library_verifier_consumer(
+                    mimicked,
+                    parent / "verifier-mimicked",
+                    manifest_path="source/Cargo.toml",
+                    graph=graph,
+                    sources=(self.beta,),
+                    read_bytes=lambda path: path.read_bytes(),
+                )
+            self.assertIn("conflict", str(refused.exception).casefold())
