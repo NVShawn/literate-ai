@@ -43,8 +43,19 @@ def reconcile_generated_dependencies(
     runtime_python_imports: frozenset[str] = frozenset(),
     observed_python_imports: frozenset[str] | None = None,
     python_source_authority: PythonSourceAuthority | None = None,
+    provider_imports: frozenset[str] = frozenset(),
 ) -> None:
-    """Fail when generated dependency declarations/imports vanish from the BOM."""
+    """Fail when generated dependency declarations/imports vanish from the BOM.
+
+    ``provider_imports`` names qualified provider crates supplied through
+    admitted native Component edges.  Generated manifests express registry
+    intent and may omit those framework-supplied dependencies, so such
+    imports are not undeclared external packages; only sources whose typed
+    native provider graph is bound may exercise that exemption.
+    """
+    qualified_provider_imports = {
+        _normalized_package_name(name) for name in provider_imports
+    }
 
     runtime_modules = {
         _normalized_package_name(name) for name in runtime_python_imports
@@ -236,7 +247,9 @@ def reconcile_generated_dependencies(
     missing_imported = sorted(
         name
         for name in imported
-        if name not in declared and name not in available_python_imports
+        if name not in declared
+        and name not in available_python_imports
+        and name not in qualified_provider_imports
     )
     if missing_imported:
         raise DependencyObservationError(
